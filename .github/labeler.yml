@@ -1,0 +1,6 @@
+documentation:
+  - README.md
+
+ci:
+  - .github/*
+  - .github/**/*
