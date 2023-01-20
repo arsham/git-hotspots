@@ -9,6 +9,5 @@ walkdir = "2"
 
 [dev-dependencies]
 tempfile = "3"
-difference = "2"
 utilities = { path = "../utilities" }
 speculoos = "0"
