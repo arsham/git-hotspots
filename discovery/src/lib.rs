@@ -27,7 +27,7 @@ pub struct File {
 }
 
 pub fn discover<P: AsRef<Path>>(path: P) -> Option<Vec<File>> {
-    let res: Vec<File> = WalkDir::new(path)
+    let res: Vec<File> = WalkDir::new(&path)
         .into_iter()
         .filter_map(result::Result::ok)
         .filter(is_project_file)
@@ -36,14 +36,12 @@ pub fn discover<P: AsRef<Path>>(path: P) -> Option<Vec<File>> {
                 Some(lang) => lang.id().into(),
                 None => Lang::Undefined,
             };
-            let path = p.path().file_name().and_then(|p| p.to_str());
+            let p = p.path().to_str();
 
-            let path = match path {
-                Some(p) => p.to_owned(),
-                None => return None,
-            };
-
-            Some(File { path, lang })
+            p.map(|path| File {
+                path: path.to_owned(),
+                lang,
+            })
         })
         .collect();
 
@@ -76,14 +74,7 @@ mod discover_test {
 
     impl From<(&TempDir, &str, Lang)> for File {
         fn from(value: (&TempDir, &str, Lang)) -> Self {
-            let path = value
-                .0
-                .path()
-                .join(value.1)
-                .file_name()
-                .and_then(|p| p.to_str())
-                .unwrap()
-                .to_owned();
+            let path = value.0.path().join(value.1).to_str().unwrap().to_owned();
             File {
                 path,
                 lang: value.2,
@@ -94,7 +85,7 @@ mod discover_test {
     #[test]
     fn empty_path() -> Result<(), Box<dyn error::Error>> {
         let td = TempDir::new()?;
-        assert_that(&discover(td.path())).is_none();
+        assert_that!(discover(td.path())).is_none();
         Ok(())
     }
 
@@ -108,11 +99,11 @@ mod discover_test {
         let want = vec![f1, f2];
 
         let res = discover(td.path());
-        assert_that(&res).is_some();
+        assert_that!(res).is_some();
 
         let mut res = res.unwrap();
         res.sort_by(|a, b| a.path.cmp(&b.path));
-        assert_that(&res).is_equal_to(&want);
+        assert_that!(res).is_equal_to(&want);
         Ok(())
     }
 
@@ -127,7 +118,7 @@ mod discover_test {
 
         let mut res = discover(td.path()).unwrap();
         res.sort_by(|a, b| a.path.cmp(&b.path));
-        assert_that(&res).is_equal_to(&want);
+        assert_that!(res).is_equal_to(&want);
         Ok(())
     }
 
@@ -144,7 +135,7 @@ mod discover_test {
 
         let mut res = discover(td.path()).unwrap();
         res.sort_by(|a, b| a.path.cmp(&b.path));
-        assert_that(&res).is_equal_to(&want);
+        assert_that!(res).is_equal_to(&want);
         Ok(())
     }
 }
