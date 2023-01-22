@@ -1,0 +1,16 @@
+[package]
+name = "git-hotspots"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+parser = { path = "../parser" }
+discovery = { path = "../discovery" }
+insight = { path = "../insight" }
+structopt = { version = "0.3", features = ["color"] }
+anyhow = "1"
+thiserror = "1"
+prettytable-rs = "^0.10"
+log = "0"
+env_logger = "0"
+git2 = "0"
