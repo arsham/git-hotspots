@@ -37,12 +37,15 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+      - name: Update submodules
+        run: git submodule update --init --recursive
       - name: Install Toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
           profile: minimal
           override: true
+
       - uses: Swatinem/rust-cache@v2
       - name: Run cargo compile
         uses: actions-rs/cargo@v1
@@ -56,6 +59,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+      - name: Update submodules
+        run: git submodule update --init --recursive
       - name: Install Toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -86,6 +91,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+      - name: Update submodules
+        run: git submodule update --init --recursive
       - name: Install Toolchain | ${{ matrix.rust }}
         uses: actions-rs/toolchain@v1
         with:

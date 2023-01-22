@@ -2,6 +2,13 @@
 name = "git-hotspots"
 version = "0.0.2"
 edition = "2021"
+authors = ["Arsham Shirvani"]
+documentation = "https://docs.rs/crate/git-hotspots"
+repository = "https://github.com/arsham/git-hotspots"
+keywords = ["git", "github", "inspection"]
+categories = ["command-line-utilities", "development-tools"]
+license = "MIT"
+description = "Print function changes in git history"
 
 [dependencies]
 parser = { path = "../parser" }
@@ -13,4 +20,3 @@ thiserror = "1"
 prettytable-rs = "^0.10"
 log = "0"
 env_logger = "0"
-git2 = "0"
