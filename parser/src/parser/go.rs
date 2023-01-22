@@ -16,7 +16,7 @@ extern "C" {
 /// This parser can parse any Go files.
 pub struct GoParser {
     files: Vec<File>,
-    query: String,
+    query: Query,
     filters: Vec<Predicate>,
 }
 
@@ -31,11 +31,15 @@ impl GoParser {
         let queries = PROJECT_DIR
             .get_file("src/parser/queries/go.scm")
             .ok_or(Error::FileNotFound("go.scm not found".to_owned()))?;
-        let query = queries.contents_utf8().unwrap();
+        let query = queries
+            .contents_utf8()
+            .ok_or(Error::ParseFile("Can't parse queries".to_owned()))?;
+        let language = unsafe { tree_sitter_go() };
+        let query = Query::new(language, query)?;
 
         Ok(GoParser {
             files: vec![],
-            query: query.to_owned(),
+            query,
             filters: Vec::new(),
         })
     }
@@ -50,23 +54,23 @@ impl super::Parser for GoParser {
         Ok(())
     }
 
-    fn parser(&self) -> TSParser {
+    fn parser(&self) -> Result<TSParser, Error> {
         let language = unsafe { tree_sitter_go() };
         let mut parser = TSParser::new();
-        parser.set_language(language).unwrap();
-        parser
+        parser.set_language(language)?;
+        Ok(parser)
     }
 
-    fn query(&self) -> Result<Query, Error> {
-        let language = unsafe { tree_sitter_go() };
-        Ok(Query::new(language, &self.query)?)
+    fn query(&self) -> &Query {
+        &self.query
     }
 
     fn files(&self) -> Result<&[File], Error> {
         if self.files.is_empty() {
-            return Err(Error::NoFilesAdded);
+            Err(Error::NoFilesAdded)
+        } else {
+            Ok(&self.files)
         }
-        Ok(&self.files)
     }
 
     fn filter_path(&mut self, filter: Predicate) {

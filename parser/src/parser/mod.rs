@@ -35,6 +35,9 @@ pub enum Error {
 
     #[error(transparent)]
     Utf8Str(#[from] Utf8Error),
+
+    #[error(transparent)]
+    Language(#[from] LanguageError),
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -71,10 +74,10 @@ pub trait Parser {
     fn add_file(&mut self, f: discovery::File) -> Result<(), Error>;
 
     /// Returns a tree-sitter parser for the Parser's language.
-    fn parser(&self) -> TSParser;
+    fn parser(&self) -> Result<TSParser, Error>;
 
     /// Returns a tree-sitter Query object for the Parser's language.
-    fn query(&self) -> Result<Query, Error>;
+    fn query(&self) -> &Query;
 
     /// Returns a mutable reference to the given files. It returns and error if the file can't be
     /// read.
@@ -89,8 +92,8 @@ pub trait Parser {
     /// Returns all the functions in all files. It returns and error if the file can't be read, or
     /// the language parser can't parse the contents.
     fn find_functions(&mut self) -> Result<Vec<Element>, Error> {
-        let mut parser = self.parser();
-        let query = self.query()?;
+        let mut parser = self.parser()?;
+        let query = self.query();
         let files = self.files()?;
         let mut ret: Vec<Element> = Vec::with_capacity(files.len());
 
@@ -107,7 +110,8 @@ pub trait Parser {
                 .ok_or(Error::ParseFile(file.path.clone()))?;
 
             let mut cursor = QueryCursor::new();
-            let matches = cursor.matches(&query, tree.root_node(), source_code.as_bytes());
+
+            let matches = cursor.matches(query, tree.root_node(), source_code.as_bytes());
             let res = collect_matches(matches, &source_code);
             ret.append(
                 &mut res
