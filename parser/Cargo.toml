@@ -1,16 +1,16 @@
 [package]
 name = "parser"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 
 [dependencies]
 tree-sitter = "0.20.9"
 discovery = { path = "../discovery" }
 thiserror = "1"
-itertools = "*"
 include_dir = "0"
 
 [dev-dependencies]
+itertools = "*"
 speculoos = "0"
 
 [build-dependencies]

@@ -1,4 +1,5 @@
 pub mod go;
+pub mod lua;
 
 use std::fs;
 use std::io;
@@ -6,9 +7,8 @@ use std::io::{BufReader, Read};
 use std::str::Utf8Error;
 
 use thiserror::Error as TError;
-use tree_sitter::LanguageError;
 use tree_sitter::Parser as TSParser;
-use tree_sitter::{Query, QueryCursor, QueryMatch};
+use tree_sitter::{Language, LanguageError, Query, QueryCursor, QueryMatch};
 
 use discovery::File;
 
@@ -79,8 +79,8 @@ pub trait Parser {
     /// Will return an error if the file is not compatible with the Parser.
     fn add_file(&mut self, f: discovery::File) -> Result<(), Error>;
 
-    /// Returns a tree-sitter parser for the Parser's language.
-    fn parser(&self) -> Result<TSParser, Error>;
+    /// Returns a tree-sitter language.
+    fn language(&self) -> Language;
 
     /// Returns a tree-sitter Query object for the Parser's language.
     fn query(&self) -> &Query;
@@ -95,12 +95,17 @@ pub trait Parser {
     /// Applies the filter on the file path.
     fn filter(&self, p: &str) -> bool;
 
-    fn combine(&self, v: Vec<Element>) -> Vec<Element>;
+    /// Returns a new vector with the representation names for functions.
+    fn func_repr(&self, v: Vec<Element>) -> Vec<Element> {
+        v
+    }
 
     /// Returns all the functions in all files. It returns and error if the file can't be read, or
     /// the language parser can't parse the contents.
     fn find_functions(&mut self) -> Result<Vec<Element>, Error> {
-        let mut parser = self.parser()?;
+        let mut parser = TSParser::new();
+        let language = self.language();
+        parser.set_language(language)?;
         let query = self.query();
         let files = self.files()?;
         let mut ret: Vec<Element> = Vec::with_capacity(files.len());
@@ -133,6 +138,6 @@ pub trait Parser {
                     .collect::<Vec<Element>>(),
             );
         }
-        Ok(self.combine(ret))
+        Ok(self.func_repr(ret))
     }
 }

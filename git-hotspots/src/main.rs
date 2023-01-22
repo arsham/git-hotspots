@@ -1,7 +1,9 @@
 use anyhow::Result;
 use discovery::{discover, Lang};
 use log::{debug, info, warn, LevelFilter};
-use parser::parser::{go::GoParser, Parser, Predicate};
+use parser::parser::go::GoParser;
+use parser::parser::lua::LuaParser;
+use parser::parser::{Parser, Predicate};
 use prettytable::format;
 use prettytable::Table;
 
@@ -34,15 +36,19 @@ fn main() -> Result<()> {
     let insighter = insight::Inspector::new(&opt.root)?;
 
     let mut go_parser = GoParser::new()?;
+    let mut lua_parser = LuaParser::new()?;
     if !opt.prefix.is_empty() {
         let prefix = format!("./{}", opt.prefix);
-        go_parser.filter_path(Predicate(Box::new(move |p: &str| !p.starts_with(&prefix))));
+        let predicate = Box::new(move |p: &str| !p.starts_with(&prefix));
+        go_parser.filter_path(Predicate(predicate.clone()));
+        lua_parser.filter_path(Predicate(predicate));
     }
     if opt.invert_match.is_some() {
         let prefix = opt.invert_match.unwrap();
-        go_parser.filter_path(Predicate(Box::new(move |p: &str| p.contains(&prefix))));
+        let predicate = Box::new(move |p: &str| p.contains(&prefix));
+        go_parser.filter_path(Predicate(predicate.clone()));
+        lua_parser.filter_path(Predicate(predicate));
     }
-    go_parser.filter_path(Predicate(Box::new(|p: &str| p.contains("grammar"))));
 
     let mut table = Table::new();
     table.set_titles(row![bFg->"FILE", bFg->"FUNCTION", bFg->"FREQUENCY"]);
@@ -59,6 +65,13 @@ fn main() -> Result<()> {
                         info!("Added {path}");
                     }
                 },
+                Lang::Lua => {
+                    if let Err(err) = lua_parser.add_file(file) {
+                        warn!("Failed to load file {path}: {err}");
+                    } else if opt.log_level > 1 {
+                        info!("Added {path}");
+                    }
+                },
                 _ => {
                     if opt.log_level > 0 {
                         debug!("Unsupported file: {path}");
@@ -66,24 +79,38 @@ fn main() -> Result<()> {
                 },
             }
         });
-        let res = go_parser.find_functions()?;
-        let mut res = res
-            .iter()
-            .map(|f| {
-                (
-                    f.file.as_str(),
-                    f.name.as_str(),
-                    insighter.function_history(&f.file, &f.name).unwrap().len(),
-                )
-            })
-            .collect::<Vec<(&str, &str, usize)>>();
-        res.sort_by(|a, b| b.2.cmp(&a.2));
-        res.into_iter()
-            .skip(opt.skip)
-            .take(opt.total)
-            .for_each(|(file, func, freq)| {
-                table.add_row(row![file, func, Fr->freq.to_string()]);
-            });
+
+        let parsers: Vec<(&str, Box<dyn Parser>)> =
+            vec![("Go", Box::new(go_parser)), ("Lua", Box::new(lua_parser))];
+
+        for (name, mut parser) in parsers {
+            let res = parser.find_functions();
+            if let Err(parser::parser::Error::NoFilesAdded) = res {
+                info!("Parser {} didn't fund any files", name);
+                continue;
+            } else if let Err(err) = res {
+                return Err(err)?;
+            }
+
+            let res = res.unwrap();
+            let mut res = res
+                .iter()
+                .map(|f| {
+                    (
+                        f.file.as_str(),
+                        f.name.as_str(),
+                        insighter.function_history(&f.file, &f.name).unwrap().len(),
+                    )
+                })
+                .collect::<Vec<(&str, &str, usize)>>();
+            res.sort_by(|a, b| b.2.cmp(&a.2));
+            res.into_iter()
+                .skip(opt.skip)
+                .take(opt.total)
+                .for_each(|(file, func, freq)| {
+                    table.add_row(row![file, func, Fr->freq.to_string()]);
+                });
+        }
         table.printstd();
 
         Ok(())
