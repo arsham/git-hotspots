@@ -1,0 +1,17 @@
+[package]
+name = "insight"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+thiserror = "1"
+grep-searcher = "0"
+grep-matcher = "0"
+grep-regex = "0"
+
+[dev-dependencies]
+utilities = { path = "../utilities" }
+tempfile = "3"
+git2 = "0"
+speculoos = "0"
+itertools = "0"
