@@ -4,6 +4,7 @@ use tree_sitter::Language as TSLanguage;
 use tree_sitter::Parser as TSParser;
 use tree_sitter::Query;
 
+use super::Element;
 use super::Error;
 use super::Predicate;
 
@@ -80,6 +81,28 @@ impl super::Parser for GoParser {
     fn filter(&self, p: &str) -> bool {
         self.filters.iter().any(|f| (f.0)(p))
     }
+
+    fn combine(&self, v: Vec<Element>) -> Vec<Element> {
+        // When the index is zero, it is the method receiver. We should keep the value until the
+        // next element to concatinate.
+        let mut prev: Option<String> = None;
+        v.into_iter()
+            .filter_map(|mut e| {
+                if e.index == 0 {
+                    prev = Some(e.name);
+                    return None;
+                } else if let Some(p) = prev.as_ref() {
+                    // Removing anything up to the first space, and prepend '(' to make the method
+                    // look right.
+                    let name = p.split(' ').nth(1).unwrap_or(&p[1..]);
+                    let name = format!("({} {}", name, e.name);
+                    prev = None;
+                    e.name = name;
+                }
+                Some(e)
+            })
+            .collect()
+    }
 }
 
 #[cfg(test)]
@@ -149,6 +172,7 @@ mod find_functions {
             name: "FuncOne".to_owned(),
             line: 3,
             file: path,
+            index: 1,
         };
         assert_that!(element).is_equal_to(&want);
         Ok(())
@@ -169,23 +193,32 @@ mod find_functions {
         let mut res = res.unwrap();
         let mut want = vec![
             Element {
-                name: "FuncOne".to_owned(),
+                name: "(x) FuncOne".to_owned(),
                 line: 5,
                 file: path.clone(),
+                index: 1,
             },
             Element {
-                name: "FuncTwo".to_owned(),
+                name: "(*x) FuncTwo".to_owned(),
                 line: 6,
                 file: path.clone(),
+                index: 1,
             },
             Element {
                 name: "nested".to_owned(),
                 line: 7,
+                file: path.clone(),
+                index: 1,
+            },
+            Element {
+                name: "(*x) FuncThree".to_owned(),
+                line: 10,
                 file: path,
+                index: 1,
             },
         ];
-        want.sort_by(|a, b| a.name.cmp(&b.name));
-        res.sort_by(|a, b| a.name.cmp(&b.name));
+        want.sort_by(|a, b| a.line.cmp(&b.line));
+        res.sort_by(|a, b| a.line.cmp(&b.line));
 
         assert_equal(want, res);
         Ok(())
@@ -209,16 +242,19 @@ mod find_functions {
                 name: "FuncTwo".to_owned(),
                 line: 3,
                 file: path.clone(),
+                index: 1,
             },
             Element {
                 name: "FuncThree".to_owned(),
                 line: 5,
                 file: path.clone(),
+                index: 1,
             },
             Element {
                 name: "nested".to_owned(),
                 line: 6,
                 file: path,
+                index: 1,
             },
         ];
         want.sort_by(|a, b| a.name.cmp(&b.name));
@@ -252,21 +288,25 @@ mod find_functions {
                 name: "FuncOne".to_owned(),
                 line: 3,
                 file: path2,
+                index: 1,
             },
             Element {
                 name: "FuncTwo".to_owned(),
                 line: 3,
                 file: path1.clone(),
+                index: 1,
             },
             Element {
                 name: "FuncThree".to_owned(),
                 line: 5,
                 file: path1.clone(),
+                index: 1,
             },
             Element {
                 name: "nested".to_owned(),
                 line: 6,
                 file: path1,
+                index: 1,
             },
         ];
         want.sort_by(|a, b| a.name.cmp(&b.name));

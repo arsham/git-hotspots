@@ -7,3 +7,4 @@ func (*x) FuncTwo() {
 	nested := func() {}
 	_ = nested
 }
+func (f *x) FuncThree() {}

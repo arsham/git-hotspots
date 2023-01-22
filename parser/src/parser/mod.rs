@@ -6,6 +6,7 @@ use std::io::{BufReader, Read};
 use std::str::Utf8Error;
 
 use thiserror::Error as TError;
+use tree_sitter::LanguageError;
 use tree_sitter::Parser as TSParser;
 use tree_sitter::{Query, QueryCursor, QueryMatch};
 
@@ -40,22 +41,27 @@ pub enum Error {
     Language(#[from] LanguageError),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Element {
     pub name: String,
     pub file: String,
     pub line: usize,
+    index: u32,
 }
 
 fn collect_matches<'a>(
     matches: impl Iterator<Item = QueryMatch<'a, 'a>>,
     source: &'a str,
-) -> Vec<(usize, &'a str)> {
+) -> Vec<(usize, u32, &'a str)> {
     matches
         .filter_map(|m| {
             m.captures.iter().find_map(|capture| {
                 if let Ok(line) = capture.node.utf8_text(source.as_bytes()) {
-                    Some((capture.node.range().start_point.row + 1, line))
+                    Some((
+                        capture.node.range().start_point.row + 1,
+                        capture.index,
+                        line,
+                    ))
                 } else {
                     None
                 }
@@ -89,6 +95,8 @@ pub trait Parser {
     /// Applies the filter on the file path.
     fn filter(&self, p: &str) -> bool;
 
+    fn combine(&self, v: Vec<Element>) -> Vec<Element>;
+
     /// Returns all the functions in all files. It returns and error if the file can't be read, or
     /// the language parser can't parse the contents.
     fn find_functions(&mut self) -> Result<Vec<Element>, Error> {
@@ -116,14 +124,15 @@ pub trait Parser {
             ret.append(
                 &mut res
                     .into_iter()
-                    .map(|(line, name)| Element {
+                    .map(|(line, index, name)| Element {
                         name: name.to_owned(),
                         file: file.path.clone(),
                         line,
+                        index,
                     })
                     .collect::<Vec<Element>>(),
             );
         }
-        Ok(ret)
+        Ok(self.combine(ret))
     }
 }
