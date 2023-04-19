@@ -1,4 +1,5 @@
 use log::debug;
+use rayon::prelude::*;
 use std::{ops::Not, path::Path, result, time::Instant};
 use walkdir::{DirEntry, WalkDir};
 
@@ -44,6 +45,7 @@ impl Discovery {
         let start = Instant::now();
         let res: Vec<File> = WalkDir::new(&path)
             .into_iter()
+            .par_bridge()
             .filter_map(result::Result::ok)
             .filter(|p| {
                 if self.prefixes.is_empty() {

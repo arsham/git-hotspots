@@ -7,6 +7,7 @@ use indicatif::ProgressBar;
 use log::{debug, info, warn, LevelFilter};
 use prettytable::format;
 use prettytable::Table;
+use rayon::prelude::*;
 
 use parser::parser::go::GoParser;
 use parser::parser::lua::LuaParser;
@@ -112,6 +113,7 @@ fn main() -> Result<()> {
             let res = res.unwrap();
             report.extend(
                 res.into_iter()
+                    .par_bridge()
                     .map(|f| {
                         pb.inc(1);
                         (
