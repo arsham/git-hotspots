@@ -1,4 +1,5 @@
-use std::{path::Path, result};
+use log::debug;
+use std::{ops::Not, path::Path, result, time::Instant};
 use walkdir::{DirEntry, WalkDir};
 
 #[derive(Debug, Eq, PartialEq)]
@@ -26,29 +27,65 @@ pub struct File {
     pub lang: Lang,
 }
 
-pub fn discover<P: AsRef<Path>>(path: P) -> Option<Vec<File>> {
-    let res: Vec<File> = WalkDir::new(&path)
-        .into_iter()
-        .filter_map(result::Result::ok)
-        .filter(is_project_file)
-        .filter_map(|p| {
-            let lang = match detect_lang::from_path(p.path()) {
-                Some(lang) => lang.id().into(),
-                None => Lang::Undefined,
-            };
-            let p = p.path().to_str();
+#[derive(Default)]
+pub struct Discovery {
+    prefixes: Vec<String>,
+    not_contains: Vec<String>,
+}
 
-            p.map(|path| File {
-                path: path.to_owned(),
-                lang,
+impl Discovery {
+    pub fn with_prefix(&mut self, p: String) {
+        self.prefixes.push(p);
+    }
+    pub fn not_contains(&mut self, p: String) {
+        self.not_contains.push(p);
+    }
+    pub fn discover<P: AsRef<Path>>(&self, path: P) -> Option<Vec<File>> {
+        let start = Instant::now();
+        let res: Vec<File> = WalkDir::new(&path)
+            .into_iter()
+            .filter_map(result::Result::ok)
+            .filter(|p| {
+                if self.prefixes.is_empty() {
+                    true
+                } else {
+                    self.prefixes
+                        .iter()
+                        .any(|prefix| p.path().starts_with(prefix))
+                }
             })
-        })
-        .collect();
+            .filter(|p| {
+                if self.not_contains.is_empty() {
+                    true
+                } else {
+                    self.not_contains
+                        .iter()
+                        .any(|prefix| p.path().to_str().unwrap_or("").contains(prefix))
+                        .not()
+                }
+            })
+            .filter(is_project_file)
+            .filter_map(|p| {
+                let lang = match detect_lang::from_path(p.path()) {
+                    Some(lang) => lang.id().into(),
+                    None => Lang::Undefined,
+                };
+                let p = p.path().to_str();
 
-    if res.is_empty() {
-        None
-    } else {
-        Some(res)
+                p.map(|path| File {
+                    path: path.to_owned(),
+                    lang,
+                })
+            })
+            .collect();
+
+        debug!("Discovery took {:?}", start.elapsed());
+
+        if res.is_empty() {
+            None
+        } else {
+            Some(res)
+        }
     }
 }
 
@@ -85,7 +122,8 @@ mod discover_test {
     #[test]
     fn empty_path() -> Result<(), Box<dyn error::Error>> {
         let td = TempDir::new()?;
-        assert_that!(discover(td.path())).is_none();
+        let d = Discovery::default();
+        assert_that!(d.discover(td.path())).is_none();
         Ok(())
     }
 
@@ -98,7 +136,8 @@ mod discover_test {
         let f2 = (&td, "b.txt", Lang::Undefined).into();
         let want = vec![f1, f2];
 
-        let res = discover(td.path());
+        let d = Discovery::default();
+        let res = d.discover(td.path());
         assert_that!(res).is_some();
 
         let mut res = res.unwrap();
@@ -116,7 +155,8 @@ mod discover_test {
         let f2 = (&td, "b/c.txt", Lang::Undefined).into();
         let want = vec![f1, f2];
 
-        let mut res = discover(td.path()).unwrap();
+        let d = Discovery::default();
+        let mut res = d.discover(td.path()).unwrap();
         res.sort_by(|a, b| a.path.cmp(&b.path));
         assert_that!(res).is_equal_to(&want);
         Ok(())
@@ -133,7 +173,8 @@ mod discover_test {
 
         let want = vec![f1, f2, f3];
 
-        let mut res = discover(td.path()).unwrap();
+        let d = Discovery::default();
+        let mut res = d.discover(td.path()).unwrap();
         res.sort_by(|a, b| a.path.cmp(&b.path));
         assert_that!(res).is_equal_to(&want);
         Ok(())

@@ -1,11 +1,13 @@
 use anyhow::Result;
-use discovery::{discover, Lang};
+use discovery::Discovery;
+use discovery::Lang;
 use log::{debug, info, warn, LevelFilter};
-use parser::parser::go::GoParser;
-use parser::parser::lua::LuaParser;
-use parser::parser::{Parser, Predicate};
 use prettytable::format;
 use prettytable::Table;
+
+use parser::parser::go::GoParser;
+use parser::parser::lua::LuaParser;
+use parser::parser::Parser;
 
 #[macro_use]
 extern crate prettytable;
@@ -15,14 +17,15 @@ mod args;
 fn main() -> Result<()> {
     let opt = args::Opt::new();
 
-    let log_level = match opt.log_level {
-        0 => LevelFilter::Off,
-        1 => LevelFilter::Error,
-        2 => LevelFilter::Warn,
-        3 => LevelFilter::Info,
-        _ => LevelFilter::Debug,
-    };
-    env_logger::builder().filter_level(log_level).init();
+    env_logger::builder()
+        .filter_level(match opt.log_level {
+            0 => LevelFilter::Off,
+            1 => LevelFilter::Error,
+            2 => LevelFilter::Warn,
+            3 => LevelFilter::Info,
+            _ => LevelFilter::Debug,
+        })
+        .init();
 
     if let Some(args::Command::Version) = opt.sub_commands {
         println!(
@@ -37,24 +40,24 @@ fn main() -> Result<()> {
 
     let mut go_parser = GoParser::new()?;
     let mut lua_parser = LuaParser::new()?;
-    if !opt.prefix.is_empty() {
-        let prefix = format!("./{}", opt.prefix);
-        let predicate = Box::new(move |p: &str| !p.starts_with(&prefix));
-        go_parser.filter_path(Predicate(predicate.clone()));
-        lua_parser.filter_path(Predicate(predicate));
+    let mut discoverer = Discovery::default();
+    if let Some(prefixes) = opt.prefix {
+        for prefix in prefixes {
+            discoverer.with_prefix(format!("./{prefix}"));
+        }
     }
-    if opt.invert_match.is_some() {
-        let prefix = opt.invert_match.unwrap();
-        let predicate = Box::new(move |p: &str| p.contains(&prefix));
-        go_parser.filter_path(Predicate(predicate.clone()));
-        lua_parser.filter_path(Predicate(predicate));
+
+    if let Some(terms) = opt.invert_match {
+        for term in terms {
+            discoverer.not_contains(term.clone());
+        }
     }
 
     let mut table = Table::new();
     table.set_titles(row![bFg->"FILE", bFg->"FUNCTION", bFg->"FREQUENCY"]);
     table.set_format(*format::consts::FORMAT_NO_LINESEP_WITH_TITLE);
 
-    if let Some(locator) = discover(&opt.root) {
+    if let Some(locator) = discoverer.discover(&opt.root) {
         locator.into_iter().for_each(|file| {
             let path = file.path.clone();
             match file.lang {
@@ -77,7 +80,7 @@ fn main() -> Result<()> {
                         debug!("Unsupported file: {path}");
                     }
                 },
-            }
+            };
         });
 
         let parsers: Vec<(&str, Box<dyn Parser>)> =

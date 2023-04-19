@@ -20,12 +20,12 @@ pub struct Opt {
     pub log_level: u8,
 
     /// Show results beginning with the given string
-    #[structopt(long, short, default_value = "", hide_default_value = true)]
-    pub prefix: String,
+    #[structopt(long, short, hide_default_value = true)]
+    pub prefix: Option<Vec<String>>,
 
     /// Exclude partiallly matched path.
     #[structopt(long, short = "v")]
-    pub invert_match: Option<String>,
+    pub invert_match: Option<Vec<String>>,
 
     /// Root of the project to inspect.
     #[structopt(short, long, default_value = ".")]
