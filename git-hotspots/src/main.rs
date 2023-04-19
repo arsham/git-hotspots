@@ -11,6 +11,7 @@ use rayon::prelude::*;
 
 use parser::parser::go::GoParser;
 use parser::parser::lua::LuaParser;
+use parser::parser::rust::RustParser;
 use parser::parser::Parser;
 
 #[macro_use]
@@ -43,6 +44,7 @@ fn main() -> Result<()> {
     let insighter = insight::Inspector::new(&opt.root)?;
 
     let mut go_parser = GoParser::new()?;
+    let mut rust_parser = RustParser::new()?;
     let mut lua_parser = LuaParser::new()?;
     let mut discoverer = Discovery::default();
     if let Some(prefixes) = opt.prefix {
@@ -60,6 +62,7 @@ fn main() -> Result<()> {
     if let Some(terms) = opt.exclude_func {
         for term in terms {
             go_parser.filter_name(term.clone());
+            rust_parser.filter_name(term.clone());
             lua_parser.filter_name(term);
         }
     }
@@ -73,6 +76,7 @@ fn main() -> Result<()> {
             let path = file.path.clone();
             let err = match file.lang {
                 Lang::Go => go_parser.add_file(file),
+                Lang::Rust => rust_parser.add_file(file),
                 Lang::Lua => lua_parser.add_file(file),
                 _ => {
                     if opt.log_level > 0 {
@@ -91,6 +95,7 @@ fn main() -> Result<()> {
 
         let parsers: Vec<(&str, Box<dyn Parser>)> = vec![
             ("Go", Box::new(go_parser)),
+            ("Rust", Box::new(rust_parser)),
             ("Lua", Box::new(lua_parser)),
         ];
 

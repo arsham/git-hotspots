@@ -16,6 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("cargo:rustc-env=APP_VERSION={build_tag}");
 
     let languages = vec![
+        ("rust", vec!["parser.c", "scanner.c"]),
         ("go", vec!["parser.c"]),
         ("lua", vec!["parser.c", "scanner.c"]),
     ];

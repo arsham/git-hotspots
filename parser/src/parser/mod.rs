@@ -1,5 +1,6 @@
 pub mod go;
 pub mod lua;
+pub mod rust;
 
 use std::fs;
 use std::io;
