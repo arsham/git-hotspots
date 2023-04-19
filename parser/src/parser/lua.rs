@@ -2,7 +2,7 @@ use discovery::{File, Lang};
 use include_dir::{include_dir, Dir};
 use tree_sitter::{Language, Query};
 
-use super::{Error, Predicate};
+use super::Error;
 
 static PROJECT_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR");
 
@@ -14,7 +14,7 @@ extern "C" {
 pub struct LuaParser {
     files: Vec<File>,
     query: Query,
-    filters: Vec<Predicate>,
+    filters: Vec<String>,
 }
 
 impl Default for LuaParser {
@@ -67,12 +67,16 @@ impl super::Parser for LuaParser {
         }
     }
 
-    fn filter_path(&mut self, filter: Predicate) {
-        self.filters.push(filter);
+    fn filter_name(&mut self, s: String) {
+        self.filters.push(s);
     }
 
     fn filter(&self, p: &str) -> bool {
-        self.filters.iter().any(|f| (f.0)(p))
+        if self.filters.is_empty() {
+            false
+        } else {
+            self.filters.iter().any(|s| p.contains(s))
+        }
     }
 }
 
@@ -80,6 +84,7 @@ impl super::Parser for LuaParser {
 mod find_functions {
     use std::error;
 
+    use indicatif::ProgressBar as pb;
     use itertools::assert_equal;
     use speculoos::prelude::*;
 
@@ -90,7 +95,7 @@ mod find_functions {
     #[test]
     fn no_file_added() -> Result<(), Box<dyn error::Error>> {
         let mut p = LuaParser::new()?;
-        let res = p.find_functions();
+        let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_err();
         Ok(())
     }
@@ -118,7 +123,7 @@ mod find_functions {
             lang: Lang::Lua,
         };
         p.add_file(f)?;
-        let res = p.find_functions();
+        let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_ok();
         assert_that!(res.unwrap()).is_empty();
         Ok(())
@@ -133,7 +138,7 @@ mod find_functions {
             lang: Lang::Lua,
         };
         p.add_file(f)?;
-        let res = p.find_functions();
+        let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_ok();
 
         let res = res.unwrap();
@@ -158,7 +163,7 @@ mod find_functions {
             lang: Lang::Lua,
         };
         p.add_file(f)?;
-        let res = p.find_functions();
+        let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_ok();
 
         let mut res = res.unwrap();
@@ -204,7 +209,7 @@ mod find_functions {
             lang: Lang::Lua,
         };
         p.add_file(f)?;
-        let res = p.find_functions();
+        let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_ok();
 
         let mut res = res.unwrap();
@@ -250,7 +255,7 @@ mod find_functions {
         };
         p.add_file(f1)?;
         p.add_file(f2)?;
-        let res = p.find_functions();
+        let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_ok();
 
         let mut res = res.unwrap();

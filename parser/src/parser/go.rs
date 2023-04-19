@@ -2,7 +2,7 @@ use discovery::{File, Lang};
 use include_dir::{include_dir, Dir};
 use tree_sitter::{Language, Query};
 
-use super::{Element, Error, Predicate};
+use super::{Element, Error};
 
 static PROJECT_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR");
 
@@ -14,7 +14,7 @@ extern "C" {
 pub struct GoParser {
     files: Vec<File>,
     query: Query,
-    filters: Vec<Predicate>,
+    filters: Vec<String>,
 }
 
 impl Default for GoParser {
@@ -67,22 +67,29 @@ impl super::Parser for GoParser {
         }
     }
 
-    fn filter_path(&mut self, filter: Predicate) {
-        self.filters.push(filter);
+    fn filter_name(&mut self, s: String) {
+        self.filters.push(s);
     }
 
     fn filter(&self, p: &str) -> bool {
-        self.filters.iter().any(|f| (f.0)(p))
+        if self.filters.is_empty() {
+            false
+        } else {
+            self.filters.iter().any(|s| p.contains(s))
+        }
     }
 
-    fn func_repr(&self, v: Vec<Element>) -> Vec<Element> {
+    fn func_repr(&self, v: Vec<Element>) -> (Vec<Element>, usize) {
         // When the index is zero, it is the method receiver. We should keep the value until the
         // next element to concatinate.
         let mut prev: Option<String> = None;
-        v.into_iter()
+        let mut redacted = 0usize;
+        let res: Vec<Element> = v
+            .into_iter()
             .filter_map(|mut e| {
                 if e.index == 0 {
                     prev = Some(e.name);
+                    redacted += 1;
                     return None;
                 } else if let Some(p) = prev.as_ref() {
                     // Removing anything up to the first space, and prepend '(' to make the method
@@ -94,7 +101,8 @@ impl super::Parser for GoParser {
                 }
                 Some(e)
             })
-            .collect()
+            .collect();
+        (res, redacted)
     }
 }
 
@@ -102,6 +110,7 @@ impl super::Parser for GoParser {
 mod find_functions {
     use std::error;
 
+    use indicatif::ProgressBar as pb;
     use itertools::assert_equal;
     use speculoos::prelude::*;
 
@@ -112,7 +121,7 @@ mod find_functions {
     #[test]
     fn no_file_added() -> Result<(), Box<dyn error::Error>> {
         let mut p = GoParser::new()?;
-        let res = p.find_functions();
+        let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_err();
         Ok(())
     }
@@ -140,7 +149,7 @@ mod find_functions {
             lang: Lang::Go,
         };
         p.add_file(f)?;
-        let res = p.find_functions();
+        let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_ok();
         assert_that!(res.unwrap()).is_empty();
         Ok(())
@@ -155,7 +164,7 @@ mod find_functions {
             lang: Lang::Go,
         };
         p.add_file(f)?;
-        let res = p.find_functions();
+        let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_ok();
 
         let res = res.unwrap();
@@ -180,7 +189,7 @@ mod find_functions {
             lang: Lang::Go,
         };
         p.add_file(f)?;
-        let res = p.find_functions();
+        let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_ok();
 
         let mut res = res.unwrap();
@@ -226,7 +235,7 @@ mod find_functions {
             lang: Lang::Go,
         };
         p.add_file(f)?;
-        let res = p.find_functions();
+        let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_ok();
 
         let mut res = res.unwrap();
@@ -272,7 +281,7 @@ mod find_functions {
         };
         p.add_file(f1)?;
         p.add_file(f2)?;
-        let res = p.find_functions();
+        let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_ok();
 
         let mut res = res.unwrap();

@@ -27,6 +27,10 @@ pub struct Opt {
     #[structopt(long, short = "v")]
     pub invert_match: Option<Vec<String>>,
 
+    /// Exclude function by partial match
+    #[structopt(long, short = "F")]
+    pub exclude_func: Option<Vec<String>>,
+
     /// Root of the project to inspect.
     #[structopt(short, long, default_value = ".")]
     pub root: String,

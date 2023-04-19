@@ -4,8 +4,12 @@ pub mod lua;
 use std::fs;
 use std::io;
 use std::io::{BufReader, Read};
+use std::ops::Not;
 use std::str::Utf8Error;
+use std::time::Instant;
 
+use indicatif::ProgressBar;
+use log::debug;
 use thiserror::Error as TError;
 use tree_sitter::Parser as TSParser;
 use tree_sitter::{Language, LanguageError, Query, QueryCursor, QueryMatch};
@@ -70,9 +74,6 @@ fn collect_matches<'a>(
         .collect()
 }
 
-/// When the function returns true, the file is excluded from the oprtation.
-pub struct Predicate(pub Box<dyn Fn(&str) -> bool>);
-
 /// Parser provides the functionalities necessary for finding tree-sitter Nodes from a list of
 /// given files.
 pub trait Parser {
@@ -89,20 +90,20 @@ pub trait Parser {
     /// read.
     fn files(&self) -> Result<&[File], Error>;
 
-    /// Adds the filter to the list of filters.
-    fn filter_path(&mut self, filter: Predicate);
+    /// Adds the filter for excluding functions.
+    fn filter_name(&mut self, s: String);
 
-    /// Applies the filter on the file path.
-    fn filter(&self, p: &str) -> bool;
+    /// Applies the filter on function names.
+    fn filter(&self, func_name: &str) -> bool;
 
     /// Returns a new vector with the representation names for functions.
-    fn func_repr(&self, v: Vec<Element>) -> Vec<Element> {
-        v
+    fn func_repr(&self, v: Vec<Element>) -> (Vec<Element>, usize) {
+        (v, 0)
     }
 
     /// Returns all the functions in all files. It returns and error if the file can't be read, or
     /// the language parser can't parse the contents.
-    fn find_functions(&mut self) -> Result<Vec<Element>, Error> {
+    fn find_functions(&mut self, pb: &ProgressBar) -> Result<Vec<Element>, Error> {
         let mut parser = TSParser::new();
         let language = self.language();
         parser.set_language(language)?;
@@ -110,10 +111,8 @@ pub trait Parser {
         let files = self.files()?;
         let mut ret: Vec<Element> = Vec::with_capacity(files.len());
 
+        let start = Instant::now();
         for file in files {
-            if self.filter(&file.path) {
-                continue;
-            }
             let file_handle = fs::File::open(&file.path)?;
             let mut reader = BufReader::new(file_handle);
             let mut source_code = String::new();
@@ -129,15 +128,32 @@ pub trait Parser {
             ret.append(
                 &mut res
                     .into_iter()
-                    .map(|(line, index, name)| Element {
-                        name: name.to_owned(),
-                        file: file.path.clone(),
-                        line,
-                        index,
+                    .map(|(line, index, name)| {
+                        pb.inc_length(1);
+                        Element {
+                            name: name.to_owned(),
+                            file: file.path.clone(),
+                            line,
+                            index,
+                        }
                     })
                     .collect::<Vec<Element>>(),
             );
         }
-        Ok(self.func_repr(ret))
+
+        debug!("Finding function took {:?}", start.elapsed());
+
+        let (res, mut redacted) = self.func_repr(ret);
+        let len = res.len();
+        let res = res
+            .into_iter()
+            .filter(|e| self.filter(&e.name).not())
+            .collect::<Vec<Element>>();
+        redacted += len - res.len();
+        if let Some(len) = pb.length() {
+            // To support tests.
+            pb.set_length(len - redacted as u64);
+        }
+        Ok(res)
     }
 }

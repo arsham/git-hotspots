@@ -1,6 +1,9 @@
+use std::time::Instant;
+
 use anyhow::Result;
 use discovery::Discovery;
 use discovery::Lang;
+use indicatif::ProgressBar;
 use log::{debug, info, warn, LevelFilter};
 use prettytable::format;
 use prettytable::Table;
@@ -53,8 +56,15 @@ fn main() -> Result<()> {
         }
     }
 
+    if let Some(terms) = opt.exclude_func {
+        for term in terms {
+            go_parser.filter_name(term.clone());
+            lua_parser.filter_name(term);
+        }
+    }
+
     let mut table = Table::new();
-    table.set_titles(row![bFg->"FILE", bFg->"FUNCTION", bFg->"FREQUENCY"]);
+    table.set_titles(row![bFg->"FILE", bFg->"LINE", bFg->"FUNCTION", bFg->"FREQUENCY"]);
     table.set_format(*format::consts::FORMAT_NO_LINESEP_WITH_TITLE);
 
     if let Some(locator) = discoverer.discover(&opt.root) {
@@ -82,40 +92,51 @@ fn main() -> Result<()> {
                 },
             };
         });
+        let pb = ProgressBar::new(0);
 
         let parsers: Vec<(&str, Box<dyn Parser>)> =
             vec![("Go", Box::new(go_parser)), ("Lua", Box::new(lua_parser))];
 
+        let mut report: Vec<(String, usize, String, usize)> = Vec::new();
+
         for (name, mut parser) in parsers {
-            let res = parser.find_functions();
+            let res = parser.find_functions(&pb);
             if let Err(parser::parser::Error::NoFilesAdded) = res {
-                info!("Parser {} didn't fund any files", name);
+                debug!("Parser {} didn't find any files", name);
                 continue;
             } else if let Err(err) = res {
                 return Err(err)?;
             }
 
+            let start = Instant::now();
             let res = res.unwrap();
-            let mut res = res
-                .iter()
-                .map(|f| {
-                    (
-                        f.file.as_str(),
-                        f.name.as_str(),
-                        insighter.function_history(&f.file, &f.name).unwrap().len(),
-                    )
-                })
-                .collect::<Vec<(&str, &str, usize)>>();
-            res.sort_by(|a, b| b.2.cmp(&a.2));
-            res.into_iter()
-                .skip(opt.skip)
-                .take(opt.total)
-                .for_each(|(file, func, freq)| {
-                    table.add_row(row![file, func, Fr->freq.to_string()]);
-                });
+            report.extend(
+                res.into_iter()
+                    .map(|f| {
+                        pb.inc(1);
+                        (
+                            f.file.clone(),
+                            f.line,
+                            f.name.clone(),
+                            insighter.function_history(&f.file, &f.name).unwrap().len(),
+                        )
+                    })
+                    .collect::<Vec<(String, usize, String, usize)>>(),
+            );
+            debug!("Function hitory examination took {:?}", start.elapsed());
         }
+
+        report.sort_by(|a, b| b.3.cmp(&a.3));
+        report
+            .into_iter()
+            .skip(opt.skip)
+            .take(opt.total)
+            .for_each(|(file, line, func, freq)| {
+                table.add_row(row![file, line, func, Fr->freq.to_string()]);
+            });
         table.printstd();
 
+        pb.finish_with_message("done");
         Ok(())
     } else {
         Err(anyhow::format_err!(
