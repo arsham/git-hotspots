@@ -71,32 +71,28 @@ fn main() -> Result<()> {
     if let Some(locator) = discoverer.discover(&opt.root) {
         locator.into_iter().for_each(|file| {
             let path = file.path.clone();
-            match file.lang {
-                Lang::Go => {
-                    if let Err(err) = go_parser.add_file(file) {
-                        warn!("Failed to load file {path}: {err}");
-                    } else if opt.log_level > 1 {
-                        info!("Added {path}");
-                    }
-                },
-                Lang::Lua => {
-                    if let Err(err) = lua_parser.add_file(file) {
-                        warn!("Failed to load file {path}: {err}");
-                    } else if opt.log_level > 1 {
-                        info!("Added {path}");
-                    }
-                },
+            let err = match file.lang {
+                Lang::Go => go_parser.add_file(file),
+                Lang::Lua => lua_parser.add_file(file),
                 _ => {
                     if opt.log_level > 0 {
                         debug!("Unsupported file: {path}");
                     }
+                    return;
                 },
+            };
+            if let Err(err) = err {
+                warn!("Failed to load file {path}: {err}");
+            } else if opt.log_level > 1 {
+                info!("Added {path}");
             };
         });
         let pb = ProgressBar::new(0);
 
-        let parsers: Vec<(&str, Box<dyn Parser>)> =
-            vec![("Go", Box::new(go_parser)), ("Lua", Box::new(lua_parser))];
+        let parsers: Vec<(&str, Box<dyn Parser>)> = vec![
+            ("Go", Box::new(go_parser)),
+            ("Lua", Box::new(lua_parser)),
+        ];
 
         let mut report: Vec<(String, usize, String, usize)> = Vec::new();
 

@@ -7,11 +7,11 @@ use structopt::StructOpt;
 #[structopt(no_version, global_settings = &[DisableVersion])]
 #[structopt(setting(ColorAuto), setting(ColoredHelp))]
 pub struct Opt {
-    /// Total number of results
+    /// Total number of results.
     #[structopt(long, short, default_value = "50")]
     pub total: usize,
 
-    /// Skip first n results
+    /// Skip first n results.
     #[structopt(long, short, default_value = "0", hide_default_value = true)]
     pub skip: usize,
 
@@ -19,7 +19,7 @@ pub struct Opt {
     #[structopt(long, short = "V", parse(from_occurrences))]
     pub log_level: u8,
 
-    /// Show results beginning with the given string
+    /// Show results beginning with the given string.
     #[structopt(long, short, hide_default_value = true)]
     pub prefix: Option<Vec<String>>,
 
@@ -27,7 +27,7 @@ pub struct Opt {
     #[structopt(long, short = "v")]
     pub invert_match: Option<Vec<String>>,
 
-    /// Exclude function by partial match
+    /// Exclude function by partial match.
     #[structopt(long, short = "F")]
     pub exclude_func: Option<Vec<String>>,
 

@@ -41,6 +41,7 @@ impl Discovery {
     pub fn not_contains(&mut self, p: String) {
         self.not_contains.push(p);
     }
+
     pub fn discover<P: AsRef<Path>>(&self, path: P) -> Option<Vec<File>> {
         let start = Instant::now();
         let res: Vec<File> = WalkDir::new(&path)
