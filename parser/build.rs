@@ -7,6 +7,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .output()?;
     let current_sha = String::from_utf8(current_sha.stdout)?;
 
+    std::process::Command::new("git")
+        .args(["submodule", "update", "--init", "--recursive"])
+        .output()
+        .expect("Failed to fetch git submodules!");
+
     let build_tag = Command::new("git")
         .args(["describe", "--abbrev", "--tags"])
         .output()?;
@@ -14,6 +19,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("cargo:rustc-env=CURRENT_SHA={current_sha}");
     println!("cargo:rustc-env=APP_VERSION={build_tag}");
+    if std::process::Command::new("sccache")
+        .arg("--version")
+        .status()
+        .is_ok()
+    {
+        std::env::set_var("CC", "sccache cc");
+        std::env::set_var("CXX", "sccache c++");
+    }
 
     let languages = vec![
         ("rust", vec!["parser.c", "scanner.c"]),
@@ -25,7 +38,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let language = spec.0;
         let package = format!("tree-sitter-{language}");
         let node_dir = format!("grammars/{package}");
-
+        let git_head = format!("../.git/modules/parser/grammars/{package}/HEAD");
+        println!("cargo:rerun-if-changed={git_head}");
 
         NpmEnv::default()
             .with_node_env(&NodeEnv::Production)
@@ -44,7 +58,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let node_dir = &node_dir.clone();
             let source_directory = format!("{node_dir}/src");
             let source_file = format!("{source_directory}/{file}");
-            println!("cargo:rerun-if-changed={source_file}");
             builder.file(source_file).include(source_directory);
         }
         builder.compile(&package);
