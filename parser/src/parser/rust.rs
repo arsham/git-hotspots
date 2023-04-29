@@ -1,4 +1,4 @@
-use discovery::{File, Lang};
+use discovery::Lang;
 use include_dir::{include_dir, Dir};
 use tree_sitter::{Language, Query};
 
@@ -12,19 +12,12 @@ extern "C" {
 
 /// This parser can parse any Rust files.
 pub struct RustParser {
-    files: Vec<File>,
+    container: super::Container,
     query: Query,
-    filters: Vec<String>,
-}
-
-impl Default for RustParser {
-    fn default() -> Self {
-        Self::new().unwrap()
-    }
 }
 
 impl RustParser {
-    pub fn new() -> Result<Self, Error> {
+    pub fn new(c: super::Container) -> Result<Self, Error> {
         let queries = PROJECT_DIR
             .get_file("src/parser/queries/rust.scm")
             .ok_or(Error::FileNotFound("rust.scm not found".to_owned()))?;
@@ -35,20 +28,23 @@ impl RustParser {
         let query = Query::new(language, query)?;
 
         Ok(RustParser {
-            files: vec![],
             query,
-            filters: Vec::new(),
+            container: c,
         })
     }
 }
 
 impl super::Parser for RustParser {
-    fn add_file(&mut self, f: File) -> Result<(), Error> {
-        if f.lang != Lang::Rust {
-            return Err(Error::NotCompatible);
-        }
-        self.files.push(f);
-        Ok(())
+    fn container(&mut self) -> &mut super::Container {
+        &mut self.container
+    }
+
+    fn ro_container(&self) -> &super::Container {
+        &self.container
+    }
+
+    fn supported(&self, f: &discovery::File) -> bool {
+        f.lang == Lang::Rust
     }
 
     fn language(&self) -> Language {
@@ -57,26 +53,6 @@ impl super::Parser for RustParser {
 
     fn query(&self) -> &Query {
         &self.query
-    }
-
-    fn files(&self) -> Result<&[File], Error> {
-        if self.files.is_empty() {
-            Err(Error::NoFilesAdded)
-        } else {
-            Ok(&self.files)
-        }
-    }
-
-    fn filter_name(&mut self, s: String) {
-        self.filters.push(s);
-    }
-
-    fn filter(&self, p: &str) -> bool {
-        if self.filters.is_empty() {
-            false
-        } else {
-            self.filters.iter().any(|s| p.contains(s))
-        }
     }
 }
 
@@ -88,13 +64,15 @@ mod find_functions {
     use itertools::assert_equal;
     use speculoos::prelude::*;
 
+    use super::super::Container;
     use super::*;
     use crate::parser::{Element, Parser};
+    use discovery::File;
     const FIXTURES: &str = "src/parser/fixtures/rust";
 
     #[test]
     fn no_file_added() -> Result<(), Box<dyn error::Error>> {
-        let mut p = RustParser::new()?;
+        let mut p = RustParser::new(Container::new(100))?;
         let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_err();
         Ok(())
@@ -104,7 +82,7 @@ mod find_functions {
     fn no_rust_file() -> Result<(), Box<dyn error::Error>> {
         let some_types = vec![Lang::Undefined, Lang::Go, Lang::Lua];
         for t in some_types {
-            let mut p = RustParser::new()?;
+            let mut p = RustParser::new(Container::new(100))?;
             let f = File {
                 path: format!("{FIXTURES}/no_function.rs"),
                 lang: t,
@@ -117,7 +95,7 @@ mod find_functions {
 
     #[test]
     fn no_function_in_file() -> Result<(), Box<dyn error::Error>> {
-        let mut p = RustParser::new()?;
+        let mut p = RustParser::new(Container::new(100))?;
         let f = File {
             path: format!("{FIXTURES}/no_function.rs"),
             lang: Lang::Rust,
@@ -131,7 +109,7 @@ mod find_functions {
 
     #[test]
     fn returns_one_function_found() -> Result<(), Box<dyn error::Error>> {
-        let mut p = RustParser::new()?;
+        let mut p = RustParser::new(Container::new(100))?;
         let path = format!("{FIXTURES}/one_function.rs");
         let f = File {
             path: path.clone(),
@@ -156,7 +134,7 @@ mod find_functions {
 
     #[test]
     fn can_identify_methods() -> Result<(), Box<dyn error::Error>> {
-        let mut p = RustParser::new()?;
+        let mut p = RustParser::new(Container::new(100))?;
         let path = format!("{FIXTURES}/method.rs");
         let f = File {
             path: path.clone(),
@@ -202,7 +180,7 @@ mod find_functions {
 
     #[test]
     fn returns_all_functions_in_files() -> Result<(), Box<dyn error::Error>> {
-        let mut p = RustParser::new()?;
+        let mut p = RustParser::new(Container::new(100))?;
         let path = format!("{FIXTURES}/multi_functions.rs");
         let f = File {
             path: path.clone(),
@@ -242,7 +220,7 @@ mod find_functions {
 
     #[test]
     fn handles_multiple_files() -> Result<(), Box<dyn error::Error>> {
-        let mut p = RustParser::new()?;
+        let mut p = RustParser::new(Container::new(100))?;
         let path1 = format!("{FIXTURES}/multi_functions.rs");
         let path2 = format!("{FIXTURES}/one_function.rs");
         let f1 = File {

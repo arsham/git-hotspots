@@ -11,6 +11,7 @@ use std::time::Instant;
 
 use indicatif::ProgressBar;
 use log::debug;
+use log::warn;
 use thiserror::Error as TError;
 use tree_sitter::Parser as TSParser;
 use tree_sitter::{Language, LanguageError, Query, QueryCursor, QueryMatch};
@@ -30,10 +31,10 @@ pub enum Error {
     #[error(transparent)]
     TSQuery(#[from] tree_sitter::QueryError),
 
-    #[error("Can't parse file")]
+    #[error("Can't parse file: {0}")]
     ParseFile(String),
 
-    #[error("File not found")]
+    #[error("File not found: {0}")]
     FileNotFound(String),
 
     #[error(transparent)]
@@ -52,6 +53,23 @@ pub struct Element {
     pub file: String,
     pub line: usize,
     index: u32,
+}
+
+/// Container holds the files and filters for the Parser.
+#[derive(Debug, PartialEq, Eq)]
+pub struct Container {
+    files: Vec<File>,
+    filters: Vec<String>,
+}
+
+impl Container {
+    /// Returns a new Container with the given capacity.
+    pub fn new(cap: usize) -> Self {
+        Container {
+            files: Vec::with_capacity(cap),
+            filters: Vec::with_capacity(cap),
+        }
+    }
 }
 
 fn collect_matches<'a>(
@@ -78,8 +96,23 @@ fn collect_matches<'a>(
 /// Parser provides the functionalities necessary for finding tree-sitter Nodes from a list of
 /// given files.
 pub trait Parser {
+    /// Returns a mutable reference to the container.
+    fn container(&mut self) -> &mut Container;
+
+    /// Returns a reference to the container.
+    fn ro_container(&self) -> &Container;
+
+    /// Returns true if the file is compatible with the Parser.
+    fn supported(&self, f: &discovery::File) -> bool;
+
     /// Will return an error if the file is not compatible with the Parser.
-    fn add_file(&mut self, f: discovery::File) -> Result<(), Error>;
+    fn add_file(&mut self, f: discovery::File) -> Result<(), Error> {
+        if !self.supported(&f) {
+            return Err(Error::NotCompatible);
+        }
+        self.container().files.push(f);
+        Ok(())
+    }
 
     /// Returns a tree-sitter language.
     fn language(&self) -> Language;
@@ -89,13 +122,24 @@ pub trait Parser {
 
     /// Returns a mutable reference to the given files. It returns and error if the file can't be
     /// read.
-    fn files(&self) -> Result<&[File], Error>;
+    fn files(&self) -> Result<&[File], Error> {
+        let files = self.ro_container().files.as_slice();
+        if files.is_empty() {
+            Err(Error::NoFilesAdded)
+        } else {
+            Ok(files)
+        }
+    }
 
     /// Adds the filter for excluding functions.
-    fn filter_name(&mut self, s: String);
+    fn filter_name(&mut self, s: String) {
+        self.container().filters.push(s);
+    }
 
     /// Applies the filter on function names.
-    fn filter(&self, func_name: &str) -> bool;
+    fn filter(&self, p: &str) -> bool {
+        self.ro_container().filters.iter().any(|s| p.contains(s))
+    }
 
     /// Returns a new vector with the representation names for functions.
     fn func_repr(&self, v: Vec<Element>) -> (Vec<Element>, usize) {
@@ -108,8 +152,8 @@ pub trait Parser {
         let mut parser = TSParser::new();
         let language = self.language();
         parser.set_language(language)?;
-        let query = self.query();
         let files = self.files()?;
+        let query = self.query();
         let mut ret: Vec<Element> = Vec::with_capacity(files.len());
 
         let start = Instant::now();
@@ -117,10 +161,17 @@ pub trait Parser {
             let file_handle = fs::File::open(&file.path)?;
             let mut reader = BufReader::new(file_handle);
             let mut source_code = String::new();
-            reader.read_to_string(&mut source_code)?;
-            let tree = parser
-                .parse(&source_code, None)
-                .ok_or(Error::ParseFile(file.path.clone()))?;
+            if let Err(err) = reader.read_to_string(&mut source_code) {
+                warn!("error while reading {}: {err}", file.path.clone());
+                continue;
+            };
+            let tree = match parser.parse(&source_code, None) {
+                Some(tree) => tree,
+                None => {
+                    warn!("error while parsing {}", file.path.clone());
+                    continue;
+                },
+            };
 
             let mut cursor = QueryCursor::new();
 

@@ -12,7 +12,7 @@ use rayon::prelude::*;
 use parser::parser::go::GoParser;
 use parser::parser::lua::LuaParser;
 use parser::parser::rust::RustParser;
-use parser::parser::Parser;
+use parser::parser::{Container, Parser};
 
 #[macro_use]
 extern crate prettytable;
@@ -43,9 +43,9 @@ fn main() -> Result<()> {
 
     let insighter = insight::Inspector::new(&opt.root)?;
 
-    let mut go_parser = GoParser::new()?;
-    let mut rust_parser = RustParser::new()?;
-    let mut lua_parser = LuaParser::new()?;
+    let mut go_parser = GoParser::new(Container::new(100))?;
+    let mut rust_parser = RustParser::new(Container::new(100))?;
+    let mut lua_parser = LuaParser::new(Container::new(100))?;
     let mut discoverer = Discovery::default();
     if let Some(prefixes) = opt.prefix {
         for prefix in prefixes {
@@ -103,15 +103,23 @@ fn main() -> Result<()> {
 
         for (name, mut parser) in parsers {
             let res = parser.find_functions(&pb);
-            if let Err(parser::parser::Error::NoFilesAdded) = res {
-                debug!("Parser {} didn't find any files", name);
-                continue;
-            } else if let Err(err) = res {
-                return Err(err)?;
-            }
+            let res = match res {
+                Ok(r) => r,
+                Err(parser::parser::Error::NoFilesAdded) => {
+                    debug!("Parser {name} didn't find any files");
+                    continue;
+                },
+                Err(parser::parser::Error::ParseFile(msg)) => {
+                    warn!("Parser {name} encounter an error: {msg}");
+                    continue;
+                },
+                Err(err) => {
+                    debug!("Parser {name} encounter an error: {err}");
+                    return Err(err)?;
+                },
+            };
 
             let start = Instant::now();
-            let res = res.unwrap();
             report.extend(
                 res.into_iter()
                     .par_bridge()

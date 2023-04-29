@@ -1,4 +1,4 @@
-use discovery::{File, Lang};
+use discovery::Lang;
 use include_dir::{include_dir, Dir};
 use tree_sitter::{Language, Query};
 
@@ -12,19 +12,12 @@ extern "C" {
 
 /// This parser can parse any Go files.
 pub struct GoParser {
-    files: Vec<File>,
+    container: super::Container,
     query: Query,
-    filters: Vec<String>,
-}
-
-impl Default for GoParser {
-    fn default() -> Self {
-        Self::new().unwrap()
-    }
 }
 
 impl GoParser {
-    pub fn new() -> Result<Self, Error> {
+    pub fn new(c: super::Container) -> Result<Self, Error> {
         let queries = PROJECT_DIR
             .get_file("src/parser/queries/go.scm")
             .ok_or(Error::FileNotFound("go.scm not found".to_owned()))?;
@@ -35,20 +28,23 @@ impl GoParser {
         let query = Query::new(language, query)?;
 
         Ok(GoParser {
-            files: vec![],
+            container: c,
             query,
-            filters: Vec::new(),
         })
     }
 }
 
 impl super::Parser for GoParser {
-    fn add_file(&mut self, f: File) -> Result<(), Error> {
-        if f.lang != Lang::Go {
-            return Err(Error::NotCompatible);
-        }
-        self.files.push(f);
-        Ok(())
+    fn container(&mut self) -> &mut super::Container {
+        &mut self.container
+    }
+
+    fn ro_container(&self) -> &super::Container {
+        &self.container
+    }
+
+    fn supported(&self, f: &discovery::File) -> bool {
+        f.lang == Lang::Go
     }
 
     fn language(&self) -> Language {
@@ -57,26 +53,6 @@ impl super::Parser for GoParser {
 
     fn query(&self) -> &Query {
         &self.query
-    }
-
-    fn files(&self) -> Result<&[File], Error> {
-        if self.files.is_empty() {
-            Err(Error::NoFilesAdded)
-        } else {
-            Ok(&self.files)
-        }
-    }
-
-    fn filter_name(&mut self, s: String) {
-        self.filters.push(s);
-    }
-
-    fn filter(&self, p: &str) -> bool {
-        if self.filters.is_empty() {
-            false
-        } else {
-            self.filters.iter().any(|s| p.contains(s))
-        }
     }
 
     fn func_repr(&self, v: Vec<Element>) -> (Vec<Element>, usize) {
@@ -114,13 +90,15 @@ mod find_functions {
     use itertools::assert_equal;
     use speculoos::prelude::*;
 
+    use super::super::Container;
     use super::*;
     use crate::parser::{Element, Parser};
+    use discovery::File;
     const FIXTURES: &str = "src/parser/fixtures/go";
 
     #[test]
     fn no_file_added() -> Result<(), Box<dyn error::Error>> {
-        let mut p = GoParser::new()?;
+        let mut p = GoParser::new(Container::new(100))?;
         let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_err();
         Ok(())
@@ -130,7 +108,7 @@ mod find_functions {
     fn no_go_file() -> Result<(), Box<dyn error::Error>> {
         let some_types = vec![Lang::Undefined, Lang::Rust, Lang::Lua];
         for t in some_types {
-            let mut p = GoParser::new()?;
+            let mut p = GoParser::new(Container::new(100))?;
             let f = File {
                 path: format!("{FIXTURES}/no_function.1.go"),
                 lang: t,
@@ -143,7 +121,7 @@ mod find_functions {
 
     #[test]
     fn no_function_in_file() -> Result<(), Box<dyn error::Error>> {
-        let mut p = GoParser::new()?;
+        let mut p = GoParser::new(Container::new(100))?;
         let f = File {
             path: format!("{FIXTURES}/no_function.1.go"),
             lang: Lang::Go,
@@ -157,7 +135,7 @@ mod find_functions {
 
     #[test]
     fn returns_one_function_found() -> Result<(), Box<dyn error::Error>> {
-        let mut p = GoParser::new()?;
+        let mut p = GoParser::new(Container::new(100))?;
         let path = format!("{FIXTURES}/one_function.1.go");
         let f = File {
             path: path.clone(),
@@ -182,7 +160,7 @@ mod find_functions {
 
     #[test]
     fn can_identify_methods() -> Result<(), Box<dyn error::Error>> {
-        let mut p = GoParser::new()?;
+        let mut p = GoParser::new(Container::new(100))?;
         let path = format!("{FIXTURES}/method.1.go");
         let f = File {
             path: path.clone(),
@@ -228,7 +206,7 @@ mod find_functions {
 
     #[test]
     fn returns_all_functions_in_files() -> Result<(), Box<dyn error::Error>> {
-        let mut p = GoParser::new()?;
+        let mut p = GoParser::new(Container::new(100))?;
         let path = format!("{FIXTURES}/multi_functions.1.go");
         let f = File {
             path: path.clone(),
@@ -268,7 +246,7 @@ mod find_functions {
 
     #[test]
     fn handles_multiple_files() -> Result<(), Box<dyn error::Error>> {
-        let mut p = GoParser::new()?;
+        let mut p = GoParser::new(Container::new(100))?;
         let path1 = format!("{FIXTURES}/multi_functions.1.go");
         let path2 = format!("{FIXTURES}/one_function.1.go");
         let f1 = File {

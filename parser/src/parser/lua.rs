@@ -1,8 +1,8 @@
-use discovery::{File, Lang};
 use include_dir::{include_dir, Dir};
 use tree_sitter::{Language, Query};
 
 use super::Error;
+use discovery::Lang;
 
 static PROJECT_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR");
 
@@ -12,19 +12,12 @@ extern "C" {
 
 /// This parser can parse any Lua files.
 pub struct LuaParser {
-    files: Vec<File>,
+    container: super::Container,
     query: Query,
-    filters: Vec<String>,
-}
-
-impl Default for LuaParser {
-    fn default() -> Self {
-        Self::new().unwrap()
-    }
 }
 
 impl LuaParser {
-    pub fn new() -> Result<Self, Error> {
+    pub fn new(c: super::Container) -> Result<Self, Error> {
         let queries = PROJECT_DIR
             .get_file("src/parser/queries/lua.scm")
             .ok_or(Error::FileNotFound("lua.scm not found".to_owned()))?;
@@ -35,20 +28,23 @@ impl LuaParser {
         let query = Query::new(language, query)?;
 
         Ok(LuaParser {
-            files: vec![],
             query,
-            filters: Vec::new(),
+            container: c,
         })
     }
 }
 
 impl super::Parser for LuaParser {
-    fn add_file(&mut self, f: File) -> Result<(), Error> {
-        if f.lang != Lang::Lua {
-            return Err(Error::NotCompatible);
-        }
-        self.files.push(f);
-        Ok(())
+    fn container(&mut self) -> &mut super::Container {
+        &mut self.container
+    }
+
+    fn ro_container(&self) -> &super::Container {
+        &self.container
+    }
+
+    fn supported(&self, f: &discovery::File) -> bool {
+        f.lang == Lang::Lua
     }
 
     fn language(&self) -> Language {
@@ -57,26 +53,6 @@ impl super::Parser for LuaParser {
 
     fn query(&self) -> &Query {
         &self.query
-    }
-
-    fn files(&self) -> Result<&[File], Error> {
-        if self.files.is_empty() {
-            Err(Error::NoFilesAdded)
-        } else {
-            Ok(&self.files)
-        }
-    }
-
-    fn filter_name(&mut self, s: String) {
-        self.filters.push(s);
-    }
-
-    fn filter(&self, p: &str) -> bool {
-        if self.filters.is_empty() {
-            false
-        } else {
-            self.filters.iter().any(|s| p.contains(s))
-        }
     }
 }
 
@@ -88,13 +64,15 @@ mod find_functions {
     use itertools::assert_equal;
     use speculoos::prelude::*;
 
+    use super::super::Container;
     use super::*;
     use crate::parser::{Element, Parser};
+    use discovery::File;
     const FIXTURES: &str = "src/parser/fixtures/lua";
 
     #[test]
     fn no_file_added() -> Result<(), Box<dyn error::Error>> {
-        let mut p = LuaParser::new()?;
+        let mut p = LuaParser::new(Container::new(100))?;
         let res = p.find_functions(&pb::hidden());
         assert_that!(res).is_err();
         Ok(())
@@ -104,7 +82,7 @@ mod find_functions {
     fn no_lua_file() -> Result<(), Box<dyn error::Error>> {
         let some_types = vec![Lang::Undefined, Lang::Rust, Lang::Go];
         for t in some_types {
-            let mut p = LuaParser::new()?;
+            let mut p = LuaParser::new(Container::new(100))?;
             let f = File {
                 path: format!("{FIXTURES}/no_file.1.lua"),
                 lang: t,
@@ -117,7 +95,7 @@ mod find_functions {
 
     #[test]
     fn no_function_in_file() -> Result<(), Box<dyn error::Error>> {
-        let mut p = LuaParser::new()?;
+        let mut p = LuaParser::new(Container::new(100))?;
         let f = File {
             path: format!("{FIXTURES}/no_function.1.lua"),
             lang: Lang::Lua,
@@ -131,7 +109,7 @@ mod find_functions {
 
     #[test]
     fn returns_one_function_found() -> Result<(), Box<dyn error::Error>> {
-        let mut p = LuaParser::new()?;
+        let mut p = LuaParser::new(Container::new(100))?;
         let path = format!("{FIXTURES}/one_function.1.lua");
         let f = File {
             path: path.clone(),
@@ -156,7 +134,7 @@ mod find_functions {
 
     #[test]
     fn can_identify_methods() -> Result<(), Box<dyn error::Error>> {
-        let mut p = LuaParser::new()?;
+        let mut p = LuaParser::new(Container::new(100))?;
         let path = format!("{FIXTURES}/method.1.lua");
         let f = File {
             path: path.clone(),
@@ -202,7 +180,7 @@ mod find_functions {
 
     #[test]
     fn returns_all_functions_in_files() -> Result<(), Box<dyn error::Error>> {
-        let mut p = LuaParser::new()?;
+        let mut p = LuaParser::new(Container::new(100))?;
         let path = format!("{FIXTURES}/multi_functions.1.lua");
         let f = File {
             path: path.clone(),
@@ -242,7 +220,7 @@ mod find_functions {
 
     #[test]
     fn handles_multiple_files() -> Result<(), Box<dyn error::Error>> {
-        let mut p = LuaParser::new()?;
+        let mut p = LuaParser::new(Container::new(100))?;
         let path1 = format!("{FIXTURES}/multi_functions.1.lua");
         let path2 = format!("{FIXTURES}/one_function.1.lua");
         let f1 = File {
