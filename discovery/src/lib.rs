@@ -152,7 +152,8 @@ mod discover_test {
     #[test]
     fn discovers_recursively() -> Result<(), Box<dyn error::Error>> {
         let td = TempDir::new()?;
-        let files = vec!["a.txt", "b/c.txt"];
+        let b = Path::new("b").join("c.txt");
+        let files = vec!["a.txt", b.to_str().unwrap()];
         utilities::create_files(&td, files)?;
         let f1 = (&td, "a.txt", Lang::Undefined).into();
         let f2 = (&td, "b/c.txt", Lang::Undefined).into();
