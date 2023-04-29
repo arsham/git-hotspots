@@ -4,7 +4,7 @@ version = "0.0.2"
 edition = "2021"
 
 [dependencies]
-tree-sitter = "0.20.9"
+tree-sitter = ">= 0.20"
 discovery = { path = "../discovery" }
 thiserror = "1"
 include_dir = "0"
