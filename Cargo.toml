@@ -20,16 +20,15 @@ hotspots-utilities = { path = "utilities", version = "0.0.4" }
 
 [profile.dev]
 incremental = true
-split-debuginfo = 'unpacked'
 codegen-units = 1024
 lto = "off"
 debug = 0
 
 [profile.test]
 incremental = true
-split-debuginfo = 'unpacked'
 codegen-units = 1024
 lto = "off"
+debug = 0
 
 [profile.release]
 strip = true
