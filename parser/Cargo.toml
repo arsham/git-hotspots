@@ -1,11 +1,16 @@
 [package]
-name = "parser"
-version = "0.0.2"
-edition = "2021"
+name = "hotspots-parser"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+description.workspace = true
+documentation.workspace = true
+categories.workspace = true
 
 [dependencies]
 tree-sitter = ">= 0.20"
-discovery = { path = "../discovery" }
+hotspots-discovery = { workspace = true }
 thiserror = "1"
 include_dir = "0"
 rayon = "1"

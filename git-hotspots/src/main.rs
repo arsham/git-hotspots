@@ -1,18 +1,20 @@
 use std::time::Instant;
 
 use anyhow::Result;
-use discovery::Discovery;
-use discovery::Lang;
 use indicatif::ProgressBar;
 use log::{debug, info, warn, LevelFilter};
 use prettytable::format;
 use prettytable::Table;
 use rayon::prelude::*;
 
-use parser::parser::go::GoParser;
-use parser::parser::lua::LuaParser;
-use parser::parser::rust::RustParser;
-use parser::parser::{Container, Parser};
+use hotspots_discovery::Discovery;
+use hotspots_discovery::Lang;
+use hotspots_insight::Inspector;
+use hotspots_parser::parser;
+use hotspots_parser::parser::go::GoParser;
+use hotspots_parser::parser::lua::LuaParser;
+use hotspots_parser::parser::rust::RustParser;
+use hotspots_parser::parser::{Container, Parser};
 
 #[macro_use]
 extern crate prettytable;
@@ -41,7 +43,7 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    let insighter = insight::Inspector::new(&opt.root)?;
+    let insighter = Inspector::new(&opt.root)?;
 
     let mut go_parser = GoParser::new(Container::new(100))?;
     let mut rust_parser = RustParser::new(Container::new(100))?;
@@ -80,7 +82,7 @@ fn main() -> Result<()> {
                 Lang::Lua => lua_parser.add_file(file),
                 _ => {
                     if opt.log_level > 0 {
-                        debug!("Unsupported file: {path}");
+                        warn!("Unsupported file: {path}");
                     }
                     return;
                 },
@@ -105,11 +107,11 @@ fn main() -> Result<()> {
             let res = parser.find_functions(&pb);
             let res = match res {
                 Ok(r) => r,
-                Err(parser::parser::Error::NoFilesAdded) => {
+                Err(parser::Error::NoFilesAdded) => {
                     debug!("Parser {name} didn't find any files");
                     continue;
                 },
-                Err(parser::parser::Error::ParseFile(msg)) => {
+                Err(parser::Error::ParseFile(msg)) => {
                     warn!("Parser {name} encounter an error: {msg}");
                     continue;
                 },

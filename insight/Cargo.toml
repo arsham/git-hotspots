@@ -1,7 +1,12 @@
 [package]
-name = "insight"
-version = "0.0.1"
-edition = "2021"
+name = "hotspots-insight"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+description.workspace = true
+documentation.workspace = true
+categories.workspace = true
 
 [dependencies]
 thiserror = "1"
@@ -10,7 +15,7 @@ grep-matcher = "0"
 grep-regex = "0"
 
 [dev-dependencies]
-utilities = { path = "../utilities" }
+hotspots-utilities = { workspace = true }
 tempfile = "3"
 git2 = "0"
 speculoos = "0"

@@ -85,7 +85,7 @@ mod commits {
     use super::*;
 
     fn new_inspector() -> Inspector {
-        let (dir, _) = utilities::repo_init();
+        let (dir, _) = hotspots_utilities::repo_init();
         let path = dir.path().as_os_str().to_string_lossy().to_string();
         let inspector = Inspector::new(path.as_str()).unwrap();
         inspector

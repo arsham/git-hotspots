@@ -1,19 +1,17 @@
 [package]
 name = "git-hotspots"
-version = "0.0.2"
-edition = "2021"
-authors = ["Arsham Shirvani"]
-documentation = "https://docs.rs/crate/git-hotspots"
-repository = "https://github.com/arsham/git-hotspots"
-keywords = ["git", "github", "inspection"]
-categories = ["command-line-utilities", "development-tools"]
-license = "MIT"
-description = "Print function changes in git history"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+description.workspace = true
+documentation.workspace = true
+categories.workspace = true
 
 [dependencies]
-parser = { path = "../parser" }
-discovery = { path = "../discovery" }
-insight = { path = "../insight" }
+hotspots-parser = { workspace = true }
+hotspots-discovery = { workspace = true }
+hotspots-insight = { workspace = true }
 structopt = { version = "0.3", features = ["color"] }
 anyhow = "1"
 thiserror = "1"

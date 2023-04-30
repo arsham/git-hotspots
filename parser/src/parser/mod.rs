@@ -16,7 +16,7 @@ use thiserror::Error as TError;
 use tree_sitter::Parser as TSParser;
 use tree_sitter::{Language, LanguageError, Query, QueryCursor, QueryMatch};
 
-use discovery::File;
+use hotspots_discovery::File;
 
 /// Error enumerates all errors for this application.
 #[derive(TError, Debug)]
@@ -103,10 +103,10 @@ pub trait Parser {
     fn ro_container(&self) -> &Container;
 
     /// Returns true if the file is compatible with the Parser.
-    fn supported(&self, f: &discovery::File) -> bool;
+    fn supported(&self, f: &File) -> bool;
 
     /// Will return an error if the file is not compatible with the Parser.
-    fn add_file(&mut self, f: discovery::File) -> Result<(), Error> {
+    fn add_file(&mut self, f: File) -> Result<(), Error> {
         if !self.supported(&f) {
             return Err(Error::NotCompatible);
         }

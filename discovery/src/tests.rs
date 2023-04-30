@@ -4,6 +4,7 @@ use speculoos::prelude::*;
 use tempfile::TempDir;
 
 use super::*;
+use hotspots_utilities::create_files;
 
 impl From<(&TempDir, &str, Lang)> for File {
     fn from(value: (&TempDir, &str, Lang)) -> Self {
@@ -15,8 +16,10 @@ impl From<(&TempDir, &str, Lang)> for File {
     }
 }
 
+type DynError = Box<dyn error::Error>;
+
 #[test]
-fn empty_path() -> Result<(), Box<dyn error::Error>> {
+fn empty_path() -> Result<(), DynError> {
     let td = TempDir::new()?;
     let d = Discovery::default();
     assert_that!(d.discover(td.path())).is_none();
@@ -24,10 +27,10 @@ fn empty_path() -> Result<(), Box<dyn error::Error>> {
 }
 
 #[test]
-fn ignores_hidden_files() -> Result<(), Box<dyn error::Error>> {
+fn ignores_hidden_files() -> Result<(), DynError> {
     let td = TempDir::new()?;
     let files = vec!["a.txt", "b.txt", ".nope.txt"];
-    utilities::create_files(&td, files)?;
+    create_files(&td, files)?;
     let f1 = (&td, "a.txt", Lang::Undefined).into();
     let f2 = (&td, "b.txt", Lang::Undefined).into();
     let want = vec![f1, f2];
@@ -43,11 +46,11 @@ fn ignores_hidden_files() -> Result<(), Box<dyn error::Error>> {
 }
 
 #[test]
-fn discovers_recursively() -> Result<(), Box<dyn error::Error>> {
+fn discovers_recursively() -> Result<(), DynError> {
     let td = TempDir::new()?;
     let b = Path::new("b").join("c.txt");
     let files = vec!["a.txt", b.to_str().unwrap()];
-    utilities::create_files(&td, files)?;
+    create_files(&td, files)?;
     let f1 = (&td, "a.txt", Lang::Undefined).into();
     let f2 = (&td, b.to_str().unwrap(), Lang::Undefined).into();
     let want = vec![f1, f2];
@@ -60,10 +63,10 @@ fn discovers_recursively() -> Result<(), Box<dyn error::Error>> {
 }
 
 #[test]
-fn discovers_language() -> Result<(), Box<dyn error::Error>> {
+fn discovers_language() -> Result<(), DynError> {
     let td = TempDir::new()?;
     let files = vec!["file1.go", "file2.rs", "file3.lua"];
-    utilities::create_files(&td, files)?;
+    create_files(&td, files)?;
     let f1 = (&td, "file1.go", Lang::Go).into();
     let f2 = (&td, "file2.rs", Lang::Rust).into();
     let f3 = (&td, "file3.lua", Lang::Lua).into();

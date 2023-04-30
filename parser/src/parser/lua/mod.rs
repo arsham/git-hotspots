@@ -2,7 +2,7 @@ use include_dir::{include_dir, Dir};
 use tree_sitter::{Language, Query};
 
 use super::Error;
-use discovery::Lang;
+use hotspots_discovery::{File, Lang};
 
 static PROJECT_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR");
 
@@ -43,7 +43,7 @@ impl super::Parser for LuaParser {
         &self.container
     }
 
-    fn supported(&self, f: &discovery::File) -> bool {
+    fn supported(&self, f: &File) -> bool {
         f.lang == Lang::Lua
     }
 

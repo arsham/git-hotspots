@@ -4,14 +4,16 @@ use indicatif::ProgressBar as pb;
 use itertools::assert_equal;
 use speculoos::prelude::*;
 
-use super::super::Container;
-use super::*;
-use crate::parser::{Element, Parser};
-use discovery::File;
+use super::RustParser;
+use crate::parser::{Container, Element, Parser};
+use hotspots_discovery::{File, Lang};
+
 const FIXTURES: &str = "src/parser/fixtures/rust";
 
+type DynError = Box<dyn error::Error>;
+
 #[test]
-fn no_file_added() -> Result<(), Box<dyn error::Error>> {
+fn no_file_added() -> Result<(), DynError> {
     let mut p = RustParser::new(Container::new(100))?;
     let res = p.find_functions(&pb::hidden());
     assert_that!(res).is_err();
@@ -19,7 +21,7 @@ fn no_file_added() -> Result<(), Box<dyn error::Error>> {
 }
 
 #[test]
-fn no_rust_file() -> Result<(), Box<dyn error::Error>> {
+fn no_rust_file() -> Result<(), DynError> {
     let some_types = vec![Lang::Undefined, Lang::Go, Lang::Lua];
     for t in some_types {
         let mut p = RustParser::new(Container::new(100))?;
@@ -34,7 +36,7 @@ fn no_rust_file() -> Result<(), Box<dyn error::Error>> {
 }
 
 #[test]
-fn no_function_in_file() -> Result<(), Box<dyn error::Error>> {
+fn no_function_in_file() -> Result<(), DynError> {
     let mut p = RustParser::new(Container::new(100))?;
     let f = File {
         path: format!("{FIXTURES}/no_function.rs"),
@@ -48,7 +50,7 @@ fn no_function_in_file() -> Result<(), Box<dyn error::Error>> {
 }
 
 #[test]
-fn returns_one_function_found() -> Result<(), Box<dyn error::Error>> {
+fn returns_one_function_found() -> Result<(), DynError> {
     let mut p = RustParser::new(Container::new(100))?;
     let path = format!("{FIXTURES}/one_function.rs");
     let f = File {
@@ -73,7 +75,7 @@ fn returns_one_function_found() -> Result<(), Box<dyn error::Error>> {
 }
 
 #[test]
-fn can_identify_methods() -> Result<(), Box<dyn error::Error>> {
+fn can_identify_methods() -> Result<(), DynError> {
     let mut p = RustParser::new(Container::new(100))?;
     let path = format!("{FIXTURES}/method.rs");
     let f = File {
@@ -119,7 +121,7 @@ fn can_identify_methods() -> Result<(), Box<dyn error::Error>> {
 }
 
 #[test]
-fn returns_all_functions_in_files() -> Result<(), Box<dyn error::Error>> {
+fn returns_all_functions_in_files() -> Result<(), DynError> {
     let mut p = RustParser::new(Container::new(100))?;
     let path = format!("{FIXTURES}/multi_functions.rs");
     let f = File {
@@ -159,7 +161,7 @@ fn returns_all_functions_in_files() -> Result<(), Box<dyn error::Error>> {
 }
 
 #[test]
-fn handles_multiple_files() -> Result<(), Box<dyn error::Error>> {
+fn handles_multiple_files() -> Result<(), DynError> {
     let mut p = RustParser::new(Container::new(100))?;
     let path1 = format!("{FIXTURES}/multi_functions.rs");
     let path2 = format!("{FIXTURES}/one_function.rs");
