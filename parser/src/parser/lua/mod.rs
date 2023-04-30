@@ -1,14 +1,11 @@
 use include_dir::{include_dir, Dir};
 use tree_sitter::{Language, Query};
+use tree_sitter_lua::language;
 
 use super::Error;
 use hotspots_discovery::{File, Lang};
 
 static PROJECT_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR");
-
-extern "C" {
-    fn tree_sitter_lua() -> Language;
-}
 
 /// This parser can parse any Lua files.
 pub struct LuaParser {
@@ -24,7 +21,7 @@ impl LuaParser {
         let query = queries
             .contents_utf8()
             .ok_or(Error::ParseFile("Can't parse queries".to_owned()))?;
-        let language = unsafe { tree_sitter_lua() };
+        let language = language();
         let query = Query::new(language, query)?;
 
         Ok(LuaParser {
@@ -48,7 +45,7 @@ impl super::Parser for LuaParser {
     }
 
     fn language(&self) -> Language {
-        unsafe { tree_sitter_lua() }
+        language()
     }
 
     fn query(&self) -> &Query {

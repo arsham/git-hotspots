@@ -10,6 +10,9 @@ categories.workspace = true
 
 [dependencies]
 tree-sitter = ">= 0.20"
+tree-sitter-rust = ">= 0.20"
+tree-sitter-go = ">= 0.19"
+tree-sitter-lua = ">= 0.0.14"
 hotspots-discovery = { workspace = true }
 thiserror = "1"
 include_dir = "0"

@@ -1,14 +1,11 @@
 use include_dir::{include_dir, Dir};
 use tree_sitter::{Language, Query};
+use tree_sitter_rust::language;
 
 use super::Error;
 use hotspots_discovery::{File, Lang};
 
 static PROJECT_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR");
-
-extern "C" {
-    fn tree_sitter_rust() -> Language;
-}
 
 /// This parser can parse any Rust files.
 pub struct RustParser {
@@ -24,7 +21,7 @@ impl RustParser {
         let query = queries
             .contents_utf8()
             .ok_or(Error::ParseFile("Can't parse queries".to_owned()))?;
-        let language = unsafe { tree_sitter_rust() };
+        let language = language();
         let query = Query::new(language, query)?;
 
         Ok(RustParser {
@@ -48,7 +45,7 @@ impl super::Parser for RustParser {
     }
 
     fn language(&self) -> Language {
-        unsafe { tree_sitter_rust() }
+        language()
     }
 
     fn query(&self) -> &Query {
