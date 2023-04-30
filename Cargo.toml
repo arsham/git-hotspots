@@ -17,3 +17,19 @@ hotspots-parser = { path = "parser", version = "0.0.4" }
 hotspots-discovery = { path = "discovery", version = "0.0.4" }
 hotspots-insight = { path = "insight", version = "0.0.4" }
 hotspots-utilities = { path = "utilities", version = "0.0.4" }
+
+[profile.dev]
+incremental = true
+split-debuginfo = 'unpacked'
+codegen-units = 1024
+lto = "off"
+debug = 0
+
+[profile.test]
+incremental = true
+split-debuginfo = 'unpacked'
+codegen-units = 1024
+lto = "off"
+
+[profile.release]
+strip = true

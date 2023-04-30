@@ -10,6 +10,12 @@ on:
       - feature/*
       - bugfix/*
       - refactor/*
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_RETRY: 10
+  CI: 1
+  RUST_BACKTRACE: short
+  RUSTUP_MAX_RETRIES: 10
 
 jobs:
   label:
@@ -32,6 +38,11 @@ jobs:
           - windows-latest
           - macOS-latest
         rust:
+          - 1.65.0
+          - 1.66.0
+          - 1.67.0
+          - 1.68.0
+          - 1.69.0
           - stable
     runs-on: ${{ matrix.os }}
     steps:
@@ -85,6 +96,11 @@ jobs:
           - windows-latest
           - macOS-latest
         rust:
+          - 1.65.0
+          - 1.66.0
+          - 1.67.0
+          - 1.68.0
+          - 1.69.0
           - stable
     runs-on: ${{ matrix.os }}
     needs: [compile]
