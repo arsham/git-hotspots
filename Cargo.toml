@@ -2,7 +2,7 @@
 members = ["parser", "discovery", "utilities", "insight", "git-hotspots"]
 
 [workspace.package]
-version = "0.0.7"
+version = "0.0.8"
 edition = "2021"
 rust-version = "1.69"
 authors = ["Arsham <arsham@duck.com>"]
@@ -15,10 +15,10 @@ categories = ["command-line-utilities", "development-tools"]
 description = " A tool to find hotspots in your git repository."
 
 [workspace.dependencies]
-hotspots-parser = { path = "parser", version = "0.0.7" }
-hotspots-discovery = { path = "discovery", version = "0.0.7" }
-hotspots-insight = { path = "insight", version = "0.0.7" }
-hotspots-utilities = { path = "utilities", version = "0.0.7" }
+hotspots-parser = { path = "parser", version = "0.0.8" }
+hotspots-discovery = { path = "discovery", version = "0.0.8" }
+hotspots-insight = { path = "insight", version = "0.0.8" }
+hotspots-utilities = { path = "utilities", version = "0.0.8" }
 
 [profile.dev]
 incremental = true
