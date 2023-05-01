@@ -4,7 +4,7 @@ members = ["parser", "discovery", "utilities", "insight", "git-hotspots"]
 [workspace.package]
 version = "0.0.8"
 edition = "2021"
-rust-version = "1.69"
+rust-version = "1.65"
 authors = ["Arsham <arsham@duck.com>"]
 license = "MIT"
 readme = "README.md"
