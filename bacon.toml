@@ -3,11 +3,33 @@ default_job = "clippy"
 [jobs]
 
 [jobs.clippy]
-command = ["cargo", "clippy", "--color", "always"]
+command = [
+    "cargo",
+    "clippy",
+    "--color",
+    "always",
+    "--",
+    "-W",
+    "missing_docs",
+    "-W",
+    "missing_crate_level_docs",
+]
 need_stdout = false
+watch = ["tests", "benches", "examples"]
 
 [jobs.clippy-all]
-command = ["cargo", "clippy", "--all-targets", "--color", "always"]
+command = [
+    "cargo",
+    "clippy",
+    "--all-targets",
+    "--color",
+    "always",
+    "--",
+    "-W",
+    "missing_docs",
+    "-W",
+    "missing_crate_level_docs",
+]
 need_stdout = false
 watch = ["tests", "benches", "examples"]
 

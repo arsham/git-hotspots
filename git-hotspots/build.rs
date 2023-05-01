@@ -1,3 +1,4 @@
+//! This crate contains the build script for git-hotspots.
 use std::process::Command;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

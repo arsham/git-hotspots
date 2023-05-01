@@ -1,18 +1,5 @@
-use std::process::Command;
-
+//! This crate contains the build script for parsers.
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let current_sha = Command::new("git")
-        .args(["rev-parse", "--short", "HEAD"])
-        .output()?;
-    let current_sha = String::from_utf8(current_sha.stdout)?;
-
-    let build_tag = Command::new("git")
-        .args(["describe", "--abbrev", "--tags"])
-        .output()?;
-    let build_tag = String::from_utf8(build_tag.stdout)?;
-
-    println!("cargo:rustc-env=CURRENT_SHA={current_sha}");
-    println!("cargo:rustc-env=APP_VERSION={build_tag}");
     if std::process::Command::new("sccache")
         .arg("--version")
         .status()

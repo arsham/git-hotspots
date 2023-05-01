@@ -1,3 +1,5 @@
+//! This crate is used to get the history of functions and methods in a git repository.
+
 use std::process::Command;
 use std::{io, str};
 
@@ -16,15 +18,19 @@ pub struct Inspector {
 /// Error enumerates all errors for this application.
 #[derive(TError, Debug)]
 pub enum Error {
+    /// Any IO errors.
     #[error(transparent)]
     IO(#[from] io::Error),
 
+    /// Error from the grep crate.
     #[error(transparent)]
     Grep(#[from] grep_regex::Error),
 
+    /// Error related to the UTF8 encoding.
     #[error(transparent)]
     UTF8(#[from] str::Utf8Error),
 
+    /// When the path is not a git repository.
     #[error("Not a git directory")]
     NotGitRepo,
 }

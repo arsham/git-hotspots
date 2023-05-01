@@ -1,3 +1,44 @@
+/*!
+Git subcommand for finding hotspots in a git repository.
+
+This tool helps with identifying functions that have had a lot of changes in the git history.
+It does this by parsing the files that are supported by the program and then using the git
+history to count how many times each function has been changed.
+
+# Why is this helpful?
+
+As you work on your project, the more you change a function, the more likely it is that you
+will work on it again. If this particular function is changed too often, it might be a sign
+that the function requires more attention and can contribute to technical debt.
+
+With this tool you can identify functions that are too big or complex and are being refactored
+a lot, or are refactored a lot in relation to another part of the program.
+
+Additionally when you want to make a decision on how to refactor your code, you can use this to
+find out which functions are the most changed and start with those. This can help you to make a
+more informed decision on how to refactor your code.
+
+# Usage
+
+Put the binary in your path. Note that git uses any binary that starts with `git-` as a git sub
+command.
+
+```bash
+git hotspots
+```
+This will print out 50 found functions in the order of how often they have been changed.
+
+## Options
+
+* `--total`, `-t`: Total number of results. Default: 50
+* `--skip`, `-s`: Skip first n results. Default: 0
+* `--log-level`, `-V`: Log level. Try -VV for more logs!
+* `--prefix`, `-p`: Show results beginning with the given string.
+* `--invert-match`, `-v`: Exclude partially matched path.
+* `--exclude-func`, `-F`: Exclude function by partial match.
+* `--root`, `-r`: Root of the project to inspect. Default: .
+*/
+#![warn(missing_docs)]
 use std::time::Instant;
 
 use anyhow::Result;
@@ -10,11 +51,11 @@ use rayon::prelude::*;
 use hotspots_discovery::Discovery;
 use hotspots_discovery::Lang;
 use hotspots_insight::Inspector;
-use hotspots_parser::parser;
-use hotspots_parser::parser::go::GoParser;
-use hotspots_parser::parser::lua::LuaParser;
-use hotspots_parser::parser::rust::RustParser;
-use hotspots_parser::parser::{Container, Parser};
+use hotspots_parser as parser;
+use hotspots_parser::go::GoParser;
+use hotspots_parser::lua::LuaParser;
+use hotspots_parser::rust::RustParser;
+use hotspots_parser::{Container, Parser};
 
 #[macro_use]
 extern crate prettytable;

@@ -4,29 +4,29 @@ use indicatif::ProgressBar as pb;
 use itertools::assert_equal;
 use speculoos::prelude::*;
 
-use super::GoParser;
-use crate::parser::{Container, Element, Parser};
+use super::RustParser;
+use crate::{Container, Element, Parser};
 use hotspots_discovery::{File, Lang};
 
-const FIXTURES: &str = "src/parser/fixtures/go";
+const FIXTURES: &str = "src/fixtures/rust";
 
 type DynError = Box<dyn error::Error>;
 
 #[test]
 fn no_file_added() -> Result<(), DynError> {
-    let mut p = GoParser::new(Container::new(100))?;
+    let mut p = RustParser::new(Container::new(100))?;
     let res = p.find_functions(&pb::hidden());
     assert_that!(res).is_err();
     Ok(())
 }
 
 #[test]
-fn no_go_file() -> Result<(), DynError> {
-    let some_types = vec![Lang::Undefined, Lang::Rust, Lang::Lua];
+fn no_rust_file() -> Result<(), DynError> {
+    let some_types = vec![Lang::Undefined, Lang::Go, Lang::Lua];
     for t in some_types {
-        let mut p = GoParser::new(Container::new(100))?;
+        let mut p = RustParser::new(Container::new(100))?;
         let f = File {
-            path: format!("{FIXTURES}/no_function.1.go"),
+            path: format!("{FIXTURES}/no_function.rs"),
             lang: t,
         };
         let res = p.add_file(f);
@@ -37,10 +37,10 @@ fn no_go_file() -> Result<(), DynError> {
 
 #[test]
 fn no_function_in_file() -> Result<(), DynError> {
-    let mut p = GoParser::new(Container::new(100))?;
+    let mut p = RustParser::new(Container::new(100))?;
     let f = File {
-        path: format!("{FIXTURES}/no_function.1.go"),
-        lang: Lang::Go,
+        path: format!("{FIXTURES}/no_function.rs"),
+        lang: Lang::Rust,
     };
     p.add_file(f)?;
     let res = p.find_functions(&pb::hidden());
@@ -51,11 +51,11 @@ fn no_function_in_file() -> Result<(), DynError> {
 
 #[test]
 fn returns_one_function_found() -> Result<(), DynError> {
-    let mut p = GoParser::new(Container::new(100))?;
-    let path = format!("{FIXTURES}/one_function.1.go");
+    let mut p = RustParser::new(Container::new(100))?;
+    let path = format!("{FIXTURES}/one_function.rs");
     let f = File {
         path: path.clone(),
-        lang: Lang::Go,
+        lang: Lang::Rust,
     };
     p.add_file(f)?;
     let res = p.find_functions(&pb::hidden());
@@ -65,10 +65,10 @@ fn returns_one_function_found() -> Result<(), DynError> {
     assert_that!(res).has_length(1);
     let element = res.get(0).unwrap();
     let want = Element {
-        name: "FuncOne".to_owned(),
-        line: 3,
+        name: "func_one".to_owned(),
+        line: 1,
         file: path,
-        index: 1,
+        index: 0,
     };
     assert_that!(element).is_equal_to(&want);
     Ok(())
@@ -76,11 +76,11 @@ fn returns_one_function_found() -> Result<(), DynError> {
 
 #[test]
 fn can_identify_methods() -> Result<(), DynError> {
-    let mut p = GoParser::new(Container::new(100))?;
-    let path = format!("{FIXTURES}/method.1.go");
+    let mut p = RustParser::new(Container::new(100))?;
+    let path = format!("{FIXTURES}/method.rs");
     let f = File {
         path: path.clone(),
-        lang: Lang::Go,
+        lang: Lang::Rust,
     };
     p.add_file(f)?;
     let res = p.find_functions(&pb::hidden());
@@ -89,28 +89,28 @@ fn can_identify_methods() -> Result<(), DynError> {
     let mut res = res.unwrap();
     let mut want = vec![
         Element {
-            name: "(x) FuncOne".to_owned(),
-            line: 5,
+            name: "func_one".to_owned(),
+            line: 4,
             file: path.clone(),
-            index: 1,
+            index: 0,
         },
         Element {
-            name: "(*x) FuncTwo".to_owned(),
-            line: 6,
+            name: "func_two".to_owned(),
+            line: 5,
             file: path.clone(),
-            index: 1,
+            index: 0,
         },
         Element {
             name: "nested".to_owned(),
-            line: 7,
+            line: 6,
             file: path.clone(),
-            index: 1,
+            index: 0,
         },
         Element {
-            name: "(*x) FuncThree".to_owned(),
-            line: 10,
+            name: "func_three".to_owned(),
+            line: 8,
             file: path,
-            index: 1,
+            index: 0,
         },
     ];
     want.sort_by(|a, b| a.line.cmp(&b.line));
@@ -122,11 +122,11 @@ fn can_identify_methods() -> Result<(), DynError> {
 
 #[test]
 fn returns_all_functions_in_files() -> Result<(), DynError> {
-    let mut p = GoParser::new(Container::new(100))?;
-    let path = format!("{FIXTURES}/multi_functions.1.go");
+    let mut p = RustParser::new(Container::new(100))?;
+    let path = format!("{FIXTURES}/multi_functions.rs");
     let f = File {
         path: path.clone(),
-        lang: Lang::Go,
+        lang: Lang::Rust,
     };
     p.add_file(f)?;
     let res = p.find_functions(&pb::hidden());
@@ -135,22 +135,22 @@ fn returns_all_functions_in_files() -> Result<(), DynError> {
     let mut res = res.unwrap();
     let mut want = vec![
         Element {
-            name: "FuncTwo".to_owned(),
-            line: 3,
+            name: "func_two".to_owned(),
+            line: 1,
             file: path.clone(),
-            index: 1,
+            index: 0,
         },
         Element {
-            name: "FuncThree".to_owned(),
-            line: 5,
+            name: "func_three".to_owned(),
+            line: 3,
             file: path.clone(),
-            index: 1,
+            index: 0,
         },
         Element {
             name: "nested".to_owned(),
-            line: 6,
+            line: 4,
             file: path,
-            index: 1,
+            index: 0,
         },
     ];
     want.sort_by(|a, b| a.name.cmp(&b.name));
@@ -162,16 +162,16 @@ fn returns_all_functions_in_files() -> Result<(), DynError> {
 
 #[test]
 fn handles_multiple_files() -> Result<(), DynError> {
-    let mut p = GoParser::new(Container::new(100))?;
-    let path1 = format!("{FIXTURES}/multi_functions.1.go");
-    let path2 = format!("{FIXTURES}/one_function.1.go");
+    let mut p = RustParser::new(Container::new(100))?;
+    let path1 = format!("{FIXTURES}/multi_functions.rs");
+    let path2 = format!("{FIXTURES}/one_function.rs");
     let f1 = File {
         path: path1.clone(),
-        lang: Lang::Go,
+        lang: Lang::Rust,
     };
     let f2 = File {
         path: path2.clone(),
-        lang: Lang::Go,
+        lang: Lang::Rust,
     };
     p.add_file(f1)?;
     p.add_file(f2)?;
@@ -181,28 +181,28 @@ fn handles_multiple_files() -> Result<(), DynError> {
     let mut res = res.unwrap();
     let mut want = vec![
         Element {
-            name: "FuncOne".to_owned(),
-            line: 3,
+            name: "func_one".to_owned(),
+            line: 1,
             file: path2,
-            index: 1,
+            index: 0,
         },
         Element {
-            name: "FuncTwo".to_owned(),
+            name: "func_two".to_owned(),
+            line: 1,
+            file: path1.clone(),
+            index: 0,
+        },
+        Element {
+            name: "func_three".to_owned(),
             line: 3,
             file: path1.clone(),
-            index: 1,
-        },
-        Element {
-            name: "FuncThree".to_owned(),
-            line: 5,
-            file: path1.clone(),
-            index: 1,
+            index: 0,
         },
         Element {
             name: "nested".to_owned(),
-            line: 6,
+            line: 4,
             file: path1,
-            index: 1,
+            index: 0,
         },
     ];
     want.sort_by(|a, b| a.name.cmp(&b.name));
