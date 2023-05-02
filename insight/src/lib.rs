@@ -1,4 +1,5 @@
-//! This crate is used to get the history of functions and methods in a git repository.
+//! This crate is used to get the history of functions and methods in a git
+//! repository.
 
 use std::process::Command;
 use std::{io, str};
@@ -9,7 +10,8 @@ use grep_searcher::sinks::UTF8;
 use grep_searcher::Searcher;
 use thiserror::Error as TError;
 
-/// Inspector interrogates the git repository for history of functions and methods.
+/// Inspector interrogates the git repository for history of functions and
+/// methods.
 pub struct Inspector {
     matcher: RegexMatcher,
     path: String,
@@ -52,8 +54,8 @@ impl Inspector {
         }
     }
 
-    /// Returns the commits that the function by func_name appears for the filename from beginning
-    /// of the repository.
+    /// Returns the commits that the function by func_name appears for the
+    /// filename from beginning of the repository.
     pub fn function_history(&self, filename: &str, func_name: &str) -> Result<Vec<String>, Error> {
         let input = format!(":{func_name}:{filename}");
         let output = Command::new("git")

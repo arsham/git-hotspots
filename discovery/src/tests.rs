@@ -1,10 +1,10 @@
 use std::error;
 
+use hotspots_utilities::create_files;
 use speculoos::prelude::*;
 use tempfile::TempDir;
 
 use super::*;
-use hotspots_utilities::create_files;
 
 impl From<(&TempDir, &str, Lang)> for File {
     fn from(value: (&TempDir, &str, Lang)) -> Self {

@@ -1,4 +1,5 @@
-//! This is a utility crate for the git-hotspots project. This is intended to be used in tests.
+//! This is a utility crate for the git-hotspots project. This is intended to be
+//! used in tests.
 use std::fs::File;
 use std::io;
 use std::path::Path;
@@ -18,7 +19,8 @@ pub fn create_files(path: &TempDir, files: Vec<&str>) -> io::Result<()> {
     Ok(())
 }
 
-/// Creates and sets up a repository. This helper are borrowed from the git2 code.
+/// Creates and sets up a repository. This helper are borrowed from the git2
+/// code.
 pub fn repo_init() -> (TempDir, Repository) {
     let td = TempDir::new().unwrap();
     let mut opts = RepositoryInitOptions::new();

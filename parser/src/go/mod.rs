@@ -1,9 +1,9 @@
 //! This module implements the parser for Go language.
+use hotspots_discovery::{File, Lang};
 use tree_sitter::{Language, Query};
 use tree_sitter_go::language;
 
 use super::{Element, Error};
-use hotspots_discovery::{File, Lang};
 
 /// This parser can parse any Go files.
 pub struct GoParser {
@@ -12,8 +12,8 @@ pub struct GoParser {
 }
 
 impl GoParser {
-    /// Creates a new Go parser. The container should have enough capacity or capable of growing to
-    /// hold all the elements in the file.
+    /// Creates a new Go parser. The container should have enough capacity or
+    /// capable of growing to hold all the elements in the file.
     pub fn new(c: super::Container) -> Result<Self, Error> {
         let queries = crate::PROJECT_DIR
             .get_file("src/queries/go.scm")
@@ -52,12 +52,12 @@ impl super::Parser for GoParser {
         &self.query
     }
 
-    /// Returns a new vector with the representation names for functions. In case of go, we want to
-    /// remove the receiver from the method name, and inform the caller that we removed one element
-    /// from the vector.
+    /// Returns a new vector with the representation names for functions. In
+    /// case of go, we want to remove the receiver from the method name, and
+    /// inform the caller that we removed one element from the vector.
     fn func_repr(&self, v: Vec<Element>) -> (Vec<Element>, usize) {
-        // When the index is zero, it is the method receiver. We should keep the value until the
-        // next element to concatinate.
+        // When the index is zero, it is the method receiver. We should keep the value
+        // until the next element to concatinate.
         let mut prev: Option<String> = None;
         let mut redacted = 0usize;
         let res: Vec<Element> = v

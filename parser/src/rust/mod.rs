@@ -1,9 +1,9 @@
 //! This module implements the parser for Rust language.
+use hotspots_discovery::{File, Lang};
 use tree_sitter::{Language, Query};
 use tree_sitter_rust::language;
 
 use super::Error;
-use hotspots_discovery::{File, Lang};
 
 /// This parser can parse any Rust files.
 pub struct RustParser {
@@ -12,8 +12,8 @@ pub struct RustParser {
 }
 
 impl RustParser {
-    /// Creates a new Rust parser. The container should have enough capacity or capable of growing
-    /// to hold all the elements in the file.
+    /// Creates a new Rust parser. The container should have enough capacity or
+    /// capable of growing to hold all the elements in the file.
     pub fn new(c: super::Container) -> Result<Self, Error> {
         let queries = crate::PROJECT_DIR
             .get_file("src/queries/rust.scm")

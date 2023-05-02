@@ -34,3 +34,5 @@ debug = 0
 
 [profile.release]
 strip = true
+codegen-units = 1
+lto = true

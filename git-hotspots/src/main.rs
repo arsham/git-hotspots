@@ -42,20 +42,17 @@ This will print out 50 found functions in the order of how often they have been 
 use std::time::Instant;
 
 use anyhow::Result;
-use indicatif::ProgressBar;
-use log::{debug, info, warn, LevelFilter};
-use prettytable::format;
-use prettytable::Table;
-use rayon::prelude::*;
-
-use hotspots_discovery::Discovery;
-use hotspots_discovery::Lang;
+use hotspots_discovery::{Discovery, Lang};
 use hotspots_insight::Inspector;
 use hotspots_parser as parser;
 use hotspots_parser::go::GoParser;
 use hotspots_parser::lua::LuaParser;
 use hotspots_parser::rust::RustParser;
 use hotspots_parser::{Container, Parser};
+use indicatif::ProgressBar;
+use log::{debug, info, warn, LevelFilter};
+use prettytable::{format, Table};
+use rayon::prelude::*;
 
 #[macro_use]
 extern crate prettytable;

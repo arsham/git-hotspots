@@ -1,9 +1,9 @@
 //! This module implements the parser for Lua language.
+use hotspots_discovery::{File, Lang};
 use tree_sitter::{Language, Query};
 use tree_sitter_lua::language;
 
 use super::Error;
-use hotspots_discovery::{File, Lang};
 
 /// This parser can parse any Lua files.
 pub struct LuaParser {
@@ -12,8 +12,8 @@ pub struct LuaParser {
 }
 
 impl LuaParser {
-    /// Creates a new Lua parser. The container should have enough capacity or capable of growing
-    /// to hold all the elements in the file.
+    /// Creates a new Lua parser. The container should have enough capacity or
+    /// capable of growing to hold all the elements in the file.
     pub fn new(c: super::Container) -> Result<Self, Error> {
         let queries = crate::PROJECT_DIR
             .get_file("src/queries/lua.scm")

@@ -1,12 +1,12 @@
 use std::error;
 
+use hotspots_discovery::{File, Lang};
 use indicatif::ProgressBar as pb;
 use itertools::assert_equal;
 use speculoos::prelude::*;
 
 use super::LuaParser;
 use crate::{Container, Element, Parser};
-use hotspots_discovery::{File, Lang};
 
 const FIXTURES: &str = "src/fixtures/lua";
 

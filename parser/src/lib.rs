@@ -1,5 +1,5 @@
-//! This crate parses supported languages with their tree-sitter grammers, and collects all the
-//! methods and functions in the files.
+//! This crate parses supported languages with their tree-sitter grammers, and
+//! collects all the methods and functions in the files.
 //!
 //! All tree-sitter queries are stored in the `queries` directory.
 //! All fixtures for testing are stored in the `fixtures` directory.
@@ -8,22 +8,18 @@ pub mod go;
 pub mod lua;
 pub mod rust;
 
-use std::fs;
-use std::io;
 use std::io::{BufReader, Read};
 use std::ops::Not;
 use std::str::Utf8Error;
 use std::time::Instant;
-
-use include_dir::{include_dir, Dir};
-use indicatif::ProgressBar;
-use log::debug;
-use log::warn;
-use thiserror::Error as TError;
-use tree_sitter::Parser as TSParser;
-use tree_sitter::{Language, LanguageError, Query, QueryCursor, QueryMatch};
+use std::{fs, io};
 
 use hotspots_discovery::File;
+use include_dir::{include_dir, Dir};
+use indicatif::ProgressBar;
+use log::{debug, warn};
+use thiserror::Error as TError;
+use tree_sitter::{Language, LanguageError, Parser as TSParser, Query, QueryCursor, QueryMatch};
 
 static PROJECT_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR");
 
@@ -113,8 +109,8 @@ fn collect_matches<'a>(
         .collect()
 }
 
-/// Parser provides the functionalities necessary for finding tree-sitter Nodes from a list of
-/// given files.
+/// Parser provides the functionalities necessary for finding tree-sitter Nodes
+/// from a list of given files.
 pub trait Parser {
     /// Returns a mutable reference to the container.
     fn container(&mut self) -> &mut Container;
@@ -140,8 +136,8 @@ pub trait Parser {
     /// Returns a tree-sitter Query object for the Parser's language.
     fn query(&self) -> &Query;
 
-    /// Returns a mutable reference to the given files. It returns and error if the file can't be
-    /// read.
+    /// Returns a mutable reference to the given files. It returns and error if
+    /// the file can't be read.
     fn files(&self) -> Result<&[File], Error> {
         let files = self.ro_container().files.as_slice();
         if files.is_empty() {
@@ -166,8 +162,8 @@ pub trait Parser {
         (v, 0)
     }
 
-    /// Returns all the functions in all files. It returns and error if the file can't be read, or
-    /// the language parser can't parse the contents.
+    /// Returns all the functions in all files. It returns and error if the file
+    /// can't be read, or the language parser can't parse the contents.
     fn find_functions(&mut self, pb: &ProgressBar) -> Result<Vec<Element>, Error> {
         let mut parser = TSParser::new();
         let language = self.language();
