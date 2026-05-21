@@ -1,0 +1,84 @@
+schema: flow-brief.v1
+brief:
+  id: B001
+  slug: local-first-hotspot-intelligence-cli
+  title: Local-first hotspot intelligence CLI
+  theme_id: null
+summary: "Define the OSS capability for git-hotspots as a deterministic,
+  local-first hotspot intelligence CLI for developers and coding agents: before
+  refactoring, ask Git where change pressure and maintenance pain concentrate."
+intent:
+  desired_capability:
+    - A command-line tool that analyses local Git history and produces
+      reproducible hotspot evidence for files first, with symbol-level insight
+      added later through provider adapters.
+    - Reports should help humans and coding agents focus review, refactoring,
+      testing, and onboarding effort without treating metrics as runtime truth
+      or quality judgement.
+    - Provider architecture should allow future evidence sources such as
+      tree-sitter, LSP, ctags, dependency graphs, blame/history, and test or
+      coverage data without making any single provider the core product.
+  why:
+    - "High change frequency is a useful attention signal: code that changes
+      often may be fragile, strategically important, under-tested, or worth
+      improving."
+    - The reboot should avoid the old parser-heavy trap and prove usefulness
+      with deterministic Git-history evidence before deep language support.
+    - Local-first reports preserve trust and make the project suitable for
+      private repositories, OSS maintainers, and agent-assisted workflows.
+constraints:
+  - Public repo state must stay purely OSS/publicity oriented; commercial
+    strategy belongs outside repo artefacts.
+  - The CLI should be local-first, deterministic, and no-network/no-telemetry by
+    default.
+  - Reports must frame hotspots as investigation prompts and evidence, not as
+    accusations or definitive diagnoses.
+  - Author identity and ownership metrics are sensitive and must be
+    de-emphasised, anonymised, or opt-in when they appear later.
+  - Known OSS repo case studies should be framed as exploration, not judgement
+    of maintainers or projects.
+  - Large-repo performance, bounded memory use, and future cache invalidation
+    are capability constraints, not polish.
+scope:
+  in_scope:
+    - OSS/publicity-oriented CLI capability and public project framing.
+    - "File-level hotspot analysis as the first useful layer: churn, change
+      frequency, recency, co-change, size, confidence, and explainable
+      evidence."
+    - Agent-ready export formats such as JSON and Markdown that users may pipe
+      into their own tools or agents.
+    - First-class provider concept for later symbol and dependency evidence,
+      with tree-sitter as one provider rather than the foundation.
+    - "Campaign language such as: Your git history knows where your technical
+      debt lives; Stop refactoring by vibes; Before asking an AI to refactor,
+      ask Git where to look; The riskiest code is not always the ugliest code,
+      it is the code everyone keeps changing."
+  out_of_scope:
+    - Hosted dashboards, SaaS, and commercial or monetisation plans in
+      repository artefacts.
+    - Claims that the tool predicts bugs, measures code quality, ranks
+      developers, or replaces established code-health platforms.
+    - Mandatory LLM use at runtime; agents may consume exports, but the product
+      truth remains deterministic.
+    - Making tree-sitter, LSP, or any language provider part of the initial
+      critical path.
+    - Feature-level execution plans, PRDs, packet plans, todos, or runs during
+      this brief-capture step.
+durable_decisions:
+  - "Adopt the public thesis: deterministic, local-first hotspot intelligence
+    CLI for developers and coding agents."
+  - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+  - Start conceptually with file-level Git-history evidence; defer symbol-level
+    precision until provider seams are validated.
+  - Treat tree-sitter as a later provider, alongside possible LSP, ctags,
+    dependency, blame/history, and test/coverage providers.
+  - Keep the public repository free of monetisation plans and SaaS strategy; use
+    it as OSS/publicity framing only.
+  - Use agent-ready reports as an export surface, not as model-driven product
+    truth.
+links:
+  roadmap_item_id: null
+  feature_ids: []
+timestamps:
+  created_at: 2026-05-21T22:29:16.257Z
+  updated_at: 2026-05-21T22:29:45.164Z

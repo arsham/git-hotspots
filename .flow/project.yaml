@@ -1,0 +1,39 @@
+schema: flow-project.v1
+schema_version: 0.1.0
+project:
+  key: git-hotspots
+  name: git-hotspots
+state:
+  status: active
+  active_feature_id: null
+  active_run_id: null
+  last_completed_feature_id: "0001"
+defaults:
+  autonomy: ask
+  lane: standard
+  resume: propose_then_confirm
+paths:
+  features: .flow/features
+  runs: .flow/runs
+  roadmap: .flow/roadmap.yaml
+  briefs: .flow/briefs
+focus:
+  active_theme_id: null
+  next_theme_id: null
+  active_roadmap_item_id: null
+  next_roadmap_item_id: null
+execution_queue:
+  mode: serial
+  feature_ids: []
+  stop_on_blocked: true
+features:
+  next_id: 2
+  registry:
+    - id: "0001"
+      slug: project-goals-and-planning-briefs
+      path: .flow/features/0001_project-goals-and-planning-briefs
+      created_at: 2026-05-21T22:34:38.466Z
+intake:
+  mode: roadmap
+  summary: null
+  requested_at: null

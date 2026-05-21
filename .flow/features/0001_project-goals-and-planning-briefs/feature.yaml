@@ -1,0 +1,834 @@
+schema: flow-feature.v1
+feature:
+  id: "0001"
+  slug: project-goals-and-planning-briefs
+  title: Project goals and planning briefs
+  lane: standard
+  status: done
+  autonomy_default: ask
+intent:
+  problem: The project has a strong capability brief, but future sessions still
+    need implementation-neutral project-goal artefacts that preserve the public
+    thesis, non-goals, safety constraints, and next planning path without
+    relying on chat history.
+  outcome: "Future planners can recover the git-hotspots direction from durable
+    artefacts alone: B001 remains the capability source, Feature 0001 records
+    execution-ready documentation scope, project memory captures cross-feature
+    constraints, and public docs explain the OSS goals without monetisation or
+    overclaiming."
+  acceptance:
+    - Feature 0001 is explicitly documentation and durable-context work only; it
+      does not create CLI code, package manifests, scoring implementations,
+      provider APIs, SaaS plans, pricing, telemetry, hosted dashboards, or
+      developer-ranking features.
+    - "Durable artefacts preserve the tagline: Before you refactor, ask Git
+      where the pain is."
+    - "Durable artefacts state the public thesis: a deterministic, local-first
+      hotspot intelligence CLI for developers and coding agents."
+    - "Durable artefacts state file-level Git-history evidence comes first:
+      churn, change frequency, recency, co-change, size, confidence, and
+      explainable evidence."
+    - Durable artefacts state providers are later optional enrichers, including
+      possible tree-sitter, LSP, ctags, dependency, blame/history, and test or
+      coverage providers.
+    - Durable artefacts state agent-ready exports consume deterministic evidence
+      and do not make LLMs runtime truth.
+    - Public-facing artefacts frame hotspots as investigation prompts, not
+      accusations, quality scores, bug predictions, or developer-performance
+      metrics.
+    - Public-facing artefacts keep repository positioning OSS/publicity-oriented
+      and contain no monetisation, pricing, hosted-SaaS, or sales strategy.
+    - "Operational constraints are captured compactly: no network or telemetry
+      by default, cache as optional optimisation not truth, author metrics
+      absent/anonymised/opt-in, shallow or partial history marked incomplete,
+      provider failures degrade gracefully."
+    - A future implementation planner can identify the next feature boundary for
+      a file-level Zig CLI spike without reading the original chat.
+planning:
+  state: ready
+  summary: Documentation-only shaping feature that turns the git-hotspots reboot
+    discussion into durable, OSS-safe project goals, planning context, and
+    handoff artefacts for future implementation features.
+  brief_alignment:
+    status: aligned
+    role: primary
+    summary: "Feature 0001 is the primary planning/docs slice for B001: it turns the
+      local-first hotspot intelligence capability into durable project goals,
+      public OSS framing, project memory, and future handoff artefacts without
+      implementing runtime code."
+    checked_at: 2026-05-21T22:41:59.256Z
+  brief_sync:
+    status: updated
+    reason: Feature 0001 links B001 and derives its documentation-only project-goal
+      scope from the capability brief.
+    checked_at: 2026-05-21T22:42:19.832Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-21T22:42:45.589Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: done
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-21T22:42:45.589Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-21T22:42:45.589Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-21T22:42:45.589Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: null
+  depends_on_feature_ids: []
+  blocked_by: []
+design:
+  rough_shape:
+    - Use B001 as the source capability brief and avoid duplicating all of it;
+      link to it from Feature 0001 and public docs.
+    - Create or update concise public project-goal documentation that states
+      thesis, tagline, users, value, non-goals, safe claims, and first-layer
+      evidence.
+    - Create or update a small future-planning/handoff artefact that records
+      next candidate implementation features, validation gates, and known
+      exclusions.
+    - Update .flow/project-memory.md with compact cross-feature constraints and
+      planning heuristics that future Flow sessions must preserve.
+    - Keep the feature implementation as one planning/docs pass with no runtime
+      code or toolchain lock-in.
+  packets:
+    - id: P1
+      depends_on: []
+      status: done
+      title: Feature authority and brief alignment
+      goal: Materialise Feature 0001 as the docs/durable-context authority linked to
+        B001, with acceptance, non-goals, and Flow-owned handoff scope.
+      owner_phase: runner
+      execution_context:
+        - "Anchors:
+          .flow/features/0001_project-goals-and-planning-briefs/feature.yaml,
+          .flow/features/0001_project-goals-and-planning-briefs/prd.md,
+          .flow/briefs/B001_local-first-hotspot-intelligence-cli.yaml."
+        - "In scope: preserve B001 as source thesis, complete Feature 0001
+          docs-only scope, record acceptance and non-goals, and keep brief
+          alignment current."
+        - "Out of scope: CLI implementation, toolchain setup, scoring
+          algorithms, provider APIs, monetisation, SaaS, telemetry, and runtime
+          LLM behaviour."
+        - "Protected: public thesis, tagline, OSS/publicity boundary, no
+          overclaiming, and deterministic local-first product truth."
+        - "Dependencies: none beyond existing B001."
+        - "Validation/evidence: flow validate --target feature:0001 --format
+          json, flow brief show --brief B001 --format json --view full, and a
+          read-through proving no contradiction with B001."
+        - "Review focus: feature and PRD say enough for a fresh planner without
+          duplicating B001 wholesale."
+        - "Escalate if: docs-only scope would require runtime
+          command/API/toolchain choices or commercial positioning."
+        - "Done boundary: Feature 0001 has linked B001, clear acceptance, clear
+          packet scope, and current brief-alignment evidence."
+      verification_commands:
+        - flow validate --target feature:0001 --format json
+    - id: P2
+      depends_on:
+        - P1
+      status: done
+      title: Public project goals documentation
+      goal: Produce concise OSS-safe project-goal documentation for readers and future
+        contributors.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: README.md or docs/project-goals.md, .flow/project-memory.md
+          for cross-feature constraints."
+        - "In scope: tagline, thesis, target users, user value, safe claims,
+          non-goals, first-layer file evidence, future provider direction, and
+          agent-ready export framing."
+        - "Out of scope: detailed architecture, exhaustive UX, launch strategy,
+          monetisation, SaaS, pricing, or implementation-specific command
+          flags."
+        - "Protected: hotspots are investigation prompts; no bug prediction,
+          code-quality score, developer ranking, or judgemental OSS case-study
+          language."
+        - "Dependencies: P1 scope and acceptance must be stable first."
+        - "Validation/evidence: markdown read-through and content scan for
+          prohibited claims and prohibited commercial content."
+        - "Review focus: public docs are clear, truthful, modest, and useful
+          without requiring chat context."
+        - "Escalate if: public docs need a decision between README vs docs/
+          structure or expose private commercial strategy."
+        - "Done boundary: an OSS reader can understand what git-hotspots is, why
+          it exists, what it will not claim, and how future work will start."
+      verification_commands:
+        - git diff --check
+        - grep -RniE 'moneti[sz]ation|pricing|SaaS|sales strategy|predicts
+          bugs|bug prediction|developer ranking|performance metric' README.md
+          docs .flow/features/0001_project-goals-and-planning-briefs
+          .flow/project-memory.md || true
+    - id: P3
+      depends_on:
+        - P2
+      status: done
+      title: Future planning handoff
+      goal: Create a compact handoff for the next implementation-planning session
+        without overbuilding the roadmap.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: .flow/project-memory.md,
+          .flow/features/0001_project-goals-and-planning-briefs/prd.md, optional
+          docs/future-plan.md or equivalent concise handoff artefact."
+        - "In scope: next candidate feature boundary for a file-level Zig CLI
+          spike, validation gates, deferred provider topics, cache/privacy
+          guardrails, and open questions."
+        - "Out of scope: detailed packet plans for future implementation,
+          dependency lock-in, package manager setup, release automation, SaaS
+          roadmap, or paid product strategy."
+        - "Protected: keep future plan implementation-neutral unless already
+          agreed; do not turn provider architecture into first-sprint scope."
+        - "Dependencies: public goals doc must exist so handoff can reference
+          instead of duplicate it."
+        - "Validation/evidence: fresh-session sufficiency audit from durable
+          state only, plus flow validate --target feature:0001 --format json."
+        - "Review focus: future planner can continue with next feature shaping
+          without original chat and without inheriting stale or commercial
+          assumptions."
+        - "Escalate if: next-step handoff needs business strategy, hosted
+          product assumptions, or a toolchain choice beyond the agreed Zig
+          preference for later consideration."
+        - "Done boundary: durable state names the next likely implementation
+          feature and its major guardrails while keeping Feature 0001
+          docs-only."
+      verification_commands:
+        - flow validate --target feature:0001 --format json
+  output_contract:
+    storage: Repository-local planning and documentation artefacts only.
+    artefacts:
+      - Linked Feature 0001 state and PRD
+      - .flow/project-memory.md cross-feature memory updates
+      - Public OSS-safe project-goal documentation such as README.md or
+        docs/project-goals.md
+      - A concise future-planning or handoff note for later implementation
+        shaping
+    prohibited_content:
+      - monetisation plans
+      - pricing
+      - hosted SaaS strategy
+      - sales strategy
+      - developer ranking
+      - bug prediction claims
+      - code-quality scoring claims
+      - runtime LLM dependence
+      - CLI implementation code
+      - package manifests
+      - provider API implementation
+    consumers:
+      - future Flow planners
+      - implementation feature shapers
+      - OSS readers
+      - coding agents consuming deterministic project context
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-21T22:34:38.466Z
+  updated_at: 2026-05-21T23:17:24.586Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-21T23:02:22.225Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0001"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Project goals and planning briefs
+      problem: The project has a strong capability brief, but future sessions still
+        need implementation-neutral project-goal artefacts that preserve the
+        public thesis, non-goals, safety constraints, and next planning path
+        without relying on chat history.
+      outcome: "Future planners can recover the git-hotspots direction from durable
+        artefacts alone: B001 remains the capability source, Feature 0001
+        records execution-ready documentation scope, project memory captures
+        cross-feature constraints, and public docs explain the OSS goals without
+        monetisation or overclaiming."
+      acceptance:
+        - Feature 0001 is explicitly documentation and durable-context work
+          only; it does not create CLI code, package manifests, scoring
+          implementations, provider APIs, SaaS plans, pricing, telemetry, hosted
+          dashboards, or developer-ranking features.
+        - "Durable artefacts preserve the tagline: Before you refactor, ask Git
+          where the pain is."
+        - "Durable artefacts state the public thesis: a deterministic,
+          local-first hotspot intelligence CLI for developers and coding
+          agents."
+        - "Durable artefacts state file-level Git-history evidence comes first:
+          churn, change frequency, recency, co-change, size, confidence, and
+          explainable evidence."
+        - Durable artefacts state providers are later optional enrichers,
+          including possible tree-sitter, LSP, ctags, dependency, blame/history,
+          and test or coverage providers.
+        - Durable artefacts state agent-ready exports consume deterministic
+          evidence and do not make LLMs runtime truth.
+        - Public-facing artefacts frame hotspots as investigation prompts, not
+          accusations, quality scores, bug predictions, or developer-performance
+          metrics.
+        - Public-facing artefacts keep repository positioning
+          OSS/publicity-oriented and contain no monetisation, pricing,
+          hosted-SaaS, or sales strategy.
+        - "Operational constraints are captured compactly: no network or
+          telemetry by default, cache as optional optimisation not truth, author
+          metrics absent/anonymised/opt-in, shallow or partial history marked
+          incomplete, provider failures degrade gracefully."
+        - A future implementation planner can identify the next feature boundary
+          for a file-level Zig CLI spike without reading the original chat.
+    brief_alignment:
+      status: aligned
+      role: primary
+      summary: "Feature 0001 is the primary planning/docs slice for B001: it turns the
+        local-first hotspot intelligence capability into durable project goals,
+        public OSS framing, project memory, and future handoff artefacts without
+        implementing runtime code."
+      checked_at: 2026-05-21T22:41:59.256Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0001_project-goals-and-planning-briefs/prd.md
+  requirements_contract:
+    source_path: .flow/features/0001_project-goals-and-planning-briefs/prd.md
+    source_digest: 974b31397245094b9fa62eafec400d9f1d66cc0c54fa44b1d8bd95b626f2541f
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#r1-flow-authority-and-acceptance[1]
+        text: Feature 0001 must record a documentation-only execution boundary in
+          feature.yaml and this PRD.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#r1-flow-authority-and-acceptance[2]
+        text: "Required content:"
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#r1-flow-authority-and-acceptance[3]
+        text: the problem and outcome for durable project-goal capture;
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#r1-flow-authority-and-acceptance[4]
+        text: acceptance criteria that preserve the local-first public thesis;
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#r1-flow-authority-and-acceptance[5]
+        text: explicit non-goals for runtime code, package setup, provider APIs, hosted
+          product strategy, pricing, telemetry, developer ranking, and
+          bug-prediction claims;
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#r1-flow-authority-and-acceptance[6]
+        text: a packet plan with Packet Rubric v1 context for each packet;
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#r1-flow-authority-and-acceptance[7]
+        text: alignment with B001 as the primary capability brief.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#non-goals[1]
+        text: "Feature 0001 must not implement or scaffold:"
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-009
+        source_ref: prd.md#non-goals[2]
+        text: CLI code;
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-010
+        source_ref: prd.md#non-goals[3]
+        text: build.zig, package manifests, dependency locks, or release scripts;
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-011
+        source_ref: prd.md#non-goals[4]
+        text: scoring algorithms;
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-012
+        source_ref: prd.md#non-goals[5]
+        text: provider APIs or provider implementations;
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-013
+        source_ref: prd.md#non-goals[6]
+        text: cache schema or database setup;
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-014
+        source_ref: prd.md#non-goals[7]
+        text: GitHub Actions;
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-015
+        source_ref: prd.md#non-goals[8]
+        text: telemetry;
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-016
+        source_ref: prd.md#non-goals[9]
+        text: hosted dashboards;
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-017
+        source_ref: prd.md#non-goals[10]
+        text: pricing, paid tiers, or sales strategy;
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-018
+        source_ref: prd.md#non-goals[11]
+        text: runtime LLM integration;
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-019
+        source_ref: prd.md#non-goals[12]
+        text: developer ranking or productivity analytics;
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-020
+        source_ref: prd.md#non-goals[13]
+        text: bug-prediction or code-quality scoring claims.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-021
+        source_ref: prd.md#non-goals[14]
+        text: Commercial ideas may exist outside the repository, but this feature must
+          not record commercial strategy in repo artefacts.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-022
+        source_ref: prd.md#verification[1]
+        text: "Required checks before completion:"
+        category: verification
+        packet_refs: []
+        verification: "Required checks before completion:"
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#verification[2]
+        text: "Run Flow validation:"
+        category: verification
+        packet_refs: []
+        verification: "Run Flow validation:"
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#verification[3]
+        text: "``bash flow validate --target feature:0001 --format json ``"
+        category: verification
+        packet_refs: []
+        verification: "``bash flow validate --target feature:0001 --format json ``"
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#verification[4]
+        text: "Run whitespace/diff validation:"
+        category: verification
+        packet_refs: []
+        verification: "Run whitespace/diff validation:"
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#verification[5]
+        text: "``bash git diff --check ``"
+        category: verification
+        packet_refs: []
+        verification: "``bash git diff --check ``"
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#verification[6]
+        text: Review changed files and confirm only Flow planning and documentation
+          artefacts changed.
+        category: verification
+        packet_refs: []
+        verification: Review changed files and confirm only Flow planning and
+          documentation artefacts changed.
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#verification[7]
+        text: Search changed planning/docs artefacts for prohibited public claims and
+          commercial strategy. Matches that only state non-goals are acceptable;
+          any actual plan, price, hosted roadmap, bug-prediction claim, or
+          developer-ranking claim must be removed.
+        category: verification
+        packet_refs: []
+        verification: Search changed planning/docs artefacts for prohibited public
+          claims and commercial strategy. Matches that only state non-goals are
+          acceptable; any actual plan, price, hosted roadmap, bug-prediction
+          claim, or developer-ranking claim must be removed.
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#verification[8]
+        text: "Fresh-session sufficiency audit:"
+        category: verification
+        packet_refs: []
+        verification: "Fresh-session sufficiency audit:"
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#verification[9]
+        text: A future planner must be able to recover the public thesis, non-goals,
+          operational constraints, next likely implementation feature, and
+          deferred topics from B001, Feature 0001, .flow/project-memory.md, and
+          public docs without reading this chat.
+        category: verification
+        packet_refs:
+          - P1
+        verification: A future planner must be able to recover the public thesis,
+          non-goals, operational constraints, next likely implementation
+          feature, and deferred topics from B001, Feature 0001,
+          .flow/project-memory.md, and public docs without reading this chat.
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#acceptance-mapping[1]
+        text: "Feature 0001 is complete only when:"
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#acceptance-mapping[2]
+        text: B001 is linked and aligned as the source capability brief;
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#acceptance-mapping[3]
+        text: feature.yaml and this PRD describe docs-only scope and acceptance;
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#acceptance-mapping[4]
+        text: public project-goal documentation exists;
+        category: acceptance
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#acceptance-mapping[5]
+        text: .flow/project-memory.md contains compact cross-feature truth;
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#acceptance-mapping[6]
+        text: a future-planning handoff exists;
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#acceptance-mapping[7]
+        text: no runtime implementation or package scaffold was added;
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#acceptance-mapping[8]
+        text: no repository artefact records hosted product, pricing, or sales strategy;
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#acceptance-mapping[9]
+        text: no public claim implies bug prediction, code-quality scoring, or developer
+          performance ranking.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: "Future planners can recover the git-hotspots direction from durable
+      artefacts alone: B001 remains the capability source, Feature 0001 records
+      execution-ready documentation scope, project memory captures cross-feature
+      constraints, and public docs explain the OSS goals without monetisation or
+      overclaiming."
+    acceptance:
+      - Feature 0001 is explicitly documentation and durable-context work only;
+        it does not create CLI code, package manifests, scoring implementations,
+        provider APIs, SaaS plans, pricing, telemetry, hosted dashboards, or
+        developer-ranking features.
+      - "Durable artefacts preserve the tagline: Before you refactor, ask Git
+        where the pain is."
+      - "Durable artefacts state the public thesis: a deterministic, local-first
+        hotspot intelligence CLI for developers and coding agents."
+      - "Durable artefacts state file-level Git-history evidence comes first:
+        churn, change frequency, recency, co-change, size, confidence, and
+        explainable evidence."
+      - Durable artefacts state providers are later optional enrichers,
+        including possible tree-sitter, LSP, ctags, dependency, blame/history,
+        and test or coverage providers.
+      - Durable artefacts state agent-ready exports consume deterministic
+        evidence and do not make LLMs runtime truth.
+      - Public-facing artefacts frame hotspots as investigation prompts, not
+        accusations, quality scores, bug predictions, or developer-performance
+        metrics.
+      - Public-facing artefacts keep repository positioning
+        OSS/publicity-oriented and contain no monetisation, pricing,
+        hosted-SaaS, or sales strategy.
+      - "Operational constraints are captured compactly: no network or telemetry
+        by default, cache as optional optimisation not truth, author metrics
+        absent/anonymised/opt-in, shallow or partial history marked incomplete,
+        provider failures degrade gracefully."
+      - A future implementation planner can identify the next feature boundary
+        for a file-level Zig CLI spike without reading the original chat.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - flow validate --target feature:0001 --format json
+      - git diff --check
+      - grep -RniE 'moneti[sz]ation|pricing|SaaS|sales strategy|predicts
+        bugs|bug prediction|developer ranking|performance metric' README.md docs
+        .flow/features/0001_project-goals-and-planning-briefs
+        .flow/project-memory.md || true
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
