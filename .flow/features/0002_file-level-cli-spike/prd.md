@@ -245,6 +245,34 @@ Docs must not introduce monetisation plans, hosted product strategy, unsupported
 provider promises, bug-prediction claims, code-quality scoring claims, or
 developer ranking language.
 
+### R13. Real-repository smoke validation
+
+Once the executable exists, fixture-only validation is not sufficient for
+close-out. The runner must also run the built CLI against real local projects.
+
+Default targets:
+
+- this repository, via `--repo .`;
+- one suitable sibling or nearby local repository selected at execution time.
+
+The second target should be a real repository with enough history to exercise
+ranking and output, such as an older sibling project. The runner must not fetch
+or contact remotes to prepare the target. If no suitable second repository is
+available, record the skipped-target reason and the replacement evidence.
+
+Real-repository evidence must include:
+
+- exact commands run;
+- a privacy-safe label for each selected repository;
+- whether table and JSON output completed successfully;
+- a short summary of top-result plausibility and caveats;
+- any performance observation useful for the next planning pass.
+
+Do not commit absolute local paths, private repository names, source snippets,
+author identities, or raw report dumps from private repositories. Store only
+concise evidence in Flow run/review state or a privacy-safe validation note if a
+future feature explicitly creates one.
+
 ## Edge cases
 
 Implementation and tests should account for:
@@ -308,6 +336,20 @@ Performance smoke:
 ```bash
 /usr/bin/time -v ./zig-out/bin/git-hotspots --repo fixtures/medium --format json >/tmp/git-hotspots-medium.json
 ```
+
+Real-repository smoke:
+
+```bash
+./zig-out/bin/git-hotspots --repo . --format table
+./zig-out/bin/git-hotspots --repo . --format json >/tmp/git-hotspots-this-repo.json
+
+# Select one suitable sibling/local repository at execution time. Do not fetch.
+./zig-out/bin/git-hotspots --repo <sibling-repo> --format table
+./zig-out/bin/git-hotspots --repo <sibling-repo> --format json >/tmp/git-hotspots-sibling.json
+```
+
+The runner must record privacy-safe labels and summaries for these runs rather
+than committing local absolute paths or raw private report output.
 
 Flow validation:
 

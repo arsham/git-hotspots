@@ -38,5 +38,9 @@ local-first hotspot intelligence CLI.
 
 - Make small, reviewable changes.
 - Do not add build/package scaffolding unless the active feature asks for it.
+- For implementation features, include real-repository smoke validation once an
+  executable exists; default to this repo plus one suitable sibling/local repo,
+  and record privacy-safe evidence without committing absolute local paths or
+  raw private report output.
 - Preserve existing Flow state when present; use Flow commands for lifecycle
   updates instead of hand-editing Flow artefacts when a command exists.

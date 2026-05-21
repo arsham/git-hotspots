@@ -51,6 +51,13 @@ intent:
     - Docs or help text explain that hotspots are investigation prompts and
       state the spike's limitations without mentioning monetisation, hosted
       product strategy, unsupported providers, or bug prediction.
+    - "Close-out validation includes real-repository smoke runs after the
+      executable exists: this repository and at least one suitable sibling/local
+      repository when available; fixture-only validation is not sufficient once
+      the CLI can run."
+    - Real-project smoke evidence records exact commands, selected repo labels,
+      result summaries, and any skipped-target reason without committing
+      absolute local paths or private repository details.
 planning:
   state: ready
   summary: "Shape Feature 0002 as the first executable spike: minimal Zig CLI,
@@ -87,14 +94,14 @@ proposal:
       - multi_packet_scope
     audit_required: true
     judge_review_recommended: false
-    materialised_at: 2026-05-21T23:31:05.119Z
+    materialised_at: 2026-05-21T23:42:23.076Z
   quality_plan: null
 project_feature:
   lifecycle_state: ready
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
-    materialised_at: 2026-05-21T23:31:05.119Z
+    materialised_at: 2026-05-21T23:42:23.076Z
   quality_plan:
     assurance_band: sensitive
     review_mode: delegated_reviewer
@@ -117,12 +124,12 @@ project_feature:
         required: false
         cases: []
     derived_from_risk_assessment_ref: proposal.risk_assessment
-    materialised_at: 2026-05-21T23:31:05.119Z
+    materialised_at: 2026-05-21T23:42:23.076Z
   authority_refinement:
     selected_sign_off_authority: orchestrator
     explicit_pause_required: true
     verification_independence_requirement: continuity_safe_delegated
-    materialised_at: 2026-05-21T23:31:05.119Z
+    materialised_at: 2026-05-21T23:42:23.076Z
 verification_independence_requirement: continuity_safe_delegated
 readiness:
   requirements_ready: true
@@ -161,6 +168,10 @@ design:
       and hosted/commercial strategy out of this feature.
     - Generate Git fixture repositories in tests or scripts rather than checking
       in .git directories; use fixed timestamps and dummy local author data.
+    - Implementation feature close-out must include real-repository smoke
+      validation, not fixtures alone. Default targets are this repo plus one
+      suitable sibling/local repo chosen at runtime; record evidence and caveats
+      without committing absolute local paths.
   packets:
     - id: P1
       depends_on: []
@@ -382,4 +393,4 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-21T23:23:45.768Z
-  updated_at: 2026-05-21T23:31:05.119Z
+  updated_at: 2026-05-21T23:42:23.076Z

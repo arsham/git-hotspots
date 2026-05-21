@@ -37,6 +37,10 @@ briefs, feature files, PRDs, and code own detailed active truth.
   unless a later feature records stronger safeguards.
 - Shallow or partial history must be detected and reported as scoped or
   incomplete. Do not auto-fetch or contact remotes to hide missing history.
+- Implementation features need real-repository smoke validation once an
+  executable exists. Fixture-only evidence is not enough; default smoke targets
+  are this repo and one suitable sibling/local repo, with privacy-safe labels
+  and no committed absolute paths or raw private report dumps.
 
 ## Planning heuristics
 
@@ -47,6 +51,8 @@ briefs, feature files, PRDs, and code own detailed active truth.
 - Do not let tree-sitter, LSP, or cache design become the first implementation
   blocker.
 - Public case studies should be exploratory and careful, never judgemental.
+- Plan validation so future runners do not need Arsham to manually remember the
+  real-project smoke checks after each implementation feature.
 
 ## Current traps
 
