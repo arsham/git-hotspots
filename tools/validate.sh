@@ -42,6 +42,11 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
+case "$EXE" in
+  /*) EXE_ABS=$EXE ;;
+  *) EXE_ABS=$ROOT/${EXE#./} ;;
+esac
+
 TMPDIR_VALIDATE=${TMPDIR:-/tmp}
 SUMMARY=$(mktemp "$TMPDIR_VALIDATE/git-hotspots-validate-summary.XXXXXX")
 FALLBACKS=$(mktemp "$TMPDIR_VALIDATE/git-hotspots-validate-fallbacks.XXXXXX")
@@ -356,6 +361,95 @@ for text in [basic, scope, empty, edge_text, read(self_md), self_scoped_text, in
 PY
 }
 
+explain_output_checks() {
+  explain_a=$ARTIFACT_DIR/explain-a.txt
+  explain_b=$ARTIFACT_DIR/explain-b.txt
+  explain_nongit=$ARTIFACT_DIR/explain-nongit.txt
+  explain_err=$ARTIFACT_DIR/explain.err
+  help_out=$ARTIFACT_DIR/help.txt
+
+  "$EXE" --explain > "$explain_a" 2> "$explain_err" || return 1
+  [ ! -s "$explain_err" ] || return 1
+  diff -u fixtures/expected/explain.txt "$explain_a" >/dev/null || return 1
+  "$EXE" --explain > "$explain_b" 2> "$explain_err" || return 1
+  [ ! -s "$explain_err" ] || return 1
+  diff -u "$explain_a" "$explain_b" >/dev/null || return 1
+  "$EXE" --help > "$help_out" 2> "$explain_err" || return 1
+  [ ! -s "$explain_err" ] || return 1
+  grep -q -- '--explain' "$help_out" || return 1
+
+  nongit=$(mktemp -d "$ARTIFACT_DIR/nongit.XXXXXX")
+  (cd "$nongit" && "$EXE_ABS" --explain > "$explain_nongit" 2> "$explain_err") || return 1
+  [ ! -s "$explain_err" ] || return 1
+  diff -u fixtures/expected/explain.txt "$explain_nongit" >/dev/null || return 1
+
+  for args in \
+    '--repo .' \
+    '--limit 1' \
+    '--format markdown' \
+    '--since HEAD~1' \
+    '--include-prefix src/' \
+    '--exclude-prefix .flow/'
+  do
+    # shellcheck disable=SC2086
+    if "$EXE" --explain $args > "$ARTIFACT_DIR/explain-invalid.out" 2> "$explain_err"; then
+      return 1
+    fi
+    grep -q -- '--explain cannot be combined' "$explain_err" || return 1
+  done
+}
+
+prohibited_claim_scan() {
+  have_python || return 1
+  python3 - fixtures/expected/explain.txt README.md <<'PY'
+import re
+import sys
+from pathlib import Path
+
+patterns = [
+    re.compile(r'\bbug (prediction|predictions|predict|predicts)\b'),
+    re.compile(r'\bobjective code[- ]quality (rating|ratings|score|scores)\b'),
+    re.compile(r'\bmaintainer judgement\b'),
+    re.compile(r'\bdeveloper (ranking|rankings)\b'),
+    re.compile(r'\bproductivity analytics\b'),
+    re.compile(r'\bAI/LLM judgement\b', re.IGNORECASE),
+    re.compile(r'\btechnical-debt (score|scores)\b'),
+    re.compile(r'\bauthor metrics\b'),
+    re.compile(r'\bhosted product\b'),
+    re.compile(r'\bpricing\b'),
+    re.compile(r'\bsales strategy\b'),
+]
+allowed_markers = (
+    ' not ',
+    'not ',
+    ' no ',
+    'no ',
+    'without ',
+    'avoid ',
+    'should not ',
+    'does not ',
+    'do not ',
+    'never ',
+    'non-claims',
+    'limitations',
+)
+
+failures = []
+for path_name in sys.argv[1:]:
+    path = Path(path_name)
+    lines = path.read_text(encoding='utf-8').splitlines()
+    for line_no, line in enumerate(lines, 1):
+        context = ' '.join(lines[max(0, line_no - 3):line_no])
+        normalized = f' {context.strip().lower()} '
+        if any(pattern.search(line) for pattern in patterns):
+            if not any(marker in normalized for marker in allowed_markers):
+                failures.append(f'{path}:{line_no}: {line}')
+
+if failures:
+    raise SystemExit('positive prohibited claim(s):\n' + '\n'.join(failures))
+PY
+}
+
 choose_timing_tool() {
   if [ -x /usr/bin/time ] && /usr/bin/time -v sh -c ':' >/dev/null 2>&1; then
     printf '%s\n' '/usr/bin/time -v'
@@ -538,6 +632,19 @@ run_quiet "format check" zig fmt --check build.zig src tests
 run_quiet "fast gate: zig build test" zig build test
 run_quiet "build executable: zig build" zig build
 run_quiet "help text smoke" "$EXE" --help
+printf 'validate: RUN explain golden, determinism, standalone, and invalid combinations\n'
+if explain_output_checks; then
+  pass_rung "explain golden, determinism, standalone, and invalid combinations"
+else
+  fail_rung "explain golden, determinism, standalone, and invalid combinations" "explain output or parser contract failed"
+fi
+printf 'validate: RUN prohibited claim scan\n'
+if prohibited_claim_scan; then
+  note_fallback "prohibited claim scan: python3 allowlist-aware line scan"
+  pass_rung "prohibited claim scan"
+else
+  fail_rung "prohibited claim scan" "positive prohibited claim detected or python3 unavailable"
+fi
 run_quiet "git diff whitespace check" git diff --check
 run_quiet "shell syntax checks" sh -c "for file in tools/*.sh tests/*.sh; do sh -n \"\$file\" || exit 1; done"
 

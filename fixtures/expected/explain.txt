@@ -1,0 +1,58 @@
+# git-hotspots scoring explanation
+
+## Purpose
+
+Hotspots are local Git-history investigation prompts. They point to files
+that changed often or recently, carried churn, or repeatedly changed with
+other files in the selected evidence universe.
+
+## Score components
+
+- frequency = change_count * 10
+- churn = min((additions + deletions) / 25, 40)
+- recency = 20 at the selected HEAD timestamp; otherwise it decays by age
+  in days as max(0, 20 - age_days)
+- cochange = min(cochange_total * 2, 20)
+- total = frequency + churn + recency + cochange
+
+The current score is only this sum of file-level Git-history evidence.
+
+## Confidence
+
+- high: at least 3 changes and no row caveats
+- medium: at least 2 changes
+- low: anything else
+
+## Caveats
+
+Caveats reduce how much confidence to place in a hotspot prompt. Current
+caveat classes include:
+
+- shallow history, where available commits may be incomplete
+- partial or promisor history, where available objects may be incomplete
+- dirty worktrees, where ranking uses committed history only
+- binary or non-text churn that Git cannot count normally
+- large commits whose co-change evidence may be capped or caveated
+- deleted paths or paths not present at HEAD
+
+## Scope filters
+
+Include and exclude prefixes are literal repo-relative prefixes using '/'
+separators. They are not globs, regexes, pathspecs, gitignore rules, or
+project configuration.
+
+Filters apply before aggregation, scoring, co-change evidence, and limit.
+Excludes win over includes. Scoped reports change the evidence universe, so
+compare scoped and unscoped reports with that boundary in mind.
+
+## Limitations and non-claims
+
+Scores are not bug predictions, objective code-quality ratings, maintainer
+judgement, developer rankings, productivity analytics, AI/LLM judgement,
+or technical-debt scores.
+
+## Runtime guarantees
+
+This explanation is static. It does not inspect a repository, run Git
+analysis, contact remotes, use providers, use cache, require network
+access, upload source, or emit telemetry.

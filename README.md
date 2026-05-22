@@ -101,20 +101,42 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --include-prefix src/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --exclude-prefix .flow/ --limit 10 --format markdown
+./zig-out/bin/git-hotspots --explain
 ```
 
 Supported options are `--repo`, `--limit`, `--format table|json|markdown`,
 `--since`, repeatable `--include-prefix`, repeatable `--exclude-prefix`, and
-`--help`. Include and exclude prefixes are literal repo-relative Git path
-prefixes using `/` separators; they are applied before hotspot scoring and
-co-change evidence, with excludes winning over includes. They are not globs,
-pathspecs, gitignore rules, regexes, or project configuration. Reports include
-scope metadata showing whether filters were active, which prefixes were used,
-and bounded counts for paths and changes omitted by include or exclude filters.
-Markdown output is a deterministic stdout report with run summary, scope,
-caveats, ranked hotspots, and per-result evidence. The spike reads local Git
-history only. It does not fetch, push, upload source, contact remotes, or emit
-telemetry.
+`--explain`, and `--help`. Include and exclude prefixes are literal
+repo-relative Git path prefixes using `/` separators; they are applied before
+hotspot scoring and co-change evidence, with excludes winning over includes.
+They are not globs, pathspecs, gitignore rules, regexes, or project
+configuration. Reports include scope metadata showing whether filters were
+active, which prefixes were used, and bounded counts for paths and changes
+omitted by include or exclude filters. Markdown output is a deterministic
+stdout report with run summary, scope, caveats, ranked hotspots, and
+per-result evidence. The spike reads local Git history only. It does not fetch,
+push, upload source, contact remotes, or emit telemetry.
+
+## How to read scores
+
+Run `git-hotspots --explain` to print the static scoring explanation without
+requiring a Git repository. The current score is the sum of frequency, churn,
+recency, and co-change evidence:
+
+- frequency = `change_count * 10`;
+- churn = `min((additions + deletions) / 25, 40)`;
+- recency is `20` at the selected HEAD timestamp and otherwise decays by age in
+  days to a floor of `0`;
+- co-change = `min(cochange_total * 2, 20)`.
+
+Confidence is `high` when a row has at least three changes and no caveats,
+`medium` when it has at least two changes, and `low` otherwise. Caveats call
+out shallow history, partial or promisor history, dirty worktrees, binary or
+non-text churn, large commits, and paths deleted or not present at HEAD.
+
+Hotspots are local Git-history investigation prompts. They are not bug
+predictions, objective code-quality ratings, maintainer judgement, developer
+rankings, productivity analytics, AI/LLM judgement, or technical-debt scores.
 
 Use the full local validation workflow before close-out:
 

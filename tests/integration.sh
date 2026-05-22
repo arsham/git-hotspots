@@ -4,6 +4,10 @@ set -eu
 EXE=$1
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$ROOT"
+case "$EXE" in
+  /*) EXE_ABS=$EXE ;;
+  *) EXE_ABS=$ROOT/${EXE#./} ;;
+esac
 
 assert_fails_with_output() {
   label=$1
@@ -36,6 +40,23 @@ assert_fails_with_stderr() {
 }
 
 sh tools/setup-fixtures.sh
+
+"$EXE" --explain > /tmp/git-hotspots-explain.txt
+diff -u fixtures/expected/explain.txt /tmp/git-hotspots-explain.txt
+"$EXE" --explain > /tmp/git-hotspots-explain-2.txt
+diff -u /tmp/git-hotspots-explain.txt /tmp/git-hotspots-explain-2.txt
+"$EXE" --help > /tmp/git-hotspots-help.txt
+grep -q -- "--explain" /tmp/git-hotspots-help.txt
+explain_nongit=$(mktemp -d)
+(cd "$explain_nongit" && "$EXE_ABS" --explain > /tmp/git-hotspots-explain-nongit.txt 2> /tmp/git-hotspots-explain-nongit.err)
+diff -u fixtures/expected/explain.txt /tmp/git-hotspots-explain-nongit.txt
+test ! -s /tmp/git-hotspots-explain-nongit.err
+assert_fails_with_stderr explain-repo "--explain cannot be combined" "$EXE" --explain --repo .
+assert_fails_with_stderr explain-limit "--explain cannot be combined" "$EXE" --explain --limit 1
+assert_fails_with_stderr explain-format "--explain cannot be combined" "$EXE" --explain --format markdown
+assert_fails_with_stderr explain-since "--explain cannot be combined" "$EXE" --explain --since HEAD~1
+assert_fails_with_stderr explain-include "--explain cannot be combined" "$EXE" --explain --include-prefix src/
+assert_fails_with_stderr explain-exclude "--explain cannot be combined" "$EXE" --explain --exclude-prefix .flow/
 
 "$EXE" --repo fixtures/basic --format json > /tmp/git-hotspots-basic.json
 diff -u fixtures/expected/basic.json /tmp/git-hotspots-basic.json

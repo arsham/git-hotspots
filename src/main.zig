@@ -2,6 +2,7 @@ const std = @import("std");
 const model = @import("model.zig");
 const git = @import("git.zig");
 const report = @import("report.zig");
+const explain = @import("explain.zig");
 const Io = std.Io;
 
 const usage =
@@ -9,6 +10,7 @@ const usage =
     \\
     \\Usage:
     \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--include-prefix PATH]... [--exclude-prefix PATH]...
+    \\  git-hotspots --explain
     \\  git-hotspots --help
     \\
     \\Options:
@@ -22,6 +24,7 @@ const usage =
     \\  --exclude-prefix PATH
     \\                    Repeatable repo-relative literal Git path prefix to exclude
     \\                    before scoring; use / separators, not globs
+    \\  --explain         Explain current scoring semantics without analysing a repo
     \\  --help            Show this help
     \\
     \\Hotspots are investigation prompts from local Git history, not bug predictions,
@@ -58,7 +61,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
     const stderr = &stderr_writer.interface;
     defer stderr.flush() catch {};
 
-    const cfg = parseArgs(allocator, args) catch |err| {
+    const mode = parseArgs(allocator, args) catch |err| {
         switch (err) {
             error.HelpRequested => {
                 try stdout.writeAll(usage);
@@ -66,11 +69,20 @@ pub fn main(init: std.process.Init.Minimal) !void {
             },
             error.InvalidIncludePrefix => try stderr.print("error: --include-prefix must be a non-empty repo-relative path prefix without absolute roots, '..' segments, or control characters\n", .{}),
             error.InvalidExcludePrefix => try stderr.print("error: --exclude-prefix must be a non-empty repo-relative path prefix without absolute roots, '..' segments, or control characters\n", .{}),
+            error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags (--repo, --limit, --format, --since, --include-prefix, --exclude-prefix)\n", .{}),
             error.InvalidArguments => try stderr.print("error: invalid arguments\n\n{s}", .{usage}),
             else => try stderr.print("error: {s}\n", .{@errorName(err)}),
         }
         try stderr.flush();
         std.process.exit(2);
+    };
+
+    const cfg = switch (mode) {
+        .explain => {
+            try stdout.writeAll(explain.text);
+            return;
+        },
+        .analyze => |cfg| cfg,
     };
     defer freeConfig(allocator, cfg);
 
@@ -94,50 +106,78 @@ pub fn main(init: std.process.Init.Minimal) !void {
     }
 }
 
-const CliError = error{ HelpRequested, InvalidArguments, InvalidIncludePrefix, InvalidExcludePrefix } || std.mem.Allocator.Error;
+const CliMode = union(enum) {
+    analyze: model.Config,
+    explain,
+};
 
-fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!model.Config {
+const CliError = error{ HelpRequested, InvalidArguments, InvalidExplainCombination, InvalidIncludePrefix, InvalidExcludePrefix } || std.mem.Allocator.Error;
+
+fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!CliMode {
     var cfg = model.Config{ .repo_path = try allocator.dupe(u8, ".") };
     errdefer freeConfig(allocator, cfg);
+    var explain_requested = false;
+    var analysis_flag_seen = false;
 
     var i: usize = 1;
     while (i < args.len) : (i += 1) {
         const arg = args[i];
         if (std.mem.eql(u8, arg, "--help") or std.mem.eql(u8, arg, "-h")) return error.HelpRequested;
+        if (std.mem.eql(u8, arg, "--explain")) {
+            explain_requested = true;
+            continue;
+        }
         if (std.mem.eql(u8, arg, "--repo")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             const v = args[i];
             allocator.free(cfg.repo_path);
             cfg.repo_path = try allocator.dupe(u8, v);
         } else if (std.mem.eql(u8, arg, "--limit")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             const v = args[i];
             cfg.limit = std.fmt.parseInt(usize, v, 10) catch return error.InvalidArguments;
         } else if (std.mem.eql(u8, arg, "--format")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             const v = args[i];
             if (std.mem.eql(u8, v, "table")) cfg.format = .table else if (std.mem.eql(u8, v, "json")) cfg.format = .json else if (std.mem.eql(u8, v, "markdown")) cfg.format = .markdown else return error.InvalidArguments;
         } else if (std.mem.eql(u8, arg, "--since")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             const v = args[i];
             if (cfg.since) |old| allocator.free(old);
             cfg.since = try allocator.dupe(u8, v);
         } else if (std.mem.eql(u8, arg, "--include-prefix")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             try appendIncludePrefix(allocator, &cfg, args[i]);
         } else if (std.mem.eql(u8, arg, "--exclude-prefix")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             try appendExcludePrefix(allocator, &cfg, args[i]);
         } else return error.InvalidArguments;
     }
+    if (explain_requested) {
+        if (analysis_flag_seen) return error.InvalidExplainCombination;
+        freeConfig(allocator, cfg);
+        return .explain;
+    }
     if (cfg.limit == 0) return error.InvalidArguments;
-    return cfg;
+    return .{ .analyze = cfg };
 }
 
 fn freeConfig(allocator: std.mem.Allocator, cfg: model.Config) void {
@@ -200,9 +240,29 @@ test "parse defaults are documented through config shape" {
     try std.testing.expectEqual(model.Format.table, cfg.format);
 }
 
+test "parse standalone explain mode" {
+    const args = [_][:0]const u8{ "git-hotspots", "--explain" };
+    const mode = try parseArgs(std.testing.allocator, &args);
+    try std.testing.expectEqual(std.meta.Tag(CliMode).explain, mode);
+}
+
+test "reject explain combined with analysis flags" {
+    const cases = [_][]const [:0]const u8{
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--repo", "." },
+        &[_][:0]const u8{ "git-hotspots", "--repo", ".", "--explain" },
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--limit", "1" },
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--format", "markdown" },
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--since", "HEAD~1" },
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--include-prefix", "src/" },
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--exclude-prefix", ".flow/" },
+    };
+    for (cases) |args| try std.testing.expectError(error.InvalidExplainCombination, parseArgs(std.testing.allocator, args));
+}
+
 test "parse repeatable exclude prefixes" {
     const args = [_][:0]const u8{ "git-hotspots", "--exclude-prefix", "./.flow/", "--exclude-prefix", "vendor/" };
-    const cfg = try parseArgs(std.testing.allocator, &args);
+    const mode = try parseArgs(std.testing.allocator, &args);
+    const cfg = mode.analyze;
     defer freeConfig(std.testing.allocator, cfg);
     try std.testing.expectEqual(@as(usize, 2), cfg.exclude_prefixes.len);
     try std.testing.expectEqualStrings(".flow/", cfg.exclude_prefixes[0]);
@@ -211,7 +271,8 @@ test "parse repeatable exclude prefixes" {
 
 test "parse repeatable include prefixes" {
     const args = [_][:0]const u8{ "git-hotspots", "--include-prefix", "./src/", "--include-prefix", "vendor/" };
-    const cfg = try parseArgs(std.testing.allocator, &args);
+    const mode = try parseArgs(std.testing.allocator, &args);
+    const cfg = mode.analyze;
     defer freeConfig(std.testing.allocator, cfg);
     try std.testing.expectEqual(@as(usize, 2), cfg.include_prefixes.len);
     try std.testing.expectEqualStrings("src/", cfg.include_prefixes[0]);
@@ -237,6 +298,7 @@ test "reject invalid include prefixes" {
 }
 
 test {
+    _ = @import("explain.zig");
     _ = @import("git.zig");
     _ = @import("report.zig");
     _ = @import("scoring.zig");
