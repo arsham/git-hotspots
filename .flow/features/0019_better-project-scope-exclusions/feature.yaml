@@ -221,4 +221,683 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T23:43:51.716Z
-  updated_at: 2026-05-22T23:50:25.437Z
+  updated_at: 2026-05-22T23:52:15.137Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-22T23:52:15.137Z
+  assurance_level: sensitive
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Balanced
+    runner_model: Balanced
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level sensitive requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0019"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Better project-scope exclusions
+      problem: The default project scope currently excludes only .flow/. That keeps
+        this repository's Flow process state from dominating first-run reports,
+        but it does not handle a small set of common tracked generated or
+        dependency output directories that can make project-focused reports
+        noisy in real repositories.
+      outcome: Project scope uses a finite disclosed list of root literal built-in
+        exclude prefixes for common generated/dependency output directories,
+        while --scope all remains the full local Git-history evidence universe
+        and reports continue to disclose effective scope and omission counts.
+      acceptance:
+        - Omitted --scope continues to behave exactly like --scope project.
+        - "--scope project applies exactly these built-in root literal prefixes,
+          in this documented order: .flow/, .zig-cache/, zig-out/, target/,
+          node_modules/, dist/, build/, coverage/."
+        - --scope all applies no built-in project exclusions and preserves the
+          full local tracked-path evidence universe.
+        - Built-in prefixes are deduplicated with explicit --exclude-prefix
+          values, and excludes continue to win over includes.
+        - Filtering happens before aggregation, scoring, co-change evidence,
+          rename-lineage folding, ranking, --inspect, progress-compatible
+          rendering, and output limiting.
+        - Project/default output does not leak approved excluded prefixes
+          through result paths, co-change paths, inspect matches, lineage
+          aliases, Markdown headings, evidence text, table rows, JSON rows, or
+          validation summaries.
+        - --scope all can show and inspect the approved excluded paths when
+          local Git history contains them.
+        - Cross-prefix rename cases remain scope-honest and carry
+          partial-lineage caveats when kept rows lose excluded rename-edge
+          evidence.
+        - Table, JSON, Markdown, help, README, and --explain disclose the
+          expanded project-scope prefix list and retain the --scope all escape
+          hatch.
+        - Documentation states project scope is a convenience default, not more
+          correct than full local Git-history evidence.
+        - No .gitignore import, globs, pathspecs, regexes, config files, dynamic
+          classifiers, broad vendor/docs/fixtures exclusions, providers, cache,
+          scoring redesign, CI, release packaging, network behaviour, or
+          telemetry behaviour is added.
+    brief_alignment:
+      status: aligned
+      role: primary
+      summary: Feature 0019 is a primary usability slice under B001. It improves
+        first-run project-focused reports by excluding a finite, disclosed set
+        of common generated/dependency root prefixes without changing scoring,
+        providers, cache, network behaviour, or full-evidence --scope all.
+      checked_at: 2026-05-22T23:48:38.641Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0019_better-project-scope-exclusions/prd.md
+  requirements_contract:
+    source_path: .flow/features/0019_better-project-scope-exclusions/prd.md
+    source_digest: ac635e5f71fe1914f40c4e49e0c39fae803c36bd9777e85d06005165e10d4aca
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: Omitted --scope continues to behave exactly like --scope project.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: --scope project applies exactly the approved built-in prefix list above.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: Built-in prefixes are repo-root literal prefixes using / separators.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: Built-in prefixes are deterministic and ordered as documented.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: Built-in prefixes are deduplicated with user-provided --exclude-prefix
+          values.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: --scope all applies no built-in exclusions and preserves the full local
+          tracked-path evidence universe.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: Explicit --include-prefix continues to narrow the evidence universe before
+          scoring.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: Excludes continue to win over includes, including built-in project
+          excludes.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: Filtering happens before aggregation, scoring, co-change evidence,
+          ranking, --inspect, progress-compatible rendering, and output
+          limiting.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: Project/default output must not include approved excluded prefixes in
+          result paths, co-change paths, inspect matches, lineage aliases,
+          Markdown headings, evidence sections, table rows, JSON rows, or
+          validation summaries.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: --scope all may include those paths when local Git history contains them.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: --inspect of a default-hidden path fails under omitted scope or --scope
+          project with the existing selected-scope not-found error.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: The same path can be inspected under --scope all when it has Git-history
+          evidence.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: "Rename lineage remains scope-honest: rename edges crossing approved
+          excluded prefixes do not leak excluded aliases or evidence into
+          project rows."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#requirements[15]
+        text: Kept rows affected by scope-crossing rename edges carry the existing
+          partial lineage caveat when appropriate.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#requirements[16]
+        text: Table, JSON, and Markdown reports disclose the effective project prefixes
+          and bounded omitted path/change counts.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#requirements[17]
+        text: Help, README, --explain, and fixtures stop saying project scope only
+          excludes .flow/.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#requirements[18]
+        text: Documentation states that project scope is a convenience default, not more
+          correct than --scope all.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#requirements[19]
+        text: No .gitignore import, glob/pathspec/regex support, config files, generated
+          file classifiers, vendor/dependency taxonomy, provider work, cache,
+          scoring redesign, CI, release packaging, network behaviour, or
+          telemetry behaviour is added.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#edge-cases[1]
+        text: Near-miss paths such as src/buildtool.zig, src/vendoradapter.zig, and
+          docs/coverage.md are not excluded by root built-ins.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#edge-cases[2]
+        text: A repository whose only changed paths are project-scope excluded paths
+          produces an empty successful project-scope report with clear scope
+          metadata, not an empty-repository error.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#edge-cases[3]
+        text: Repeated explicit --exclude-prefix values that duplicate project built-ins
+          do not duplicate report metadata.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#edge-cases[4]
+        text: --scope all --exclude-prefix target/ still behaves as an explicit user
+          exclusion and remains disclosed as a user/effective prefix.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#edge-cases[5]
+        text: --include-prefix nodemodules/ under project scope yields no kept evidence
+          because excludes win over includes. --scope all --include-prefix
+          nodemodules/ can analyse that subtree.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#edge-cases[6]
+        text: Progress output remains stderr-only and stdout reports remain byte-stable.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#validation[1]
+        text: "Implementation close-out must include:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Implementation close-out must include:"
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#validation[2]
+        text: zig build test
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig build test
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#validation[3]
+        text: zig build validate
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig build validate
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#validation[4]
+        text: git diff --check
+        category: verification
+        packet_refs:
+          - P1
+        verification: git diff --check
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#validation[5]
+        text: close-out validation with this repo and the approved sibling repo labelled
+          sibling-local-repo
+        category: verification
+        packet_refs:
+          - P1
+        verification: close-out validation with this repo and the approved sibling repo
+          labelled sibling-local-repo
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#validation[6]
+        text: "Fixture and golden coverage must prove:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Fixture and golden coverage must prove:"
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#validation[7]
+        text: omitted scope is byte-for-byte equivalent to --scope project for table,
+          JSON, Markdown, and progress stdout;
+        category: verification
+        packet_refs:
+          - P1
+        verification: omitted scope is byte-for-byte equivalent to --scope project for
+          table, JSON, Markdown, and progress stdout;
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#validation[8]
+        text: --scope all preserves full-evidence behaviour and can show built-in-hidden
+          paths when fixtures contain them;
+        category: verification
+        packet_refs:
+          - P1
+        verification: --scope all preserves full-evidence behaviour and can show
+          built-in-hidden paths when fixtures contain them;
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#validation[9]
+        text: project scope equals --scope all plus the approved explicit exclude-prefix
+          list for rows, scores, co-changes, evidence, confidence, caveats,
+          omitted counts, and lineage metadata;
+        category: verification
+        packet_refs:
+          - P1
+        verification: project scope equals --scope all plus the approved explicit
+          exclude-prefix list for rows, scores, co-changes, evidence,
+          confidence, caveats, omitted counts, and lineage metadata;
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#validation[10]
+        text: excluded paths do not leak into project results, co-changes, inspect
+          matches, lineage aliases, Markdown evidence, table output, JSON
+          output, or validation summaries;
+        category: verification
+        packet_refs:
+          - P1
+        verification: excluded paths do not leak into project results, co-changes,
+          inspect matches, lineage aliases, Markdown evidence, table output,
+          JSON output, or validation summaries;
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#validation[11]
+        text: near-miss paths remain included;
+        category: verification
+        packet_refs:
+          - P1
+        verification: near-miss paths remain included;
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#validation[12]
+        text: cross-prefix rename cases cover included-to-included,
+          excluded-to-included, included-to-excluded, excluded-to-excluded, and
+          a chained rename crossing an excluded prefix;
+        category: verification
+        packet_refs:
+          - P1
+        verification: cross-prefix rename cases cover included-to-included,
+          excluded-to-included, included-to-excluded, excluded-to-excluded, and
+          a chained rename crossing an excluded prefix;
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#validation[13]
+        text: --inspect hidden-path failure under project scope and success under
+          --scope all when evidence exists;
+        category: verification
+        packet_refs:
+          - P1
+        verification: --inspect hidden-path failure under project scope and success
+          under --scope all when evidence exists;
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#validation[14]
+        text: help, README, and --explain list the approved prefixes and preserve
+          investigation-prompt/non-judgemental framing;
+        category: verification
+        packet_refs:
+          - P1
+        verification: help, README, and --explain list the approved prefixes and
+          preserve investigation-prompt/non-judgemental framing;
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#validation[15]
+        text: prohibited-claim and privacy scans pass with no hosted, pricing, sales,
+          author, remote, absolute private path, raw sibling report,
+          bug-prediction, quality-score, or developer-ranking leakage.
+        category: verification
+        packet_refs:
+          - P1
+        verification: prohibited-claim and privacy scans pass with no hosted, pricing,
+          sales, author, remote, absolute private path, raw sibling report,
+          bug-prediction, quality-score, or developer-ranking leakage.
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#non-goals[1]
+        text: Do not add new scope modes beyond all and project.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-042
+        source_ref: prd.md#non-goals[2]
+        text: Do not add dynamic path classification, .gitignore import, config files,
+          globs, regexes, pathspecs, or generated-file detection.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-043
+        source_ref: prd.md#non-goals[3]
+        text: Do not add broad vendor/, third_party/, fixtures/, docs/, lockfile,
+          .github/, or source-tree generated-file exclusions.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-044
+        source_ref: prd.md#non-goals[4]
+        text: Do not change scoring, Git traversal, rename-lineage truth, report schemas
+          beyond existing scope metadata values, provider architecture, cache,
+          CI, release packaging, network behaviour, or telemetry behaviour.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: The default project scope is now the first-run experience for
+          git-hotspots. It currently excludes only .flow/, which keeps this
+          repository's Flow process state from dominating reports but leaves
+          other common generated or dependency output directories to appear when
+          they are tracked in a repository. Users can exclude those paths
+          explicitly, but first-run project-focused reports should handle a
+          small set of widely recognised root generated/dependency directories
+          without introducing dynamic classification or hidden judgement.
+      - source_ref: prd.md#outcome[1]
+        text: --scope project uses a finite, deterministic list of root literal built-in
+          exclude prefixes. The list is disclosed in help, --explain, README
+          text, and report scope metadata. --scope all remains the full local
+          Git-history evidence universe with no built-in project excludes.
+      - source_ref: prd.md#outcome[2]
+        text: "Approved project-scope built-in exclude prefixes:"
+      - source_ref: prd.md#outcome[3]
+        text: .flow/
+      - source_ref: prd.md#outcome[4]
+        text: .zig-cache/
+      - source_ref: prd.md#outcome[5]
+        text: zig-out/
+      - source_ref: prd.md#outcome[6]
+        text: target/
+      - source_ref: prd.md#outcome[7]
+        text: node_modules/
+      - source_ref: prd.md#outcome[8]
+        text: dist/
+      - source_ref: prd.md#outcome[9]
+        text: build/
+      - source_ref: prd.md#outcome[10]
+        text: coverage/
+      - source_ref: prd.md#outcome[11]
+        text: These are convenience exclusions for project-focused reports, not claims
+          that excluded files are unimportant or less correct as evidence.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 12 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: Project scope uses a finite disclosed list of root literal built-in
+      exclude prefixes for common generated/dependency output directories, while
+      --scope all remains the full local Git-history evidence universe and
+      reports continue to disclose effective scope and omission counts.
+    acceptance:
+      - Omitted --scope continues to behave exactly like --scope project.
+      - "--scope project applies exactly these built-in root literal prefixes,
+        in this documented order: .flow/, .zig-cache/, zig-out/, target/,
+        node_modules/, dist/, build/, coverage/."
+      - --scope all applies no built-in project exclusions and preserves the
+        full local tracked-path evidence universe.
+      - Built-in prefixes are deduplicated with explicit --exclude-prefix
+        values, and excludes continue to win over includes.
+      - Filtering happens before aggregation, scoring, co-change evidence,
+        rename-lineage folding, ranking, --inspect, progress-compatible
+        rendering, and output limiting.
+      - Project/default output does not leak approved excluded prefixes through
+        result paths, co-change paths, inspect matches, lineage aliases,
+        Markdown headings, evidence text, table rows, JSON rows, or validation
+        summaries.
+      - --scope all can show and inspect the approved excluded paths when local
+        Git history contains them.
+      - Cross-prefix rename cases remain scope-honest and carry partial-lineage
+        caveats when kept rows lose excluded rename-edge evidence.
+      - Table, JSON, Markdown, help, README, and --explain disclose the expanded
+        project-scope prefix list and retain the --scope all escape hatch.
+      - Documentation states project scope is a convenience default, not more
+        correct than full local Git-history evidence.
+      - No .gitignore import, globs, pathspecs, regexes, config files, dynamic
+        classifiers, broad vendor/docs/fixtures exclusions, providers, cache,
+        scoring redesign, CI, release packaging, network behaviour, or telemetry
+        behaviour is added.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig build test
+      - zig build validate
+      - git diff --check
+      - zig build validate -Dcloseout=true -Dsmoke-repo=<approved-local-repo>
+        -Dsmoke-label=sibling-local-repo
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
