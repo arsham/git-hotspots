@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub const Format = enum { table, json };
+pub const Format = enum { table, json, markdown };
 
 pub const Config = struct {
     repo_path: []const u8,

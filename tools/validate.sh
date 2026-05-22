@@ -230,6 +230,63 @@ for path in (basic_path, self_path, self_scoped_path, scope_filtered_path, scope
 PY
 }
 
+markdown_assertions() {
+  have_python || return 1
+  python3 - "$BASIC_MD_A" "$BASIC_MD_B" "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" "$SCOPE_EMPTY_MD" "$EDGE_MD" "$SELF_MARKDOWN" "$SELF_SCOPED_MARKDOWN" <<'PY'
+import os, re, sys
+from pathlib import Path
+
+basic_a, basic_b, scope_filtered, scope_filtered_b, scope_empty, edge, self_md, self_scoped = [Path(p) for p in sys.argv[1:]]
+
+def read(path):
+    return path.read_text(encoding='utf-8')
+
+basic = read(basic_a)
+assert basic == read(basic_b), 'basic markdown repeated output changed'
+for section in ['# git-hotspots report', '## Run summary', '## Scope', '## Caveats', '## Top hotspots', '## Evidence']:
+    assert section in basic, section
+assert 'File-level Git-history investigation prompts, not bug predictions or code-quality ratings.' in basic
+
+scope = read(scope_filtered)
+assert scope == read(scope_filtered_b), 'scope markdown repeated output changed'
+assert '- Filters active: true' in scope, 'scope filter flag missing'
+assert '- Exclude prefixes: .flow/' in scope, 'scope prefix missing'
+assert '- Excluded path count: 2' in scope, 'scope excluded path count missing'
+assert '- Excluded change count: 5' in scope, 'scope excluded change count missing'
+for line in scope.splitlines():
+    if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
+        assert '.flow/' not in line, 'filtered path leaked in scoped markdown: %r' % line
+
+empty = read(scope_empty)
+for section in ['## Run summary', '## Scope', '## Caveats', '## Top hotspots', '## Evidence']:
+    assert section in empty, 'empty scoped markdown missing %s' % section
+assert 'No hotspots matched the requested scope.' in empty, 'empty scoped top-hotspots note missing'
+assert 'No result evidence to show.' in empty, 'empty scoped evidence note missing'
+
+edge_text = read(edge)
+assert 'weird/tab\\tname.txt' in edge_text, 'tab path was not escaped deterministically'
+assert 'glob/\\[literal\\]\\*.txt' in edge_text, 'glob-like path markdown escaping missing'
+assert 'path is deleted or not present at HEAD' in edge_text, 'deleted-file caveat missing'
+assert 'binary or non\\-text churn unavailable for some changes' in edge_text, 'binary caveat missing'
+
+self_scoped_text = read(self_scoped)
+assert '- Filters active: true' in self_scoped_text, 'self scoped markdown lost scope flag'
+assert '- Exclude prefixes: .flow/' in self_scoped_text, 'self scoped markdown lost prefix'
+for line in self_scoped_text.splitlines():
+    if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
+        assert '.flow/' not in line, 'self scoped markdown leaked .flow path: %r' % line
+
+for text in [basic, scope, empty, edge_text, read(self_md), self_scoped_text]:
+    assert '\t' not in text, 'raw tab leaked in markdown'
+    assert 'Fixture Author' not in text, 'fixture author name leaked'
+    assert 'fixture@example.invalid' not in text, 'fixture author email leaked'
+    home = os.path.expanduser('~')
+    assert not home or home not in text, 'home path leaked'
+    assert not re.search(r'https?://|ssh://|git@', text), 'remote URL leaked'
+    assert not re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b', text), 'email-like identity leaked'
+PY
+}
+
 choose_timing_tool() {
   if [ -x /usr/bin/time ] && /usr/bin/time -v sh -c ':' >/dev/null 2>&1; then
     printf '%s\n' '/usr/bin/time -v'
@@ -287,16 +344,28 @@ fixture_json_checks() {
   "$EXE" --repo fixtures/basic --format json > "$BASIC_B" || return 1
   diff -u fixtures/expected/basic.json "$BASIC_A" >/dev/null || return 1
   diff -u "$BASIC_A" "$BASIC_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/basic --format markdown > "$BASIC_MD_A" || return 1
+  "$EXE" --repo fixtures/basic --format markdown > "$BASIC_MD_B" || return 1
+  diff -u fixtures/expected/basic.md "$BASIC_MD_A" >/dev/null || return 1
+  diff -u "$BASIC_MD_A" "$BASIC_MD_B" >/dev/null || return 1
   "$EXE" --repo fixtures/scope --format json > "$SCOPE_UNFILTERED_JSON" || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format json > "$SCOPE_FILTERED_JSON" || return 1
   diff -u fixtures/expected/scope-filtered.json "$SCOPE_FILTERED_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > "$SCOPE_FILTERED_MD" || return 1
+  "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > "$SCOPE_FILTERED_MD_B" || return 1
+  diff -u fixtures/expected/scope-filtered.md "$SCOPE_FILTERED_MD" >/dev/null || return 1
+  diff -u "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" >/dev/null || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix src/ --format json > "$SCOPE_SRC_FILTERED_JSON" || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix weird/ --format json > "$SCOPE_WEIRD_FILTERED_JSON" || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format json > "$SCOPE_EMPTY_JSON" || return 1
+  "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format markdown > "$SCOPE_EMPTY_MD" || return 1
+  "$EXE" --repo fixtures/edge --limit 200 --format markdown > "$EDGE_MD" || return 1
   "$EXE" --repo fixtures/shallow --format json > "$SHALLOW_JSON" || return 1
   "$EXE" --repo fixtures/partial --format json > "$PARTIAL_JSON" || return 1
   "$EXE" --repo . --format json > "$SELF_JSON" || return 1
+  "$EXE" --repo . --format markdown > "$SELF_MARKDOWN" || return 1
   "$EXE" --repo . --exclude-prefix .flow/ --limit 10 --format json > "$SELF_SCOPED_JSON" || return 1
+  "$EXE" --repo . --exclude-prefix .flow/ --limit 10 --format markdown > "$SELF_SCOPED_MARKDOWN" || return 1
   summary=$(json_count_summary "$SELF_SCOPED_JSON") || return 1
   printf 'this-repo scoped-flow %s\n' "$summary" >> "$SMOKES"
 }
@@ -323,6 +392,7 @@ real_repo_smoke() {
 
   table_out=$(mktemp "$ARTIFACT_DIR/table.XXXXXX")
   json_out=$(mktemp "$ARTIFACT_DIR/real.XXXXXX.json")
+  markdown_out=$(mktemp "$ARTIFACT_DIR/real.XXXXXX.md")
   timing_file=$(mktemp "$ARTIFACT_DIR/real-time.XXXXXX")
 
   if "$EXE" --repo "$repo" --format table > "$table_out" 2> "$timing_file"; then
@@ -337,41 +407,56 @@ real_repo_smoke() {
     *) json_status=pass ;;
   esac
 
-  if [ "$table_status" = pass ] && [ "$json_status" = pass ]; then
+  if "$EXE" --repo "$repo" --format markdown > "$markdown_out" 2> "$timing_file"; then
+    markdown_status=pass
+  else
+    markdown_status=fail
+  fi
+
+  if [ "$table_status" = pass ] && [ "$json_status" = pass ] && [ "$markdown_status" = pass ]; then
     summary=$(json_count_summary "$json_out") || summary='results=unknown caveats=unknown dirty=unknown'
     elapsed=${timing#*|}
-    printf 'real-repo label=%s table=%s json=%s %s elapsed=%s\n' "$label" "$table_status" "$json_status" "$summary" "$elapsed" >> "$SMOKES"
+    printf 'real-repo label=%s table=%s json=%s markdown=%s %s elapsed=%s\n' "$label" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" >> "$SMOKES"
     pass_rung "real repo smoke $label"
     return 0
   fi
 
-  fail_rung "real repo smoke $label" "table=$table_status json=$json_status"
+  fail_rung "real repo smoke $label" "table=$table_status json=$json_status markdown=$markdown_status"
   return 1
 }
 
 BASIC_A=$ARTIFACT_DIR/basic-a.json
 BASIC_B=$ARTIFACT_DIR/basic-b.json
+BASIC_MD_A=$ARTIFACT_DIR/basic-a.md
+BASIC_MD_B=$ARTIFACT_DIR/basic-b.md
 SCOPE_UNFILTERED_JSON=$ARTIFACT_DIR/scope-unfiltered.json
 SCOPE_FILTERED_JSON=$ARTIFACT_DIR/scope-filtered.json
+SCOPE_FILTERED_MD=$ARTIFACT_DIR/scope-filtered.md
+SCOPE_FILTERED_MD_B=$ARTIFACT_DIR/scope-filtered-b.md
 SCOPE_SRC_FILTERED_JSON=$ARTIFACT_DIR/scope-src-filtered.json
 SCOPE_WEIRD_FILTERED_JSON=$ARTIFACT_DIR/scope-weird-filtered.json
 SCOPE_EMPTY_JSON=$ARTIFACT_DIR/scope-empty.json
+SCOPE_EMPTY_MD=$ARTIFACT_DIR/scope-empty.md
 SHALLOW_JSON=$ARTIFACT_DIR/shallow.json
 PARTIAL_JSON=$ARTIFACT_DIR/partial.json
+EDGE_MD=$ARTIFACT_DIR/edge.md
 SELF_JSON=$ARTIFACT_DIR/self.json
 SELF_SCOPED_JSON=$ARTIFACT_DIR/self-scoped.json
+SELF_MARKDOWN=$ARTIFACT_DIR/self.md
+SELF_SCOPED_MARKDOWN=$ARTIFACT_DIR/self-scoped.md
 
 run_quiet "format check" zig fmt --check build.zig src tests
 run_quiet "fast gate: zig build test" zig build test
 run_quiet "build executable: zig build" zig build
+run_quiet "help text smoke" "$EXE" --help
 run_quiet "git diff whitespace check" git diff --check
-run_quiet "shell syntax checks" sh -c 'for file in tools/*.sh tests/*.sh; do sh -n "$file" || exit 1; done'
+run_quiet "shell syntax checks" sh -c "for file in tools/*.sh tests/*.sh; do sh -n \"\$file\" || exit 1; done"
 
-printf 'validate: RUN deterministic fixture JSON\n'
+printf 'validate: RUN deterministic fixture JSON and Markdown\n'
 if fixture_json_checks; then
-  pass_rung "deterministic fixture JSON"
+  pass_rung "deterministic fixture JSON and Markdown"
 else
-  fail_rung "deterministic fixture JSON" "fixture output was invalid or unstable"
+  fail_rung "deterministic fixture JSON and Markdown" "fixture output was invalid or unstable"
 fi
 
 printf 'validate: RUN JSON validity\n'
@@ -383,6 +468,14 @@ if semantic_assertions; then
   pass_rung "shallow, partial, and privacy assertions"
 else
   fail_rung "shallow, partial, and privacy assertions" "semantic assertions failed"
+fi
+
+printf 'validate: RUN Markdown semantic and privacy assertions\n'
+if markdown_assertions; then
+  note_fallback "markdown privacy/path scans: python3 semantic checks; rg not required"
+  pass_rung "Markdown semantic and privacy assertions"
+else
+  fail_rung "Markdown semantic and privacy assertions" "semantic assertions failed"
 fi
 
 printf 'validate: RUN medium fixture performance smoke\n'

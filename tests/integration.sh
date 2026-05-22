@@ -41,15 +41,24 @@ sh tools/setup-fixtures.sh
 diff -u fixtures/expected/basic.json /tmp/git-hotspots-basic.json
 "$EXE" --repo fixtures/basic --format json > /tmp/git-hotspots-basic-2.json
 diff -u /tmp/git-hotspots-basic.json /tmp/git-hotspots-basic-2.json
+"$EXE" --repo fixtures/basic --format markdown > /tmp/git-hotspots-basic.md
+diff -u fixtures/expected/basic.md /tmp/git-hotspots-basic.md
+"$EXE" --repo fixtures/basic --format markdown > /tmp/git-hotspots-basic-2.md
+diff -u /tmp/git-hotspots-basic.md /tmp/git-hotspots-basic-2.md
 "$EXE" --repo fixtures/scope --format json > /tmp/git-hotspots-scope-unfiltered.json
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format json > /tmp/git-hotspots-scope-filtered.json
 diff -u fixtures/expected/scope-filtered.json /tmp/git-hotspots-scope-filtered.json
+"$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > /tmp/git-hotspots-scope-filtered.md
+diff -u fixtures/expected/scope-filtered.md /tmp/git-hotspots-scope-filtered.md
+"$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > /tmp/git-hotspots-scope-filtered-2.md
+diff -u /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-filtered-2.md
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format table > /tmp/git-hotspots-scope-filtered.txt
 "$EXE" --repo fixtures/scope --exclude-prefix vendor/ --format json > /tmp/git-hotspots-scope-vendor-filtered.json
 "$EXE" --repo fixtures/scope --exclude-prefix src/ --format json > /tmp/git-hotspots-scope-src-filtered.json
 "$EXE" --repo fixtures/scope --exclude-prefix weird/ --format json > /tmp/git-hotspots-scope-weird-filtered.json
 "$EXE" --repo fixtures/scope --exclude-prefix 'glob/*' --format json > /tmp/git-hotspots-scope-glob-prefix.json
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format json > /tmp/git-hotspots-scope-empty.json
+"$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format markdown > /tmp/git-hotspots-scope-empty.md
 
 nongit=$(mktemp -d)
 assert_fails_with_output non-git "$EXE" --repo "$nongit"
@@ -61,6 +70,7 @@ bare=$(mktemp -d)
 git init --bare -q "$bare/repo.git"
 assert_fails_with_output bare "$EXE" --repo "$bare/repo.git"
 assert_fails_with_output invalid-since "$EXE" --repo fixtures/basic --since does-not-exist
+assert_fails_with_stderr invalid-format "invalid arguments" "$EXE" --repo fixtures/basic --format xml
 assert_fails_with_stderr invalid-exclude-empty --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix ""
 assert_fails_with_stderr invalid-exclude-absolute --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix /tmp
 assert_fails_with_stderr invalid-exclude-parent --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix src/../lib
@@ -68,15 +78,21 @@ ctrl=$(printf 'bad\001prefix')
 assert_fails_with_stderr invalid-exclude-control --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix "$ctrl"
 
 "$EXE" --repo fixtures/edge --limit 200 --format json > /tmp/git-hotspots-edge.json
+"$EXE" --repo fixtures/edge --limit 200 --format markdown > /tmp/git-hotspots-edge.md
 "$EXE" --repo fixtures/medium --format json > /tmp/git-hotspots-medium.json
 "$EXE" --repo fixtures/shallow --format json > /tmp/git-hotspots-shallow.json
 "$EXE" --repo fixtures/partial --format json > /tmp/git-hotspots-partial.json
 "$EXE" --repo fixtures/detached --format json > /tmp/git-hotspots-detached.json
 "$EXE" --repo fixtures/linked --format json > /tmp/git-hotspots-linked.json
 
-python3 - <<'PY'
+python3 - /tmp/git-hotspots-basic.md /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-empty.md /tmp/git-hotspots-edge.md <<'PY'
 import json
+import os
+import re
+import sys
 from pathlib import Path
+
+basic_md_path, scope_md_path, scope_empty_md_path, edge_md_path = map(Path, sys.argv[1:])
 
 def load(path):
     return json.loads(Path(path).read_text())
@@ -168,4 +184,39 @@ assert partial['analysis']['history']['auto_fetch'] is False
 for label, path in [('detached','/tmp/git-hotspots-detached.json'), ('linked','/tmp/git-hotspots-linked.json')]:
     data = load(path)
     assert data['results'], label
+
+basic_md = basic_md_path.read_text()
+assert '# git-hotspots report' in basic_md
+assert 'File-level Git-history investigation prompts, not bug predictions or code-quality ratings.' in basic_md
+for section in ['## Run summary', '## Scope', '## Caveats', '## Top hotspots', '## Evidence']:
+    assert section in basic_md, section
+
+scope_md = scope_md_path.read_text()
+assert '- Filters active: true' in scope_md
+assert '- Exclude prefixes: .flow/' in scope_md
+assert '- Excluded path count: 2' in scope_md
+assert '- Excluded change count: 5' in scope_md
+for line in scope_md.splitlines():
+    if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
+        assert '.flow/' not in line, line
+
+scope_empty_md = scope_empty_md_path.read_text()
+assert 'No hotspots matched the requested scope.' in scope_empty_md
+assert 'No result evidence to show.' in scope_empty_md
+for section in ['## Run summary', '## Scope', '## Caveats', '## Top hotspots', '## Evidence']:
+    assert section in scope_empty_md, section
+
+edge_md = edge_md_path.read_text()
+assert 'weird/tab\\tname.txt' in edge_md
+assert 'glob/\\[literal\\]\\*.txt' in edge_md
+assert 'path is deleted or not present at HEAD' in edge_md
+assert 'binary or non\\-text churn unavailable for some changes' in edge_md
+for text in [basic_md, scope_md, scope_empty_md, edge_md]:
+    assert '\t' not in text, 'raw tab leaked in markdown'
+    assert 'Fixture Author' not in text
+    assert 'fixture@example.invalid' not in text
+    home = os.path.expanduser('~')
+    assert not home or home not in text
+    assert not re.search(r'https?://|ssh://|git@', text)
+    assert not re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b', text)
 PY

@@ -88,6 +88,120 @@ pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("}}\n", .{});
 }
 
+pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
+    try writer.writeAll("# git-hotspots report\n\n");
+    try writer.writeAll("File-level Git-history investigation prompts, not bug predictions or code-quality ratings.\n\n");
+
+    try writer.writeAll("## Run summary\n\n");
+    try writer.writeAll("- Tool: git-hotspots 0.0.0-spike\n");
+    try writer.writeAll("- Head commit: ");
+    try markdownText(writer, analysis.history.head);
+    try writer.writeByte('\n');
+    try writer.writeAll("- Range: ");
+    if (analysis.history.range) |range| try markdownText(writer, range) else try writer.writeAll("None");
+    try writer.writeByte('\n');
+    try writer.print("- Commit count: {d}\n", .{analysis.history.commit_count});
+    try writer.print("- Shallow history: {}\n", .{analysis.history.is_shallow});
+    try writer.print("- Partial history: {}\n", .{analysis.history.is_partial});
+    try writer.print("- Dirty worktree: {}\n", .{analysis.history.dirty_worktree});
+    try writer.writeAll("- Auto fetch: false\n");
+    try writer.writeAll("- Paths: repo-relative\n\n");
+
+    try writer.writeAll("## Scope\n\n");
+    try writer.print("- Filters active: {}\n", .{analysis.scope.filters_active});
+    try writer.writeAll("- Exclude prefixes: ");
+    if (analysis.scope.exclude_prefixes.len == 0) {
+        try writer.writeAll("None");
+    } else {
+        for (analysis.scope.exclude_prefixes, 0..) |prefix, i| {
+            if (i != 0) try writer.writeAll(", ");
+            try markdownText(writer, prefix);
+        }
+    }
+    try writer.writeByte('\n');
+    try writer.print("- Excluded path count: {d}\n", .{analysis.scope.excluded_path_count});
+    try writer.print("- Excluded change count: {d}\n\n", .{analysis.scope.excluded_change_count});
+
+    try writer.writeAll("## Caveats\n\n");
+    try renderMarkdownStringList(writer, analysis.caveats);
+
+    try writer.writeAll("\n## Top hotspots\n\n");
+    try writer.writeAll("| Rank | Path | Score | Changes | Churn | Confidence | Last commit |\n");
+    try writer.writeAll("| ---: | --- | ---: | ---: | ---: | --- | --- |\n");
+    for (analysis.results, 0..) |row, i| {
+        try writer.print("| {d} | ", .{i + 1});
+        try markdownText(writer, row.path);
+        try writer.print(" | {d:.1} | {d} | {d} | ", .{ row.score.total, row.change_count, row.churn });
+        try markdownText(writer, row.confidence);
+        try writer.writeAll(" | ");
+        try markdownText(writer, row.last_changed_commit);
+        try writer.writeAll(" |\n");
+    }
+    if (analysis.results.len == 0) try writer.writeAll("\nNo hotspots matched the requested scope.\n");
+
+    try writer.writeAll("\n## Evidence\n");
+    if (analysis.results.len == 0) {
+        try writer.writeAll("\nNo result evidence to show.\n");
+        return;
+    }
+
+    for (analysis.results, 0..) |row, i| {
+        try writer.print("\n### {d}. ", .{i + 1});
+        try markdownText(writer, row.path);
+        try writer.writeAll("\n\n");
+        try writer.print("- Score breakdown: total={d:.3}, frequency={d:.3}, churn={d:.3}, recency={d:.3}, cochange={d:.3}\n", .{ row.score.total, row.score.frequency, row.score.churn, row.score.recency, row.score.cochange });
+        try writer.print("- Changes: {d}\n", .{row.change_count});
+        try writer.print("- Additions: {d}\n", .{row.additions});
+        try writer.print("- Deletions: {d}\n", .{row.deletions});
+        try writer.print("- Current size: ", .{});
+        if (row.current_size) |size| try writer.print("{d}", .{size}) else try writer.writeAll("None");
+        try writer.writeByte('\n');
+        try writer.writeAll("- Confidence: ");
+        try markdownText(writer, row.confidence);
+        try writer.writeByte('\n');
+        try writer.writeAll("- Last commit: ");
+        try markdownText(writer, row.last_changed_commit);
+        try writer.writeByte('\n');
+
+        try writer.writeAll("- Top co-changes:\n");
+        if (row.cochanges.len == 0) {
+            try writer.writeAll("  - None\n");
+        } else {
+            for (row.cochanges) |cc| {
+                try writer.writeAll("  - ");
+                try markdownText(writer, cc.path);
+                try writer.print(" (count={d})\n", .{cc.count});
+            }
+        }
+
+        try writer.writeAll("- Evidence commits:\n");
+        if (row.evidence.len == 0) {
+            try writer.writeAll("  - None\n");
+        } else {
+            for (row.evidence) |ev| {
+                try writer.writeAll("  - commit=");
+                try markdownText(writer, ev.commit);
+                try writer.print(" timestamp={d} additions=", .{ev.timestamp});
+                try renderOptionalU64(writer, ev.additions);
+                try writer.writeAll(" deletions=");
+                try renderOptionalU64(writer, ev.deletions);
+                try writer.writeByte('\n');
+            }
+        }
+
+        try writer.writeAll("- Row caveats:\n");
+        if (row.caveats.len == 0) {
+            try writer.writeAll("  - None\n");
+        } else {
+            for (row.caveats) |caveat| {
+                try writer.writeAll("  - ");
+                try markdownText(writer, caveat);
+                try writer.writeByte('\n');
+            }
+        }
+    }
+}
+
 fn stringArray(writer: anytype, values: []const []const u8) !void {
     try writer.print("[", .{});
     for (values, 0..) |v, i| {
@@ -104,6 +218,48 @@ fn renderInlineStringArray(writer: anytype, values: []const []const u8) !void {
         try writer.print("{s}", .{value});
     }
     try writer.print("]", .{});
+}
+
+fn renderMarkdownStringList(writer: anytype, values: []const []const u8) !void {
+    if (values.len == 0) {
+        try writer.writeAll("- None\n");
+        return;
+    }
+    for (values) |value| {
+        try writer.writeAll("- ");
+        try markdownText(writer, value);
+        try writer.writeByte('\n');
+    }
+}
+
+fn renderOptionalU64(writer: anytype, value: ?u64) !void {
+    if (value) |v| try writer.print("{d}", .{v}) else try writer.writeAll("None");
+}
+
+fn markdownText(writer: anytype, value: []const u8) !void {
+    for (value) |c| switch (c) {
+        '\\' => try writer.writeAll("\\\\"),
+        '`' => try writer.writeAll("\\`"),
+        '*' => try writer.writeAll("\\*"),
+        '_' => try writer.writeAll("\\_"),
+        '{' => try writer.writeAll("\\{"),
+        '}' => try writer.writeAll("\\}"),
+        '[' => try writer.writeAll("\\["),
+        ']' => try writer.writeAll("\\]"),
+        '(' => try writer.writeAll("\\("),
+        ')' => try writer.writeAll("\\)"),
+        '#' => try writer.writeAll("\\#"),
+        '+' => try writer.writeAll("\\+"),
+        '-' => try writer.writeAll("\\-"),
+        '!' => try writer.writeAll("\\!"),
+        '|' => try writer.writeAll("\\|"),
+        '>' => try writer.writeAll("\\>"),
+        '\n' => try writer.writeAll("\\n"),
+        '\r' => try writer.writeAll("\\r"),
+        '\t' => try writer.writeAll("\\t"),
+        0...8, 11...12, 14...0x1f, 0x7f => try writer.print("\\x{x:0>2}", .{c}),
+        else => try writer.writeByte(c),
+    };
 }
 
 fn jsonString(writer: anytype, value: []const u8) !void {
@@ -125,4 +281,59 @@ test "json string escapes paths" {
     defer aw.deinit();
     try jsonString(&aw.writer, "a b/é\t\\q\"");
     try std.testing.expectEqualStrings("\"a b/é\\t\\\\q\\\"\"", aw.written());
+}
+
+test "markdown text escapes markdown and control characters" {
+    var aw: std.Io.Writer.Allocating = .init(std.testing.allocator);
+    defer aw.deinit();
+    try markdownText(&aw.writer, "# [a|b] `x`\t\\q\x01");
+    try std.testing.expectEqualStrings("\\# \\[a\\|b\\] \\`x\\`\\t\\\\q\\x01", aw.written());
+}
+
+test "markdown report has stable sections and no raw private root" {
+    var prefixes = [_][]const u8{ ".flow/", "glob/*" };
+    var global_caveats = [_][]const u8{"dirty worktree detected; ranking uses committed history only"};
+    var cochanges = [_]model.CoChange{.{ .path = "co|path\t`x`.zig", .count = 2 }};
+    var row_caveats = [_][]const u8{"path # caveat\tbinary"};
+    var evidence = [_]model.Evidence{.{ .commit = "abc123", .timestamp = 123, .additions = 1, .deletions = null }};
+    var results = [_]model.Result{.{
+        .path = "# heading|path\t`x`.zig",
+        .score = .{ .frequency = 1.0, .churn = 2.0, .recency = 3.0, .cochange = 4.0, .total = 10.0 },
+        .change_count = 2,
+        .additions = 7,
+        .deletions = 5,
+        .churn = 12,
+        .last_changed_timestamp = 456,
+        .last_changed_commit = "def456",
+        .current_size = null,
+        .cochanges = cochanges[0..],
+        .confidence = "medium",
+        .caveats = row_caveats[0..],
+        .evidence = evidence[0..],
+    }};
+    const analysis = model.Analysis{
+        .allocator = std.testing.allocator,
+        .repo_root = "/private/root",
+        .history = .{ .head = "head123", .head_timestamp = 999, .range = null, .is_shallow = false, .is_partial = false, .dirty_worktree = true, .commit_count = 3 },
+        .scope = .{ .filters_active = true, .exclude_prefixes = prefixes[0..], .excluded_path_count = 2, .excluded_change_count = 5 },
+        .results = results[0..],
+        .caveats = global_caveats[0..],
+    };
+
+    var aw: std.Io.Writer.Allocating = .init(std.testing.allocator);
+    defer aw.deinit();
+    try renderMarkdown(&aw.writer, analysis);
+    const out = aw.written();
+
+    try std.testing.expect(std.mem.indexOf(u8, out, "# git-hotspots report\n\n") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "File-level Git-history investigation prompts, not bug predictions or code-quality ratings.") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "## Run summary\n\n- Tool: git-hotspots 0.0.0-spike") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "## Scope") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "## Caveats") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "## Top hotspots") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "## Evidence") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "\\# heading\\|path\\t\\`x\\`") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "co\\|path\\t\\`x\\`") != null);
+    try std.testing.expect(std.mem.indexOfScalar(u8, out, '\t') == null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "/private/root") == null);
 }

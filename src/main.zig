@@ -8,13 +8,13 @@ const usage =
     \\git-hotspots: deterministic file-level Git-history hotspot prompts
     \\
     \\Usage:
-    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json] [--since REV] [--exclude-prefix PATH]...
+    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--exclude-prefix PATH]...
     \\  git-hotspots --help
     \\
     \\Options:
     \\  --repo PATH       Local Git worktree to analyse (default: .)
     \\  --limit N         Maximum ranked files to emit (default: 10)
-    \\  --format FORMAT   table or json (default: table)
+    \\  --format FORMAT   table, json, or markdown (default: table)
     \\  --since REV       Analyse commits after REV through HEAD
     \\  --exclude-prefix PATH
     \\                    Repeatable repo-relative literal Git path prefix to exclude
@@ -86,6 +86,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
     switch (cfg.format) {
         .table => try report.renderTable(stdout, analysis),
         .json => try report.renderJson(stdout, analysis),
+        .markdown => try report.renderMarkdown(stdout, analysis),
     }
 }
 
@@ -114,7 +115,7 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             const v = args[i];
-            if (std.mem.eql(u8, v, "table")) cfg.format = .table else if (std.mem.eql(u8, v, "json")) cfg.format = .json else return error.InvalidArguments;
+            if (std.mem.eql(u8, v, "table")) cfg.format = .table else if (std.mem.eql(u8, v, "json")) cfg.format = .json else if (std.mem.eql(u8, v, "markdown")) cfg.format = .markdown else return error.InvalidArguments;
         } else if (std.mem.eql(u8, arg, "--since")) {
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
