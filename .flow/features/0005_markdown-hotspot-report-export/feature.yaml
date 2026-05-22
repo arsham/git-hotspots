@@ -1,0 +1,247 @@
+schema: flow-feature.v1
+feature:
+  id: "0005"
+  slug: markdown-hotspot-report-export
+  title: Markdown hotspot report export
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: The CLI can emit table and JSON reports, but the project thesis
+    includes agent-ready, human-shareable exports. Users need a deterministic
+    Markdown report that carries the same local Git-history evidence, scope
+    metadata, caveats, and ranked hotspot details without requiring runtime
+    LLMs, templates, or private upload.
+  outcome: Add `--format markdown` as a stdout renderer over the existing
+    `model.Analysis` evidence model, with deterministic sections for run
+    summary, scope, caveats, ranked hotspots, and per-result evidence. Extend
+    validation and docs so Markdown is covered by the canonical local gate.
+  acceptance:
+    - The CLI accepts `--format markdown` alongside `table` and `json`; the
+      default format remains `table`, and invalid formats still fail clearly.
+    - Markdown rendering uses the existing `model.Analysis` and does not
+      recompute or change Git collection, scoring, co-change, filtering, or
+      JSON/table behaviour.
+    - Markdown includes title, framing disclaimer, run summary, scope, caveats,
+      top-hotspots table, and per-result evidence sections.
+    - Markdown output is deterministic for the same fixture/options and covered
+      by exact golden files plus repeated-output diffs.
+    - Markdown safely renders paths and table cells containing spaces, tabs,
+      unicode, pipes, backticks, brackets, heading/list-like text, and glob-like
+      literals without raw control-character leakage.
+    - Scoped Markdown reports disclose filters and excluded counts, and do not
+      include excluded `.flow/` result rows or co-change paths.
+    - Empty scoped reports, shallow/partial history, dirty worktrees, deleted
+      files, and binary caveats remain explainable in Markdown.
+    - "`zig build validate` covers Markdown golden diffs, semantic assertions,
+      privacy scans, and table/JSON/Markdown real-repo smoke summaries."
+    - README/help document Markdown as an output format without Flow process
+      clutter, prompt-generation claims, bug prediction, quality scoring,
+      developer ranking, hosted/commercial content, or provider/cache promises.
+planning:
+  state: ready
+  summary: "Narrow renderer feature: add deterministic Markdown output via
+    `--format markdown`, render from the existing analysis model, validate with
+    golden Markdown fixtures and privacy-safe real-repo smoke, and document the
+    format publicly. Defer templates, output files, prompts, agent personas,
+    HTML/PDF, frontmatter, providers, cache, release/CI, and scoring or Git
+    behaviour changes."
+  brief_sync:
+    status: unchanged
+    checked_at: 2026-05-22T02:30:10.262Z
+    reason: Feature 0005 is a follow-up implementation slice within B001's
+      agent-ready export direction; B001 remains current and does not require
+      edits.
+  brief_alignment:
+    status: aligned
+    checked_at: 2026-05-22T02:30:10.262Z
+    role: follow_up
+    summary: Feature 0005 implements the Markdown side of B001's deterministic
+      agent-ready export idea without making agents runtime authority.
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-22T02:34:45.868Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-22T02:34:45.868Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-22T02:34:45.868Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-22T02:34:45.868Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: No active roadmap candidate existed after Feature 0004.
+    Markdown export is the next small product slice because the CLI already has
+    table/JSON evidence and the public thesis calls for agent-ready reports.
+  depends_on_feature_ids:
+    - "0002"
+    - "0003"
+    - "0004"
+  blocked_by: []
+design:
+  rough_shape:
+    - Extend `model.Format` and CLI help/parser with `markdown`.
+    - Add `report.renderMarkdown(writer, analysis)` using only `model.Analysis`.
+    - Add Markdown escaping helpers for table cells, headings, paths, caveats,
+      and evidence text.
+    - Add `fixtures/expected/basic.md` and `fixtures/expected/scope-filtered.md`.
+    - Extend integration tests and `tools/validate.sh` so Markdown is part of
+      canonical validation and real-repo smoke.
+    - Update README with a concise Markdown example and supported-format list.
+  packets:
+    - id: P1
+      title: Markdown renderer contract
+      goal: Add deterministic Markdown rendering from existing `model.Analysis`.
+      depends_on: []
+      status: planned
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/report.zig and renderer unit tests."
+        - "In scope: renderMarkdown(writer, analysis), Markdown escaping
+          helpers, required report sections, preserved result order, existing
+          model fields only."
+        - "Out of scope: CLI exposure, scoring changes, Git collection changes,
+          provider/cache work, templates, prompts, file output."
+        - "Protected: renderer must not reach into Git/scoring logic or include
+          absolute roots, authors, remotes, source snippets, or private dumps."
+        - "Dependencies: Feature 0002 analysis model, Feature 0004 scope
+          metadata."
+        - "Validation/evidence: zig fmt --check build.zig src tests; zig build
+          test; unit tests for escaping and stable section snippets."
+        - "Review focus: deterministic, privacy-safe Markdown with provenance,
+          caveats, scope, ranked rows, and evidence."
+        - "Escalate if: Markdown requires data not present in model.Analysis or
+          would change score/Git/scope semantics."
+        - "Done boundary: renderer compiles, tests pass, and is ready for CLI
+          plumbing."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+    - id: P2
+      title: CLI format plumbing
+      goal: Expose Markdown as `--format markdown` while preserving existing formats.
+      depends_on:
+        - P1
+      status: planned
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/model.zig, src/main.zig, src/report.zig,
+          tests/integration.sh."
+        - "In scope: Format.markdown, CLI parser branch, usage text, render
+          switch, targeted fixture smoke."
+        - "Out of scope: --output, templates, prompt flags, agent flags, config
+          files, and table/JSON behaviour changes."
+        - "Protected: default remains table; invalid format handling remains
+          clear; existing JSON/table fixtures stay stable."
+        - "Dependencies: P1 renderer exists."
+        - "Validation/evidence: zig build; zig build test; zig build run --
+          --help; targeted Markdown commands for basic and scoped fixtures."
+        - "Review focus: CLI surface is exactly one new format value and does
+          not widen product scope."
+        - "Escalate if: CLI scope expands beyond format selection."
+        - "Done boundary: users can run --format markdown and existing formats
+          still work."
+      verification_commands:
+        - zig build
+        - zig build test
+        - zig build run -- --help
+    - id: P3
+      title: Validation, fixtures, and public docs
+      goal: Cover Markdown in canonical validation and document it publicly.
+      depends_on:
+        - P2
+      status: planned
+      owner_phase: runner
+      execution_context:
+        - "Anchors: fixtures/expected/basic.md,
+          fixtures/expected/scope-filtered.md, tests/integration.sh,
+          tools/validate.sh, README.md."
+        - "In scope: golden Markdown fixture diffs, repeated-output diff,
+          semantic assertions, privacy checks, table/JSON/Markdown real-repo
+          smoke, README example."
+        - "Out of scope: Flow/process clutter in README, raw private smoke
+          outputs, release/CI work, commercial/hosted language, providers,
+          cache, templates, prompt generation."
+        - "Protected: README remains polished and OSS-facing; validation summary
+          uses labels/counts only and no absolute/private paths."
+        - "Dependencies: P2 CLI plumbing exists."
+        - "Validation/evidence: zig build validate; zig build test; git diff
+          --check; close-out mode with sibling/local repo or explicit skip
+          reason."
+        - "Review focus: Markdown is deterministic and privacy-safe; scoped
+          Markdown does not leak excluded paths; docs do not overclaim."
+        - "Escalate if: golden Markdown becomes too brittle and needs
+          semantic-only reshaping or validation requires new external tools."
+        - "Done boundary: zig build validate is sufficient to catch Markdown
+          export regressions."
+      verification_commands:
+        - zig build validate
+        - zig build test
+        - git diff --check
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-22T02:30:10.262Z
+  updated_at: 2026-05-22T02:34:45.868Z

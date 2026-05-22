@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0005"
   active_run_id: null
   last_completed_feature_id: "0004"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 5
+  next_id: 6
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -45,6 +45,10 @@ features:
       slug: scope-filters-for-useful-hotspot-reports
       path: .flow/features/0004_scope-filters-for-useful-hotspot-reports
       created_at: 2026-05-22T01:49:50.901Z
+    - id: "0005"
+      slug: markdown-hotspot-report-export
+      path: .flow/features/0005_markdown-hotspot-report-export
+      created_at: 2026-05-22T02:30:10.262Z
 intake:
   mode: roadmap
   summary: null
