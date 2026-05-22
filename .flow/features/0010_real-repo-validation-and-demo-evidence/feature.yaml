@@ -33,14 +33,14 @@ intent:
       and 1-2 categorical usefulness/noise observations without private paths,
       repo names, authors, remotes, commit messages, source snippets, or raw
       reports.
-    - Evidence checks cover usefulness basics: reports have non-empty results where
-        expected, positive scores, confidence/caveat fields, evidence commits,
-        Markdown sections, JSON validity, and scoped output without `.flow/`
-        leakage.
-    - Evidence checks record performance and scale basics: tool version, Git/Zig
-        versions when relevant, analysed commit count, tracked-file count,
-        elapsed time, dirty flag, caveat count, and whether reports stay within
-        small-output bounds.
+    - "Evidence checks cover usefulness basics: reports have non-empty results
+      where expected, positive scores, confidence/caveat fields, evidence
+      commits, Markdown sections, JSON validity, and scoped output without
+      `.flow/` leakage."
+    - "Evidence checks record performance and scale basics: tool version,
+      Git/Zig versions when relevant, analysed commit count, tracked-file count,
+      elapsed time, dirty flag, caveat count, and whether reports stay within
+      small-output bounds."
     - No scoring, Git traversal, provider, cache, package/release, CI, network,
       telemetry, upload, remote enrichment, author/developer metric,
       commercial/SaaS, or hosted-product behaviour is added.
@@ -321,4 +321,497 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T14:56:46.028Z
-  updated_at: 2026-05-22T15:12:49.012Z
+  updated_at: 2026-05-22T15:14:15.105Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-22T15:14:15.105Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0010"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+      - P4
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Real-repo validation and demo evidence
+      problem: The public alpha CLI is now published, but its usefulness has only been
+        proven by fixtures, this-repo validation, and smoke checks. Before
+        adding broader features, we need privacy-safe real-repository evidence
+        that file-level reports are understandable, useful, and not dominated by
+        avoidable noise.
+      outcome: Produce a narrow validation-and-demo evidence slice using the existing
+        CLI on this repo and one operator-provided local/sibling repo,
+        committing only privacy-safe summaries and this-repo demo material so
+        the next product feature is chosen from evidence rather than assumption.
+      acceptance:
+        - This repo is exercised from a clean worktree with unscoped and scoped
+          commands, including `--exclude-prefix .flow/`, JSON, Markdown, table,
+          and `--explain` where relevant.
+        - Public demo material, if committed, is generated only from this public
+          repo, uses repo-relative paths, records the exact command and version,
+          excludes `.flow/` as approved, and frames hotspots as investigation
+          prompts rather than judgements.
+        - One operator-provided local or sibling Git worktree is exercised with
+          privacy-safe label `sibling-local-repo`, or execution stops before
+          dispatch until such a path is provided; no raw sibling reports are
+          committed.
+        - Committed sibling evidence contains only safe labels, command shapes,
+          pass/fail summaries, bounded result/caveat/scope counts, elapsed
+          timing, and 1-2 categorical usefulness/noise observations without
+          private paths, repo names, authors, remotes, commit messages, source
+          snippets, or raw reports.
+        - "Evidence checks cover usefulness basics: reports have non-empty
+          results where expected, positive scores, confidence/caveat fields,
+          evidence commits, Markdown sections, JSON validity, and scoped output
+          without `.flow/` leakage."
+        - "Evidence checks record performance and scale basics: tool version,
+          Git/Zig versions when relevant, analysed commit count, tracked-file
+          count, elapsed time, dirty flag, caveat count, and whether reports
+          stay within small-output bounds."
+        - No scoring, Git traversal, provider, cache, package/release, CI,
+          network, telemetry, upload, remote enrichment, author/developer
+          metric, commercial/SaaS, or hosted-product behaviour is added.
+        - Docs and committed evidence do not claim bug prediction, objective
+          code-quality scoring, technical-debt scoring, maintainer judgement,
+          developer ranking, productivity analytics, or third-party OSS blame.
+        - Close-out evidence includes `zig build validate`, close-out validation
+          with the operator-provided sibling repo, `git diff --check`,
+          docs/prohibited-claim scan, privacy scan of committed demo/evidence
+          artefacts, and clean git status.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Feature 0010 tests whether deterministic file-level hotspot reports are
+        useful on real repositories without expanding runtime truth or public
+        claims.
+      checked_at: 2026-05-22T16:12:00.000Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0010_real-repo-validation-and-demo-evidence/prd.md
+  requirements_contract:
+    source_path: .flow/features/0010_real-repo-validation-and-demo-evidence/prd.md
+    source_digest: 3a142f558870c6c4dacf59369ce8f54a7eef28fe09416a41ac56e4680d2f3cbc
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: Use the existing git-hotspots CLI without changing scoring, Git traversal,
+          report schemas, provider behaviour, cache behaviour, packaging,
+          release, CI, network, telemetry, upload, or remote enrichment.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: Generate this-repo demo evidence from a clean worktree where practical and
+          use the approved scope filter --exclude-prefix .flow/ for public demo
+          material.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: This-repo demo evidence must record the exact command shape, tool version,
+          output format, clean/dirty flag, result count, caveat count, scope
+          counts, and short non-judgemental observations.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: This-repo public demo material may include bounded repo-relative paths
+          from this public repository only.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: Run a second real-repo smoke against the operator-provided local/sibling
+          Git worktree using the privacy-safe label sibling-local-repo.
+        category: requirement
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: Do not persist the sibling repository path, name, remote URL,
+          organisation, author identities, commit messages, source snippets, or
+          raw table/JSON/Markdown reports in committed artefacts.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: Sibling evidence may record only safe labels, command shapes, pass/fail
+          status, result counts, caveat counts, dirty flag, scope-active flag,
+          elapsed timing, scale counts, and categorical usefulness/noise
+          observations.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: Run zig build validate and close-out validation with the sibling repo
+          using -Dsmoke-label=sibling-local-repo.
+        category: requirement
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: Verify JSON outputs are valid and contain non-empty results where
+          expected, positive scores, confidence fields, caveat fields, and
+          evidence commit fields.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: Verify Markdown outputs contain Run summary, Scope, Caveats, Top hotspots,
+          Evidence, and investigation-prompt/non-prediction framing.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: Verify scoped this-repo output with --exclude-prefix .flow/ contains no
+          .flow/ result or co-change paths and reports non-zero excluded counts
+          when applicable.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: "Record basic scale and performance evidence: analysed commit count,
+          tracked file count, elapsed time, result count, and whether output
+          size stayed small."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: Public wording must frame results as historical change-pressure prompts,
+          not bug predictions, objective code-quality ratings, maintainer
+          judgement, developer rankings, productivity analytics, or
+          technical-debt scores.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: Public artefacts must not name or excerpt third-party OSS repositories
+          unless separately approved.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#requirements[15]
+        text: If validation exposes a product bug or scoring/noise problem, record it as
+          a candidate future seam; do not fix it inside this feature unless it
+          is required to keep evidence truthful and remains inside the existing
+          CLI contract.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#edge-cases-and-privacy-rules[1]
+        text: Reports may reveal repository structure even without absolute paths. Treat
+          all sibling output as sensitive and summary-only.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#edge-cases-and-privacy-rules[2]
+        text: Dirty worktrees must be reported honestly. Prefer clean this-repo demo
+          evidence after shaping/Flow changes are committed.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#edge-cases-and-privacy-rules[3]
+        text: Use project-relative paths only. Scan committed demo/evidence docs for
+          absolute local paths, home-directory fragments, remote URLs,
+          email-like identities, raw tabs, and private repo names.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#edge-cases-and-privacy-rules[4]
+        text: Do not clone, fetch, pull, or contact remotes to prepare the sibling
+          repository. Use only the already-provided local worktree.
+        category: edge_case
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#edge-cases-and-privacy-rules[5]
+        text: Public demo excerpts from this repo must be small and scope-disclosed.
+        category: edge_case
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#validation[1]
+        text: "Required close-out commands and checks:"
+        category: verification
+        packet_refs: []
+        verification: "Required close-out commands and checks:"
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#validation[2]
+        text: "``sh zig build test zig build validate zig build validate -Dcloseout=true
+          -Dsmoke-repo=<operator-provided-local-repo>
+          -Dsmoke-label=sibling-local-repo git diff --check git status --short
+          --branch ``"
+        category: verification
+        packet_refs:
+          - P3
+        verification: "``sh zig build test zig build validate zig build validate
+          -Dcloseout=true -Dsmoke-repo=<operator-provided-local-repo>
+          -Dsmoke-label=sibling-local-repo git diff --check git status --short
+          --branch ``"
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#validation[3]
+        text: "Additional checks:"
+        category: verification
+        packet_refs: []
+        verification: "Additional checks:"
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#validation[4]
+        text: Run this-repo table, JSON, and Markdown commands with --exclude-prefix
+          .flow/.
+        category: verification
+        packet_refs: []
+        verification: Run this-repo table, JSON, and Markdown commands with
+          --exclude-prefix .flow/.
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#validation[5]
+        text: Run this-repo include-scope smoke such as --include-prefix src/ where
+          useful.
+        category: verification
+        packet_refs: []
+        verification: Run this-repo include-scope smoke such as --include-prefix src/
+          where useful.
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#validation[6]
+        text: Validate JSON with Python or jq.
+        category: verification
+        packet_refs: []
+        verification: Validate JSON with Python or jq.
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#validation[7]
+        text: Scan committed docs/evidence for prohibited positive claims and private
+          data.
+        category: verification
+        packet_refs: []
+        verification: Scan committed docs/evidence for prohibited positive claims and
+          private data.
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#validation[8]
+        text: Confirm no implementation files changed unless a separately justified
+          validation helper is added within scope.
+        category: verification
+        packet_refs: []
+        verification: Confirm no implementation files changed unless a separately
+          justified validation helper is added within scope.
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: Produce a narrow validation-and-demo evidence slice using the existing
+      CLI on this repo and one operator-provided local/sibling repo, committing
+      only privacy-safe summaries and this-repo demo material so the next
+      product feature is chosen from evidence rather than assumption.
+    acceptance:
+      - This repo is exercised from a clean worktree with unscoped and scoped
+        commands, including `--exclude-prefix .flow/`, JSON, Markdown, table,
+        and `--explain` where relevant.
+      - Public demo material, if committed, is generated only from this public
+        repo, uses repo-relative paths, records the exact command and version,
+        excludes `.flow/` as approved, and frames hotspots as investigation
+        prompts rather than judgements.
+      - One operator-provided local or sibling Git worktree is exercised with
+        privacy-safe label `sibling-local-repo`, or execution stops before
+        dispatch until such a path is provided; no raw sibling reports are
+        committed.
+      - Committed sibling evidence contains only safe labels, command shapes,
+        pass/fail summaries, bounded result/caveat/scope counts, elapsed timing,
+        and 1-2 categorical usefulness/noise observations without private paths,
+        repo names, authors, remotes, commit messages, source snippets, or raw
+        reports.
+      - "Evidence checks cover usefulness basics: reports have non-empty results
+        where expected, positive scores, confidence/caveat fields, evidence
+        commits, Markdown sections, JSON validity, and scoped output without
+        `.flow/` leakage."
+      - "Evidence checks record performance and scale basics: tool version,
+        Git/Zig versions when relevant, analysed commit count, tracked-file
+        count, elapsed time, dirty flag, caveat count, and whether reports stay
+        within small-output bounds."
+      - No scoring, Git traversal, provider, cache, package/release, CI,
+        network, telemetry, upload, remote enrichment, author/developer metric,
+        commercial/SaaS, or hosted-product behaviour is added.
+      - Docs and committed evidence do not claim bug prediction, objective
+        code-quality scoring, technical-debt scoring, maintainer judgement,
+        developer ranking, productivity analytics, or third-party OSS blame.
+      - Close-out evidence includes `zig build validate`, close-out validation
+        with the operator-provided sibling repo, `git diff --check`,
+        docs/prohibited-claim scan, privacy scan of committed demo/evidence
+        artefacts, and clean git status.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig build validate
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
