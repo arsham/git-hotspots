@@ -4,7 +4,7 @@ feature:
   slug: large-repo-runtime-feedback
   title: Large-repo runtime feedback
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Large local repositories can take long enough to analyse that a user
@@ -82,7 +82,7 @@ proposal:
     materialised_at: 2026-05-22T19:00:44.023Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -142,7 +142,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: CLI progress contract
       goal: Add the --progress analysis flag and configuration contract without
         changing report output or analysis semantics.
@@ -176,7 +176,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Stderr phase feedback
       goal: Emit bounded privacy-safe phase feedback and elapsed timing to stderr only
         when --progress is enabled.
@@ -215,7 +215,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Validation docs and real-repo smoke
       goal: Make progress feedback durable in validation and public docs with
         privacy-safe close-out evidence.
@@ -278,7 +278,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T18:52:59.240Z
-  updated_at: 2026-05-22T19:01:46.537Z
+  updated_at: 2026-05-22T19:28:02.757Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-22T19:01:46.537Z

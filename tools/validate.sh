@@ -153,6 +153,18 @@ json_validity() {
   pass_rung "$label"
 }
 
+progress_stderr_scan() {
+  err_file=$1
+  grep -q -- 'progress: checking repository' "$err_file" || return 1
+  grep -q -- 'progress: reading Git history' "$err_file" || return 1
+  grep -q -- 'progress: scoring files' "$err_file" || return 1
+  grep -q -- 'progress: rendering report' "$err_file" || return 1
+  grep -Eq '^progress: done in [0-9]+ms$' "$err_file" || return 1
+  esc=$(printf '\033')
+  cr=$(printf '\r')
+  ! LC_ALL=C grep -Eq '/|@|https?://|ssh://|git@|[0-9a-f]{12,40}' "$err_file" && ! LC_ALL=C grep -q '\\' "$err_file" && ! LC_ALL=C grep -q "$esc" "$err_file" && ! LC_ALL=C grep -q "$cr" "$err_file"
+}
+
 semantic_assertions() {
   have_python || return 1
   python3 - "$BASIC_A" "$BASIC_INSPECT_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" <<'PY'
@@ -466,6 +478,10 @@ explain_output_checks() {
   grep -q -- '--version' "$help_out" || return 1
   grep -q -- '--inspect PATH' "$help_out" || return 1
   grep -q -- '--scope VALUE' "$help_out" || return 1
+  grep -q -- '--progress' "$help_out" || return 1
+  "$EXE" --progress --help > "$ARTIFACT_DIR/help-progress.txt" 2> "$explain_err" || return 1
+  [ ! -s "$explain_err" ] || return 1
+  grep -q -- '--progress' "$ARTIFACT_DIR/help-progress.txt" || return 1
   "$EXE" --version > "$version_out" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
   [ "$(cat "$version_out")" = 'git-hotspots 0.1.0-alpha.1' ] || return 1
@@ -486,7 +502,8 @@ explain_output_checks() {
     '--scope project' \
     '--include-prefix src/' \
     '--exclude-prefix .flow/' \
-    '--inspect src/app.txt'
+    '--inspect src/app.txt' \
+    '--progress'
   do
     # shellcheck disable=SC2086
     if "$EXE" --explain $args > "$ARTIFACT_DIR/explain-invalid.out" 2> "$explain_err"; then
@@ -504,7 +521,8 @@ explain_output_checks() {
     '--include-prefix src/' \
     '--exclude-prefix .flow/' \
     '--inspect src/app.txt' \
-    '--explain'
+    '--explain' \
+    '--progress'
   do
     # shellcheck disable=SC2086
     if "$EXE" --version $args > "$ARTIFACT_DIR/version-invalid.out" 2> "$explain_err"; then
@@ -655,16 +673,30 @@ run_timed_json() {
 
 fixture_json_checks() {
   sh tools/setup-fixtures.sh >/dev/null 2>&1 || return 1
-  "$EXE" --repo fixtures/basic --format json > "$BASIC_A" || return 1
+  "$EXE" --repo fixtures/basic --format json > "$BASIC_A" 2> "$BASIC_ERR" || return 1
+  [ ! -s "$BASIC_ERR" ] || return 1
   "$EXE" --repo fixtures/basic --format json > "$BASIC_B" || return 1
   diff -u fixtures/expected/basic.json "$BASIC_A" >/dev/null || return 1
   diff -u "$BASIC_A" "$BASIC_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/basic --progress --format json > "$BASIC_PROGRESS_JSON" 2> "$BASIC_PROGRESS_ERR" || return 1
+  diff -u "$BASIC_A" "$BASIC_PROGRESS_JSON" >/dev/null || return 1
+  progress_stderr_scan "$BASIC_PROGRESS_ERR" || return 1
   "$EXE" --repo fixtures/basic --inspect src/app.txt --format json > "$BASIC_INSPECT_JSON" || return 1
   diff -u fixtures/expected/basic-inspect.json "$BASIC_INSPECT_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/basic --progress --inspect src/app.txt --format json > "$BASIC_INSPECT_PROGRESS_JSON" 2> "$BASIC_INSPECT_PROGRESS_ERR" || return 1
+  diff -u "$BASIC_INSPECT_JSON" "$BASIC_INSPECT_PROGRESS_JSON" >/dev/null || return 1
+  progress_stderr_scan "$BASIC_INSPECT_PROGRESS_ERR" || return 1
   "$EXE" --repo fixtures/basic --format markdown > "$BASIC_MD_A" || return 1
   "$EXE" --repo fixtures/basic --format markdown > "$BASIC_MD_B" || return 1
   diff -u fixtures/expected/basic.md "$BASIC_MD_A" >/dev/null || return 1
   diff -u "$BASIC_MD_A" "$BASIC_MD_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/basic --progress --format markdown > "$BASIC_PROGRESS_MD" 2> "$BASIC_PROGRESS_MD_ERR" || return 1
+  diff -u "$BASIC_MD_A" "$BASIC_PROGRESS_MD" >/dev/null || return 1
+  progress_stderr_scan "$BASIC_PROGRESS_MD_ERR" || return 1
+  "$EXE" --repo fixtures/basic --format table > "$BASIC_TABLE" || return 1
+  "$EXE" --repo fixtures/basic --progress --format table > "$BASIC_PROGRESS_TABLE" 2> "$BASIC_PROGRESS_TABLE_ERR" || return 1
+  diff -u "$BASIC_TABLE" "$BASIC_PROGRESS_TABLE" >/dev/null || return 1
+  progress_stderr_scan "$BASIC_PROGRESS_TABLE_ERR" || return 1
   "$EXE" --repo fixtures/basic --inspect src/app.txt --format markdown > "$BASIC_INSPECT_MD" || return 1
   diff -u fixtures/expected/basic-inspect.md "$BASIC_INSPECT_MD" >/dev/null || return 1
   "$EXE" --repo fixtures/basic --inspect src/app.txt --format table > "$BASIC_INSPECT_TABLE" || return 1
@@ -687,6 +719,9 @@ fixture_json_checks() {
   diff -u "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" >/dev/null || return 1
   "$EXE" --repo fixtures/scope --scope project --format json > "$SCOPE_PROJECT_JSON" || return 1
   diff -u fixtures/expected/scope-project.json "$SCOPE_PROJECT_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/scope --scope project --progress --format json > "$SCOPE_PROJECT_PROGRESS_JSON" 2> "$SCOPE_PROJECT_PROGRESS_ERR" || return 1
+  diff -u "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_PROGRESS_JSON" >/dev/null || return 1
+  progress_stderr_scan "$SCOPE_PROJECT_PROGRESS_ERR" || return 1
   "$EXE" --repo fixtures/scope --scope project --format json > "$SCOPE_PROJECT_JSON_B" || return 1
   diff -u "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" >/dev/null || return 1
   "$EXE" --repo fixtures/scope --scope project --format markdown > "$SCOPE_PROJECT_MD" || return 1
@@ -694,6 +729,9 @@ fixture_json_checks() {
   diff -u fixtures/expected/scope-project.md "$SCOPE_PROJECT_MD" >/dev/null || return 1
   diff -u "$SCOPE_PROJECT_MD" "$SCOPE_PROJECT_MD_B" >/dev/null || return 1
   "$EXE" --repo fixtures/scope --scope project --inspect src/vendor_adapter.zig --format json > "$SCOPE_PROJECT_INSPECT_JSON" || return 1
+  "$EXE" --repo fixtures/scope --scope project --progress --inspect src/vendor_adapter.zig --format json > "$SCOPE_PROJECT_INSPECT_PROGRESS_JSON" 2> "$SCOPE_PROJECT_INSPECT_PROGRESS_ERR" || return 1
+  diff -u "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_PROJECT_INSPECT_PROGRESS_JSON" >/dev/null || return 1
+  progress_stderr_scan "$SCOPE_PROJECT_INSPECT_PROGRESS_ERR" || return 1
   "$EXE" --repo fixtures/scope --scope all --inspect .flow/state.yaml --format json > "$SCOPE_ALL_INSPECT_FLOW_JSON" || return 1
   if "$EXE" --repo fixtures/scope --scope project --inspect .flow/state.yaml --format json > "$ARTIFACT_DIR/project-inspect-flow.out" 2> "$ARTIFACT_DIR/project-inspect-flow.err"; then return 1; fi
   grep -q -- '--inspect target has no matching' "$ARTIFACT_DIR/project-inspect-flow.err" || return 1
@@ -718,6 +756,9 @@ fixture_json_checks() {
   "$EXE" --repo fixtures/edge --limit 200 --format markdown > "$EDGE_MD" || return 1
   "$EXE" --repo fixtures/edge --inspect 'glob/[literal]*.txt' --format markdown > "$EDGE_INSPECT_MD" || return 1
   "$EXE" --repo fixtures/edge --inspect 'weird/tab\tname.txt' --format json > "$EDGE_INSPECT_TAB_JSON" || return 1
+  if "$EXE" --repo fixtures/basic --progress --since does-not-exist > "$ARTIFACT_DIR/progress-invalid-since.out" 2> "$ARTIFACT_DIR/progress-invalid-since.err"; then return 1; fi
+  grep -q -- 'progress: checking repository' "$ARTIFACT_DIR/progress-invalid-since.err" || return 1
+  grep -q -- '--since must name' "$ARTIFACT_DIR/progress-invalid-since.err" || return 1
   "$EXE" --repo fixtures/shallow --format json > "$SHALLOW_JSON" || return 1
   "$EXE" --repo fixtures/partial --format json > "$PARTIAL_JSON" || return 1
   "$EXE" --repo . --format json > "$SELF_JSON" || return 1
@@ -754,7 +795,11 @@ real_repo_smoke() {
   project_table_out=$(mktemp "$ARTIFACT_DIR/project-table.XXXXXX")
   project_json_out=$(mktemp "$ARTIFACT_DIR/project-real.XXXXXX.json")
   project_markdown_out=$(mktemp "$ARTIFACT_DIR/project-real.XXXXXX.md")
+  progress_json_out=$(mktemp "$ARTIFACT_DIR/progress-real.XXXXXX.json")
+  progress_err=$(mktemp "$ARTIFACT_DIR/progress-real.XXXXXX.err")
   timing_file=$(mktemp "$ARTIFACT_DIR/real-time.XXXXXX")
+  commit_count=$(git -C "$repo" rev-list --count HEAD 2>/dev/null || printf 'unknown')
+  tracked_file_count=$(git -C "$repo" ls-files 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
 
   if "$EXE" --repo "$repo" --scope all --format table > "$table_out" 2> "$timing_file"; then
     table_status=pass
@@ -792,25 +837,41 @@ real_repo_smoke() {
     project_markdown_status=fail
   fi
 
-  if [ "$table_status" = pass ] && [ "$json_status" = pass ] && [ "$markdown_status" = pass ] && [ "$project_table_status" = pass ] && [ "$project_json_status" = pass ] && [ "$project_markdown_status" = pass ]; then
+  if "$EXE" --repo "$repo" --scope project --progress --format json > "$progress_json_out" 2> "$progress_err" && diff -u "$project_json_out" "$progress_json_out" >/dev/null && progress_stderr_scan "$progress_err"; then
+    progress_status=pass
+  else
+    progress_status=fail
+  fi
+
+  if [ "$table_status" = pass ] && [ "$json_status" = pass ] && [ "$markdown_status" = pass ] && [ "$project_table_status" = pass ] && [ "$project_json_status" = pass ] && [ "$project_markdown_status" = pass ] && [ "$progress_status" = pass ]; then
     summary=$(json_count_summary "$json_out") || summary='results=unknown caveats=unknown dirty=unknown'
     project_summary=$(json_count_summary "$project_json_out") || project_summary='results=unknown caveats=unknown dirty=unknown'
     elapsed=${timing#*|}
     project_elapsed=${project_timing#*|}
-    printf 'real-repo label=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_%s project_elapsed=%s\n' "$label" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
+    printf 'real-repo label=%s commits=%s tracked_files=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
     pass_rung "real repo smoke $label"
     return 0
   fi
 
-  fail_rung "real repo smoke $label" "all_table=$table_status all_json=$json_status all_markdown=$markdown_status project_table=$project_table_status project_json=$project_json_status project_markdown=$project_markdown_status"
+  fail_rung "real repo smoke $label" "all_table=$table_status all_json=$json_status all_markdown=$markdown_status project_table=$project_table_status project_json=$project_json_status project_markdown=$project_markdown_status project_progress=$progress_status"
   return 1
 }
 
 BASIC_A=$ARTIFACT_DIR/basic-a.json
 BASIC_B=$ARTIFACT_DIR/basic-b.json
+BASIC_ERR=$ARTIFACT_DIR/basic.err
+BASIC_PROGRESS_JSON=$ARTIFACT_DIR/basic-progress.json
+BASIC_PROGRESS_ERR=$ARTIFACT_DIR/basic-progress.err
 BASIC_INSPECT_JSON=$ARTIFACT_DIR/basic-inspect.json
+BASIC_INSPECT_PROGRESS_JSON=$ARTIFACT_DIR/basic-inspect-progress.json
+BASIC_INSPECT_PROGRESS_ERR=$ARTIFACT_DIR/basic-inspect-progress.err
 BASIC_MD_A=$ARTIFACT_DIR/basic-a.md
 BASIC_MD_B=$ARTIFACT_DIR/basic-b.md
+BASIC_PROGRESS_MD=$ARTIFACT_DIR/basic-progress.md
+BASIC_PROGRESS_MD_ERR=$ARTIFACT_DIR/basic-progress-md.err
+BASIC_TABLE=$ARTIFACT_DIR/basic.txt
+BASIC_PROGRESS_TABLE=$ARTIFACT_DIR/basic-progress.txt
+BASIC_PROGRESS_TABLE_ERR=$ARTIFACT_DIR/basic-progress-table.err
 BASIC_INSPECT_MD=$ARTIFACT_DIR/basic-inspect.md
 BASIC_INSPECT_TABLE=$ARTIFACT_DIR/basic-inspect.txt
 SCOPE_UNFILTERED_JSON=$ARTIFACT_DIR/scope-unfiltered.json
@@ -821,10 +882,14 @@ SCOPE_FILTERED_MD=$ARTIFACT_DIR/scope-filtered.md
 SCOPE_FILTERED_MD_B=$ARTIFACT_DIR/scope-filtered-b.md
 SCOPE_PROJECT_JSON=$ARTIFACT_DIR/scope-project.json
 SCOPE_PROJECT_JSON_B=$ARTIFACT_DIR/scope-project-b.json
+SCOPE_PROJECT_PROGRESS_JSON=$ARTIFACT_DIR/scope-project-progress.json
+SCOPE_PROJECT_PROGRESS_ERR=$ARTIFACT_DIR/scope-project-progress.err
 SCOPE_PROJECT_DUPLICATE_JSON=$ARTIFACT_DIR/scope-project-duplicate.json
 SCOPE_PROJECT_INCLUDE_FLOW_JSON=$ARTIFACT_DIR/scope-project-include-flow.json
 SCOPE_PROJECT_INCLUDE_SRC_JSON=$ARTIFACT_DIR/scope-project-include-src.json
 SCOPE_PROJECT_INSPECT_JSON=$ARTIFACT_DIR/scope-project-inspect.json
+SCOPE_PROJECT_INSPECT_PROGRESS_JSON=$ARTIFACT_DIR/scope-project-inspect-progress.json
+SCOPE_PROJECT_INSPECT_PROGRESS_ERR=$ARTIFACT_DIR/scope-project-inspect-progress.err
 SCOPE_ALL_INSPECT_FLOW_JSON=$ARTIFACT_DIR/scope-all-inspect-flow.json
 SCOPE_PROJECT_MD=$ARTIFACT_DIR/scope-project.md
 SCOPE_PROJECT_MD_B=$ARTIFACT_DIR/scope-project-b.md
@@ -887,7 +952,7 @@ else
 fi
 
 printf 'validate: RUN JSON validity\n'
-json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_INSPECT_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
+json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_PROGRESS_JSON" "$BASIC_INSPECT_JSON" "$BASIC_INSPECT_PROGRESS_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" "$SCOPE_PROJECT_PROGRESS_JSON" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_PROJECT_INSPECT_PROGRESS_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
 
 printf 'validate: RUN shallow, partial, and privacy assertions\n'
 if semantic_assertions; then

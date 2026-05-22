@@ -10,7 +10,7 @@ const usage =
     \\git-hotspots: deterministic file-level Git-history hotspot prompts
     \\
     \\Usage:
-    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--scope all|project] [--include-prefix PATH]... [--exclude-prefix PATH]... [--inspect PATH]
+    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--scope all|project] [--include-prefix PATH]... [--exclude-prefix PATH]... [--inspect PATH] [--progress]
     \\  git-hotspots --explain
     \\  git-hotspots --version
     \\  git-hotspots --help
@@ -31,6 +31,7 @@ const usage =
     \\  --inspect PATH    Exact repo-relative file drilldown; selects one file after
     \\                    scoring and ranking, before normal --limit truncation;
     \\                    use \\t to target a tab in a Git path
+    \\  --progress        Write opt-in coarse analysis progress to stderr for long runs
     \\  --explain         Explain current scoring semantics without analysing a repo
     \\  --version         Show the git-hotspots version without analysing a repo
     \\  --help            Show this help
@@ -80,8 +81,8 @@ pub fn main(init: std.process.Init.Minimal) !void {
             error.InvalidInspectPath => try stderr.print("error: --inspect must be a non-empty exact repo-relative Git path without absolute roots, '..' segments, or control characters\n", .{}),
             error.InvalidScope => try stderr.print("error: --scope accepts one lowercase value: all or project\n", .{}),
             error.InvalidInspectLimitCombination => try stderr.print("error: --limit cannot be combined with --inspect; inspect selects from the full scoped evidence universe\n", .{}),
-            error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect)\n", .{}),
-            error.InvalidVersionCombination => try stderr.print("error: --version cannot be combined with --explain or analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect)\n", .{}),
+            error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect, --progress)\n", .{}),
+            error.InvalidVersionCombination => try stderr.print("error: --version cannot be combined with --explain or analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect, --progress)\n", .{}),
             error.InvalidArguments => try stderr.print("error: invalid arguments\n\n{s}", .{usage}),
             else => try stderr.print("error: {s}\n", .{@errorName(err)}),
         }
@@ -102,7 +103,10 @@ pub fn main(init: std.process.Init.Minimal) !void {
     };
     defer freeConfig(allocator, cfg);
 
-    var analysis = git.analyze(allocator, io, cfg) catch |err| {
+    const progress_started = Io.Clock.Timestamp.now(io, .awake);
+    const progress = if (cfg.progress) stderr else null;
+
+    var analysis = git.analyze(allocator, io, cfg, progress) catch |err| {
         switch (err) {
             error.NotGitRepository => try stderr.print("error: --repo must point to a local non-bare Git worktree\n", .{}),
             error.BareRepository => try stderr.print("error: bare repositories are not supported by this alpha; use a worktree\n", .{}),
@@ -116,10 +120,24 @@ pub fn main(init: std.process.Init.Minimal) !void {
     };
     defer analysis.deinit();
 
+    try writeProgress(progress, "rendering report");
+
     switch (cfg.format) {
         .table => try report.renderTable(stdout, analysis),
         .json => try report.renderJson(stdout, analysis),
         .markdown => try report.renderMarkdown(stdout, analysis),
+    }
+    if (progress) |writer| {
+        const elapsed = progress_started.durationTo(Io.Clock.Timestamp.now(io, .awake));
+        try writer.print("progress: done in {d}ms\n", .{elapsed.raw.toMilliseconds()});
+        try writer.flush();
+    }
+}
+
+fn writeProgress(progress: ?*Io.Writer, message: []const u8) !void {
+    if (progress) |writer| {
+        try writer.print("progress: {s}\n", .{message});
+        try writer.flush();
     }
 }
 
@@ -152,6 +170,13 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
         if (std.mem.eql(u8, arg, "--version")) {
             if (explain_requested) return error.InvalidVersionCombination;
             version_requested = true;
+            continue;
+        }
+        if (std.mem.eql(u8, arg, "--progress")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
+            cfg.progress = true;
             continue;
         }
         if (std.mem.eql(u8, arg, "--repo")) {
@@ -369,6 +394,24 @@ test "parse defaults are documented through config shape" {
     try std.testing.expectEqual(@as(usize, 10), cfg.limit);
     try std.testing.expectEqual(model.Format.table, cfg.format);
     try std.testing.expectEqual(model.ScopePreset.all, cfg.scope);
+    try std.testing.expect(!cfg.progress);
+}
+
+test "parse progress analysis flag independent of order" {
+    const before_args = [_][:0]const u8{ "git-hotspots", "--progress", "--repo", "fixtures/basic", "--format", "json" };
+    const before_mode = try parseArgs(std.testing.allocator, &before_args);
+    const before_cfg = before_mode.analyze;
+    defer freeConfig(std.testing.allocator, before_cfg);
+    try std.testing.expect(before_cfg.progress);
+    try std.testing.expectEqual(model.Format.json, before_cfg.format);
+    try std.testing.expectEqualStrings("fixtures/basic", before_cfg.repo_path);
+
+    const after_args = [_][:0]const u8{ "git-hotspots", "--repo", "fixtures/basic", "--format", "markdown", "--progress" };
+    const after_mode = try parseArgs(std.testing.allocator, &after_args);
+    const after_cfg = after_mode.analyze;
+    defer freeConfig(std.testing.allocator, after_cfg);
+    try std.testing.expect(after_cfg.progress);
+    try std.testing.expectEqual(model.Format.markdown, after_cfg.format);
 }
 
 test "parse standalone explain mode" {
@@ -395,6 +438,8 @@ test "reject explain combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--explain", "--exclude-prefix", ".flow/" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--inspect", "src/app.zig" },
         &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--explain" },
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--progress" },
+        &[_][:0]const u8{ "git-hotspots", "--progress", "--explain" },
     };
     for (cases) |args| try std.testing.expectError(error.InvalidExplainCombination, parseArgs(std.testing.allocator, args));
 }
@@ -412,6 +457,8 @@ test "reject version combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--version", "--explain" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--inspect", "src/app.zig" },
         &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--version" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--progress" },
+        &[_][:0]const u8{ "git-hotspots", "--progress", "--version" },
     };
     for (cases) |args| try std.testing.expectError(error.InvalidVersionCombination, parseArgs(std.testing.allocator, args));
 }

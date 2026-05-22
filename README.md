@@ -135,13 +135,15 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --include-prefix src/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --exclude-prefix .flow/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --format markdown
+./zig-out/bin/git-hotspots --repo . --progress --format json
 ./zig-out/bin/git-hotspots --explain
 ./zig-out/bin/git-hotspots --version
 ```
 
 Supported options are `--repo`, `--limit`, `--format table|json|markdown`,
 `--since`, `--scope all|project`, repeatable `--include-prefix`, repeatable
-`--exclude-prefix`, `--inspect`, `--explain`, `--version`, and `--help`.
+`--exclude-prefix`, `--inspect`, `--progress`, `--explain`, `--version`, and
+`--help`.
 `--scope all` is the default unfiltered evidence universe unless explicit
 prefixes are supplied. `--scope project` is opt-in and currently expands only to
 the literal exclude prefix `.flow/`, so workflow metadata does not dominate a
@@ -160,6 +162,11 @@ bounded counts for paths and changes omitted by include or exclude filters.
 Markdown output is a deterministic stdout report with run summary, scope,
 caveats, ranked hotspots, and per-result evidence. `--version` is standalone
 and prints the alpha version without requiring a Git repository.
+
+Use `--progress` when a long local analysis would benefit from coarse runtime
+feedback. It is opt-in, writes bounded phase and elapsed-time lines to stderr
+only, and does not add timing or progress fields to table, JSON, or Markdown
+reports.
 
 ## How to read scores
 

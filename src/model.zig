@@ -12,6 +12,7 @@ pub const Config = struct {
     repo_path: []const u8,
     limit: usize = 10,
     format: Format = .table,
+    progress: bool = false,
     since: ?[]const u8 = null,
     inspect_path: ?[]const u8 = null,
     scope: ScopePreset = .all,

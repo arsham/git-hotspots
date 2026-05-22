@@ -39,6 +39,41 @@ assert_fails_with_stderr() {
   fi
 }
 
+assert_progress_stderr() {
+  label=$1
+  err=$2
+  if ! grep -q -- 'progress: checking repository' "$err"; then
+    echo "$label stderr missing checking repository phase" >&2
+    exit 1
+  fi
+  if ! grep -q -- 'progress: reading Git history' "$err"; then
+    echo "$label stderr missing reading Git history phase" >&2
+    exit 1
+  fi
+  if ! grep -q -- 'progress: scoring files' "$err"; then
+    echo "$label stderr missing scoring files phase" >&2
+    exit 1
+  fi
+  if ! grep -q -- 'progress: rendering report' "$err"; then
+    echo "$label stderr missing rendering report phase" >&2
+    exit 1
+  fi
+  if ! grep -Eq '^progress: done in [0-9]+ms$' "$err"; then
+    echo "$label stderr missing bounded elapsed line" >&2
+    exit 1
+  fi
+  esc=$(printf '\033')
+  cr=$(printf '\r')
+  if LC_ALL=C grep -Eq '/|@|https?://|ssh://|git@|[0-9a-f]{12,40}' "$err" || LC_ALL=C grep -q '\\' "$err"; then
+    echo "$label stderr failed progress privacy scan" >&2
+    exit 1
+  fi
+  if LC_ALL=C grep -q "$esc" "$err" || LC_ALL=C grep -q "$cr" "$err"; then
+    echo "$label stderr contained terminal control characters" >&2
+    exit 1
+  fi
+}
+
 ctrl=$(printf 'bad\001path')
 
 sh tools/setup-fixtures.sh
@@ -52,6 +87,10 @@ grep -q -- "--explain" /tmp/git-hotspots-help.txt
 grep -q -- "--version" /tmp/git-hotspots-help.txt
 grep -q -- "--inspect PATH" /tmp/git-hotspots-help.txt
 grep -q -- "--scope VALUE" /tmp/git-hotspots-help.txt
+grep -q -- "--progress" /tmp/git-hotspots-help.txt
+"$EXE" --progress --help > /tmp/git-hotspots-progress-help.txt 2> /tmp/git-hotspots-progress-help.err
+grep -q -- "--progress" /tmp/git-hotspots-progress-help.txt
+test ! -s /tmp/git-hotspots-progress-help.err
 "$EXE" --version > /tmp/git-hotspots-version.txt 2> /tmp/git-hotspots-version.err
 test "$(cat /tmp/git-hotspots-version.txt)" = "git-hotspots 0.1.0-alpha.1"
 test ! -s /tmp/git-hotspots-version.err
@@ -71,6 +110,8 @@ assert_fails_with_stderr explain-scope "--explain cannot be combined" "$EXE" --e
 assert_fails_with_stderr explain-include "--explain cannot be combined" "$EXE" --explain --include-prefix src/
 assert_fails_with_stderr explain-exclude "--explain cannot be combined" "$EXE" --explain --exclude-prefix .flow/
 assert_fails_with_stderr explain-inspect "--explain cannot be combined" "$EXE" --explain --inspect src/app.txt
+assert_fails_with_stderr explain-progress "--explain cannot be combined" "$EXE" --explain --progress
+assert_fails_with_stderr progress-explain "--explain cannot be combined" "$EXE" --progress --explain
 assert_fails_with_stderr version-repo "--version cannot be combined" "$EXE" --version --repo .
 assert_fails_with_stderr version-limit "--version cannot be combined" "$EXE" --version --limit 1
 assert_fails_with_stderr version-format "--version cannot be combined" "$EXE" --version --format markdown
@@ -80,17 +121,34 @@ assert_fails_with_stderr version-include "--version cannot be combined" "$EXE" -
 assert_fails_with_stderr version-exclude "--version cannot be combined" "$EXE" --version --exclude-prefix .flow/
 assert_fails_with_stderr version-explain "--version cannot be combined" "$EXE" --version --explain
 assert_fails_with_stderr version-inspect "--version cannot be combined" "$EXE" --version --inspect src/app.txt
+assert_fails_with_stderr version-progress "--version cannot be combined" "$EXE" --version --progress
+assert_fails_with_stderr progress-version "--version cannot be combined" "$EXE" --progress --version
+assert_fails_with_stderr version-progress "--version cannot be combined" "$EXE" --version --progress
 
-"$EXE" --repo fixtures/basic --format json > /tmp/git-hotspots-basic.json
+"$EXE" --repo fixtures/basic --format json > /tmp/git-hotspots-basic.json 2> /tmp/git-hotspots-basic.err
+test ! -s /tmp/git-hotspots-basic.err
 diff -u fixtures/expected/basic.json /tmp/git-hotspots-basic.json
+"$EXE" --repo fixtures/basic --progress --format json > /tmp/git-hotspots-basic-progress.json 2> /tmp/git-hotspots-basic-progress.err
+diff -u /tmp/git-hotspots-basic.json /tmp/git-hotspots-basic-progress.json
+assert_progress_stderr basic-json /tmp/git-hotspots-basic-progress.err
 "$EXE" --repo fixtures/basic --format json > /tmp/git-hotspots-basic-2.json
 diff -u /tmp/git-hotspots-basic.json /tmp/git-hotspots-basic-2.json
 "$EXE" --repo fixtures/basic --format markdown > /tmp/git-hotspots-basic.md
 diff -u fixtures/expected/basic.md /tmp/git-hotspots-basic.md
+"$EXE" --repo fixtures/basic --progress --format markdown > /tmp/git-hotspots-basic-progress.md 2> /tmp/git-hotspots-basic-progress-md.err
+diff -u /tmp/git-hotspots-basic.md /tmp/git-hotspots-basic-progress.md
+assert_progress_stderr basic-markdown /tmp/git-hotspots-basic-progress-md.err
 "$EXE" --repo fixtures/basic --format markdown > /tmp/git-hotspots-basic-2.md
 diff -u /tmp/git-hotspots-basic.md /tmp/git-hotspots-basic-2.md
+"$EXE" --repo fixtures/basic --format table > /tmp/git-hotspots-basic.txt
+"$EXE" --repo fixtures/basic --progress --format table > /tmp/git-hotspots-basic-progress.txt 2> /tmp/git-hotspots-basic-progress-table.err
+diff -u /tmp/git-hotspots-basic.txt /tmp/git-hotspots-basic-progress.txt
+assert_progress_stderr basic-table /tmp/git-hotspots-basic-progress-table.err
 "$EXE" --repo fixtures/basic --inspect src/app.txt --format json > /tmp/git-hotspots-basic-inspect.json
 diff -u fixtures/expected/basic-inspect.json /tmp/git-hotspots-basic-inspect.json
+"$EXE" --repo fixtures/basic --progress --inspect src/app.txt --format json > /tmp/git-hotspots-basic-inspect-progress.json 2> /tmp/git-hotspots-basic-inspect-progress.err
+diff -u /tmp/git-hotspots-basic-inspect.json /tmp/git-hotspots-basic-inspect-progress.json
+assert_progress_stderr basic-inspect /tmp/git-hotspots-basic-inspect-progress.err
 "$EXE" --repo fixtures/basic --inspect src/app.txt --format json > /tmp/git-hotspots-basic-inspect-2.json
 diff -u /tmp/git-hotspots-basic-inspect.json /tmp/git-hotspots-basic-inspect-2.json
 "$EXE" --repo fixtures/basic --inspect src/app.txt --format markdown > /tmp/git-hotspots-basic-inspect.md
@@ -109,6 +167,9 @@ diff -u /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-filtered-2.m
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format table > /tmp/git-hotspots-scope-filtered.txt
 "$EXE" --repo fixtures/scope --scope project --format json > /tmp/git-hotspots-scope-project.json
 diff -u fixtures/expected/scope-project.json /tmp/git-hotspots-scope-project.json
+"$EXE" --repo fixtures/scope --scope project --progress --format json > /tmp/git-hotspots-scope-project-progress.json 2> /tmp/git-hotspots-scope-project-progress.err
+diff -u /tmp/git-hotspots-scope-project.json /tmp/git-hotspots-scope-project-progress.json
+assert_progress_stderr scope-project /tmp/git-hotspots-scope-project-progress.err
 "$EXE" --repo fixtures/scope --scope project --format json > /tmp/git-hotspots-scope-project-2.json
 diff -u /tmp/git-hotspots-scope-project.json /tmp/git-hotspots-scope-project-2.json
 "$EXE" --repo fixtures/scope --scope project --format markdown > /tmp/git-hotspots-scope-project.md
@@ -163,6 +224,7 @@ bare=$(mktemp -d)
 git init --bare -q "$bare/repo.git"
 assert_fails_with_output bare "$EXE" --repo "$bare/repo.git"
 assert_fails_with_output invalid-since "$EXE" --repo fixtures/basic --since does-not-exist
+assert_fails_with_stderr progress-invalid-since "--since must name" "$EXE" --repo fixtures/basic --progress --since does-not-exist
 assert_fails_with_stderr invalid-format "invalid arguments" "$EXE" --repo fixtures/basic --format xml
 assert_fails_with_stderr invalid-scope-missing "--scope accepts" "$EXE" --repo fixtures/basic --scope
 assert_fails_with_stderr invalid-scope-unknown "--scope accepts" "$EXE" --repo fixtures/basic --scope unknown

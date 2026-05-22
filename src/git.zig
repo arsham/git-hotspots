@@ -98,7 +98,16 @@ fn isTrueText(text: []u8) bool {
     return std.mem.eql(u8, std.mem.trim(u8, text, "\r\n "), "true");
 }
 
-pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config) AnalyzeError!model.Analysis {
+fn writeProgress(progress: ?*std.Io.Writer, message: []const u8) !void {
+    if (progress) |writer| {
+        try writer.print("progress: {s}\n", .{message});
+        try writer.flush();
+    }
+}
+
+pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, progress: ?*std.Io.Writer) AnalyzeError!model.Analysis {
+    try writeProgress(progress, "checking repository");
+
     const bare_out = runGitOk(allocator, io, cfg.repo_path, &.{ "rev-parse", "--is-bare-repository" }) catch return error.NotGitRepository;
     defer allocator.free(bare_out);
     if (isTrueText(bare_out)) return error.BareRepository;
@@ -157,6 +166,7 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config) Anal
     }
     errdefer if (range_owned) |r| allocator.free(r);
 
+    try writeProgress(progress, "reading Git history");
     const log_out = try runGitOk(allocator, io, cfg.repo_path, log_args.items);
     defer allocator.free(log_out);
 
@@ -223,6 +233,8 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config) Anal
     if (is_shallow) try addCaveat(allocator, &caveats, "history is shallow; auto_fetch is false");
     if (is_partial) try addCaveat(allocator, &caveats, "history may be partial/promisor; auto_fetch is false");
     if (dirty) try addCaveat(allocator, &caveats, "dirty worktree detected; ranking uses committed history only");
+
+    try writeProgress(progress, "scoring files");
 
     var results = std.array_list.Managed(model.Result).init(allocator);
     errdefer {
