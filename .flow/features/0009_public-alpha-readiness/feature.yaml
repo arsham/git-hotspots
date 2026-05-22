@@ -1,0 +1,293 @@
+schema: flow-feature.v1
+feature:
+  id: "0009"
+  slug: public-alpha-readiness
+  title: Public alpha readiness
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: The repository has a useful local CLI alpha, but it is not ready for
+    public OSS use because it lacks an explicit license, still reports the spike
+    version marker, has no `--version` surface, and does not yet document alpha
+    install and contribution expectations.
+  outcome: Prepare the repository for a narrow source-available public alpha by
+    adding Apache-2.0 licensing, alpha version identity, `--version`, minimal
+    install and contribution docs, and alpha readiness validation without adding
+    packaging, release automation, CI, hosted strategy, or new hotspot analysis
+    behaviour.
+  acceptance:
+    - A root `LICENSE` file contains the Apache-2.0 license with copyright
+      holder `Arsham Shirvani` and year `2026` recorded in the repo where
+      appropriate.
+    - README includes a compact license note, alpha status, install-from-source
+      guidance, Git/Zig prerequisites, current limitations, and validation
+      guidance without promising packaged releases or hosted services.
+    - "A lightweight `CONTRIBUTING.md` explains the alpha contribution posture:
+      issues and small focused PRs are welcome, contributors should run `zig
+      build validate`, and changes must preserve local-first/no-telemetry
+      defaults and avoid diagnostic overclaims."
+    - Version identity is centralised in source and the public alpha version is
+      `0.1.0-alpha.1`; JSON and Markdown report metadata use that version.
+    - "`git-hotspots --version` exits 0 outside a Git repository, prints a
+      deterministic version line, and rejects analysis-flag combinations clearly
+      if the implementation chooses standalone semantics."
+    - Existing analysis behaviour, scoring, filtering, report schemas apart from
+      intentional version metadata, fixtures, and validation outputs remain
+      stable.
+    - Public docs and runtime text do not add commercial, SaaS, hosted-product,
+      pricing, sales, bug-prediction, objective quality-score,
+      technical-debt-score, author-metric, maintainer-judgement,
+      developer-ranking, productivity-analytics, or AI/LLM-judgement claims.
+    - Public alpha readiness does not add package registries, binary release
+      automation, Homebrew, GitHub Actions, release tags, provider/cache design,
+      network access, telemetry, upload, remote enrichment, or author metrics.
+    - Close-out evidence includes `zig build validate`, close-out validation
+      with a privacy-safe sibling smoke repo or explicit approved skip reason,
+      help/version/explain smoke, install-from-source smoke in a clean
+      disposable copy, docs/prohibited-claim scans, license/version checks, and
+      git hygiene checks.
+planning:
+  state: ready
+  summary: "Public alpha metadata and docs polish. Operator decisions are fixed
+    for this feature: Apache-2.0, copyright 2026 Arsham Shirvani, version
+    0.1.0-alpha.1, add `--version`, document Zig 0.16.0 as the currently
+    validated Zig version, and welcome issues plus small focused PRs. Do not
+    create release tags, binary/package release automation, CI, hosted docs,
+    provider/cache architecture, or commercial strategy."
+  brief_sync:
+    status: unchanged
+    reason: Feature 0009 is a public-readiness follow-up within B001's OSS,
+      local-first CLI capability; B001 remains current.
+    checked_at: 2026-05-22T13:55:00.000Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Feature 0009 makes the existing CLI alpha legally and publicly
+      understandable without changing deterministic hotspot product truth.
+    checked_at: 2026-05-22T13:55:00.000Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-22T13:51:13.511Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-22T13:51:13.511Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-22T13:51:13.511Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-22T13:51:13.511Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: No active roadmap item existed after Feature 0008. The next
+    public-readiness gap is legal/version/install/contribution polish before any
+    public alpha announcement.
+  depends_on_feature_ids:
+    - "0002"
+    - "0003"
+    - "0004"
+    - "0005"
+    - "0006"
+    - "0007"
+    - "0008"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add Apache-2.0 `LICENSE` with the agreed copyright owner/year and a tiny
+      README license note.
+    - Add a central version constant for `0.1.0-alpha.1`; update report
+      metadata, fixtures, validation checks, and docs to use it.
+    - Add standalone `--version` help/parser/output, with tests and validation.
+    - Add minimal install-from-source and alpha status docs in README, including
+      the currently validated Zig version `0.16.0` and local Git requirement.
+    - Add lightweight `CONTRIBUTING.md` for issues and small focused PRs.
+    - Add or record validation/hygiene evidence for license presence, version
+      consistency, source install smoke, prohibited claims, and git
+      branch/remote hygiene.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: OSS license and alpha docs baseline
+      goal: Add the legal/docs baseline needed for a public alpha without adding
+        release automation or broader product commitments.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: LICENSE, README.md, CONTRIBUTING.md."
+        - "In scope: Apache-2.0 license text; copyright 2026 Arsham Shirvani;
+          compact README license/status/install/prerequisite wording;
+          lightweight contribution posture for issues and small focused PRs."
+        - "Out of scope: package registries, binary downloads, Homebrew, GitHub
+          releases, CI, security policy, code of conduct, docs site,
+          provider/cache architecture, commercial/hosted strategy."
+        - "Protected: README remains public and visitor-facing; docs do not
+          claim bug prediction, objective quality scoring, technical-debt
+          scores, developer ranking, maintainer judgement, productivity
+          analytics, or hosted/commercial plans."
+        - "Dependencies: operator decisions fixed in shaping: Apache-2.0,
+          copyright 2026 Arsham Shirvani, Zig 0.16.0 as currently validated,
+          contribution posture issues plus small focused PRs."
+        - "Validation/evidence: git diff --check; docs/prohibited-claim scan;
+          license-file presence check; README mentions no packaged release if no
+          package release is added; CONTRIBUTING mentions zig build validate."
+        - "Manual evidence plan: inspect README and CONTRIBUTING for public
+          alpha wording; expected observation is no Flow process clutter and no
+          commercial/diagnostic overclaim; durable proof location is runner
+          handoff and reviewer verdict for RUN close-out."
+        - "Review focus: license choice is explicit, docs are honest about alpha
+          and source install, and contribution guidance is lightweight."
+        - "Escalate if: license text requires legal review, docs need release
+          promises, or contribution posture expands into governance/process
+          overbuild."
+        - "Done boundary: public docs can tell a visitor what the alpha is, how
+          to build it, how it is licensed, and how to contribute safely."
+      verification_commands:
+        - git diff --check
+        - zig build validate
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: Alpha version and version flag
+      goal: Replace the spike version marker with the agreed alpha identity and expose
+        it through report metadata and `--version`.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/main.zig, src/report.zig, src/model.zig or a new small
+          version module, fixtures/expected/*, tests/integration.sh,
+          tools/validate.sh, README.md."
+        - "In scope: central version constant `0.1.0-alpha.1`; update JSON and
+          Markdown report metadata; add `git-hotspots --version`; update help,
+          tests, fixtures, and validation checks."
+        - "Out of scope: release tags, package metadata, build.zig.zon,
+          semantic-version compatibility guarantees beyond alpha identity,
+          schema changes except intentional version metadata."
+        - "Protected: no scoring, Git traversal, filtering, confidence, caveat,
+          report-result, local-first, privacy, provider, cache, network,
+          telemetry, or author-metric behaviour changes."
+        - "Dependencies: P1 may update docs that reference the version."
+        - "Validation/evidence: zig fmt --check build.zig src tests; zig build
+          test; zig build run -- --help; `git-hotspots --version` exact output;
+          report fixture diffs updated only for version metadata."
+        - "Manual evidence plan: compare pre/post fixture diffs; expected
+          observation is version-only metadata changes unless docs/help/version
+          tests intentionally changed; durable proof location is runner handoff
+          and reviewer verdict."
+        - "Review focus: version is centralised, standalone version mode works
+          outside a repo, and no existing analysis behaviour drifts."
+        - "Escalate if: implementation needs package metadata, release tags,
+          build-system redesign, or schema compatibility commitments."
+        - "Done boundary: users and reports can identify the alpha version
+          deterministically."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build run -- --help
+    - id: P3
+      depends_on:
+        - P1
+        - P2
+      status: planned
+      title: Public alpha validation and hygiene
+      goal: Extend or record validation evidence proving alpha docs/version/license
+        consistency, install-from-source behaviour, and publication hygiene.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: tools/validate.sh, tests/integration.sh, README.md,
+          CONTRIBUTING.md, LICENSE, git status/history/remotes."
+        - "In scope: license/version consistency checks in validation where
+          practical; source-install smoke in a clean disposable copy or manual
+          close-out evidence; docs/prohibited-claim scans; branch/remote/backup
+          branch hygiene summary."
+        - "Out of scope: CI, release automation, tag creation, remote push,
+          binary artifact creation, checksum signing, package managers, history
+          rewrite unless a concrete leak is found and the operator explicitly
+          authorises it."
+        - "Protected: validation summaries stay privacy-safe; do not commit raw
+          private smoke reports, absolute local paths, private repo names,
+          author identities, or commercial strategy."
+        - "Dependencies: P1 and P2 complete."
+        - "Validation/evidence: zig build validate; close-out validate with
+          privacy-safe sibling repo or explicit approved skip reason; git diff
+          --check; help/version/explain smoke; install-from-source smoke from a
+          clean disposable copy; flow validate --target feature:0009 --format
+          json."
+        - "Manual evidence plan: record exact commands, pass/fail summaries,
+          tool versions, license/version scan result, and git branch/remotes
+          hygiene; expected observation is clean worktree, no usable remote push
+          attempted, backup branches local-only, and no private/publicity leaks;
+          durable proof location is run handoff and reviewer verdict."
+        - "Review focus: alpha readiness evidence is strong enough for a source
+          public alpha but does not imply packaged release readiness."
+        - "Escalate if: validation requires external services, remote access,
+          private artefact commits, history rewrite, release tags, or broader
+          governance/security policy decisions."
+        - "Done boundary: Feature 0009 can close with license, version, docs,
+          and alpha validation evidence complete."
+      verification_commands:
+        - zig build validate
+        - git diff --check
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-22T13:40:29.901Z
+  updated_at: 2026-05-22T13:51:13.511Z
+execution:
+  blockers: []
+  requires_confirmation: true
