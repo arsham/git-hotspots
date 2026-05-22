@@ -168,6 +168,31 @@ feedback. It is opt-in, writes bounded phase and elapsed-time lines to stderr
 only, and does not add timing or progress fields to table, JSON, or Markdown
 reports.
 
+## Large repository recipes
+
+Large repositories can start with explicit exploratory scopes while preserving
+the default full-history behaviour. These recipes use only supported local CLI
+options and do not change scoring, report schemas, or runtime defaults.
+
+For a project-focused recent run that keeps workflow metadata out of the first
+pass, bound history by revision and enable progress feedback:
+
+```sh
+./zig-out/bin/git-hotspots --repo . --scope project --since HEAD~500 --progress --limit 20 --format markdown
+```
+
+For a source-focused pass, combine a literal repo-relative prefix with a bounded
+revision range:
+
+```sh
+./zig-out/bin/git-hotspots --repo . --include-prefix src/ --since HEAD~1000 --limit 20 --format markdown
+```
+
+Bounded runs are exploratory scopes: they reduce the selected history or output
+for a specific question, but they are not more correct than a full-history run
+and are not hidden defaults. If you omit `--since`, `git-hotspots` analyses the
+full reachable local history selected by the other scope and prefix options.
+
 ## How to read scores
 
 Run `git-hotspots --explain` to print the static scoring explanation without
