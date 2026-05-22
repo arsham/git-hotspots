@@ -253,4 +253,553 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T21:46:21.845Z
-  updated_at: 2026-05-22T21:53:31.984Z
+  updated_at: 2026-05-22T21:56:46.406Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-22T21:56:46.406Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0017"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Project scope as default
+      problem: Unflagged git-hotspots reports currently default to all tracked
+        Git-history paths. In this repository and real-repo evidence,
+        workflow/process metadata can dominate the first-run report, making the
+        default less useful for public alpha users.
+      outcome: Unflagged analysis defaults to project scope during alpha, excluding
+        only .flow/ by the existing project preset, while explicit --scope all
+        preserves the old full-evidence universe.
+      acceptance:
+        - Unflagged analysis reports selected_scope=project and applies the
+          existing project preset, currently only .flow/.
+        - Explicit --scope all preserves the old all-tracked-path evidence
+          universe and remains documented as the full local Git-history mode.
+        - Explicit --scope project remains accepted and is equivalent to omitted
+          --scope for table, JSON, Markdown, inspect, and progress stdout.
+        - No new project exclusions, path classifiers, gitignore import, config
+          files, cache, providers, scoring changes, report schema additions,
+          network, telemetry, CI, or release packaging are added.
+        - Default/project reports do not include .flow/ result paths or
+          co-change paths; explicit --scope all can include .flow/ when those
+          paths rank or are inspected.
+        - Help, README, and explain text plainly disclose project scope as the
+          alpha default and --scope all as the full-evidence escape hatch
+          without implying scoped evidence is more correct.
+        - Validation proves default/project/all parity, inspect interactions,
+          prefix interactions, since/progress stability, deterministic outputs,
+          and privacy-safe real-repo smoke with sibling-local-repo.
+    brief_alignment:
+      status: aligned
+      role: primary
+      summary: Feature 0017 is a primary product-behaviour slice under B001. It keeps
+        deterministic local evidence and OSS/publicity boundaries while making
+        the existing project scope preset the alpha default with explicit
+        --scope all full-evidence escape hatch.
+      checked_at: 2026-05-22T21:53:05.525Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0017_project-scope-as-default/prd.md
+  requirements_contract:
+    source_path: .flow/features/0017_project-scope-as-default/prd.md
+    source_digest: e41cf5755813f8a37e6424d46eafaedc14c2160a279280215d0133204a45eb6c
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#non-goals[1]
+        text: Do not add new project preset exclusions such as zig-out/, target/,
+          node_modules/, dist/, build/, or coverage/.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-002
+        source_ref: prd.md#non-goals[2]
+        text: Do not add path classifiers, gitignore import, pathspec/glob/regex
+          support, config files, stored preferences, migration warnings,
+          telemetry, or usage analytics.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-003
+        source_ref: prd.md#non-goals[3]
+        text: Do not change scoring formulas, ranking, confidence thresholds, co-change
+          calculation, history traversal, inspect matching, report schemas
+          except for existing scope metadata values, or progress behaviour.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-004
+        source_ref: prd.md#non-goals[4]
+        text: Do not add cache, providers, network behaviour, CI, release packaging,
+          hosted product content, commercial strategy, bug-prediction claims,
+          code-quality claims, or developer-ranking claims.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-005
+        source_ref: prd.md#default-scope-semantics[1]
+        text: Unflagged analysis must set analysis.scope.selected_scope to project.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#default-scope-semantics[2]
+        text: Unflagged analysis must apply the same effective exclude prefixes as
+          explicit --scope project, currently exactly .flow/.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#default-scope-semantics[3]
+        text: Explicit --scope project must remain accepted and equivalent to unflagged
+          analysis, including effective prefixes and report rows.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#default-scope-semantics[4]
+        text: Explicit --scope all must remain accepted and must have no built-in
+          project excludes.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#default-scope-semantics[5]
+        text: Invalid, missing, repeated, and case-mismatched --scope values must keep
+          the existing error behaviour.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#default-scope-semantics[6]
+        text: Existing --include-prefix and --exclude-prefix semantics remain literal,
+          repo-relative, order-independent, and non-glob.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#default-scope-semantics[7]
+        text: Excludes continue to win over includes, including default/project .flow/
+          exclusion versus --include-prefix .flow/.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#output-behaviour[1]
+        text: Table output must continue to include a scope line that makes the selected
+          scope and effective prefixes visible.
+        category: behaviour
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#output-behaviour[2]
+        text: JSON output must keep the existing analysis.scope shape while reporting
+          the new default selected scope and effective prefixes.
+        category: behaviour
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#output-behaviour[3]
+        text: Markdown output must keep the existing Scope section while reporting the
+          new default selected scope and effective prefixes.
+        category: behaviour
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#output-behaviour[4]
+        text: Unflagged default reports must not include .flow/ result paths or .flow/
+          co-change paths.
+        category: behaviour
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#output-behaviour[5]
+        text: Explicit --scope all reports on fixtures with .flow/ history must preserve
+          the old full-evidence output, including .flow/ paths when they rank.
+        category: behaviour
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#output-behaviour[6]
+        text: Reports must not emit raw omitted path lists; bounded omitted counts and
+          effective prefixes are allowed.
+        category: behaviour
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#validation-and-evidence[1]
+        text: Unit tests must prove default project scope, explicit all scope, explicit
+          project scope, invalid scope behaviour, and prefix interaction
+          behaviour.
+        category: verification
+        packet_refs: []
+        verification: Unit tests must prove default project scope, explicit all scope,
+          explicit project scope, invalid scope behaviour, and prefix
+          interaction behaviour.
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#validation-and-evidence[2]
+        text: Fixture/golden tests must prove unflagged output equals explicit --scope
+          project for table, JSON, Markdown, inspect where applicable, and
+          progress stdout.
+        category: verification
+        packet_refs:
+          - P2
+        verification: Fixture/golden tests must prove unflagged output equals explicit
+          --scope project for table, JSON, Markdown, inspect where applicable,
+          and progress stdout.
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#validation-and-evidence[3]
+        text: Fixture/golden tests must preserve an explicit --scope all old-default
+          output for a fixture containing .flow/ paths.
+        category: verification
+        packet_refs: []
+        verification: Fixture/golden tests must preserve an explicit --scope all
+          old-default output for a fixture containing .flow/ paths.
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#validation-and-evidence[4]
+        text: Determinism checks must pass for table, JSON, Markdown, inspect, and
+          progress stdout.
+        category: verification
+        packet_refs: []
+        verification: Determinism checks must pass for table, JSON, Markdown, inspect,
+          and progress stdout.
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#validation-and-evidence[5]
+        text: Close-out validation must run the standard validation ladder and real-repo
+          smoke on this repo plus the approved sibling local repo with the label
+          sibling-local-repo.
+        category: verification
+        packet_refs:
+          - P3
+        verification: Close-out validation must run the standard validation ladder and
+          real-repo smoke on this repo plus the approved sibling local repo with
+          the label sibling-local-repo.
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#validation-and-evidence[6]
+        text: "Real-repo smoke evidence must be privacy-safe: labels, bounded counts,
+          command shapes, elapsed times, caveats, and pass/fail status only. Do
+          not commit raw sibling reports, actual sibling path, private repo
+          name, remotes, authors, commit messages, or source snippets."
+        category: verification
+        packet_refs:
+          - P3
+        verification: "Real-repo smoke evidence must be privacy-safe: labels, bounded
+          counts, command shapes, elapsed times, caveats, and pass/fail status
+          only. Do not commit raw sibling reports, actual sibling path, private
+          repo name, remotes, authors, commit messages, or source snippets."
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#edge-cases[1]
+        text: git-hotspots --scope all --include-prefix .flow/ should analyse only
+          .flow/ paths when they match and should not inherit project
+          exclusions.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#edge-cases[2]
+        text: git-hotspots --include-prefix .flow/ under the new default should return
+          no matching results when .flow/ is excluded by project scope, with
+          excludes winning over includes.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#edge-cases[3]
+        text: Duplicate .flow/ exclusions from default/project scope plus explicit
+          --exclude-prefix .flow/ must not duplicate metadata or change rows.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#edge-cases[4]
+        text: Empty default/project scoped results remain successful explainable
+          reports.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#edge-cases[5]
+        text: Shallow/partial/dirty-worktree caveats remain unchanged.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#p3-docs-and-close-out-validation[1]
+        text: "Anchors: README.md, src/explain.zig, tools/validate.sh, validation
+          output, real-repo smoke evidence."
+        category: verification
+        packet_refs:
+          - P3
+        verification: "Anchors: README.md, src/explain.zig, tools/validate.sh,
+          validation output, real-repo smoke evidence."
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#p3-docs-and-close-out-validation[2]
+        text: "In scope: update public docs/help/explain references to the new default;
+          update validation summaries and run standard plus close-out
+          validation."
+        category: verification
+        packet_refs:
+          - P3
+        verification: "In scope: update public docs/help/explain references to the new
+          default; update validation summaries and run standard plus close-out
+          validation."
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#p3-docs-and-close-out-validation[3]
+        text: "Out of scope: new release, CI, screenshots, public third-party case
+          study, provider/cache features."
+        category: verification
+        packet_refs: []
+        verification: "Out of scope: new release, CI, screenshots, public third-party
+          case study, provider/cache features."
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#p3-docs-and-close-out-validation[4]
+        text: "Protected: OSS/publicity boundary, investigation-prompt framing,
+          no-commercial-content rule, no bug-prediction or developer-ranking
+          language."
+        category: verification
+        packet_refs: []
+        verification: "Protected: OSS/publicity boundary, investigation-prompt framing,
+          no-commercial-content rule, no bug-prediction or developer-ranking
+          language."
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#p3-docs-and-close-out-validation[5]
+        text: "Dependencies: P1 and P2 complete."
+        category: verification
+        packet_refs:
+          - P1
+          - P2
+        verification: "Dependencies: P1 and P2 complete."
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#p3-docs-and-close-out-validation[6]
+        text: "Validation/evidence: zig build test, zig build validate, git diff
+          --check, close-out validation with sibling-local-repo,
+          privacy/prohibited scans over changed docs."
+        category: verification
+        packet_refs:
+          - P3
+        verification: "Validation/evidence: zig build test, zig build validate, git diff
+          --check, close-out validation with sibling-local-repo,
+          privacy/prohibited scans over changed docs."
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#p3-docs-and-close-out-validation[7]
+        text: "Review focus: public docs plainly disclose default project scope and
+          explicit all scope without overclaiming correctness."
+        category: verification
+        packet_refs: []
+        verification: "Review focus: public docs plainly disclose default project scope
+          and explicit all scope without overclaiming correctness."
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#p3-docs-and-close-out-validation[8]
+        text: "Escalate if: docs imply scoped reports are more correct than full Git
+          history, expose private sibling evidence, or introduce unsupported
+          roadmap/commercial claims."
+        category: verification
+        packet_refs: []
+        verification: "Escalate if: docs imply scoped reports are more correct than full
+          Git history, expose private sibling evidence, or introduce unsupported
+          roadmap/commercial claims."
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#p3-docs-and-close-out-validation[9]
+        text: "Done boundary: CLI, reports, docs, tests, and close-out evidence all
+          agree on project scope as the alpha default."
+        category: verification
+        packet_refs: []
+        verification: "Done boundary: CLI, reports, docs, tests, and close-out evidence
+          all agree on project scope as the alpha default."
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: Unflagged analysis defaults to project scope during alpha, excluding
+      only .flow/ by the existing project preset, while explicit --scope all
+      preserves the old full-evidence universe.
+    acceptance:
+      - Unflagged analysis reports selected_scope=project and applies the
+        existing project preset, currently only .flow/.
+      - Explicit --scope all preserves the old all-tracked-path evidence
+        universe and remains documented as the full local Git-history mode.
+      - Explicit --scope project remains accepted and is equivalent to omitted
+        --scope for table, JSON, Markdown, inspect, and progress stdout.
+      - No new project exclusions, path classifiers, gitignore import, config
+        files, cache, providers, scoring changes, report schema additions,
+        network, telemetry, CI, or release packaging are added.
+      - Default/project reports do not include .flow/ result paths or co-change
+        paths; explicit --scope all can include .flow/ when those paths rank or
+        are inspected.
+      - Help, README, and explain text plainly disclose project scope as the
+        alpha default and --scope all as the full-evidence escape hatch without
+        implying scoped evidence is more correct.
+      - Validation proves default/project/all parity, inspect interactions,
+        prefix interactions, since/progress stability, deterministic outputs,
+        and privacy-safe real-repo smoke with sibling-local-repo.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig build test
+      - git diff --check
+      - zig build validate
+      - zig build validate -Dcloseout=true -Dsmoke-repo=<approved-local-repo>
+        -Dsmoke-label=sibling-local-repo
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
