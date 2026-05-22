@@ -16,6 +16,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 
 ## Scope
 
+- Selected scope: all
 - Filters active: false
 - Include prefixes: None
 - Exclude prefixes: None

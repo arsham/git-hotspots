@@ -10,7 +10,7 @@ const usage =
     \\git-hotspots: deterministic file-level Git-history hotspot prompts
     \\
     \\Usage:
-    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--include-prefix PATH]... [--exclude-prefix PATH]... [--inspect PATH]
+    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--scope all|project] [--include-prefix PATH]... [--exclude-prefix PATH]... [--inspect PATH]
     \\  git-hotspots --explain
     \\  git-hotspots --version
     \\  git-hotspots --help
@@ -20,6 +20,8 @@ const usage =
     \\  --limit N         Maximum ranked files to emit (default: 10)
     \\  --format FORMAT   table, json, or markdown (default: table)
     \\  --since REV       Analyse commits after REV through HEAD
+    \\  --scope VALUE     all (default) or project; project currently excludes
+    \\                    the literal .flow/ prefix before scoring
     \\  --include-prefix PATH
     \\                    Repeatable repo-relative literal Git path prefix to include;
     \\                    narrows the evidence universe before scoring; not a glob
@@ -76,9 +78,10 @@ pub fn main(init: std.process.Init.Minimal) !void {
             error.InvalidIncludePrefix => try stderr.print("error: --include-prefix must be a non-empty repo-relative path prefix without absolute roots, '..' segments, or control characters\n", .{}),
             error.InvalidExcludePrefix => try stderr.print("error: --exclude-prefix must be a non-empty repo-relative path prefix without absolute roots, '..' segments, or control characters\n", .{}),
             error.InvalidInspectPath => try stderr.print("error: --inspect must be a non-empty exact repo-relative Git path without absolute roots, '..' segments, or control characters\n", .{}),
+            error.InvalidScope => try stderr.print("error: --scope accepts one lowercase value: all or project\n", .{}),
             error.InvalidInspectLimitCombination => try stderr.print("error: --limit cannot be combined with --inspect; inspect selects from the full scoped evidence universe\n", .{}),
-            error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags (--repo, --limit, --format, --since, --include-prefix, --exclude-prefix, --inspect)\n", .{}),
-            error.InvalidVersionCombination => try stderr.print("error: --version cannot be combined with --explain or analysis flags (--repo, --limit, --format, --since, --include-prefix, --exclude-prefix, --inspect)\n", .{}),
+            error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect)\n", .{}),
+            error.InvalidVersionCombination => try stderr.print("error: --version cannot be combined with --explain or analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect)\n", .{}),
             error.InvalidArguments => try stderr.print("error: invalid arguments\n\n{s}", .{usage}),
             else => try stderr.print("error: {s}\n", .{@errorName(err)}),
         }
@@ -126,7 +129,7 @@ const CliMode = union(enum) {
     version,
 };
 
-const CliError = error{ HelpRequested, InvalidArguments, InvalidExplainCombination, InvalidVersionCombination, InvalidIncludePrefix, InvalidExcludePrefix, InvalidInspectPath, InvalidInspectLimitCombination } || std.mem.Allocator.Error;
+const CliError = error{ HelpRequested, InvalidArguments, InvalidExplainCombination, InvalidVersionCombination, InvalidIncludePrefix, InvalidExcludePrefix, InvalidInspectPath, InvalidInspectLimitCombination, InvalidScope } || std.mem.Allocator.Error;
 
 fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!CliMode {
     var cfg = model.Config{ .repo_path = try allocator.dupe(u8, ".") };
@@ -135,6 +138,7 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
     var version_requested = false;
     var analysis_flag_seen = false;
     var limit_seen = false;
+    var scope_seen = false;
 
     var i: usize = 1;
     while (i < args.len) : (i += 1) {
@@ -185,6 +189,16 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
             const v = args[i];
             if (cfg.since) |old| allocator.free(old);
             cfg.since = try allocator.dupe(u8, v);
+        } else if (std.mem.eql(u8, arg, "--scope")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
+            if (scope_seen) return error.InvalidScope;
+            scope_seen = true;
+            i += 1;
+            if (i >= args.len) return error.InvalidScope;
+            const v = args[i];
+            if (std.mem.eql(u8, v, "all")) cfg.scope = .all else if (std.mem.eql(u8, v, "project")) cfg.scope = .project else return error.InvalidScope;
         } else if (std.mem.eql(u8, arg, "--include-prefix")) {
             analysis_flag_seen = true;
             if (explain_requested) return error.InvalidExplainCombination;
@@ -224,6 +238,7 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
     }
     if (cfg.limit == 0) return error.InvalidArguments;
     if (cfg.inspect_path != null and limit_seen) return error.InvalidInspectLimitCombination;
+    try applyScopePreset(allocator, &cfg);
     return .{ .analyze = cfg };
 }
 
@@ -300,6 +315,38 @@ fn appendExcludePrefix(allocator: std.mem.Allocator, cfg: *model.Config, raw: []
     cfg.exclude_prefixes = expanded;
 }
 
+fn applyScopePreset(allocator: std.mem.Allocator, cfg: *model.Config) CliError!void {
+    switch (cfg.scope) {
+        .all => {},
+        .project => try applyProjectScopePreset(allocator, cfg),
+    }
+}
+
+fn applyProjectScopePreset(allocator: std.mem.Allocator, cfg: *model.Config) CliError!void {
+    const project_prefix = ".flow/";
+    var duplicate_count: usize = 0;
+    for (cfg.exclude_prefixes) |existing| {
+        if (std.mem.eql(u8, existing, project_prefix)) duplicate_count += 1;
+    }
+
+    const expanded = try allocator.alloc([]const u8, cfg.exclude_prefixes.len - duplicate_count + 1);
+    errdefer allocator.free(expanded);
+    const owned = try allocator.dupe(u8, project_prefix);
+    errdefer allocator.free(owned);
+    expanded[0] = owned;
+    var out_i: usize = 1;
+    for (cfg.exclude_prefixes) |existing| {
+        if (std.mem.eql(u8, existing, project_prefix)) {
+            allocator.free(existing);
+        } else {
+            expanded[out_i] = existing;
+            out_i += 1;
+        }
+    }
+    if (cfg.exclude_prefixes.len > 0) allocator.free(cfg.exclude_prefixes);
+    cfg.exclude_prefixes = expanded;
+}
+
 const PrefixError = error{InvalidPrefix} || std.mem.Allocator.Error;
 
 fn normalizePrefix(allocator: std.mem.Allocator, raw: []const u8) PrefixError![]const u8 {
@@ -321,6 +368,7 @@ test "parse defaults are documented through config shape" {
     const cfg = model.Config{ .repo_path = "." };
     try std.testing.expectEqual(@as(usize, 10), cfg.limit);
     try std.testing.expectEqual(model.Format.table, cfg.format);
+    try std.testing.expectEqual(model.ScopePreset.all, cfg.scope);
 }
 
 test "parse standalone explain mode" {
@@ -342,6 +390,7 @@ test "reject explain combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--explain", "--limit", "1" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--format", "markdown" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--since", "HEAD~1" },
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--scope", "project" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--include-prefix", "src/" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--exclude-prefix", ".flow/" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--inspect", "src/app.zig" },
@@ -357,6 +406,7 @@ test "reject version combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--version", "--limit", "1" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--format", "markdown" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--since", "HEAD~1" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--scope", "project" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--include-prefix", "src/" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--exclude-prefix", ".flow/" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--explain" },
@@ -364,6 +414,56 @@ test "reject version combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--version" },
     };
     for (cases) |args| try std.testing.expectError(error.InvalidVersionCombination, parseArgs(std.testing.allocator, args));
+}
+
+test "parse scope preset values" {
+    const all_args = [_][:0]const u8{ "git-hotspots", "--scope", "all" };
+    const all_mode = try parseArgs(std.testing.allocator, &all_args);
+    const all_cfg = all_mode.analyze;
+    defer freeConfig(std.testing.allocator, all_cfg);
+    try std.testing.expectEqual(model.ScopePreset.all, all_cfg.scope);
+    try std.testing.expectEqual(@as(usize, 0), all_cfg.exclude_prefixes.len);
+
+    const project_args = [_][:0]const u8{ "git-hotspots", "--scope", "project" };
+    const project_mode = try parseArgs(std.testing.allocator, &project_args);
+    const project_cfg = project_mode.analyze;
+    defer freeConfig(std.testing.allocator, project_cfg);
+    try std.testing.expectEqual(model.ScopePreset.project, project_cfg.scope);
+    try std.testing.expectEqual(@as(usize, 1), project_cfg.exclude_prefixes.len);
+    try std.testing.expectEqualStrings(".flow/", project_cfg.exclude_prefixes[0]);
+}
+
+test "reject invalid scope values" {
+    const cases = [_][]const [:0]const u8{
+        &[_][:0]const u8{ "git-hotspots", "--scope" },
+        &[_][:0]const u8{ "git-hotspots", "--scope", "unknown" },
+        &[_][:0]const u8{ "git-hotspots", "--scope", "Project" },
+        &[_][:0]const u8{ "git-hotspots", "--scope", "PROJECT" },
+        &[_][:0]const u8{ "git-hotspots", "--scope", "all", "--scope", "project" },
+    };
+    for (cases) |args| try std.testing.expectError(error.InvalidScope, parseArgs(std.testing.allocator, args));
+}
+
+test "project scope combines with prefixes independent of flag order" {
+    const before_args = [_][:0]const u8{ "git-hotspots", "--scope", "project", "--include-prefix", ".flow/", "--exclude-prefix", "vendor/", "--exclude-prefix", ".flow/" };
+    const before_mode = try parseArgs(std.testing.allocator, &before_args);
+    const before_cfg = before_mode.analyze;
+    defer freeConfig(std.testing.allocator, before_cfg);
+    try std.testing.expectEqual(model.ScopePreset.project, before_cfg.scope);
+    try std.testing.expectEqual(@as(usize, 1), before_cfg.include_prefixes.len);
+    try std.testing.expectEqualStrings(".flow/", before_cfg.include_prefixes[0]);
+    try std.testing.expectEqual(@as(usize, 2), before_cfg.exclude_prefixes.len);
+    try std.testing.expectEqualStrings(".flow/", before_cfg.exclude_prefixes[0]);
+    try std.testing.expectEqualStrings("vendor/", before_cfg.exclude_prefixes[1]);
+
+    const after_args = [_][:0]const u8{ "git-hotspots", "--exclude-prefix", ".flow/", "--exclude-prefix", "vendor/", "--include-prefix", ".flow/", "--scope", "project" };
+    const after_mode = try parseArgs(std.testing.allocator, &after_args);
+    const after_cfg = after_mode.analyze;
+    defer freeConfig(std.testing.allocator, after_cfg);
+    try std.testing.expectEqual(model.ScopePreset.project, after_cfg.scope);
+    try std.testing.expectEqualStrings(before_cfg.include_prefixes[0], after_cfg.include_prefixes[0]);
+    try std.testing.expectEqualStrings(before_cfg.exclude_prefixes[0], after_cfg.exclude_prefixes[0]);
+    try std.testing.expectEqualStrings(before_cfg.exclude_prefixes[1], after_cfg.exclude_prefixes[1]);
 }
 
 test "parse repeatable exclude prefixes" {

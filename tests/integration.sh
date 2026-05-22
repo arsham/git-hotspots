@@ -51,6 +51,7 @@ diff -u /tmp/git-hotspots-explain.txt /tmp/git-hotspots-explain-2.txt
 grep -q -- "--explain" /tmp/git-hotspots-help.txt
 grep -q -- "--version" /tmp/git-hotspots-help.txt
 grep -q -- "--inspect PATH" /tmp/git-hotspots-help.txt
+grep -q -- "--scope VALUE" /tmp/git-hotspots-help.txt
 "$EXE" --version > /tmp/git-hotspots-version.txt 2> /tmp/git-hotspots-version.err
 test "$(cat /tmp/git-hotspots-version.txt)" = "git-hotspots 0.1.0-alpha.1"
 test ! -s /tmp/git-hotspots-version.err
@@ -66,6 +67,7 @@ assert_fails_with_stderr explain-repo "--explain cannot be combined" "$EXE" --ex
 assert_fails_with_stderr explain-limit "--explain cannot be combined" "$EXE" --explain --limit 1
 assert_fails_with_stderr explain-format "--explain cannot be combined" "$EXE" --explain --format markdown
 assert_fails_with_stderr explain-since "--explain cannot be combined" "$EXE" --explain --since HEAD~1
+assert_fails_with_stderr explain-scope "--explain cannot be combined" "$EXE" --explain --scope project
 assert_fails_with_stderr explain-include "--explain cannot be combined" "$EXE" --explain --include-prefix src/
 assert_fails_with_stderr explain-exclude "--explain cannot be combined" "$EXE" --explain --exclude-prefix .flow/
 assert_fails_with_stderr explain-inspect "--explain cannot be combined" "$EXE" --explain --inspect src/app.txt
@@ -73,6 +75,7 @@ assert_fails_with_stderr version-repo "--version cannot be combined" "$EXE" --ve
 assert_fails_with_stderr version-limit "--version cannot be combined" "$EXE" --version --limit 1
 assert_fails_with_stderr version-format "--version cannot be combined" "$EXE" --version --format markdown
 assert_fails_with_stderr version-since "--version cannot be combined" "$EXE" --version --since HEAD~1
+assert_fails_with_stderr version-scope "--version cannot be combined" "$EXE" --version --scope project
 assert_fails_with_stderr version-include "--version cannot be combined" "$EXE" --version --include-prefix src/
 assert_fails_with_stderr version-exclude "--version cannot be combined" "$EXE" --version --exclude-prefix .flow/
 assert_fails_with_stderr version-explain "--version cannot be combined" "$EXE" --version --explain
@@ -95,6 +98,8 @@ diff -u fixtures/expected/basic-inspect.md /tmp/git-hotspots-basic-inspect.md
 "$EXE" --repo fixtures/basic --inspect src/app.txt --format table > /tmp/git-hotspots-basic-inspect.txt
 diff -u fixtures/expected/basic-inspect.txt /tmp/git-hotspots-basic-inspect.txt
 "$EXE" --repo fixtures/scope --format json > /tmp/git-hotspots-scope-unfiltered.json
+"$EXE" --repo fixtures/scope --scope all --format json > /tmp/git-hotspots-scope-all.json
+diff -u /tmp/git-hotspots-scope-unfiltered.json /tmp/git-hotspots-scope-all.json
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format json > /tmp/git-hotspots-scope-filtered.json
 diff -u fixtures/expected/scope-filtered.json /tmp/git-hotspots-scope-filtered.json
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > /tmp/git-hotspots-scope-filtered.md
@@ -102,6 +107,21 @@ diff -u fixtures/expected/scope-filtered.md /tmp/git-hotspots-scope-filtered.md
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > /tmp/git-hotspots-scope-filtered-2.md
 diff -u /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-filtered-2.md
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format table > /tmp/git-hotspots-scope-filtered.txt
+"$EXE" --repo fixtures/scope --scope project --format json > /tmp/git-hotspots-scope-project.json
+diff -u fixtures/expected/scope-project.json /tmp/git-hotspots-scope-project.json
+"$EXE" --repo fixtures/scope --scope project --format json > /tmp/git-hotspots-scope-project-2.json
+diff -u /tmp/git-hotspots-scope-project.json /tmp/git-hotspots-scope-project-2.json
+"$EXE" --repo fixtures/scope --scope project --format markdown > /tmp/git-hotspots-scope-project.md
+diff -u fixtures/expected/scope-project.md /tmp/git-hotspots-scope-project.md
+"$EXE" --repo fixtures/scope --scope project --format markdown > /tmp/git-hotspots-scope-project-2.md
+diff -u /tmp/git-hotspots-scope-project.md /tmp/git-hotspots-scope-project-2.md
+"$EXE" --repo fixtures/scope --scope project --format table > /tmp/git-hotspots-scope-project.txt
+"$EXE" --repo fixtures/scope --scope project --inspect src/vendor_adapter.zig --format json > /tmp/git-hotspots-scope-project-inspect.json
+"$EXE" --repo fixtures/scope --scope all --inspect .flow/state.yaml --format json > /tmp/git-hotspots-scope-all-inspect-flow.json
+assert_fails_with_stderr inspect-project-excluded-flow "--inspect target has no matching Git-history evidence" "$EXE" --repo fixtures/scope --scope project --inspect .flow/state.yaml --format json
+"$EXE" --repo fixtures/scope --scope project --exclude-prefix .flow/ --format json > /tmp/git-hotspots-scope-project-duplicate-flow.json
+"$EXE" --repo fixtures/scope --scope project --include-prefix .flow/ --format json > /tmp/git-hotspots-scope-project-include-flow.json
+"$EXE" --repo fixtures/scope --scope project --include-prefix src/ --format json > /tmp/git-hotspots-scope-project-include-src.json
 "$EXE" --repo fixtures/scope --include-prefix src/ --format json > /tmp/git-hotspots-scope-src-include.json
 "$EXE" --repo fixtures/scope --include-prefix src/ --format markdown > /tmp/git-hotspots-scope-src-include.md
 "$EXE" --repo fixtures/scope --include-prefix src/ --format table > /tmp/git-hotspots-scope-src-include.txt
@@ -144,6 +164,11 @@ git init --bare -q "$bare/repo.git"
 assert_fails_with_output bare "$EXE" --repo "$bare/repo.git"
 assert_fails_with_output invalid-since "$EXE" --repo fixtures/basic --since does-not-exist
 assert_fails_with_stderr invalid-format "invalid arguments" "$EXE" --repo fixtures/basic --format xml
+assert_fails_with_stderr invalid-scope-missing "--scope accepts" "$EXE" --repo fixtures/basic --scope
+assert_fails_with_stderr invalid-scope-unknown "--scope accepts" "$EXE" --repo fixtures/basic --scope unknown
+assert_fails_with_stderr invalid-scope-case-title "--scope accepts" "$EXE" --repo fixtures/basic --scope Project
+assert_fails_with_stderr invalid-scope-case-upper "--scope accepts" "$EXE" --repo fixtures/basic --scope PROJECT
+assert_fails_with_stderr invalid-scope-repeated "--scope accepts" "$EXE" --repo fixtures/basic --scope all --scope project
 assert_fails_with_stderr invalid-exclude-empty --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix ""
 assert_fails_with_stderr invalid-exclude-absolute --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix /tmp
 assert_fails_with_stderr invalid-exclude-parent --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix src/../lib
@@ -163,14 +188,14 @@ assert_fails_with_stderr invalid-include-control --include-prefix "$EXE" --repo 
 "$EXE" --repo fixtures/detached --format json > /tmp/git-hotspots-detached.json
 "$EXE" --repo fixtures/linked --format json > /tmp/git-hotspots-linked.json
 
-python3 - /tmp/git-hotspots-basic.md /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-empty.md /tmp/git-hotspots-edge.md /tmp/git-hotspots-scope-src-include.md /tmp/git-hotspots-scope-include-empty.md /tmp/git-hotspots-basic-inspect.md /tmp/git-hotspots-edge-inspect-glob.md <<'PY'
+python3 - /tmp/git-hotspots-basic.md /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-project.md /tmp/git-hotspots-scope-empty.md /tmp/git-hotspots-edge.md /tmp/git-hotspots-scope-src-include.md /tmp/git-hotspots-scope-include-empty.md /tmp/git-hotspots-basic-inspect.md /tmp/git-hotspots-edge-inspect-glob.md <<'PY'
 import json
 import os
 import re
 import sys
 from pathlib import Path
 
-basic_md_path, scope_md_path, scope_empty_md_path, edge_md_path, include_md_path, include_empty_md_path, basic_inspect_md_path, edge_inspect_md_path = map(Path, sys.argv[1:])
+basic_md_path, scope_md_path, project_md_path, scope_empty_md_path, edge_md_path, include_md_path, include_empty_md_path, basic_inspect_md_path, edge_inspect_md_path = map(Path, sys.argv[1:])
 
 def load(path):
     return json.loads(Path(path).read_text())
@@ -179,6 +204,7 @@ def by_path(data):
     return {row['path']: row for row in data['results']}
 
 basic = load('/tmp/git-hotspots-basic.json')
+assert basic['analysis']['scope']['selected_scope'] == 'all'
 assert basic['analysis']['scope']['filters_active'] is False
 assert basic['analysis']['scope']['include_prefixes'] == []
 assert basic['analysis']['scope']['exclude_prefixes'] == []
@@ -191,6 +217,8 @@ assert basic_inspect['results'][0] == basic['results'][0]
 assert 'inspect' not in basic
 
 scope_unfiltered = load('/tmp/git-hotspots-scope-unfiltered.json')
+scope_all = load('/tmp/git-hotspots-scope-all.json')
+assert scope_all == scope_unfiltered, '--scope all changed unfiltered output'
 unfiltered_paths = [row['path'] for row in scope_unfiltered['results']]
 assert any(path.startswith('.flow/') for path in unfiltered_paths), 'default scope fixture lost .flow paths'
 assert 'src/new.zig' in unfiltered_paths, 'braced rename fixture missing new path'
@@ -200,6 +228,7 @@ assert '' not in unfiltered_paths, 'empty path leaked from braced rename parsing
 scope_filtered = load('/tmp/git-hotspots-scope-filtered.json')
 scope_meta = scope_filtered['analysis']['scope']
 assert scope_meta == {
+    'selected_scope': 'all',
     'filters_active': True,
     'include_prefixes': [],
     'exclude_prefixes': ['.flow/'],
@@ -212,6 +241,45 @@ for row in scope_filtered['results']:
     assert not row['path'].startswith('.flow/'), row['path']
     assert all(not cc['path'].startswith('.flow/') for cc in row['cochanges']), row['path']
 assert 'src/vendor_adapter.zig' in by_path(scope_filtered), 'vendor/ prefix semantics fixture missing adapter'
+
+scope_project = load('/tmp/git-hotspots-scope-project.json')
+project_meta = scope_project['analysis']['scope']
+assert project_meta == {
+    'selected_scope': 'project',
+    'filters_active': True,
+    'include_prefixes': [],
+    'exclude_prefixes': ['.flow/'],
+    'outside_include_path_count': 0,
+    'outside_include_change_count': 0,
+    'excluded_path_count': 2,
+    'excluded_change_count': 5,
+}, project_meta
+assert scope_project['results'] == scope_filtered['results'], 'project preset rows differ from explicit .flow/ exclusion'
+for row in scope_project['results']:
+    assert not row['path'].startswith('.flow/'), row['path']
+    assert all(not cc['path'].startswith('.flow/') for cc in row['cochanges']), row['path']
+scope_project_duplicate = load('/tmp/git-hotspots-scope-project-duplicate-flow.json')
+assert scope_project_duplicate['analysis']['scope']['exclude_prefixes'] == ['.flow/']
+assert scope_project_duplicate['results'] == scope_project['results'], 'duplicate project exclude changed rows'
+scope_project_include_flow = load('/tmp/git-hotspots-scope-project-include-flow.json')
+assert scope_project_include_flow['analysis']['scope']['selected_scope'] == 'project'
+assert scope_project_include_flow['analysis']['scope']['include_prefixes'] == ['.flow/']
+assert scope_project_include_flow['analysis']['scope']['exclude_prefixes'] == ['.flow/']
+assert scope_project_include_flow['results'] == [], 'exclude did not win over include for project .flow/'
+scope_project_include_src = load('/tmp/git-hotspots-scope-project-include-src.json')
+assert scope_project_include_src['analysis']['scope']['selected_scope'] == 'project'
+assert scope_project_include_src['analysis']['scope']['include_prefixes'] == ['src/']
+assert scope_project_include_src['analysis']['scope']['exclude_prefixes'] == ['.flow/']
+for row in scope_project_include_src['results']:
+    assert row['path'].startswith('src/'), row['path']
+    assert all(cc['path'].startswith('src/') for cc in row['cochanges']), row['path']
+scope_project_inspect = load('/tmp/git-hotspots-scope-project-inspect.json')
+assert scope_project_inspect['results'][0] == by_path(scope_project)['src/vendor_adapter.zig']
+assert scope_project_inspect['inspect']['matched_path'] == 'src/vendor_adapter.zig'
+scope_all_inspect_flow = load('/tmp/git-hotspots-scope-all-inspect-flow.json')
+assert scope_all_inspect_flow['analysis']['scope']['selected_scope'] == 'all'
+assert len(scope_all_inspect_flow['results']) == 1
+assert scope_all_inspect_flow['results'][0]['path'] == '.flow/state.yaml'
 scope_inspect_excluded_flow = load('/tmp/git-hotspots-scope-inspect-excluded-flow.json')
 assert len(scope_inspect_excluded_flow['results']) == 1
 assert scope_inspect_excluded_flow['results'][0] == by_path(scope_filtered)['src/vendor_adapter.zig']
@@ -239,6 +307,7 @@ assert 'glob/[literal]*.txt' in by_path(glob_prefix), 'glob-like prefix acted as
 
 src_include = load('/tmp/git-hotspots-scope-src-include.json')
 src_include_scope = src_include['analysis']['scope']
+assert src_include_scope['selected_scope'] == 'all'
 assert src_include_scope['filters_active'] is True
 assert src_include_scope['include_prefixes'] == ['src/']
 assert src_include_scope['exclude_prefixes'] == []
@@ -288,10 +357,13 @@ assert scope_empty['analysis']['scope']['filters_active'] is True
 assert scope_empty['analysis']['scope']['excluded_path_count'] >= 1
 
 table_text = Path('/tmp/git-hotspots-scope-filtered.txt').read_text()
-assert 'scope: include_prefixes=[] exclude_prefixes=[.flow/]' in table_text
+assert 'scope: selected=all include_prefixes=[] exclude_prefixes=[.flow/]' in table_text
 assert '.flow/' not in '\n'.join(line for line in table_text.splitlines() if line[:1].isdigit())
+project_table_text = Path('/tmp/git-hotspots-scope-project.txt').read_text()
+assert 'scope: selected=project include_prefixes=[] exclude_prefixes=[.flow/]' in project_table_text
+assert '.flow/' not in '\n'.join(line for line in project_table_text.splitlines() if line[:1].isdigit())
 include_table_text = Path('/tmp/git-hotspots-scope-src-include.txt').read_text()
-assert 'scope: include_prefixes=[src/] exclude_prefixes=[]' in include_table_text
+assert 'scope: selected=all include_prefixes=[src/] exclude_prefixes=[]' in include_table_text
 for line in include_table_text.splitlines():
     if line[:1].isdigit():
         assert 'src/' in line, line
@@ -336,6 +408,7 @@ assert '# git-hotspots report' in basic_md
 assert 'File-level Git-history investigation prompts, not bug predictions or code-quality ratings.' in basic_md
 for section in ['## Run summary', '## Scope', '## Caveats', '## Top hotspots', '## Evidence']:
     assert section in basic_md, section
+assert '- Selected scope: all' in basic_md
 basic_inspect_md = basic_inspect_md_path.read_text()
 assert '## Inspect' in basic_inspect_md
 assert '- Requested path: src/app.txt' in basic_inspect_md
@@ -343,6 +416,7 @@ assert '- Matched path: src/app.txt' in basic_inspect_md
 assert '- Rank in scoped evidence universe: 1' in basic_inspect_md
 
 scope_md = scope_md_path.read_text()
+assert '- Selected scope: all' in scope_md
 assert '- Filters active: true' in scope_md
 assert '- Include prefixes: None' in scope_md
 assert '- Exclude prefixes: .flow/' in scope_md
@@ -351,6 +425,13 @@ assert '- Outside include change count: 0' in scope_md
 assert '- Excluded path count: 2' in scope_md
 assert '- Excluded change count: 5' in scope_md
 for line in scope_md.splitlines():
+    if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
+        assert '.flow/' not in line, line
+
+project_md = project_md_path.read_text()
+assert '- Selected scope: project' in project_md
+assert '- Exclude prefixes: .flow/' in project_md
+for line in project_md.splitlines():
     if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
         assert '.flow/' not in line, line
 
@@ -381,7 +462,7 @@ assert 'binary or non\\-text churn unavailable for some changes' in edge_md
 edge_inspect_md = edge_inspect_md_path.read_text()
 assert 'glob/\\[literal\\]\\*.txt' in edge_inspect_md
 assert '## Inspect' in edge_inspect_md
-for text in [basic_md, scope_md, scope_empty_md, edge_md, include_md, include_empty_md, basic_inspect_md, edge_inspect_md]:
+for text in [basic_md, scope_md, project_md, scope_empty_md, edge_md, include_md, include_empty_md, basic_inspect_md, edge_inspect_md]:
     assert '\t' not in text, 'raw tab leaked in markdown'
     assert 'Fixture Author' not in text
     assert 'fixture@example.invalid' not in text

@@ -122,7 +122,7 @@ print('results=%d caveats=%d dirty=%s scope_active=%s outside_include_paths=%d o
     len(data.get('results', [])),
     len(data.get('analysis', {}).get('caveats', [])),
     str(data.get('analysis', {}).get('history', {}).get('dirty_worktree', False)).lower(),
-    str(scope.get('filters_active', False)).lower(),
+    '%s/%s' % (scope.get('selected_scope', 'all'), str(scope.get('filters_active', False)).lower()),
     int(scope.get('outside_include_path_count', 0) or 0),
     int(scope.get('outside_include_change_count', 0) or 0),
     int(scope.get('excluded_path_count', 0) or 0),
@@ -155,9 +155,9 @@ json_validity() {
 
 semantic_assertions() {
   have_python || return 1
-  python3 - "$BASIC_A" "$BASIC_INSPECT_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" <<'PY'
+  python3 - "$BASIC_A" "$BASIC_INSPECT_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" <<'PY'
 import json, os, re, sys
-basic_path, basic_inspect_path, shallow_path, partial_path, self_path, self_scoped_path, scope_unfiltered_path, scope_filtered_path, scope_inspect_excluded_flow_path, scope_inspect_renamed_path, scope_src_filtered_path, scope_weird_filtered_path, scope_empty_path, scope_src_include_path, scope_src_vendor_include_path, scope_include_exclude_path, scope_weird_include_path, scope_glob_star_include_path, scope_glob_include_path, scope_include_empty_path, edge_inspect_tab_path = sys.argv[1:]
+basic_path, basic_inspect_path, shallow_path, partial_path, self_path, self_scoped_path, scope_unfiltered_path, scope_all_path, scope_filtered_path, scope_project_path, scope_project_duplicate_path, scope_project_include_flow_path, scope_project_include_src_path, scope_project_inspect_path, scope_all_inspect_flow_path, scope_inspect_excluded_flow_path, scope_inspect_renamed_path, scope_src_filtered_path, scope_weird_filtered_path, scope_empty_path, scope_src_include_path, scope_src_vendor_include_path, scope_include_exclude_path, scope_weird_include_path, scope_glob_star_include_path, scope_glob_include_path, scope_include_empty_path, edge_inspect_tab_path = sys.argv[1:]
 
 def load(path):
     with open(path, encoding='utf-8') as fh:
@@ -166,6 +166,7 @@ def load(path):
 basic = load(basic_path)
 assert basic['results'], 'basic results missing'
 assert basic['results'][0]['path'] == 'src/app.txt', 'unexpected basic top result'
+assert basic['analysis']['scope']['selected_scope'] == 'all', 'basic selected scope changed'
 assert basic['analysis']['scope']['filters_active'] is False, 'basic scope unexpectedly active'
 assert basic['analysis']['scope']['include_prefixes'] == [], 'basic include prefixes changed'
 assert all(not os.path.isabs(row['path']) for row in basic['results']), 'absolute basic result path'
@@ -176,6 +177,8 @@ assert len(basic_inspect.get('results', [])) == 1, 'inspect result count changed
 assert basic_inspect['results'][0] == basic['results'][0], 'inspect result no longer matches full analysis row'
 
 scope_unfiltered = load(scope_unfiltered_path)
+scope_all = load(scope_all_path)
+assert scope_all == scope_unfiltered, '--scope all changed unfiltered output'
 assert any(row['path'].startswith('.flow/') for row in scope_unfiltered.get('results', [])), 'unfiltered scope fixture lost .flow paths'
 unfiltered_paths = [row['path'] for row in scope_unfiltered.get('results', [])]
 assert 'src/new.zig' in unfiltered_paths, 'braced rename fixture missing normalized new path'
@@ -184,6 +187,7 @@ assert 'weird/tab\tname.txt' in unfiltered_paths, 'quoted tab fixture missing un
 
 scope_filtered = load(scope_filtered_path)
 scope = scope_filtered['analysis']['scope']
+assert scope['selected_scope'] == 'all', 'filtered selected scope changed'
 assert scope['filters_active'] is True, 'filtered scope metadata inactive'
 assert scope['include_prefixes'] == [], 'filtered include prefixes changed'
 assert scope['exclude_prefixes'] == ['.flow/'], 'filtered prefix order changed'
@@ -195,6 +199,46 @@ for row in scope_filtered.get('results', []):
     assert not row['path'].startswith('.flow/'), 'excluded result leaked'
     for cc in row.get('cochanges', []):
         assert not cc['path'].startswith('.flow/'), 'excluded cochange leaked'
+
+scope_project = load(scope_project_path)
+project_scope = scope_project['analysis']['scope']
+assert project_scope['selected_scope'] == 'project', 'project selected scope missing'
+assert project_scope['filters_active'] is True, 'project scope metadata inactive'
+assert project_scope['include_prefixes'] == [], 'project include prefixes changed'
+assert project_scope['exclude_prefixes'] == ['.flow/'], 'project exclude prefix changed'
+assert project_scope['outside_include_path_count'] == 0, 'project outside include path count changed'
+assert project_scope['outside_include_change_count'] == 0, 'project outside include change count changed'
+assert project_scope['excluded_path_count'] == 2, 'project excluded path count changed'
+assert project_scope['excluded_change_count'] == 5, 'project excluded change count changed'
+assert scope_project['results'] == scope_filtered['results'], 'project preset rows differ from explicit .flow/ exclusion'
+for row in scope_project.get('results', []):
+    assert not row['path'].startswith('.flow/'), 'project result leaked .flow path'
+    for cc in row.get('cochanges', []):
+        assert not cc['path'].startswith('.flow/'), 'project cochange leaked .flow path'
+scope_project_duplicate = load(scope_project_duplicate_path)
+assert scope_project_duplicate['analysis']['scope']['exclude_prefixes'] == ['.flow/'], 'duplicate project exclude was reported twice'
+assert scope_project_duplicate['results'] == scope_project['results'], 'duplicate project exclude changed rows'
+scope_project_include_flow = load(scope_project_include_flow_path)
+assert scope_project_include_flow['analysis']['scope']['selected_scope'] == 'project', 'project include-flow selected scope changed'
+assert scope_project_include_flow['analysis']['scope']['include_prefixes'] == ['.flow/'], 'project include-flow include prefix changed'
+assert scope_project_include_flow['analysis']['scope']['exclude_prefixes'] == ['.flow/'], 'project include-flow exclude prefix changed'
+assert scope_project_include_flow['results'] == [], 'exclude did not win over include for project .flow/'
+scope_project_include_src = load(scope_project_include_src_path)
+assert scope_project_include_src['analysis']['scope']['selected_scope'] == 'project', 'project include-src selected scope changed'
+assert scope_project_include_src['analysis']['scope']['include_prefixes'] == ['src/'], 'project include-src include prefix changed'
+assert scope_project_include_src['analysis']['scope']['exclude_prefixes'] == ['.flow/'], 'project include-src exclude prefix changed'
+for row in scope_project_include_src.get('results', []):
+    assert row['path'].startswith('src/'), 'project include-src leaked result'
+    for cc in row.get('cochanges', []):
+        assert cc['path'].startswith('src/'), 'project include-src leaked cochange'
+scope_project_inspect = load(scope_project_inspect_path)
+project_by_path = {row['path']: row for row in scope_project.get('results', [])}
+assert scope_project_inspect['results'][0] == project_by_path['src/vendor_adapter.zig'], 'project inspect row mismatch'
+assert scope_project_inspect['inspect']['matched_path'] == 'src/vendor_adapter.zig', 'project inspect metadata mismatch'
+scope_all_inspect_flow = load(scope_all_inspect_flow_path)
+assert scope_all_inspect_flow['analysis']['scope']['selected_scope'] == 'all', 'all inspect selected scope changed'
+assert len(scope_all_inspect_flow.get('results', [])) == 1, 'all inspect flow result count changed'
+assert scope_all_inspect_flow['results'][0]['path'] == '.flow/state.yaml', 'all inspect flow path changed'
 scope_inspect_excluded_flow = load(scope_inspect_excluded_flow_path)
 assert len(scope_inspect_excluded_flow.get('results', [])) == 1, 'scoped inspect result count changed'
 filtered_by_path = {row['path']: row for row in scope_filtered.get('results', [])}
@@ -220,6 +264,7 @@ assert scope_empty['analysis']['scope']['filters_active'] is True, 'empty scoped
 
 scope_src_include = load(scope_src_include_path)
 scope = scope_src_include['analysis']['scope']
+assert scope['selected_scope'] == 'all', 'include selected scope changed'
 assert scope['filters_active'] is True, 'include scope metadata inactive'
 assert scope['include_prefixes'] == ['src/'], 'include prefix order changed'
 assert scope['exclude_prefixes'] == [], 'include-only exclude metadata changed'
@@ -273,6 +318,7 @@ assert len(edge_inspect_tab.get('results', [])) == 1, 'tab inspect result count 
 assert edge_inspect_tab['results'][0]['path'] == 'weird/tab\tname.txt', 'tab inspect did not match tab path'
 
 self_scoped = load(self_scoped_path)
+assert self_scoped['analysis']['scope']['selected_scope'] == 'all', 'self scoped selected scope changed'
 assert self_scoped['analysis']['scope']['filters_active'] is True, 'self scoped metadata inactive'
 assert self_scoped['analysis']['scope']['include_prefixes'] == [], 'self scoped include prefixes changed'
 assert self_scoped['analysis']['scope']['exclude_prefixes'] == ['.flow/'], 'self scoped prefix changed'
@@ -291,7 +337,7 @@ history = partial['analysis']['history']
 assert history['is_partial'] is True, 'partial fixture not reported as partial'
 assert history['auto_fetch'] is False, 'partial fixture auto_fetch changed'
 
-for path in (basic_path, self_path, self_scoped_path, scope_filtered_path, scope_src_filtered_path, scope_weird_filtered_path, scope_empty_path):
+for path in (basic_path, self_path, self_scoped_path, scope_filtered_path, scope_project_path, scope_project_duplicate_path, scope_project_include_flow_path, scope_project_include_src_path, scope_src_filtered_path, scope_weird_filtered_path, scope_empty_path):
     data = load(path)
     for row in data.get('results', []):
         assert not os.path.isabs(row.get('path', '')), 'absolute result path in %s' % path
@@ -307,11 +353,11 @@ PY
 
 markdown_assertions() {
   have_python || return 1
-  python3 - "$BASIC_MD_A" "$BASIC_MD_B" "$BASIC_INSPECT_MD" "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" "$SCOPE_EMPTY_MD" "$EDGE_MD" "$EDGE_INSPECT_MD" "$SELF_MARKDOWN" "$SELF_SCOPED_MARKDOWN" "$SCOPE_SRC_INCLUDE_MD" "$SCOPE_INCLUDE_EMPTY_MD" <<'PY'
+  python3 - "$BASIC_MD_A" "$BASIC_MD_B" "$BASIC_INSPECT_MD" "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" "$SCOPE_PROJECT_MD" "$SCOPE_PROJECT_MD_B" "$SCOPE_EMPTY_MD" "$EDGE_MD" "$EDGE_INSPECT_MD" "$SELF_MARKDOWN" "$SELF_SCOPED_MARKDOWN" "$SCOPE_SRC_INCLUDE_MD" "$SCOPE_INCLUDE_EMPTY_MD" <<'PY'
 import os, re, sys
 from pathlib import Path
 
-basic_a, basic_b, basic_inspect, scope_filtered, scope_filtered_b, scope_empty, edge, edge_inspect, self_md, self_scoped, scope_src_include_md, scope_include_empty_md = [Path(p) for p in sys.argv[1:]]
+basic_a, basic_b, basic_inspect, scope_filtered, scope_filtered_b, scope_project, scope_project_b, scope_empty, edge, edge_inspect, self_md, self_scoped, scope_src_include_md, scope_include_empty_md = [Path(p) for p in sys.argv[1:]]
 
 def read(path):
     return path.read_text(encoding='utf-8')
@@ -320,6 +366,7 @@ basic = read(basic_a)
 assert basic == read(basic_b), 'basic markdown repeated output changed'
 for section in ['# git-hotspots report', '## Run summary', '## Scope', '## Caveats', '## Top hotspots', '## Evidence']:
     assert section in basic, section
+assert '- Selected scope: all' in basic, 'basic selected scope missing'
 assert 'File-level Git-history investigation prompts, not bug predictions or code-quality ratings.' in basic
 basic_inspect_text = read(basic_inspect)
 assert '## Inspect' in basic_inspect_text, 'inspect markdown section missing'
@@ -329,6 +376,7 @@ assert '- Rank in scoped evidence universe: 1' in basic_inspect_text, 'inspect m
 
 scope = read(scope_filtered)
 assert scope == read(scope_filtered_b), 'scope markdown repeated output changed'
+assert '- Selected scope: all' in scope, 'scope selected scope missing'
 assert '- Filters active: true' in scope, 'scope filter flag missing'
 assert '- Include prefixes: None' in scope, 'scope include prefix metadata missing'
 assert '- Exclude prefixes: .flow/' in scope, 'scope prefix missing'
@@ -340,6 +388,14 @@ for line in scope.splitlines():
     if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
         assert '.flow/' not in line, 'filtered path leaked in scoped markdown: %r' % line
 
+project = read(scope_project)
+assert project == read(scope_project_b), 'project markdown repeated output changed'
+assert '- Selected scope: project' in project, 'project selected scope missing'
+assert '- Exclude prefixes: .flow/' in project, 'project exclude prefix missing'
+for line in project.splitlines():
+    if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
+        assert '.flow/' not in line, 'project path leaked in scoped markdown: %r' % line
+
 empty = read(scope_empty)
 for section in ['## Run summary', '## Scope', '## Caveats', '## Top hotspots', '## Evidence']:
     assert section in empty, 'empty scoped markdown missing %s' % section
@@ -347,6 +403,7 @@ assert 'No hotspots matched the requested scope.' in empty, 'empty scoped top-ho
 assert 'No result evidence to show.' in empty, 'empty scoped evidence note missing'
 
 include_text = read(scope_src_include_md)
+assert '- Selected scope: all' in include_text, 'include markdown selected scope missing'
 assert '- Filters active: true' in include_text, 'include markdown filter flag missing'
 assert '- Include prefixes: src/' in include_text, 'include markdown prefix missing'
 assert '- Exclude prefixes: None' in include_text, 'include markdown exclude metadata missing'
@@ -370,13 +427,14 @@ assert '## Inspect' in edge_inspect_text, 'edge inspect section missing'
 assert 'glob/\\[literal\\]\\*.txt' in edge_inspect_text, 'edge inspect markdown escaping missing'
 
 self_scoped_text = read(self_scoped)
+assert '- Selected scope: all' in self_scoped_text, 'self scoped markdown lost selected scope'
 assert '- Filters active: true' in self_scoped_text, 'self scoped markdown lost scope flag'
 assert '- Exclude prefixes: .flow/' in self_scoped_text, 'self scoped markdown lost prefix'
 for line in self_scoped_text.splitlines():
     if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
         assert '.flow/' not in line, 'self scoped markdown leaked .flow path: %r' % line
 
-for text in [basic, basic_inspect_text, scope, empty, edge_text, edge_inspect_text, read(self_md), self_scoped_text, include_text, include_empty]:
+for text in [basic, basic_inspect_text, scope, project, empty, edge_text, edge_inspect_text, read(self_md), self_scoped_text, include_text, include_empty]:
     assert '\t' not in text, 'raw tab leaked in markdown'
     assert 'Fixture Author' not in text, 'fixture author name leaked'
     assert 'fixture@example.invalid' not in text, 'fixture author email leaked'
@@ -407,6 +465,7 @@ explain_output_checks() {
   grep -q -- '--explain' "$help_out" || return 1
   grep -q -- '--version' "$help_out" || return 1
   grep -q -- '--inspect PATH' "$help_out" || return 1
+  grep -q -- '--scope VALUE' "$help_out" || return 1
   "$EXE" --version > "$version_out" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
   [ "$(cat "$version_out")" = 'git-hotspots 0.1.0-alpha.1' ] || return 1
@@ -424,6 +483,7 @@ explain_output_checks() {
     '--limit 1' \
     '--format markdown' \
     '--since HEAD~1' \
+    '--scope project' \
     '--include-prefix src/' \
     '--exclude-prefix .flow/' \
     '--inspect src/app.txt'
@@ -440,6 +500,7 @@ explain_output_checks() {
     '--limit 1' \
     '--format markdown' \
     '--since HEAD~1' \
+    '--scope project' \
     '--include-prefix src/' \
     '--exclude-prefix .flow/' \
     '--inspect src/app.txt' \
@@ -554,10 +615,11 @@ run_timed_json() {
   repo=$1
   output=$2
   timing_file=$3
+  shift 3
   tool=$(choose_timing_tool)
   case "$tool" in
     '/usr/bin/time -v')
-      if /usr/bin/time -v "$EXE" --repo "$repo" --format json > "$output" 2> "$timing_file"; then
+      if /usr/bin/time -v "$EXE" --repo "$repo" "$@" --format json > "$output" 2> "$timing_file"; then
         elapsed=$(awk -F': ' '/Elapsed \(wall clock\) time/ {print $2; exit}' "$timing_file")
         [ -n "$elapsed" ] || elapsed="recorded"
         printf '%s|%s\n' "$tool" "$elapsed"
@@ -566,7 +628,7 @@ run_timed_json() {
       return 1
       ;;
     '/usr/bin/time -p')
-      if /usr/bin/time -p "$EXE" --repo "$repo" --format json > "$output" 2> "$timing_file"; then
+      if /usr/bin/time -p "$EXE" --repo "$repo" "$@" --format json > "$output" 2> "$timing_file"; then
         elapsed=$(awk '/^real / {print $2 "s"; exit}' "$timing_file")
         [ -n "$elapsed" ] || elapsed="recorded"
         printf '%s|%s\n' "$tool" "$elapsed"
@@ -576,7 +638,7 @@ run_timed_json() {
       ;;
     *)
       start=$(date +%s 2>/dev/null || printf '0')
-      if "$EXE" --repo "$repo" --format json > "$output" 2> "$timing_file"; then
+      if "$EXE" --repo "$repo" "$@" --format json > "$output" 2> "$timing_file"; then
         end=$(date +%s 2>/dev/null || printf '0')
         if [ "$start" -gt 0 ] && [ "$end" -ge "$start" ]; then
           elapsed=$((end - start))s
@@ -612,6 +674,8 @@ fixture_json_checks() {
   if "$EXE" --repo fixtures/basic --inspect missing.txt >/dev/null 2> "$ARTIFACT_DIR/inspect-missing.err"; then return 1; fi
   grep -q -- '--inspect target has no matching' "$ARTIFACT_DIR/inspect-missing.err" || return 1
   "$EXE" --repo fixtures/scope --format json > "$SCOPE_UNFILTERED_JSON" || return 1
+  "$EXE" --repo fixtures/scope --scope all --format json > "$SCOPE_ALL_JSON" || return 1
+  diff -u "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" >/dev/null || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format json > "$SCOPE_FILTERED_JSON" || return 1
   diff -u fixtures/expected/scope-filtered.json "$SCOPE_FILTERED_JSON" >/dev/null || return 1
   if "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --inspect .flow/secret.txt --format json > "$ARTIFACT_DIR/inspect-excluded.out" 2> "$ARTIFACT_DIR/inspect-excluded.err"; then return 1; fi
@@ -621,6 +685,21 @@ fixture_json_checks() {
   "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > "$SCOPE_FILTERED_MD_B" || return 1
   diff -u fixtures/expected/scope-filtered.md "$SCOPE_FILTERED_MD" >/dev/null || return 1
   diff -u "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/scope --scope project --format json > "$SCOPE_PROJECT_JSON" || return 1
+  diff -u fixtures/expected/scope-project.json "$SCOPE_PROJECT_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/scope --scope project --format json > "$SCOPE_PROJECT_JSON_B" || return 1
+  diff -u "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/scope --scope project --format markdown > "$SCOPE_PROJECT_MD" || return 1
+  "$EXE" --repo fixtures/scope --scope project --format markdown > "$SCOPE_PROJECT_MD_B" || return 1
+  diff -u fixtures/expected/scope-project.md "$SCOPE_PROJECT_MD" >/dev/null || return 1
+  diff -u "$SCOPE_PROJECT_MD" "$SCOPE_PROJECT_MD_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/scope --scope project --inspect src/vendor_adapter.zig --format json > "$SCOPE_PROJECT_INSPECT_JSON" || return 1
+  "$EXE" --repo fixtures/scope --scope all --inspect .flow/state.yaml --format json > "$SCOPE_ALL_INSPECT_FLOW_JSON" || return 1
+  if "$EXE" --repo fixtures/scope --scope project --inspect .flow/state.yaml --format json > "$ARTIFACT_DIR/project-inspect-flow.out" 2> "$ARTIFACT_DIR/project-inspect-flow.err"; then return 1; fi
+  grep -q -- '--inspect target has no matching' "$ARTIFACT_DIR/project-inspect-flow.err" || return 1
+  "$EXE" --repo fixtures/scope --scope project --exclude-prefix .flow/ --format json > "$SCOPE_PROJECT_DUPLICATE_JSON" || return 1
+  "$EXE" --repo fixtures/scope --scope project --include-prefix .flow/ --format json > "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" || return 1
+  "$EXE" --repo fixtures/scope --scope project --include-prefix src/ --format json > "$SCOPE_PROJECT_INCLUDE_SRC_JSON" || return 1
   "$EXE" --repo fixtures/scope --include-prefix src/ --format json > "$SCOPE_SRC_INCLUDE_JSON" || return 1
   "$EXE" --repo fixtures/scope --include-prefix src/ --inspect src/new.zig --format json > "$SCOPE_INSPECT_RENAMED_JSON" || return 1
   "$EXE" --repo fixtures/scope --include-prefix src/ --format markdown > "$SCOPE_SRC_INCLUDE_MD" || return 1
@@ -672,35 +751,58 @@ real_repo_smoke() {
   table_out=$(mktemp "$ARTIFACT_DIR/table.XXXXXX")
   json_out=$(mktemp "$ARTIFACT_DIR/real.XXXXXX.json")
   markdown_out=$(mktemp "$ARTIFACT_DIR/real.XXXXXX.md")
+  project_table_out=$(mktemp "$ARTIFACT_DIR/project-table.XXXXXX")
+  project_json_out=$(mktemp "$ARTIFACT_DIR/project-real.XXXXXX.json")
+  project_markdown_out=$(mktemp "$ARTIFACT_DIR/project-real.XXXXXX.md")
   timing_file=$(mktemp "$ARTIFACT_DIR/real-time.XXXXXX")
 
-  if "$EXE" --repo "$repo" --format table > "$table_out" 2> "$timing_file"; then
+  if "$EXE" --repo "$repo" --scope all --format table > "$table_out" 2> "$timing_file"; then
     table_status=pass
   else
     table_status=fail
   fi
 
-  timing=$(run_timed_json "$repo" "$json_out" "$timing_file") || timing='timing failed|unknown'
+  timing=$(run_timed_json "$repo" "$json_out" "$timing_file" --scope all) || timing='timing failed|unknown'
   case "$timing" in
     'timing failed|unknown') json_status=fail ;;
     *) json_status=pass ;;
   esac
 
-  if "$EXE" --repo "$repo" --format markdown > "$markdown_out" 2> "$timing_file"; then
+  if "$EXE" --repo "$repo" --scope all --format markdown > "$markdown_out" 2> "$timing_file"; then
     markdown_status=pass
   else
     markdown_status=fail
   fi
 
-  if [ "$table_status" = pass ] && [ "$json_status" = pass ] && [ "$markdown_status" = pass ]; then
+  if "$EXE" --repo "$repo" --scope project --format table > "$project_table_out" 2> "$timing_file"; then
+    project_table_status=pass
+  else
+    project_table_status=fail
+  fi
+
+  project_timing=$(run_timed_json "$repo" "$project_json_out" "$timing_file" --scope project) || project_timing='timing failed|unknown'
+  case "$project_timing" in
+    'timing failed|unknown') project_json_status=fail ;;
+    *) project_json_status=pass ;;
+  esac
+
+  if "$EXE" --repo "$repo" --scope project --format markdown > "$project_markdown_out" 2> "$timing_file"; then
+    project_markdown_status=pass
+  else
+    project_markdown_status=fail
+  fi
+
+  if [ "$table_status" = pass ] && [ "$json_status" = pass ] && [ "$markdown_status" = pass ] && [ "$project_table_status" = pass ] && [ "$project_json_status" = pass ] && [ "$project_markdown_status" = pass ]; then
     summary=$(json_count_summary "$json_out") || summary='results=unknown caveats=unknown dirty=unknown'
+    project_summary=$(json_count_summary "$project_json_out") || project_summary='results=unknown caveats=unknown dirty=unknown'
     elapsed=${timing#*|}
-    printf 'real-repo label=%s table=%s json=%s markdown=%s %s elapsed=%s\n' "$label" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" >> "$SMOKES"
+    project_elapsed=${project_timing#*|}
+    printf 'real-repo label=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_%s project_elapsed=%s\n' "$label" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
     pass_rung "real repo smoke $label"
     return 0
   fi
 
-  fail_rung "real repo smoke $label" "table=$table_status json=$json_status markdown=$markdown_status"
+  fail_rung "real repo smoke $label" "all_table=$table_status all_json=$json_status all_markdown=$markdown_status project_table=$project_table_status project_json=$project_json_status project_markdown=$project_markdown_status"
   return 1
 }
 
@@ -712,10 +814,20 @@ BASIC_MD_B=$ARTIFACT_DIR/basic-b.md
 BASIC_INSPECT_MD=$ARTIFACT_DIR/basic-inspect.md
 BASIC_INSPECT_TABLE=$ARTIFACT_DIR/basic-inspect.txt
 SCOPE_UNFILTERED_JSON=$ARTIFACT_DIR/scope-unfiltered.json
+SCOPE_ALL_JSON=$ARTIFACT_DIR/scope-all.json
 SCOPE_FILTERED_JSON=$ARTIFACT_DIR/scope-filtered.json
 SCOPE_INSPECT_EXCLUDED_FLOW_JSON=$ARTIFACT_DIR/scope-inspect-excluded-flow.json
 SCOPE_FILTERED_MD=$ARTIFACT_DIR/scope-filtered.md
 SCOPE_FILTERED_MD_B=$ARTIFACT_DIR/scope-filtered-b.md
+SCOPE_PROJECT_JSON=$ARTIFACT_DIR/scope-project.json
+SCOPE_PROJECT_JSON_B=$ARTIFACT_DIR/scope-project-b.json
+SCOPE_PROJECT_DUPLICATE_JSON=$ARTIFACT_DIR/scope-project-duplicate.json
+SCOPE_PROJECT_INCLUDE_FLOW_JSON=$ARTIFACT_DIR/scope-project-include-flow.json
+SCOPE_PROJECT_INCLUDE_SRC_JSON=$ARTIFACT_DIR/scope-project-include-src.json
+SCOPE_PROJECT_INSPECT_JSON=$ARTIFACT_DIR/scope-project-inspect.json
+SCOPE_ALL_INSPECT_FLOW_JSON=$ARTIFACT_DIR/scope-all-inspect-flow.json
+SCOPE_PROJECT_MD=$ARTIFACT_DIR/scope-project.md
+SCOPE_PROJECT_MD_B=$ARTIFACT_DIR/scope-project-b.md
 SCOPE_SRC_INCLUDE_JSON=$ARTIFACT_DIR/scope-src-include.json
 SCOPE_INSPECT_RENAMED_JSON=$ARTIFACT_DIR/scope-inspect-renamed.json
 SCOPE_SRC_INCLUDE_MD=$ARTIFACT_DIR/scope-src-include.md
@@ -775,7 +887,7 @@ else
 fi
 
 printf 'validate: RUN JSON validity\n'
-json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_INSPECT_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
+json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_INSPECT_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
 
 printf 'validate: RUN shallow, partial, and privacy assertions\n'
 if semantic_assertions; then

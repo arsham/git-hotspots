@@ -275,7 +275,7 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config) Anal
         .allocator = allocator,
         .repo_root = repo_root,
         .history = .{ .head = head, .head_timestamp = head_ts, .range = range_owned, .is_shallow = is_shallow, .is_partial = is_partial, .dirty_worktree = dirty, .commit_count = commit_count },
-        .scope = .{ .filters_active = cfg.include_prefixes.len > 0 or cfg.exclude_prefixes.len > 0, .include_prefixes = scope_include_prefixes, .exclude_prefixes = scope_exclude_prefixes, .outside_include_path_count = outside_include_paths.count(), .outside_include_change_count = outside_include_change_count, .excluded_path_count = excluded_paths.count(), .excluded_change_count = excluded_change_count },
+        .scope = .{ .selected_scope = cfg.scope, .filters_active = cfg.scope != .all or cfg.include_prefixes.len > 0 or cfg.exclude_prefixes.len > 0, .include_prefixes = scope_include_prefixes, .exclude_prefixes = scope_exclude_prefixes, .outside_include_path_count = outside_include_paths.count(), .outside_include_change_count = outside_include_change_count, .excluded_path_count = excluded_paths.count(), .excluded_change_count = excluded_change_count },
         .inspect = inspect,
         .results = try results.toOwnedSlice(),
         .caveats = try caveats.toOwnedSlice(),
@@ -523,6 +523,8 @@ test "normalizes simple rename syntax" {
 
 test "matches literal exclude prefixes" {
     try std.testing.expect(isExcludedPath(".flow/state.yaml", &.{".flow/"}));
+    try std.testing.expect(!isExcludedPath(".flowish/state.yaml", &.{".flow/"}));
+    try std.testing.expect(!isExcludedPath("src/.flow_adapter.zig", &.{".flow/"}));
     try std.testing.expect(isExcludedPath("vendor/lib.zig", &.{"vendor/"}));
     try std.testing.expect(!isExcludedPath("src/vendor_adapter.zig", &.{"vendor/"}));
     try std.testing.expect(!isExcludedPath("glob/[literal]*.zig", &.{"glob/*"}));

@@ -6,7 +6,7 @@ pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("git-hotspots: file-level Git-history investigation prompts\n", .{});
     try writer.print("commits={d} shallow={} partial={} dirty={} auto_fetch=false\n", .{ analysis.history.commit_count, analysis.history.is_shallow, analysis.history.is_partial, analysis.history.dirty_worktree });
     if (analysis.scope.filters_active) {
-        try writer.print("scope: include_prefixes=", .{});
+        try writer.print("scope: selected={s} include_prefixes=", .{model.scopePresetName(analysis.scope.selected_scope)});
         try renderInlineStringArray(writer, analysis.scope.include_prefixes);
         try writer.print(" exclude_prefixes=", .{});
         try renderInlineStringArray(writer, analysis.scope.exclude_prefixes);
@@ -41,7 +41,9 @@ pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("\"range\": ", .{});
     if (analysis.history.range) |r| try jsonString(writer, r) else try writer.print("null", .{});
     try writer.print(", \"is_shallow\": {}, \"is_partial\": {}, \"auto_fetch\": false, \"dirty_worktree\": {}, \"commit_count\": {d} }},\n", .{ analysis.history.is_shallow, analysis.history.is_partial, analysis.history.dirty_worktree, analysis.history.commit_count });
-    try writer.print("    \"scope\": {{ \"filters_active\": {}, \"include_prefixes\": ", .{analysis.scope.filters_active});
+    try writer.print("    \"scope\": {{ \"selected_scope\": ", .{});
+    try jsonString(writer, model.scopePresetName(analysis.scope.selected_scope));
+    try writer.print(", \"filters_active\": {}, \"include_prefixes\": ", .{analysis.scope.filters_active});
     try stringArray(writer, analysis.scope.include_prefixes);
     try writer.print(", \"exclude_prefixes\": ", .{});
     try stringArray(writer, analysis.scope.exclude_prefixes);
@@ -123,6 +125,7 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
     try writer.writeAll("- Paths: repo-relative\n\n");
 
     try writer.writeAll("## Scope\n\n");
+    try writer.print("- Selected scope: {s}\n", .{model.scopePresetName(analysis.scope.selected_scope)});
     try writer.print("- Filters active: {}\n", .{analysis.scope.filters_active});
     try writer.writeAll("- Include prefixes: ");
     if (analysis.scope.include_prefixes.len == 0) {
@@ -354,7 +357,7 @@ test "markdown report has stable sections and no raw private root" {
         .allocator = std.testing.allocator,
         .repo_root = "/private/root",
         .history = .{ .head = "head123", .head_timestamp = 999, .range = null, .is_shallow = false, .is_partial = false, .dirty_worktree = true, .commit_count = 3 },
-        .scope = .{ .filters_active = true, .include_prefixes = include_prefixes[0..], .exclude_prefixes = prefixes[0..], .outside_include_path_count = 3, .outside_include_change_count = 4, .excluded_path_count = 2, .excluded_change_count = 5 },
+        .scope = .{ .selected_scope = .project, .filters_active = true, .include_prefixes = include_prefixes[0..], .exclude_prefixes = prefixes[0..], .outside_include_path_count = 3, .outside_include_change_count = 4, .excluded_path_count = 2, .excluded_change_count = 5 },
         .results = results[0..],
         .caveats = global_caveats[0..],
     };

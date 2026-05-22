@@ -131,6 +131,7 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --limit 10 --format table
 ./zig-out/bin/git-hotspots --repo . --limit 10 --format json
 ./zig-out/bin/git-hotspots --repo . --limit 10 --format markdown
+./zig-out/bin/git-hotspots --repo . --scope project --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --include-prefix src/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --exclude-prefix .flow/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --format markdown
@@ -139,22 +140,26 @@ zig build
 ```
 
 Supported options are `--repo`, `--limit`, `--format table|json|markdown`,
-`--since`, repeatable `--include-prefix`, repeatable `--exclude-prefix`,
-`--inspect`, `--explain`, `--version`, and `--help`. Include and exclude
-prefixes are literal repo-relative Git path prefixes using `/` separators; they
-are applied before hotspot scoring and co-change evidence, with excludes
-winning over includes. They are not globs, pathspecs, gitignore rules, regexes,
-or project configuration. `--inspect PATH` performs an exact file drilldown
-within the selected scope, returning only that file's existing hotspot row plus
-its rank in the full scoped evidence universe. Use the Git-style `\t` escape to
-target a path that contains a tab, for example `--inspect 'weird/tab\tname.txt'`;
-literal control characters remain invalid. It does not rescore or bypass
-include/exclude filters, and it cannot be combined with `--limit`. Reports
-include scope metadata showing whether filters were active, which prefixes were
-used, and bounded counts for paths and changes omitted by include or exclude
-filters. Markdown output is a deterministic stdout report with run summary,
-scope, caveats, ranked hotspots, and per-result evidence. `--version` is
-standalone and prints the alpha version without requiring a Git repository.
+`--since`, `--scope all|project`, repeatable `--include-prefix`, repeatable
+`--exclude-prefix`, `--inspect`, `--explain`, `--version`, and `--help`.
+`--scope all` is the default unfiltered evidence universe unless explicit
+prefixes are supplied. `--scope project` is opt-in and currently expands only to
+the literal exclude prefix `.flow/`, so workflow metadata does not dominate a
+project-focused report. Include and exclude prefixes are literal repo-relative
+Git path prefixes using `/` separators; they are applied before
+hotspot scoring and co-change evidence, with excludes winning over includes.
+They are not globs, pathspecs, gitignore rules, regexes, or project
+configuration. `--inspect PATH` performs an exact file drilldown within the
+selected scope, returning only that file's existing hotspot row plus its rank in
+the full scoped evidence universe. Use the Git-style `\t` escape to target a
+path that contains a tab, for example `--inspect 'weird/tab\tname.txt'`; literal
+control characters remain invalid. It does not rescore or bypass scope,
+include, or exclude filters, and it cannot be combined with `--limit`. Reports
+include scope metadata showing the selected scope, effective prefixes, and
+bounded counts for paths and changes omitted by include or exclude filters.
+Markdown output is a deterministic stdout report with run summary, scope,
+caveats, ranked hotspots, and per-result evidence. `--version` is standalone
+and prints the alpha version without requiring a Git repository.
 
 ## How to read scores
 

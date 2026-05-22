@@ -2,12 +2,19 @@ const std = @import("std");
 
 pub const Format = enum { table, json, markdown };
 
+pub const ScopePreset = enum { all, project };
+
+pub fn scopePresetName(scope: ScopePreset) []const u8 {
+    return @tagName(scope);
+}
+
 pub const Config = struct {
     repo_path: []const u8,
     limit: usize = 10,
     format: Format = .table,
     since: ?[]const u8 = null,
     inspect_path: ?[]const u8 = null,
+    scope: ScopePreset = .all,
     include_prefixes: []const []const u8 = &.{},
     exclude_prefixes: []const []const u8 = &.{},
 };
@@ -19,6 +26,7 @@ pub const Inspect = struct {
 };
 
 pub const Scope = struct {
+    selected_scope: ScopePreset,
     filters_active: bool,
     include_prefixes: [][]const u8,
     exclude_prefixes: [][]const u8,

@@ -16,7 +16,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 
 ## Scope
 
-- Selected scope: all
+- Selected scope: project
 - Filters active: true
 - Include prefixes: None
 - Exclude prefixes: .flow/

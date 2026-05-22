@@ -4,7 +4,7 @@ feature:
   slug: default-project-scope-presets
   title: Default project scope presets
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Unscoped hotspot reports intentionally show all tracked Git-history
@@ -109,7 +109,7 @@ proposal:
     materialised_at: 2026-05-22T17:43:39.269Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -168,7 +168,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Scope preset contract
       goal: Add the --scope all|project CLI/config contract and expand project to
         deterministic literal prefixes without changing scoring or Git
@@ -206,7 +206,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Preset output and parity
       goal: Expose selected scope and effective prefixes in table, JSON, and Markdown
         while proving project preset parity with explicit .flow/ exclusion.
@@ -247,7 +247,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Docs validation and real-repo smoke
       goal: Document the preset honestly and add it to the canonical validation ladder
         and privacy-safe real-repo close-out workflow.
@@ -300,7 +300,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T17:35:59.725Z
-  updated_at: 2026-05-22T17:45:44.076Z
+  updated_at: 2026-05-22T18:41:32.853Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-22T17:45:44.076Z
