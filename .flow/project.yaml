@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0012"
   active_run_id: null
   last_completed_feature_id: "0011"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 12
+  next_id: 13
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -73,6 +73,10 @@ features:
       slug: inspect-a-hotspot-file
       path: .flow/features/0011_inspect-a-hotspot-file
       created_at: 2026-05-22T16:34:12.652Z
+    - id: "0012"
+      slug: default-project-scope-presets
+      path: .flow/features/0012_default-project-scope-presets
+      created_at: 2026-05-22T17:35:59.725Z
 intake:
   mode: roadmap
   summary: null

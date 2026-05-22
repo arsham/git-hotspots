@@ -1,0 +1,303 @@
+schema: flow-feature.v1
+feature:
+  id: "0012"
+  slug: default-project-scope-presets
+  title: Default project scope presets
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Unscoped hotspot reports intentionally show all tracked Git-history
+    evidence, but public demos and day-to-day runs can be dominated by
+    repository process artefacts such as .flow/. Users need a deterministic
+    opt-in project-oriented scope preset that improves first-run usefulness
+    without silently hiding evidence or changing the default evidence universe.
+  outcome: Add an explicit --scope all|project analysis flag. The default remains
+    all and preserves current unfiltered behaviour. The project preset is opt-in
+    and currently expands only to the built-in literal exclude prefix .flow/.
+    Reports disclose the selected scope, effective prefixes, and bounded omitted
+    counts across table, JSON, and Markdown, including inspect output.
+  acceptance:
+    - Unflagged git-hotspots output remains equivalent to --scope all and keeps
+      all tracked Git-history paths in the evidence universe unless explicit
+      include/exclude filters are provided.
+    - --scope all is accepted as an explicit default scope and does not add
+      built-in include or exclude prefixes.
+    - --scope project is accepted as an opt-in project-oriented preset and
+      currently expands only to the built-in literal exclude prefix .flow/.
+    - --scope accepts only lowercase all and project; missing, unknown,
+      repeated, or case-mismatched values fail with clear stderr and non-zero
+      exit status.
+    - "Preset exclusions combine with repeatable --include-prefix and
+      --exclude-prefix flags: includes narrow the candidate universe, preset
+      excludes and explicit excludes remove paths, and excludes win over
+      includes regardless of flag order."
+    - Effective scope metadata is disclosed in JSON, table, and Markdown,
+      including selected scope, effective include prefixes, effective exclude
+      prefixes, filters_active, outside-include counts, and excluded path/change
+      counts.
+    - No raw omitted path list is emitted; reports show bounded counts and
+      effective prefixes only.
+    - The project preset filters before aggregation, scoring, co-change
+      evidence, ranking, limiting, and inspect selection.
+    - Project-scoped results do not leak .flow/ paths into result paths,
+      co-change paths, Markdown hotspot/evidence/co-change lines, table rows, or
+      inspect matches.
+    - --scope project output is equivalent to --exclude-prefix .flow/ for result
+      rows, co-change evidence, scores, confidence, caveats, and bounded
+      evidence commits.
+    - --scope all --inspect can inspect a .flow/ path with evidence, while
+      --scope project --inspect for the same path fails generically as outside
+      the selected scope.
+    - Existing explicit include/exclude prefix semantics remain literal
+      repo-relative prefixes, not globs, pathspecs, gitignore rules, regexes,
+      generated-file detection, or project configuration.
+    - Existing normal table, JSON, Markdown, --inspect, --explain, --version,
+      and prefix-filter behaviours remain stable except intentional
+      help/docs/golden changes for scope metadata and preset support.
+    - README and --explain describe scope presets as deterministic convenience
+      filters that change the evidence universe; they do not imply hidden
+      quality intelligence, generated-code detection, or global top results
+      under scoped runs.
+    - zig build validate covers scope preset parsing, fixture goldens,
+      determinism, JSON validity, Markdown semantic/privacy assertions, inspect
+      interactions, prohibited-claim scans, and real-repo smoke.
+    - Close-out real-repo smoke covers this repo and the configured
+      sibling-local-repo label without committing private paths, raw sibling
+      reports, remotes, author identities, commit messages, source snippets,
+      hosted/commercial plans, bug-prediction claims, code-quality scores,
+      developer rankings, or productivity analytics.
+planning:
+  state: ready
+  summary: Feature 0012 adds conservative scope presets. Unflagged runs remain all
+    tracked Git-history paths. --scope all is an explicit spelling of that
+    default. --scope project is an opt-in convenience preset that currently
+    excludes only .flow/ and is disclosed as such in report metadata and docs.
+    The feature does not add globs, gitignore import, generated/vendor
+    detection, config files, scoring changes, providers, cache, CI, release, or
+    hidden default exclusions.
+  brief_sync:
+    status: updated
+    reason: "Feature 0012 remains within B001: deterministic local-first file-level
+      evidence, explicit scope disclosure, no
+      providers/cache/network/telemetry/author metrics, and hotspots framed as
+      investigation prompts."
+    checked_at: 2026-05-22T17:43:15.154Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: "Follow-up capability slice for B001: opt-in project scope preset over
+      existing file-level evidence, with default all evidence preserved and no
+      hidden product-truth changes."
+    checked_at: 2026-05-22T17:43:22.826Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-22T17:43:39.269Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-22T17:43:39.269Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-22T17:43:39.269Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-22T17:43:39.269Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: null
+  depends_on_feature_ids:
+    - "0004"
+    - "0006"
+    - "0011"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add a ScopePreset model with default all and opt-in project.
+    - Project preset initially expands only to the literal exclude prefix .flow/.
+    - Combine preset excludes with explicit include/exclude prefixes before
+      aggregation and scoring.
+    - Disclose selected scope and effective prefixes in all report formats.
+    - Keep docs explicit that scoped reports change the evidence universe.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Scope preset contract
+      goal: Add the --scope all|project CLI/config contract and expand project to
+        deterministic literal prefixes without changing scoring or Git
+        traversal.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/main.zig, src/model.zig, src/git.zig; src/scoring.zig is
+          protected."
+        - "In scope: parse --scope all|project, default to all, reject
+          missing/unknown/repeated/case-mismatched scope values, represent
+          selected scope in config/model, expand project to effective exclude
+          prefix .flow/."
+        - "Out of scope: hidden default filtering, globs, pathspecs, gitignore
+          import, generated/vendor/build detection, config files, provider
+          classification, scoring changes, Git traversal redesign."
+        - "Protected: existing include/exclude prefix validation, excludes-win
+          precedence, inspect selection timing, scoring formulas, confidence
+          thresholds, no network/telemetry/cache/provider behaviour."
+        - "Dependencies: Feature 0004 exclude-prefix semantics, Feature 0006
+          include-prefix semantics, Feature 0011 inspect after scoped analysis."
+        - "Validation/evidence: parser/unit tests for default all, explicit all,
+          project, missing value, unknown value, repeated flag, case mismatch,
+          and flag-order independence."
+        - "Review focus: project preset is opt-in, expands only to .flow/, and
+          unflagged output remains all tracked Git-history evidence."
+        - Escalate if implementation needs broader path classification, default
+          filtering, generated-file detection, repository config discovery, or
+          scoring changes.
+        - "Done boundary: CLI accepts the chosen scope contract and internal
+          effective prefixes are deterministic and inspectable by
+          reports/tests."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: Preset output and parity
+      goal: Expose selected scope and effective prefixes in table, JSON, and Markdown
+        while proving project preset parity with explicit .flow/ exclusion.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/report.zig, tests/integration.sh, fixtures/expected/*,
+          tools/setup-fixtures.sh if fixture coverage needs adjustment."
+        - "In scope: JSON/table/Markdown scope metadata, golden fixture updates,
+          parity checks between --scope project and --exclude-prefix .flow/,
+          inspect success/failure under all/project, no raw omitted path lists."
+        - "Out of scope: report schema version bump unless required, separate
+          scoring semantics for scoped reports, outputting omitted path names,
+          source snippets, commit messages, author data."
+        - "Protected: normal no-scope outputs remain equivalent to --scope all;
+          existing reports stay deterministic; project-scoped output must not
+          leak .flow/ into results/cochanges/evidence."
+        - "Validation/evidence: fixture goldens for project scope, all scope,
+          and inspect interactions; repeated output diffs; JSON validity;
+          Markdown semantic checks; table row scans for leaks."
+        - "Review focus: scope metadata is clear enough that scoped reports are
+          not mistaken for global top results, and project preset equals
+          explicit .flow/ exclusion."
+        - Escalate if disclosure requires breaking report consumers beyond
+          additive scope metadata or if preset cannot be represented as literal
+          prefixes.
+        - "Done boundary: preset reports are deterministic, disclosed,
+          leak-free, and parity-proven across table, JSON, Markdown, and
+          inspect."
+      verification_commands:
+        - zig build
+        - zig build test
+        - ./zig-out/bin/git-hotspots --repo fixtures/scope --scope project
+          --format json
+        - ./zig-out/bin/git-hotspots --repo fixtures/scope --scope project
+          --format markdown
+        - ./zig-out/bin/git-hotspots --repo fixtures/scope --scope all --format
+          json
+    - id: P3
+      depends_on:
+        - P2
+      status: planned
+      title: Docs validation and real-repo smoke
+      goal: Document the preset honestly and add it to the canonical validation ladder
+        and privacy-safe real-repo close-out workflow.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: README.md, src/explain.zig, tests/integration.sh,
+          tools/validate.sh, docs/real-repo-validation.md only if a privacy-safe
+          note is useful."
+        - "In scope: help/docs updates, explain text update, validate rungs for
+          this-repo all/project reports and close-out sibling-local-repo smoke,
+          prohibited-claim and privacy scans."
+        - "Out of scope: CI, releases, packaging, providers, cache, public
+          third-party case studies, hosted/commercial content, scoring
+          redesign."
+        - "Protected: README stays visitor-facing and avoids Flow process
+          clutter except where .flow/ is an explicit CLI example; docs must not
+          claim bug prediction, quality scoring, developer ranking,
+          generated-code detection, or hidden intelligence."
+        - "Validation/evidence: zig build validate; close-out validate with
+          sibling-local-repo when available; git diff --check; scans for private
+          paths/raw sibling output/prohibited claims."
+        - "Review focus: public docs state that project scope is opt-in,
+          currently excludes only .flow/, and changes the evidence universe."
+        - Escalate if docs require naming private repos, publishing raw private
+          reports, or broadening product claims.
+        - "Done boundary: docs and validation cover all/project/project+inspect
+          behaviour and the repo is clean after close-out."
+      verification_commands:
+        - zig build validate
+        - zig build validate -Dcloseout=true
+          -Dsmoke-repo=<operator-provided-local-repo>
+          -Dsmoke-label=sibling-local-repo
+        - git diff --check
+        - git status --short --branch
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-22T17:35:59.725Z
+  updated_at: 2026-05-22T17:43:39.269Z
