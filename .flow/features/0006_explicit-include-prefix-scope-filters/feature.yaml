@@ -271,4 +271,921 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T02:53:15.998Z
-  updated_at: 2026-05-22T02:58:42.045Z
+  updated_at: 2026-05-22T02:59:12.180Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-22T02:59:12.180Z
+  assurance_level: sensitive
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Balanced
+    runner_model: Balanced
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level sensitive requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0006"
+    packet_ids:
+      - P1
+      - P2
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Explicit include-prefix scope filters
+      problem: The CLI supports explicit exclude-prefix filtering, but users cannot
+        focus hotspot analysis on selected repo subtrees such as `src/` without
+        post-processing reports. Focused reports need an equally explicit
+        include-prefix control that preserves deterministic local evidence and
+        avoids hidden defaults or a scope DSL.
+      outcome: Add repeatable `--include-prefix PATH` filters with the same
+        repo-relative literal prefix contract as `--exclude-prefix`. Includes
+        narrow the evidence universe, excludes remove from it, and
+        table/JSON/Markdown reports disclose the active scope and bounded
+        counts.
+      acceptance:
+        - The CLI accepts repeatable `--include-prefix PATH` arguments using the
+          same repo-relative literal prefix validation rules as
+          `--exclude-prefix`.
+        - Default output remains unfiltered when no include or exclude prefixes
+          are supplied.
+        - "Effective scope is flag-order independent: includes narrow candidates
+          when present, excludes remove matching paths, and excludes win over
+          includes."
+        - Filtering happens before aggregation, scoring, co-change expansion,
+          result limiting, table output, JSON output, and Markdown output.
+        - Out-of-include paths and excluded paths do not appear in result rows,
+          co-change rows, Markdown evidence sections, or validation summaries.
+        - Table, JSON, and Markdown disclose include prefixes, exclude prefixes,
+          filter-active state, and bounded include/exclude counts without raw
+          omitted-path dumps.
+        - Empty include-scoped reports exit successfully and remain explainable
+          in table, JSON, and Markdown.
+        - Validation covers include-only, repeated include, include plus exclude
+          precedence, no-match include, literal glob semantics, braced rename
+          normalization, Git-quoted tab normalization, invalid prefixes, and
+          this-repo `src/` smoke.
+        - README/help document literal repo-relative include/exclude semantics
+          and state that scoped reports change the evidence universe without
+          making bug prediction, quality scoring, or developer-ranking claims.
+        - The feature does not add default scopes, globs, pathspecs, regex,
+          `.gitignore` import, config files, providers, cache, network,
+          telemetry, author metrics, release/CI automation, hosted/commercial
+          content, or scoring formula changes beyond scoped input.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Feature 0006 improves B001's local-first file-level reports by adding
+        explicit include scope controls without changing deterministic product
+        truth.
+      checked_at: 2026-05-22T02:58:28.422Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0006_explicit-include-prefix-scope-filters/prd.md
+  requirements_contract:
+    source_path: .flow/features/0006_explicit-include-prefix-scope-filters/prd.md
+    source_digest: d6845f7724f9a4eab76fb1c3d65fb7126e8e7ab678dccd5fa017b429a11e610e
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: The CLI must accept repeatable --include-prefix PATH flags.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: "Include prefixes must use the same validation contract as exclude
+          prefixes: repo-relative Git path prefixes, / separators, literal
+          prefix matching, no empty value, no absolute path, no Windows drive
+          absolute path, no leading backslash, no .. segment, and no control
+          characters."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: With no include prefixes and no exclude prefixes, default output must
+          remain unfiltered and preserve existing all-tracked-path behaviour.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: "Effective scope must be independent of flag order:"
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: if no include prefixes are supplied, every repo-relative path is initially
+          a candidate;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: if include prefixes are supplied, a path must match at least one include
+          prefix to be a candidate;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: exclude prefixes remove matching paths from that candidate set;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: exclude wins when a path matches both include and exclude prefixes.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: Filtering must happen before aggregation, scoring, co-change expansion,
+          result limiting, table output, JSON output, and Markdown output.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: Paths outside the include scope must not appear in result rows, co-change
+          rows, Markdown evidence sections, or validation summaries.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: Excluded paths must continue to be absent from result rows, co-change
+          rows, Markdown evidence sections, and validation summaries.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: JSON analysis.scope must preserve existing fields and add deterministic
+          include metadata, including include_prefixes and counts for
+          paths/changes omitted by include scope.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: Table output must disclose active include and exclude prefixes with
+          bounded scope counts when filters are active.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: "Markdown ## Scope must disclose active include and exclude prefixes with
+          bounded scope counts when filters are active."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#requirements[15]
+        text: Empty include-scoped reports must exit successfully and remain explainable
+          in table, JSON, and Markdown.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#requirements[16]
+        text: Repeated include prefixes are OR; repeated exclude prefixes are OR.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#requirements[17]
+        text: Literal prefix semantics must be documented; glob/* must not act as a
+          glob.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#requirements[18]
+        text: Prefix matching must use normalized Git paths already handled by the
+          current numstat parser, including braced renames and Git-quoted paths.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#requirements[19]
+        text: Existing --exclude-prefix behaviour and existing exclude-only golden
+          outputs must remain stable unless intentional additive scope metadata
+          is required.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#requirements[20]
+        text: Existing JSON/table/Markdown format contracts must remain deterministic.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#requirements[21]
+        text: README and help text must describe include prefixes as explicit literal
+          repo-relative filters and must say scoped reports change the evidence
+          universe.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#requirements[22]
+        text: The feature must not add default scopes, default include/exclude policy,
+          globs, pathspecs, regex, .gitignore import, config files,
+          provider/cache work, network access, telemetry, author metrics,
+          release/CI automation, hosted/commercial content, bug prediction,
+          quality scoring, or developer ranking.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#acceptance[1]
+        text: git-hotspots --include-prefix src/ analyses only src/ paths and only src/
+          co-change evidence.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#acceptance[2]
+        text: git-hotspots --include-prefix src/ --include-prefix vendor/ analyses paths
+          matching either prefix.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#acceptance[3]
+        text: git-hotspots --include-prefix src/ --exclude-prefix src/vendoradapter.zig
+          omits src/vendoradapter.zig; exclude wins over include.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#acceptance[4]
+        text: git-hotspots --include-prefix does-not-exist/ succeeds with an empty
+          scoped report in table, JSON, and Markdown.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#acceptance[5]
+        text: git-hotspots --include-prefix 'glob/' treats literally and does not match
+          glob/[literal]*.txt; --include-prefix glob/ does match that path.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#acceptance[6]
+        text: Invalid include prefixes fail clearly on stderr without panic.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#acceptance[7]
+        text: Scope metadata in table, JSON, and Markdown includes include prefixes,
+          exclude prefixes, active state, and bounded counts.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#acceptance[8]
+        text: Validation proves include filtering happens before co-change scoring by
+          asserting that out-of-include paths are absent from result and
+          co-change fields.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#acceptance[9]
+        text: zig build validate covers include-only, repeated include, include+exclude,
+          empty include, literal-glob, rename normalization, quoted-tab
+          normalization, and real-repo smoke.
+        category: acceptance
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#acceptance[10]
+        text: The README remains visitor-facing and OSS-safe.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#edge-cases[1]
+        text: Missing --include-prefix value.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#edge-cases[2]
+        text: Empty prefix.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#edge-cases[3]
+        text: POSIX absolute path.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#edge-cases[4]
+        text: Windows drive absolute path.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#edge-cases[5]
+        text: Leading backslash path.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#edge-cases[6]
+        text: Prefix containing a .. segment.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#edge-cases[7]
+        text: Prefix containing control characters.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#edge-cases[8]
+        text: Path containing spaces, unicode, tab escapes, brackets, and glob-like
+          characters.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#edge-cases[9]
+        text: Braced rename numstat paths.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-042
+        source_ref: prd.md#edge-cases[10]
+        text: Git-quoted paths.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-043
+        source_ref: prd.md#edge-cases[11]
+        text: Include prefix with no matching changes in the selected range.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-044
+        source_ref: prd.md#edge-cases[12]
+        text: Include and exclude both matching the same path.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-045
+        source_ref: prd.md#edge-cases[13]
+        text: --since range where only out-of-include paths changed.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-046
+        source_ref: prd.md#edge-cases[14]
+        text: Dirty worktree caveat remains independent of include filters.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-047
+        source_ref: prd.md#verification[1]
+        text: "Required validation commands:"
+        category: verification
+        packet_refs: []
+        verification: "Required validation commands:"
+        required_for_close_out: true
+      - id: REQ-048
+        source_ref: prd.md#verification[2]
+        text: "``sh zig fmt --check build.zig src tests zig build test zig build
+          validate git diff --check flow validate --target feature:0006 --format
+          json ``"
+        category: verification
+        packet_refs: []
+        verification: "``sh zig fmt --check build.zig src tests zig build test zig build
+          validate git diff --check flow validate --target feature:0006 --format
+          json ``"
+        required_for_close_out: true
+      - id: REQ-049
+        source_ref: prd.md#verification[3]
+        text: "Close-out validation must include either:"
+        category: verification
+        packet_refs: []
+        verification: "Close-out validation must include either:"
+        required_for_close_out: true
+      - id: REQ-050
+        source_ref: prd.md#verification[4]
+        text: "``sh zig build validate -Dcloseout=true -Dsmoke-repo=<local-repo>
+          -Dsmoke-label=<safe-label> ``"
+        category: verification
+        packet_refs: []
+        verification: "``sh zig build validate -Dcloseout=true -Dsmoke-repo=<local-repo>
+          -Dsmoke-label=<safe-label> ``"
+        required_for_close_out: true
+      - id: REQ-051
+        source_ref: prd.md#verification[5]
+        text: or a privacy-safe explicit skip reason.
+        category: verification
+        packet_refs: []
+        verification: or a privacy-safe explicit skip reason.
+        required_for_close_out: true
+      - id: REQ-052
+        source_ref: prd.md#verification[6]
+        text: Real-repo smoke must include this repo with --include-prefix src/ in
+          table, JSON, and Markdown. Evidence summaries must use labels and
+          bounded counts only; no absolute paths, raw private reports, author
+          identities, remotes, or private repo names may be committed.
+        category: verification
+        packet_refs:
+          - P1
+          - P2
+        verification: Real-repo smoke must include this repo with --include-prefix src/
+          in table, JSON, and Markdown. Evidence summaries must use labels and
+          bounded counts only; no absolute paths, raw private reports, author
+          identities, remotes, or private repo names may be committed.
+        required_for_close_out: true
+      - id: REQ-053
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[1]
+        text: Implement repeatable --include-prefix PATH across CLI parsing,
+          config/model, Git analysis filtering, and table/JSON/Markdown scope
+          metadata.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-054
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[2]
+        text: "Anchors:"
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-055
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[3]
+        text: src/main.zig
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-056
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[4]
+        text: src/model.zig
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-057
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[5]
+        text: src/git.zig
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-058
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[6]
+        text: src/report.zig
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-059
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[7]
+        text: tests/integration.sh
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-060
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[8]
+        text: tools/setup-fixtures.sh
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-061
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[9]
+        text: fixtures/expected/*
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-062
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[10]
+        text: "Validation:"
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-063
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[11]
+        text: zig fmt --check build.zig src tests
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-064
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[12]
+        text: zig build test
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-065
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[13]
+        text: targeted fixture commands for include-only, repeated include,
+          include+exclude, invalid include prefixes, literal glob semantics, and
+          empty scope
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-066
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[14]
+        text: "Review focus:"
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-067
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[15]
+        text: include filtering happens before aggregation and co-change expansion;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-068
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[16]
+        text: exclude wins over include;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-069
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[17]
+        text: default unfiltered behaviour and exclude-only behaviour do not regress;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-070
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[18]
+        text: scope metadata is deterministic and privacy-safe.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-071
+        source_ref: prd.md#p1-end-to-end-include-prefix-runtime-scope[19]
+        text: Escalate if implementation requires globs, pathspecs, config files,
+          default scopes, provider/cache work, or scoring formula changes.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-072
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[1]
+        text: Extend canonical validation, real-repo smoke, and README/help
+          documentation for include-prefix scope controls.
+        category: verification
+        packet_refs:
+          - P2
+        verification: Extend canonical validation, real-repo smoke, and README/help
+          documentation for include-prefix scope controls.
+        required_for_close_out: true
+      - id: REQ-073
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[2]
+        text: "Anchors:"
+        category: verification
+        packet_refs: []
+        verification: "Anchors:"
+        required_for_close_out: true
+      - id: REQ-074
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[3]
+        text: README.md
+        category: verification
+        packet_refs: []
+        verification: README.md
+        required_for_close_out: true
+      - id: REQ-075
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[4]
+        text: tools/validate.sh
+        category: verification
+        packet_refs: []
+        verification: tools/validate.sh
+        required_for_close_out: true
+      - id: REQ-076
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[5]
+        text: tests/integration.sh
+        category: verification
+        packet_refs: []
+        verification: tests/integration.sh
+        required_for_close_out: true
+      - id: REQ-077
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[6]
+        text: fixtures/expected/*
+        category: verification
+        packet_refs: []
+        verification: fixtures/expected/*
+        required_for_close_out: true
+      - id: REQ-078
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[7]
+        text: "Validation:"
+        category: verification
+        packet_refs: []
+        verification: "Validation:"
+        required_for_close_out: true
+      - id: REQ-079
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[8]
+        text: zig build validate
+        category: verification
+        packet_refs: []
+        verification: zig build validate
+        required_for_close_out: true
+      - id: REQ-080
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[9]
+        text: close-out validation mode with sibling repo or explicit privacy-safe skip
+          reason
+        category: verification
+        packet_refs: []
+        verification: close-out validation mode with sibling repo or explicit
+          privacy-safe skip reason
+        required_for_close_out: true
+      - id: REQ-081
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[10]
+        text: git diff --check
+        category: verification
+        packet_refs: []
+        verification: git diff --check
+        required_for_close_out: true
+      - id: REQ-082
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[11]
+        text: flow validate --target feature:0006 --format json
+        category: verification
+        packet_refs: []
+        verification: flow validate --target feature:0006 --format json
+        required_for_close_out: true
+      - id: REQ-083
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[12]
+        text: "Review focus:"
+        category: verification
+        packet_refs: []
+        verification: "Review focus:"
+        required_for_close_out: true
+      - id: REQ-084
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[13]
+        text: docs explain literal repo-relative include/exclude prefixes without
+          implying globs, defaults, generated-file detection, provider analysis,
+          or hidden truth;
+        category: verification
+        packet_refs: []
+        verification: docs explain literal repo-relative include/exclude prefixes
+          without implying globs, defaults, generated-file detection, provider
+          analysis, or hidden truth;
+        required_for_close_out: true
+      - id: REQ-085
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[14]
+        text: validation summaries remain privacy-safe;
+        category: verification
+        packet_refs: []
+        verification: validation summaries remain privacy-safe;
+        required_for_close_out: true
+      - id: REQ-086
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[15]
+        text: public wording keeps hotspots as investigation prompts.
+        category: verification
+        packet_refs: []
+        verification: public wording keeps hotspots as investigation prompts.
+        required_for_close_out: true
+      - id: REQ-087
+        source_ref: prd.md#p2-validation-and-public-docs-hardening[16]
+        text: Escalate if validation needs private artefacts, network/fetch behaviour,
+          raw omitted path dumps, or new dependencies.
+        category: verification
+        packet_refs: []
+        verification: Escalate if validation needs private artefacts, network/fetch
+          behaviour, raw omitted path dumps, or new dependencies.
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: Add repeatable `--include-prefix PATH` filters with the same
+      repo-relative literal prefix contract as `--exclude-prefix`. Includes
+      narrow the evidence universe, excludes remove from it, and
+      table/JSON/Markdown reports disclose the active scope and bounded counts.
+    acceptance:
+      - The CLI accepts repeatable `--include-prefix PATH` arguments using the
+        same repo-relative literal prefix validation rules as
+        `--exclude-prefix`.
+      - Default output remains unfiltered when no include or exclude prefixes
+        are supplied.
+      - "Effective scope is flag-order independent: includes narrow candidates
+        when present, excludes remove matching paths, and excludes win over
+        includes."
+      - Filtering happens before aggregation, scoring, co-change expansion,
+        result limiting, table output, JSON output, and Markdown output.
+      - Out-of-include paths and excluded paths do not appear in result rows,
+        co-change rows, Markdown evidence sections, or validation summaries.
+      - Table, JSON, and Markdown disclose include prefixes, exclude prefixes,
+        filter-active state, and bounded include/exclude counts without raw
+        omitted-path dumps.
+      - Empty include-scoped reports exit successfully and remain explainable in
+        table, JSON, and Markdown.
+      - Validation covers include-only, repeated include, include plus exclude
+        precedence, no-match include, literal glob semantics, braced rename
+        normalization, Git-quoted tab normalization, invalid prefixes, and
+        this-repo `src/` smoke.
+      - README/help document literal repo-relative include/exclude semantics and
+        state that scoped reports change the evidence universe without making
+        bug prediction, quality scoring, or developer-ranking claims.
+      - The feature does not add default scopes, globs, pathspecs, regex,
+        `.gitignore` import, config files, providers, cache, network, telemetry,
+        author metrics, release/CI automation, hosted/commercial content, or
+        scoring formula changes beyond scoped input.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig fmt --check build.zig src tests
+      - zig build test
+      - zig build validate
+      - git diff --check
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
