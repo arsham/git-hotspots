@@ -104,6 +104,15 @@ Supported options are `--repo`, `--limit`, `--format table|json`, `--since`,
 and `--help`. The spike reads local Git history only. It does not fetch, push,
 upload source, contact remotes, or emit telemetry.
 
+Use the full local validation workflow before close-out:
+
+```sh
+zig build validate
+```
+
+`zig build test` remains the faster unit and fixture gate. `zig build validate`
+runs the fuller local ladder and prints a privacy-safe evidence summary.
+
 ## Status
 
 This repository has an executable file-level CLI spike. It is not a packaged

@@ -1,0 +1,377 @@
+#!/bin/sh
+set -u
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$ROOT" || exit 1
+
+EXE=${1:-./zig-out/bin/git-hotspots}
+if [ "$#" -gt 0 ]; then
+  shift
+fi
+
+CLOSEOUT=false
+SMOKE_REPO=
+SMOKE_LABEL=
+SMOKE_SKIP_REASON=
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --closeout)
+      CLOSEOUT=true
+      shift
+      ;;
+    --smoke-repo)
+      [ "$#" -ge 2 ] || { echo "validate: --smoke-repo requires a value" >&2; exit 2; }
+      SMOKE_REPO=$2
+      shift 2
+      ;;
+    --smoke-label)
+      [ "$#" -ge 2 ] || { echo "validate: --smoke-label requires a value" >&2; exit 2; }
+      SMOKE_LABEL=$2
+      shift 2
+      ;;
+    --smoke-skip-reason)
+      [ "$#" -ge 2 ] || { echo "validate: --smoke-skip-reason requires a value" >&2; exit 2; }
+      SMOKE_SKIP_REASON=$2
+      shift 2
+      ;;
+    *)
+      echo "validate: unknown argument: $1" >&2
+      exit 2
+      ;;
+  esac
+done
+
+TMPDIR_VALIDATE=${TMPDIR:-/tmp}
+SUMMARY=$(mktemp "$TMPDIR_VALIDATE/git-hotspots-validate-summary.XXXXXX")
+FALLBACKS=$(mktemp "$TMPDIR_VALIDATE/git-hotspots-validate-fallbacks.XXXXXX")
+SMOKES=$(mktemp "$TMPDIR_VALIDATE/git-hotspots-validate-smokes.XXXXXX")
+ARTIFACT_DIR=$(mktemp -d "$TMPDIR_VALIDATE/git-hotspots-validate.XXXXXX")
+trap 'rm -f "$SUMMARY" "$FALLBACKS" "$SMOKES"; rm -rf "$ARTIFACT_DIR"' EXIT INT HUP TERM
+
+FAILURES=0
+
+note_fallback() {
+  printf '%s\n' "$1" >> "$FALLBACKS"
+}
+
+pass_rung() {
+  printf 'PASS %s\n' "$1" >> "$SUMMARY"
+  printf 'validate: PASS %s\n' "$1"
+}
+
+fail_rung() {
+  FAILURES=$((FAILURES + 1))
+  printf 'FAIL %s - %s\n' "$1" "$2" >> "$SUMMARY"
+  printf 'validate: FAIL %s - %s\n' "$1" "$2" >&2
+}
+
+print_log_excerpt() {
+  log_file=$1
+  if [ -s "$log_file" ]; then
+    sed -n '1,80p' "$log_file" >&2
+  fi
+}
+
+run_quiet() {
+  label=$1
+  shift
+  log_file=$(mktemp "$ARTIFACT_DIR/log.XXXXXX")
+  printf 'validate: RUN %s\n' "$label"
+  if "$@" > "$log_file" 2>&1; then
+    pass_rung "$label"
+  else
+    fail_rung "$label" "command exited non-zero"
+    print_log_excerpt "$log_file"
+  fi
+}
+
+have_python() {
+  command -v python3 >/dev/null 2>&1
+}
+
+safe_label() {
+  label=$1
+  [ -n "$label" ] || return 1
+  case "$label" in
+    *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-]*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+safe_reason() {
+  reason=$1
+  [ -n "$reason" ] || return 1
+  printf '%s' "$reason" | grep -Eq '^[A-Za-z0-9 ._,()_-]+$'
+}
+
+json_count_summary() {
+  json_file=$1
+  have_python || return 1
+  python3 - "$json_file" <<'PY'
+import json, sys
+with open(sys.argv[1], encoding='utf-8') as fh:
+    data = json.load(fh)
+print('results=%d caveats=%d dirty=%s' % (
+    len(data.get('results', [])),
+    len(data.get('analysis', {}).get('caveats', [])),
+    str(data.get('analysis', {}).get('history', {}).get('dirty_worktree', False)).lower(),
+))
+PY
+}
+
+json_validity() {
+  label=$1
+  shift
+  if command -v jq >/dev/null 2>&1; then
+    tool=jq
+    for file in "$@"; do
+      jq empty "$file" >/dev/null || return 1
+    done
+  elif have_python; then
+    tool=python3
+    for file in "$@"; do
+      python3 -m json.tool "$file" >/dev/null || return 1
+    done
+    note_fallback "json validity: python3 fallback used because jq was unavailable"
+  else
+    note_fallback "json validity: jq and python3 unavailable"
+    return 1
+  fi
+  note_fallback "json validity: $tool"
+  pass_rung "$label"
+}
+
+semantic_assertions() {
+  have_python || return 1
+  python3 - "$BASIC_A" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" <<'PY'
+import json, os, re, sys
+basic_path, shallow_path, partial_path, self_path = sys.argv[1:]
+
+def load(path):
+    with open(path, encoding='utf-8') as fh:
+        return json.load(fh)
+
+basic = load(basic_path)
+assert basic['results'], 'basic results missing'
+assert basic['results'][0]['path'] == 'src/app.txt', 'unexpected basic top result'
+assert all(not os.path.isabs(row['path']) for row in basic['results']), 'absolute basic result path'
+
+shallow = load(shallow_path)
+history = shallow['analysis']['history']
+assert history['is_shallow'] is True, 'shallow fixture not reported as shallow'
+assert history['auto_fetch'] is False, 'shallow fixture auto_fetch changed'
+
+partial = load(partial_path)
+history = partial['analysis']['history']
+assert history['is_partial'] is True, 'partial fixture not reported as partial'
+assert history['auto_fetch'] is False, 'partial fixture auto_fetch changed'
+
+for path in (basic_path, self_path):
+    data = load(path)
+    for row in data.get('results', []):
+        assert not os.path.isabs(row.get('path', '')), 'absolute result path in %s' % path
+    text = open(path, encoding='utf-8').read()
+    assert 'Fixture Author' not in text, 'fixture author name leaked'
+    assert 'fixture@example.invalid' not in text, 'fixture author email leaked'
+    home = os.path.expanduser('~')
+    assert not home or home not in text, 'home path leaked'
+    assert not re.search(r'https?://|ssh://|git@', text), 'remote URL leaked'
+    assert not re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b', text), 'email-like identity leaked'
+PY
+}
+
+choose_timing_tool() {
+  if [ -x /usr/bin/time ] && /usr/bin/time -v sh -c ':' >/dev/null 2>&1; then
+    printf '%s\n' '/usr/bin/time -v'
+  elif [ -x /usr/bin/time ] && /usr/bin/time -p sh -c ':' >/dev/null 2>&1; then
+    printf '%s\n' '/usr/bin/time -p'
+  else
+    printf '%s\n' 'shell elapsed seconds'
+  fi
+}
+
+run_timed_json() {
+  repo=$1
+  output=$2
+  timing_file=$3
+  tool=$(choose_timing_tool)
+  case "$tool" in
+    '/usr/bin/time -v')
+      if /usr/bin/time -v "$EXE" --repo "$repo" --format json > "$output" 2> "$timing_file"; then
+        elapsed=$(awk -F': ' '/Elapsed \(wall clock\) time/ {print $2; exit}' "$timing_file")
+        [ -n "$elapsed" ] || elapsed="recorded"
+        printf '%s|%s\n' "$tool" "$elapsed"
+        return 0
+      fi
+      return 1
+      ;;
+    '/usr/bin/time -p')
+      if /usr/bin/time -p "$EXE" --repo "$repo" --format json > "$output" 2> "$timing_file"; then
+        elapsed=$(awk '/^real / {print $2 "s"; exit}' "$timing_file")
+        [ -n "$elapsed" ] || elapsed="recorded"
+        printf '%s|%s\n' "$tool" "$elapsed"
+        return 0
+      fi
+      return 1
+      ;;
+    *)
+      start=$(date +%s 2>/dev/null || printf '0')
+      if "$EXE" --repo "$repo" --format json > "$output" 2> "$timing_file"; then
+        end=$(date +%s 2>/dev/null || printf '0')
+        if [ "$start" -gt 0 ] && [ "$end" -ge "$start" ]; then
+          elapsed=$((end - start))s
+        else
+          elapsed="fallback-note"
+        fi
+        printf '%s|%s\n' "$tool" "$elapsed"
+        return 0
+      fi
+      return 1
+      ;;
+  esac
+}
+
+fixture_json_checks() {
+  sh tools/setup-fixtures.sh >/dev/null 2>&1 || return 1
+  "$EXE" --repo fixtures/basic --format json > "$BASIC_A" || return 1
+  "$EXE" --repo fixtures/basic --format json > "$BASIC_B" || return 1
+  diff -u fixtures/expected/basic.json "$BASIC_A" >/dev/null || return 1
+  diff -u "$BASIC_A" "$BASIC_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/shallow --format json > "$SHALLOW_JSON" || return 1
+  "$EXE" --repo fixtures/partial --format json > "$PARTIAL_JSON" || return 1
+  "$EXE" --repo . --format json > "$SELF_JSON" || return 1
+}
+
+fixture_performance_smoke() {
+  timing_file=$(mktemp "$ARTIFACT_DIR/time.XXXXXX")
+  medium_json=$(mktemp "$ARTIFACT_DIR/medium.XXXXXX.json")
+  timing=$(run_timed_json fixtures/medium "$medium_json" "$timing_file") || return 1
+  tool=${timing%%|*}
+  elapsed=${timing#*|}
+  note_fallback "timing: $tool"
+  summary=$(json_count_summary "$medium_json") || return 1
+  printf 'fixture-medium %s elapsed=%s\n' "$summary" "$elapsed" >> "$SMOKES"
+}
+
+real_repo_smoke() {
+  label=$1
+  repo=$2
+  safe_label "$label" || { fail_rung "real repo smoke $label" "label must use only letters, digits, dot, underscore, or hyphen"; return 1; }
+  if ! git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    fail_rung "real repo smoke $label" "repository argument is not a Git worktree"
+    return 1
+  fi
+
+  table_out=$(mktemp "$ARTIFACT_DIR/table.XXXXXX")
+  json_out=$(mktemp "$ARTIFACT_DIR/real.XXXXXX.json")
+  timing_file=$(mktemp "$ARTIFACT_DIR/real-time.XXXXXX")
+
+  if "$EXE" --repo "$repo" --format table > "$table_out" 2> "$timing_file"; then
+    table_status=pass
+  else
+    table_status=fail
+  fi
+
+  timing=$(run_timed_json "$repo" "$json_out" "$timing_file") || timing='timing failed|unknown'
+  case "$timing" in
+    'timing failed|unknown') json_status=fail ;;
+    *) json_status=pass ;;
+  esac
+
+  if [ "$table_status" = pass ] && [ "$json_status" = pass ]; then
+    summary=$(json_count_summary "$json_out") || summary='results=unknown caveats=unknown dirty=unknown'
+    elapsed=${timing#*|}
+    printf 'real-repo label=%s table=%s json=%s %s elapsed=%s\n' "$label" "$table_status" "$json_status" "$summary" "$elapsed" >> "$SMOKES"
+    pass_rung "real repo smoke $label"
+    return 0
+  fi
+
+  fail_rung "real repo smoke $label" "table=$table_status json=$json_status"
+  return 1
+}
+
+BASIC_A=$ARTIFACT_DIR/basic-a.json
+BASIC_B=$ARTIFACT_DIR/basic-b.json
+SHALLOW_JSON=$ARTIFACT_DIR/shallow.json
+PARTIAL_JSON=$ARTIFACT_DIR/partial.json
+SELF_JSON=$ARTIFACT_DIR/self.json
+
+run_quiet "format check" zig fmt --check build.zig src tests
+run_quiet "fast gate: zig build test" zig build test
+run_quiet "build executable: zig build" zig build
+run_quiet "git diff whitespace check" git diff --check
+run_quiet "shell syntax checks" sh -c 'for file in tools/*.sh tests/*.sh; do sh -n "$file" || exit 1; done'
+
+printf 'validate: RUN deterministic fixture JSON\n'
+if fixture_json_checks; then
+  pass_rung "deterministic fixture JSON"
+else
+  fail_rung "deterministic fixture JSON" "fixture output was invalid or unstable"
+fi
+
+printf 'validate: RUN JSON validity\n'
+json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
+
+printf 'validate: RUN shallow, partial, and privacy assertions\n'
+if semantic_assertions; then
+  note_fallback "privacy/path scans: python3 semantic checks; rg not required"
+  pass_rung "shallow, partial, and privacy assertions"
+else
+  fail_rung "shallow, partial, and privacy assertions" "semantic assertions failed"
+fi
+
+printf 'validate: RUN medium fixture performance smoke\n'
+if fixture_performance_smoke; then
+  pass_rung "medium fixture performance smoke"
+else
+  fail_rung "medium fixture performance smoke" "timed fixture command failed"
+fi
+
+real_repo_smoke this-repo "$ROOT" || true
+
+if [ "$CLOSEOUT" = true ]; then
+  if [ -n "$SMOKE_REPO" ]; then
+    if [ -z "$SMOKE_LABEL" ]; then
+      fail_rung "close-out sibling smoke" "--smoke-label is required with --smoke-repo"
+    else
+      real_repo_smoke "$SMOKE_LABEL" "$SMOKE_REPO" || true
+    fi
+  elif [ -n "$SMOKE_SKIP_REASON" ]; then
+    if safe_reason "$SMOKE_SKIP_REASON"; then
+      printf 'closeout-second-smoke skipped reason=%s\n' "$SMOKE_SKIP_REASON" >> "$SMOKES"
+      pass_rung "close-out sibling smoke explicit skip"
+    else
+      fail_rung "close-out sibling smoke explicit skip" "skip reason is missing or not privacy-safe"
+    fi
+  else
+    fail_rung "close-out sibling smoke" "provide --smoke-repo and --smoke-label or --smoke-skip-reason"
+  fi
+fi
+
+printf '\nVALIDATION EVIDENCE SUMMARY\n'
+printf 'command: zig build validate\n'
+printf 'mode: %s\n' "$(if [ "$CLOSEOUT" = true ]; then printf 'close-out'; else printf 'default'; fi)"
+printf 'rungs:\n'
+sed 's/^/  - /' "$SUMMARY"
+printf 'fallbacks:\n'
+if [ -s "$FALLBACKS" ]; then
+  sort -u "$FALLBACKS" | sed 's/^/  - /'
+else
+  printf '  - none\n'
+fi
+printf 'smoke evidence:\n'
+if [ -s "$SMOKES" ]; then
+  sed 's/^/  - /' "$SMOKES"
+else
+  printf '  - none\n'
+fi
+printf 'privacy: summary uses labels and bounded counts only; raw reports and absolute private paths are not printed.\n'
+printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, provider runtime, cache requirement, packaging, or release automation.\n'
+
+if [ "$FAILURES" -ne 0 ]; then
+  printf 'validate: %d rung(s) failed\n' "$FAILURES" >&2
+  exit 1
+fi
+
+printf 'validate: all rungs passed\n'

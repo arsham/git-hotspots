@@ -4,7 +4,7 @@ feature:
   slug: one-command-validation-workflow
   title: One-command validation workflow
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Feature 0002 proved the file-level CLI spike, but its close-out
@@ -84,7 +84,7 @@ proposal:
     materialised_at: 2026-05-22T00:51:47.917Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -149,7 +149,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Canonical validation command
       goal: Add the smallest canonical validation entrypoint, preferably `zig build
         validate`, backed by a local helper script that runs the current
@@ -181,7 +181,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Evidence completeness checks
       goal: Expand the validation workflow to cover deterministic output,
         shallow/partial proof, privacy/path scans, and bounded fixture
@@ -219,7 +219,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Real-repo smoke mode and docs
       goal: Add close-out mode for privacy-safe real-repository smoke validation and
         document how future agents should use it.
@@ -295,7 +295,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T00:43:05.949Z
-  updated_at: 2026-05-22T01:29:37.718Z
+  updated_at: 2026-05-22T01:45:31.624Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-22T01:29:37.718Z
