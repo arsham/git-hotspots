@@ -4,7 +4,7 @@ feature:
   slug: file-level-cli-spike
   title: File-level CLI spike
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: git-hotspots has project-level direction but no executable proof that
@@ -97,7 +97,7 @@ proposal:
     materialised_at: 2026-05-21T23:42:23.076Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -175,7 +175,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Minimal Zig CLI scaffold
       goal: Create the smallest buildable Zig CLI with basic options, help, and clear
         repository validation errors.
@@ -212,7 +212,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Local Git history ingestion
       goal: Stream local Git history into per-path aggregate file statistics without
         providers or cache.
@@ -248,7 +248,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Ranking, scoring, and explanations
       goal: Turn file aggregates into deterministic hotspot rows with modest score
         breakdowns and caveats.
@@ -281,7 +281,7 @@ design:
     - id: P4
       depends_on:
         - P3
-      status: planned
+      status: done
       title: Table and JSON output contract
       goal: Render hotspot rows as a human table and deterministic JSON, then document
         usage and limitations.
@@ -393,7 +393,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-21T23:23:45.768Z
-  updated_at: 2026-05-21T23:49:03.796Z
+  updated_at: 2026-05-22T00:24:53.093Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-21T23:49:03.796Z
