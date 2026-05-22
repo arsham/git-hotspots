@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0011"
   active_run_id: null
   last_completed_feature_id: "0010"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 11
+  next_id: 12
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -69,6 +69,10 @@ features:
       slug: real-repo-validation-and-demo-evidence
       path: .flow/features/0010_real-repo-validation-and-demo-evidence
       created_at: 2026-05-22T14:56:46.028Z
+    - id: "0011"
+      slug: inspect-a-hotspot-file
+      path: .flow/features/0011_inspect-a-hotspot-file
+      created_at: 2026-05-22T16:34:12.652Z
 intake:
   mode: roadmap
   summary: null
