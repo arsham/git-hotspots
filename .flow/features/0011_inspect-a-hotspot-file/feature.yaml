@@ -317,4 +317,716 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T16:34:12.652Z
-  updated_at: 2026-05-22T16:43:14.840Z
+  updated_at: 2026-05-22T16:47:11.164Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-22T16:47:11.164Z
+  assurance_level: sensitive
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Balanced
+    runner_model: Balanced
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level sensitive requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0011"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Inspect a hotspot file
+      problem: Current hotspot reports identify which files have concentrated change
+        pressure, but users must scan a top-N report to understand one selected
+        file. They need a deterministic single-file drilldown that reuses
+        existing evidence without source snippets, authors, providers, cache, or
+        diagnostic overclaims.
+      outcome: Add an exact repo-relative --inspect PATH analysis flag that emits a
+        one-file hotspot drilldown in the existing table, JSON, and Markdown
+        formats from the same local Git-history evidence model. Normal ranked
+        reports remain stable, and inspect output stays local-first,
+        privacy-safe, and framed as investigation evidence.
+      acceptance:
+        - --inspect PATH is documented in help and README as an exact
+          repo-relative file drilldown flag.
+        - --inspect PATH accepts existing --repo, --since, --include-prefix,
+          --exclude-prefix, and --format table|json|markdown analysis options.
+        - --inspect PATH is rejected with --explain and --version using clear
+          stderr.
+        - Inspect path validation rejects empty, absolute POSIX, Windows
+          drive-rooted, leading backslash, parent-segment, and control-character
+          paths.
+        - Inspect selection happens after scope filtering, aggregation,
+          co-change calculation, scoring, and ranking, but before normal --limit
+          truncation, so a valid below-top-N target remains inspectable.
+        - --limit is rejected when --inspect is present, so users do not infer
+          that limit can hide or reshape the inspected target.
+        - Successful inspect output contains exactly one result row in table,
+          JSON, and Markdown formats.
+        - Inspect JSON includes additive metadata to identify requested path,
+          matched path, and rank in the scoped evidence universe while
+          preserving normal report JSON compatibility.
+        - The inspected result matches the equivalent row from full JSON
+          analysis under the same repo, range, and scope for score breakdown,
+          changes, churn, recency, current size, cochanges, confidence, caveats,
+          and bounded evidence commits.
+        - If the inspect target has no matching Git-history evidence in the
+          selected scope, the command exits non-zero with a clear
+          non-judgemental message and no panic.
+        - Include/exclude scope filters affect inspect consistently; targets
+          outside include scope or excluded by prefix do not leak into results
+          or co-change evidence.
+        - Deleted, binary, renamed, unicode, spaces, glob-like, tab-escaped, and
+          markdown-special paths render safely and preserve existing caveats.
+        - Existing normal table, JSON, Markdown, --explain, --version,
+          prefix-filter, and fixture golden outputs remain stable except
+          intentional help/docs updates.
+        - No scoring formula, Git traversal semantics, report ranking,
+          confidence thresholds, network posture, telemetry posture,
+          provider/cache behaviour, author metrics, or source-content exposure
+          changes.
+        - zig build validate covers inspect fixture goldens, determinism, error
+          cases, privacy scans, and real-repo smoke with this repo plus
+          configured close-out sibling path or explicit safe skip reason.
+        - Committed evidence and docs do not contain private repo paths, raw
+          sibling reports, author identities, remotes, commit messages, source
+          snippets, hosted/commercial plans, bug-prediction claims, code-quality
+          scores, developer rankings, or productivity analytics.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: "Follow-up capability slice for B001: single-file inspect drilldown
+        over existing file-level evidence, without changing product truth or
+        adding providers/cache/runtime AI."
+      checked_at: 2026-05-22T16:42:59.823Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0011_inspect-a-hotspot-file/prd.md
+  requirements_contract:
+    source_path: .flow/features/0011_inspect-a-hotspot-file/prd.md
+    source_digest: ecf828470b43cb5da242c3a1080be4f3f83fa8731afff04609f155a41dbc1921
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: Add repeatable-compatible analysis support for one optional --inspect PATH
+          target. The target is an exact repo-relative Git path using /
+          separators.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: "Validate inspect paths with the same safety posture as prefix filters:
+          reject empty paths, absolute POSIX paths, Windows drive-rooted paths,
+          leading backslash paths, .. segments, and control characters."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: Do not implement glob, pathspec, gitignore, regex, fuzzy, basename, or
+          multi-file matching semantics for inspect.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: Allow --inspect PATH with --repo, --since, --include-prefix,
+          --exclude-prefix, and --format table|json|markdown.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: Reject --inspect PATH with --explain and --version using clear stderr.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: Reject --limit when --inspect is present. This avoids implying that a
+          user-selected target can be hidden by top-N truncation.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: Apply normal include/exclude scope filtering before inspect target
+          selection. A target outside include scope or removed by exclude scope
+          must not appear in results or co-change evidence.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: Aggregate Git history, compute co-change evidence, score all in-scope
+          files, and sort/rank before selecting the inspect target. Select
+          before normal limit truncation so below-top-N targets remain
+          inspectable.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: Successful inspect output must contain exactly one result row in table,
+          JSON, and Markdown formats.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: "Inspect output must reuse existing file-level evidence fields: score
+          breakdown, change count, additions, deletions, churn, last-changed
+          commit, last-changed timestamp, current size, co-changes, confidence,
+          caveats, and bounded evidence commits."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: JSON inspect output must be additive and deterministic. It should include
+          inspect-specific metadata such as requested path, matched path, and
+          rank in the scoped evidence universe without breaking normal report
+          JSON.
+        category: requirement
+        packet_refs:
+          - P1
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: Markdown inspect output must remain deterministic, escaped, and
+          privacy-safe. It should keep the same investigation-prompt framing as
+          normal reports.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: If the inspect target has no matching Git-history evidence in the selected
+          scope, exit non-zero with clear, non-judgemental stderr and no panic.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: Inspect must preserve deleted/not-present-at-HEAD caveats, binary/non-text
+          caveats, large-commit caveats, shallow/partial/dirty global caveats,
+          and scope metadata.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#requirements[15]
+        text: Normal ranked reports must remain byte-stable except intentional help/docs
+          updates and any explicitly accepted additive internal model changes.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#acceptance[1]
+        text: git-hotspots --help documents --inspect PATH as an exact repo-relative
+          file drilldown flag.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#acceptance[2]
+        text: git-hotspots --inspect src/app.txt --format table|json|markdown succeeds
+          on the basic fixture and emits exactly one result row.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#acceptance[3]
+        text: Inspect JSON for a target file matches the equivalent row from a full JSON
+          analysis under the same repo, range, and scope for score breakdown,
+          changes, churn, recency, current size, co-changes, confidence,
+          caveats, and bounded evidence commits.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#acceptance[4]
+        text: Inspect target selection is independent of normal --limit truncation
+          because --limit is rejected with --inspect.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#acceptance[5]
+        text: Include/exclude filters affect inspect consistently and do not leak
+          out-of-scope paths into results or co-change lists.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#acceptance[6]
+        text: Exact path behaviour is documented and tested for renamed, deleted,
+          binary, unicode, spaces, glob-like, tab-escaped, and markdown-special
+          paths.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#acceptance[7]
+        text: Missing/invalid inspect targets and invalid flag combinations fail with
+          clear stderr and non-zero exit status.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#acceptance[8]
+        text: Existing table, JSON, Markdown, --explain, --version, prefix-filter, and
+          fixture golden outputs remain stable except intentional help/docs
+          additions.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#acceptance[9]
+        text: No scoring formula, Git traversal semantics, report ranking, confidence
+          thresholds, network posture, telemetry posture, provider/cache
+          behaviour, author metrics, or source-content exposure changes.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#acceptance[10]
+        text: zig build validate covers inspect fixture goldens, determinism, error
+          cases, privacy scans, and real-repo smoke.
+        category: acceptance
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#edge-cases[1]
+        text: Target path exists in history but is below the default top 10.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#edge-cases[2]
+        text: Target path has no matching history in the selected range.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#edge-cases[3]
+        text: Target path is valid but outside --include-prefix scope.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#edge-cases[4]
+        text: Target path is valid but removed by --exclude-prefix scope.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#edge-cases[5]
+        text: Target path is deleted or not present at HEAD.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#edge-cases[6]
+        text: Target path has binary/non-text churn.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#edge-cases[7]
+        text: Target path comes from normalized Git rename syntax, including braced
+          rename syntax.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#edge-cases[8]
+        text: Target path contains spaces, unicode, markdown-sensitive characters,
+          glob-like literals, or Git-quoted tab escapes.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#edge-cases[9]
+        text: Repository is non-git, bare, empty, shallow, partial, detached, dirty, or
+          uses a linked worktree.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#edge-cases[10]
+        text: --since is invalid.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#edge-cases[11]
+        text: --inspect is combined with --explain, --version, or --limit.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#verification[1]
+        text: "Required local gates:"
+        category: verification
+        packet_refs: []
+        verification: "Required local gates:"
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#verification[2]
+        text: "``sh zig fmt --check build.zig src tests zig build test zig build
+          validate git diff --check git status --short --branch ``"
+        category: verification
+        packet_refs: []
+        verification: "``sh zig fmt --check build.zig src tests zig build test zig build
+          validate git diff --check git status --short --branch ``"
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#verification[3]
+        text: "Required fixture checks:"
+        category: verification
+        packet_refs: []
+        verification: "Required fixture checks:"
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#verification[4]
+        text: "``sh ./zig-out/bin/git-hotspots --repo fixtures/basic --inspect
+          src/app.txt --format json ./zig-out/bin/git-hotspots --repo
+          fixtures/basic --inspect src/app.txt --format markdown
+          ./zig-out/bin/git-hotspots --repo fixtures/basic --inspect src/app.txt
+          --format table ./zig-out/bin/git-hotspots --repo fixtures/scope
+          --exclude-prefix .flow/ --inspect src/vendor_adapter.zig --format json
+          ./zig-out/bin/git-hotspots --repo fixtures/scope --include-prefix src/
+          --inspect src/new.zig --format json ./zig-out/bin/git-hotspots --repo
+          fixtures/edge --inspect 'glob/[literal]*.txt' --format markdown ``"
+        category: verification
+        packet_refs: []
+        verification: "``sh ./zig-out/bin/git-hotspots --repo fixtures/basic --inspect
+          src/app.txt --format json ./zig-out/bin/git-hotspots --repo
+          fixtures/basic --inspect src/app.txt --format markdown
+          ./zig-out/bin/git-hotspots --repo fixtures/basic --inspect src/app.txt
+          --format table ./zig-out/bin/git-hotspots --repo fixtures/scope
+          --exclude-prefix .flow/ --inspect src/vendor_adapter.zig --format json
+          ./zig-out/bin/git-hotspots --repo fixtures/scope --include-prefix src/
+          --inspect src/new.zig --format json ./zig-out/bin/git-hotspots --repo
+          fixtures/edge --inspect 'glob/[literal]*.txt' --format markdown ``"
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#verification[5]
+        text: "Close-out validation must use the existing privacy-safe real-repo
+          workflow:"
+        category: verification
+        packet_refs:
+          - P2
+          - P3
+        verification: "Close-out validation must use the existing privacy-safe real-repo
+          workflow:"
+        required_for_close_out: true
+      - id: REQ-042
+        source_ref: prd.md#verification[6]
+        text: "``sh zig build validate -Dcloseout=true
+          -Dsmoke-repo=<operator-provided-local-repo>
+          -Dsmoke-label=sibling-local-repo ``"
+        category: verification
+        packet_refs: []
+        verification: "``sh zig build validate -Dcloseout=true
+          -Dsmoke-repo=<operator-provided-local-repo>
+          -Dsmoke-label=sibling-local-repo ``"
+        required_for_close_out: true
+      - id: REQ-043
+        source_ref: prd.md#verification[7]
+        text: If the sibling repo is unavailable, use only an explicit approved safe
+          skip reason. Do not commit private repo paths, private repo names, raw
+          private reports, remotes, author identities, commit messages, or
+          source snippets.
+        category: verification
+        packet_refs: []
+        verification: If the sibling repo is unavailable, use only an explicit approved
+          safe skip reason. Do not commit private repo paths, private repo
+          names, raw private reports, remotes, author identities, commit
+          messages, or source snippets.
+        required_for_close_out: true
+      - id: REQ-044
+        source_ref: prd.md#non-goals[1]
+        text: No inspect <path> subcommand in this feature.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-045
+        source_ref: prd.md#non-goals[2]
+        text: No symbol/function-level drilldown.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-046
+        source_ref: prd.md#non-goals[3]
+        text: No tree-sitter, LSP, ctags, dependency, blame, test, or coverage
+          providers.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-047
+        source_ref: prd.md#non-goals[4]
+        text: No cache/database work.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-048
+        source_ref: prd.md#non-goals[5]
+        text: No source snippets, patches, diffs, commit messages, author identities,
+          blame, ownership, or developer metrics.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-049
+        source_ref: prd.md#non-goals[6]
+        text: No recommendations that a file is bad, predicts bugs, objectively scores
+          code quality, ranks maintainers, or measures developer productivity.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-050
+        source_ref: prd.md#non-goals[7]
+        text: No network, fetch, upload, telemetry, remote enrichment, CI, release,
+          package, or hosted-product work.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: Add an exact repo-relative --inspect PATH analysis flag that emits a
+      one-file hotspot drilldown in the existing table, JSON, and Markdown
+      formats from the same local Git-history evidence model. Normal ranked
+      reports remain stable, and inspect output stays local-first, privacy-safe,
+      and framed as investigation evidence.
+    acceptance:
+      - --inspect PATH is documented in help and README as an exact
+        repo-relative file drilldown flag.
+      - --inspect PATH accepts existing --repo, --since, --include-prefix,
+        --exclude-prefix, and --format table|json|markdown analysis options.
+      - --inspect PATH is rejected with --explain and --version using clear
+        stderr.
+      - Inspect path validation rejects empty, absolute POSIX, Windows
+        drive-rooted, leading backslash, parent-segment, and control-character
+        paths.
+      - Inspect selection happens after scope filtering, aggregation, co-change
+        calculation, scoring, and ranking, but before normal --limit truncation,
+        so a valid below-top-N target remains inspectable.
+      - --limit is rejected when --inspect is present, so users do not infer
+        that limit can hide or reshape the inspected target.
+      - Successful inspect output contains exactly one result row in table,
+        JSON, and Markdown formats.
+      - Inspect JSON includes additive metadata to identify requested path,
+        matched path, and rank in the scoped evidence universe while preserving
+        normal report JSON compatibility.
+      - The inspected result matches the equivalent row from full JSON analysis
+        under the same repo, range, and scope for score breakdown, changes,
+        churn, recency, current size, cochanges, confidence, caveats, and
+        bounded evidence commits.
+      - If the inspect target has no matching Git-history evidence in the
+        selected scope, the command exits non-zero with a clear non-judgemental
+        message and no panic.
+      - Include/exclude scope filters affect inspect consistently; targets
+        outside include scope or excluded by prefix do not leak into results or
+        co-change evidence.
+      - Deleted, binary, renamed, unicode, spaces, glob-like, tab-escaped, and
+        markdown-special paths render safely and preserve existing caveats.
+      - Existing normal table, JSON, Markdown, --explain, --version,
+        prefix-filter, and fixture golden outputs remain stable except
+        intentional help/docs updates.
+      - No scoring formula, Git traversal semantics, report ranking, confidence
+        thresholds, network posture, telemetry posture, provider/cache
+        behaviour, author metrics, or source-content exposure changes.
+      - zig build validate covers inspect fixture goldens, determinism, error
+        cases, privacy scans, and real-repo smoke with this repo plus configured
+        close-out sibling path or explicit safe skip reason.
+      - Committed evidence and docs do not contain private repo paths, raw
+        sibling reports, author identities, remotes, commit messages, source
+        snippets, hosted/commercial plans, bug-prediction claims, code-quality
+        scores, developer rankings, or productivity analytics.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig fmt --check build.zig src tests
+      - zig build test
+      - zig build
+      - ./zig-out/bin/git-hotspots --repo fixtures/basic --inspect src/app.txt
+        --format json
+      - ./zig-out/bin/git-hotspots --repo fixtures/basic --inspect src/app.txt
+        --format markdown
+      - ./zig-out/bin/git-hotspots --repo fixtures/basic --inspect src/app.txt
+        --format table
+      - zig build validate
+      - zig build validate -Dcloseout=true
+        -Dsmoke-repo=<operator-provided-local-repo>
+        -Dsmoke-label=sibling-local-repo or approved safe skip reason
+      - git diff --check
+      - git status --short --branch
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
