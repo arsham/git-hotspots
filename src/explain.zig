@@ -37,6 +37,7 @@ pub const text =
     \\- binary or non-text churn that Git cannot count normally
     \\- large commits whose co-change evidence may be capped or caveated
     \\- deleted paths or paths not present at HEAD
+    \\- Git-detected file rename lineage and scope-partial lineage
     \\
     \\## Scope filters
     \\
@@ -53,11 +54,22 @@ pub const text =
     \\Excludes win over includes. Scoped reports change the evidence universe, so
     \\compare scoped and unscoped reports with that boundary in mind.
     \\
+    \\## Rename lineage
+    \\
+    \\Git-detected file renames are folded conservatively when both the old and
+    \\new paths are in scope. Accepted old-path aliases contribute to the
+    \\canonical current path row instead of appearing as duplicate ranked rows,
+    \\and --inspect may resolve an accepted alias to that canonical row.
+    \\
+    \\Lineage is limited to local Git file rename edges. It is not symbol or
+    \\function lineage, semantic ownership, bug prediction, quality scoring, or
+    \\developer ranking.
+    \\
     \\## Limitations and non-claims
     \\
     \\Scores are not bug predictions, objective code-quality ratings, maintainer
     \\judgement, developer rankings, productivity analytics, AI/LLM judgement,
-    \\or technical-debt scores.
+    \\semantic ownership, or technical-debt scores.
     \\
     \\## Runtime guarantees
     \\
@@ -88,6 +100,7 @@ test "explanation includes confidence and non-claim boundaries" {
         "not bug predictions",
         "objective code-quality ratings",
         "developer rankings",
+        "semantic ownership",
         "productivity analytics",
         "AI/LLM judgement",
     }) |snippet| {

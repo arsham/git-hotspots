@@ -9,6 +9,7 @@
   "results": [
     {
       "path": "src/app.txt",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
       "score": { "total": 55.160, "frequency": 30.000, "churn": 0.160, "recency": 19.000, "cochange": 6.000 },
       "change_count": 3, "additions": 4, "deletions": 0, "churn": 4,
       "recency": { "last_changed_timestamp": 1767398400, "last_changed_commit": "167229fed167" },
@@ -20,6 +21,7 @@
     },
     {
       "path": "src/lib.txt",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
       "score": { "total": 42.120, "frequency": 20.000, "churn": 0.120, "recency": 20.000, "cochange": 2.000 },
       "change_count": 2, "additions": 3, "deletions": 0, "churn": 3,
       "recency": { "last_changed_timestamp": 1767484800, "last_changed_commit": "f577978a22dd" },
@@ -31,6 +33,7 @@
     },
     {
       "path": "docs/guide.md",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
       "score": { "total": 31.080, "frequency": 10.000, "churn": 0.080, "recency": 19.000, "cochange": 2.000 },
       "change_count": 1, "additions": 2, "deletions": 0, "churn": 2,
       "recency": { "last_changed_timestamp": 1767398400, "last_changed_commit": "167229fed167" },
@@ -42,6 +45,7 @@
     },
     {
       "path": "README.md",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
       "score": { "total": 29.040, "frequency": 10.000, "churn": 0.040, "recency": 17.000, "cochange": 2.000 },
       "change_count": 1, "additions": 1, "deletions": 0, "churn": 1,
       "recency": { "last_changed_timestamp": 1767225600, "last_changed_commit": "df4a28000ad3" },

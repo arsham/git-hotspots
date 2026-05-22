@@ -202,6 +202,26 @@ assert_fails_with_stderr inspect-project-excluded-flow "--inspect target has no 
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format markdown > /tmp/git-hotspots-scope-empty.md
 "$EXE" --repo fixtures/scope --scope all --exclude-prefix .flow/ --inspect src/vendor_adapter.zig --format json > /tmp/git-hotspots-scope-inspect-excluded-flow.json
 "$EXE" --repo fixtures/scope --include-prefix src/ --inspect src/new.zig --format json > /tmp/git-hotspots-scope-inspect-include-renamed.json
+"$EXE" --repo fixtures/lineage --inspect simple-new.txt --format json > /tmp/git-hotspots-lineage-simple.json
+grep -Fq -- '"lineage": { "aliases": ["simple-old.txt"], "partial": false' /tmp/git-hotspots-lineage-simple.json
+"$EXE" --repo fixtures/lineage --inspect braced/new-name.txt --format json > /tmp/git-hotspots-lineage-braced.json
+grep -Fq -- '"lineage": { "aliases": ["braced/old-name.txt"], "partial": false' /tmp/git-hotspots-lineage-braced.json
+"$EXE" --repo fixtures/lineage --inspect chain/c.txt --format json > /tmp/git-hotspots-lineage-chain.json
+grep -Fq -- '"lineage": { "aliases": ["chain/a.txt", "chain/b.txt"], "partial": false' /tmp/git-hotspots-lineage-chain.json
+grep -Fq -- '"change_count": 3' /tmp/git-hotspots-lineage-chain.json
+"$EXE" --repo fixtures/lineage --inspect chain/a.txt --format json > /tmp/git-hotspots-lineage-alias-inspect.json
+grep -Fq -- '"inspect": { "requested_path": "chain/a.txt", "matched_path": "chain/c.txt"' /tmp/git-hotspots-lineage-alias-inspect.json
+"$EXE" --repo fixtures/lineage --inspect rename-edit-new.txt --format json > /tmp/git-hotspots-lineage-rename-edit.json
+grep -Fq -- '"lineage": { "aliases": ["rename-edit-old.txt"], "partial": false' /tmp/git-hotspots-lineage-rename-edit.json
+grep -Fq -- '"additions": 2' /tmp/git-hotspots-lineage-rename-edit.json
+"$EXE" --repo fixtures/lineage --inspect deleted-new.txt --format json > /tmp/git-hotspots-lineage-deleted.json
+grep -Fq -- '"lineage": { "aliases": ["deleted-old.txt"], "partial": false' /tmp/git-hotspots-lineage-deleted.json
+grep -Fq -- '"current_size": null' /tmp/git-hotspots-lineage-deleted.json
+"$EXE" --repo fixtures/lineage --inspect cochange/new.txt --format json > /tmp/git-hotspots-lineage-cochange.json
+grep -Fq -- '{ "path": "cochange/peer.txt", "count": 4 }' /tmp/git-hotspots-lineage-cochange.json
+"$EXE" --repo fixtures/lineage --include-prefix src/ --inspect src/cross-new.txt --format json > /tmp/git-hotspots-lineage-cross-scope.json
+grep -Fq -- '"lineage": { "aliases": [], "partial": true' /tmp/git-hotspots-lineage-cross-scope.json
+! grep -Fq -- 'vendor/cross-old.txt' /tmp/git-hotspots-lineage-cross-scope.json
 "$EXE" --repo fixtures/edge --inspect 'glob/[literal]*.txt' --format markdown > /tmp/git-hotspots-edge-inspect-glob.md
 "$EXE" --repo fixtures/edge --inspect 'weird/tab\tname.txt' --format json > /tmp/git-hotspots-edge-inspect-tab.json
 assert_fails_with_stderr inspect-limit "--limit cannot be combined with --inspect" "$EXE" --repo fixtures/basic --inspect src/app.txt --limit 1

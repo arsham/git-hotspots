@@ -3,7 +3,7 @@ commits=4 shallow=false partial=false dirty=false auto_fetch=false
 scope: selected=project include_prefixes=[] exclude_prefixes=[.flow/] outside_include_paths=0 outside_include_changes=0 excluded_paths=0 excluded_changes=0
 inspect: requested=src/app.txt matched=src/app.txt rank=1
 
-rank  score   changes churn   confidence path
-1     55.2    3       4       high       src/app.txt
+rank  score   changes churn   confidence lineage path
+1     55.2    3       4       high       no      src/app.txt
 
 Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.

@@ -117,9 +117,50 @@ make_scope() {
   commit_all "$repo" '2026-03-05T00:00:00+0000' 'mixed source and workflow churn'
 }
 
+make_lineage() {
+  repo="$FIX/lineage"
+  rm -rf "$repo"
+  mkdir -p "$repo/src" "$repo/vendor" "$repo/braced" "$repo/chain" "$repo/cochange"
+  setup_repo "$repo"
+
+  printf 'simple one\n' > "$repo/simple-old.txt"
+  printf 'braced one\n' > "$repo/braced/old-name.txt"
+  printf 'chain one\n' > "$repo/chain/a.txt"
+  printf 'edit one\n' > "$repo/rename-edit-old.txt"
+  printf 'deleted one\n' > "$repo/deleted-old.txt"
+  printf 'cross one\n' > "$repo/vendor/cross-old.txt"
+  printf 'co one\n' > "$repo/cochange/old.txt"
+  printf 'peer one\n' > "$repo/cochange/peer.txt"
+  commit_all "$repo" '2026-04-01T00:00:00+0000' 'initial lineage files'
+
+  printf 'co one\nco two\n' > "$repo/cochange/old.txt"
+  printf 'peer one\npeer two\n' > "$repo/cochange/peer.txt"
+  commit_all "$repo" '2026-04-02T00:00:00+0000' 'cochange before rename'
+
+  git -C "$repo" mv simple-old.txt simple-new.txt
+  git -C "$repo" mv braced/old-name.txt braced/new-name.txt
+  git -C "$repo" mv chain/a.txt chain/b.txt
+  git -C "$repo" mv rename-edit-old.txt rename-edit-new.txt
+  printf 'edit one\nedit two\n' > "$repo/rename-edit-new.txt"
+  git -C "$repo" mv deleted-old.txt deleted-new.txt
+  git -C "$repo" mv vendor/cross-old.txt src/cross-new.txt
+  git -C "$repo" mv cochange/old.txt cochange/new.txt
+  printf 'co one\nco two\nco three\n' > "$repo/cochange/new.txt"
+  printf 'peer one\npeer two\npeer three\n' > "$repo/cochange/peer.txt"
+  commit_all "$repo" '2026-04-03T00:00:00+0000' 'rename files with edits'
+
+  git -C "$repo" mv chain/b.txt chain/c.txt
+  printf 'chain one\nchain two\n' > "$repo/chain/c.txt"
+  rm "$repo/deleted-new.txt"
+  printf 'co one\nco two\nco three\nco four\n' > "$repo/cochange/new.txt"
+  printf 'peer one\npeer two\npeer three\npeer four\n' > "$repo/cochange/peer.txt"
+  commit_all "$repo" '2026-04-04T00:00:00+0000' 'chained rename delete and cochange after rename'
+}
+
 make_basic
 make_edge
 make_scope
+make_lineage
 rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked"
 git clone -q --depth 1 "file://$FIX/basic" "$FIX/shallow"
 git clone -q "$FIX/basic" "$FIX/medium"

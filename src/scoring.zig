@@ -31,7 +31,7 @@ pub fn lessThan(_: void, lhs: model.Result, rhs: model.Result) bool {
 }
 
 test "tie breaks by path after equal evidence" {
-    const a = model.Result{ .path = "a", .score = score(1, 1, 1, 1, 0), .change_count = 1, .additions = 1, .deletions = 0, .churn = 1, .last_changed_timestamp = 1, .last_changed_commit = "abc", .current_size = null, .cochanges = &.{}, .confidence = "low", .caveats = &.{}, .evidence = &.{} };
-    const b = model.Result{ .path = "b", .score = score(1, 1, 1, 1, 0), .change_count = 1, .additions = 1, .deletions = 0, .churn = 1, .last_changed_timestamp = 1, .last_changed_commit = "abc", .current_size = null, .cochanges = &.{}, .confidence = "low", .caveats = &.{}, .evidence = &.{} };
+    const a = model.Result{ .path = "a", .lineage_aliases = &.{}, .score = score(1, 1, 1, 1, 0), .change_count = 1, .additions = 1, .deletions = 0, .churn = 1, .last_changed_timestamp = 1, .last_changed_commit = "abc", .current_size = null, .cochanges = &.{}, .confidence = "low", .caveats = &.{}, .evidence = &.{} };
+    const b = model.Result{ .path = "b", .lineage_aliases = &.{}, .score = score(1, 1, 1, 1, 0), .change_count = 1, .additions = 1, .deletions = 0, .churn = 1, .last_changed_timestamp = 1, .last_changed_commit = "abc", .current_size = null, .cochanges = &.{}, .confidence = "low", .caveats = &.{}, .evidence = &.{} };
     try std.testing.expect(lessThan({}, a, b));
 }

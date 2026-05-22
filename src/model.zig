@@ -70,6 +70,8 @@ pub const ScoreBreakdown = struct {
 
 pub const Result = struct {
     path: []const u8,
+    lineage_aliases: [][]const u8,
+    lineage_partial: bool = false,
     score: ScoreBreakdown,
     change_count: u32,
     additions: u64,
@@ -96,6 +98,8 @@ pub const Analysis = struct {
     pub fn deinit(self: *Analysis) void {
         for (self.results) |row| {
             self.allocator.free(row.path);
+            for (row.lineage_aliases) |alias| self.allocator.free(alias);
+            self.allocator.free(row.lineage_aliases);
             self.allocator.free(row.last_changed_commit);
             for (row.cochanges) |cc| self.allocator.free(cc.path);
             self.allocator.free(row.cochanges);

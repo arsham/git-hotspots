@@ -23,9 +23,9 @@ pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
     if (analysis.inspect) |inspect| {
         try writer.print("inspect: requested={s} matched={s} rank={d}\n", .{ inspect.requested_path, inspect.matched_path, inspect.rank });
     }
-    try writer.print("\n{s:<5} {s:<7} {s:<7} {s:<7} {s:<10} {s}\n", .{ "rank", "score", "changes", "churn", "confidence", "path" });
+    try writer.print("\n{s:<5} {s:<7} {s:<7} {s:<7} {s:<10} {s:<7} {s}\n", .{ "rank", "score", "changes", "churn", "confidence", "lineage", "path" });
     for (analysis.results, 0..) |row, i| {
-        try writer.print("{d:<5} {d:<7.1} {d:<7} {d:<7} {s:<10} {s}\n", .{ i + 1, row.score.total, row.change_count, row.churn, row.confidence, row.path });
+        try writer.print("{d:<5} {d:<7.1} {d:<7} {d:<7} {s:<10} {s:<7} {s}\n", .{ i + 1, row.score.total, row.change_count, row.churn, row.confidence, lineageIndicator(row), row.path });
     }
     try writer.print("\nScores are deterministic prompts for investigation, not bug predictions or code-quality ratings.\n", .{});
 }
@@ -65,6 +65,11 @@ pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
         try writer.print("      \"path\": ", .{});
         try jsonString(writer, row.path);
         try writer.print(",\n", .{});
+        try writer.print("      \"lineage\": {{ \"aliases\": ", .{});
+        try stringArray(writer, row.lineage_aliases);
+        try writer.print(", \"partial\": {}, \"caveat\": ", .{row.lineage_partial});
+        try jsonString(writer, "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked");
+        try writer.print(" }},\n", .{});
         try writer.print("      \"score\": {{ \"total\": {d:.3}, \"frequency\": {d:.3}, \"churn\": {d:.3}, \"recency\": {d:.3}, \"cochange\": {d:.3} }},\n", .{ row.score.total, row.score.frequency, row.score.churn, row.score.recency, row.score.cochange });
         try writer.print("      \"change_count\": {d}, \"additions\": {d}, \"deletions\": {d}, \"churn\": {d},\n", .{ row.change_count, row.additions, row.deletions, row.churn });
         try writer.print("      \"recency\": {{ \"last_changed_timestamp\": {d}, \"last_changed_commit\": ", .{row.last_changed_timestamp});
@@ -167,13 +172,15 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
     try renderMarkdownStringList(writer, analysis.caveats);
 
     try writer.writeAll("\n## Top hotspots\n\n");
-    try writer.writeAll("| Rank | Path | Score | Changes | Churn | Confidence | Last commit |\n");
-    try writer.writeAll("| ---: | --- | ---: | ---: | ---: | --- | --- |\n");
+    try writer.writeAll("| Rank | Path | Score | Changes | Churn | Confidence | Lineage | Last commit |\n");
+    try writer.writeAll("| ---: | --- | ---: | ---: | ---: | --- | --- | --- |\n");
     for (analysis.results, 0..) |row, i| {
         try writer.print("| {d} | ", .{i + 1});
         try markdownText(writer, row.path);
         try writer.print(" | {d:.1} | {d} | {d} | ", .{ row.score.total, row.change_count, row.churn });
         try markdownText(writer, row.confidence);
+        try writer.writeAll(" | ");
+        try markdownText(writer, lineageIndicator(row));
         try writer.writeAll(" | ");
         try markdownText(writer, row.last_changed_commit);
         try writer.writeAll(" |\n");
@@ -203,6 +210,22 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
         try writer.writeAll("- Last commit: ");
         try markdownText(writer, row.last_changed_commit);
         try writer.writeByte('\n');
+
+        try writer.writeAll("- Lineage: ");
+        if (row.lineage_aliases.len == 0 and !row.lineage_partial) {
+            try writer.writeAll("None\n");
+        } else {
+            try writer.writeAll("Git rename edges only; no copy, split, merge, symbol, or semantic move tracking\n");
+            if (row.lineage_aliases.len > 0) {
+                try writer.writeAll("  - Accepted aliases: ");
+                for (row.lineage_aliases, 0..) |alias, alias_i| {
+                    if (alias_i != 0) try writer.writeAll(", ");
+                    try markdownText(writer, alias);
+                }
+                try writer.writeByte('\n');
+            }
+            if (row.lineage_partial) try writer.writeAll("  - Caveat: lineage may be partial because at least one observed rename edge was outside active scope filters\n");
+        }
 
         try writer.writeAll("- Top co-changes:\n");
         if (row.cochanges.len == 0) {
@@ -277,6 +300,12 @@ fn renderOptionalU64(writer: anytype, value: ?u64) !void {
     if (value) |v| try writer.print("{d}", .{v}) else try writer.writeAll("None");
 }
 
+fn lineageIndicator(row: model.Result) []const u8 {
+    if (row.lineage_partial) return "partial";
+    if (row.lineage_aliases.len > 0) return "yes";
+    return "no";
+}
+
 fn markdownText(writer: anytype, value: []const u8) !void {
     for (value) |c| switch (c) {
         '\\' => try writer.writeAll("\\\\"),
@@ -338,8 +367,10 @@ test "markdown report has stable sections and no raw private root" {
     var cochanges = [_]model.CoChange{.{ .path = "co|path\t`x`.zig", .count = 2 }};
     var row_caveats = [_][]const u8{"path # caveat\tbinary"};
     var evidence = [_]model.Evidence{.{ .commit = "abc123", .timestamp = 123, .additions = 1, .deletions = null }};
+    var lineage_aliases = [_][]const u8{"old # heading|path\t`x`.zig"};
     var results = [_]model.Result{.{
         .path = "# heading|path\t`x`.zig",
+        .lineage_aliases = lineage_aliases[0..],
         .score = .{ .frequency = 1.0, .churn = 2.0, .recency = 3.0, .cochange = 4.0, .total = 10.0 },
         .change_count = 2,
         .additions = 7,

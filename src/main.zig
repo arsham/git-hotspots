@@ -31,7 +31,8 @@ const usage =
     \\                    before scoring; use / separators, not globs
     \\  --inspect PATH    Exact repo-relative file drilldown; selects one file after
     \\                    scoring and ranking, before normal --limit truncation;
-    \\                    use \\t to target a tab in a Git path
+    \\                    accepted in-scope Git rename aliases may resolve to the
+    \\                    canonical path; use \\t to target a tab in a Git path
     \\  --progress        Write opt-in coarse analysis progress to stderr for long runs
     \\  --explain         Explain current scoring semantics without analysing a repo
     \\  --version         Show the git-hotspots version without analysing a repo
@@ -40,6 +41,8 @@ const usage =
     \\Hotspots are investigation prompts from local Git history, not bug predictions,
     \\developer rankings, or objective code-quality scores. The alpha never fetches,
     \\pushes, uploads source, contacts remotes, or emits telemetry.
+    \\Git-detected file renames are folded conservatively when in scope; this is
+    \\not symbol/function lineage or semantic ownership.
     \\
 ;
 

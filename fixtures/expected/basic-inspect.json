@@ -10,6 +10,7 @@
   "results": [
     {
       "path": "src/app.txt",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
       "score": { "total": 55.160, "frequency": 30.000, "churn": 0.160, "recency": 19.000, "cochange": 6.000 },
       "change_count": 3, "additions": 4, "deletions": 0, "churn": 4,
       "recency": { "last_changed_timestamp": 1767398400, "last_changed_commit": "167229fed167" },

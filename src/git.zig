@@ -6,6 +6,8 @@ pub const AnalyzeError = anyerror;
 
 fn freeResult(allocator: std.mem.Allocator, r: *model.Result) void {
     allocator.free(r.path);
+    for (r.lineage_aliases) |alias| allocator.free(alias);
+    allocator.free(r.lineage_aliases);
     allocator.free(r.last_changed_commit);
     for (r.cochanges) |cc| allocator.free(cc.path);
     allocator.free(r.cochanges);
@@ -49,6 +51,8 @@ fn dupTrim(allocator: std.mem.Allocator, s: []u8) ![]u8 {
 const EvidenceBuilder = struct { commit: []u8, timestamp: i64, additions: ?u64, deletions: ?u64 };
 const FileAgg = struct {
     path: []u8,
+    lineage_aliases: std.array_list.Managed([]u8),
+    lineage_partial: bool = false,
     change_count: u32 = 0,
     additions: u64 = 0,
     deletions: u64 = 0,
@@ -63,6 +67,8 @@ const FileAgg = struct {
 fn deinitAgg(key: []const u8, agg: FileAgg, allocator: std.mem.Allocator) void {
     allocator.free(key);
     allocator.free(agg.path);
+    for (agg.lineage_aliases.items) |alias| allocator.free(alias);
+    agg.lineage_aliases.deinit();
     allocator.free(agg.last_commit);
     for (agg.evidence.items) |ev| allocator.free(ev.commit);
     agg.evidence.deinit();
@@ -74,6 +80,97 @@ fn deinitAgg(key: []const u8, agg: FileAgg, allocator: std.mem.Allocator) void {
 
 fn addCaveat(allocator: std.mem.Allocator, list: *std.array_list.Managed([]const u8), text: []const u8) !void {
     try list.append(try allocator.dupe(u8, text));
+}
+
+fn newAgg(allocator: std.mem.Allocator, path: []const u8) !FileAgg {
+    return .{
+        .path = try allocator.dupe(u8, path),
+        .lineage_aliases = std.array_list.Managed([]u8).init(allocator),
+        .last_commit = try allocator.dupe(u8, ""),
+        .evidence = std.array_list.Managed(EvidenceBuilder).init(allocator),
+        .cochanges = std.StringHashMap(u32).init(allocator),
+    };
+}
+
+fn pathPassesFilters(path: []const u8, include_prefixes: []const []const u8, exclude_prefixes: []const []const u8) bool {
+    return !isExcludedPath(path, exclude_prefixes) and isIncludedPath(path, include_prefixes);
+}
+
+fn noteFilteredPath(
+    allocator: std.mem.Allocator,
+    path: []const u8,
+    outside_include_paths: *std.StringHashMap(void),
+    outside_include_change_count: *usize,
+    excluded_paths: *std.StringHashMap(void),
+    excluded_change_count: *usize,
+    include_prefixes: []const []const u8,
+    exclude_prefixes: []const []const u8,
+) !void {
+    if (isExcludedPath(path, exclude_prefixes)) {
+        excluded_change_count.* += 1;
+        if (excluded_paths.get(path) == null) {
+            const owned = try allocator.dupe(u8, path);
+            errdefer allocator.free(owned);
+            try excluded_paths.put(owned, {});
+        }
+        return;
+    }
+    if (!isIncludedPath(path, include_prefixes)) {
+        outside_include_change_count.* += 1;
+        if (outside_include_paths.get(path) == null) {
+            const owned = try allocator.dupe(u8, path);
+            errdefer allocator.free(owned);
+            try outside_include_paths.put(owned, {});
+        }
+    }
+}
+
+fn resolveAliasOwned(allocator: std.mem.Allocator, aliases: *std.StringHashMap([]u8), path: []const u8) ![]u8 {
+    var current = path;
+    var depth: usize = 0;
+    while (aliases.get(current)) |next| {
+        current = next;
+        depth += 1;
+        if (depth > 64) break;
+    }
+    return allocator.dupe(u8, current);
+}
+
+fn putAlias(allocator: std.mem.Allocator, aliases: *std.StringHashMap([]u8), old_path: []const u8, canonical: []const u8) !void {
+    if (std.mem.eql(u8, old_path, canonical)) return;
+    const gop = try aliases.getOrPut(old_path);
+    if (gop.found_existing) {
+        allocator.free(gop.value_ptr.*);
+        gop.value_ptr.* = try allocator.dupe(u8, canonical);
+    } else {
+        gop.key_ptr.* = try allocator.dupe(u8, old_path);
+        gop.value_ptr.* = try allocator.dupe(u8, canonical);
+    }
+}
+
+fn addAliasToAgg(allocator: std.mem.Allocator, map: *std.StringHashMap(FileAgg), canonical: []const u8, alias: []const u8) !void {
+    if (std.mem.eql(u8, canonical, alias)) return;
+    const gop = try map.getOrPut(canonical);
+    if (!gop.found_existing) {
+        gop.key_ptr.* = try allocator.dupe(u8, canonical);
+        gop.value_ptr.* = try newAgg(allocator, canonical);
+    }
+    for (gop.value_ptr.lineage_aliases.items) |existing| {
+        if (std.mem.eql(u8, existing, alias)) return;
+    }
+    try gop.value_ptr.lineage_aliases.append(try allocator.dupe(u8, alias));
+    std.mem.sort([]u8, gop.value_ptr.lineage_aliases.items, {}, stringSliceLessThan);
+}
+
+fn hasLineageAlias(row: model.Result, requested: []const u8) bool {
+    for (row.lineage_aliases) |alias| {
+        if (std.mem.eql(u8, alias, requested)) return true;
+    }
+    return false;
+}
+
+fn stringSliceLessThan(_: void, a: []const u8, b: []const u8) bool {
+    return std.mem.lessThan(u8, a, b);
 }
 
 fn freeStringList(allocator: std.mem.Allocator, values: []const []const u8) void {
@@ -124,10 +221,13 @@ const LogParser = struct {
     excluded_change_count: *usize,
     include_prefixes: []const []const u8,
     exclude_prefixes: []const []const u8,
+    aliases: *std.StringHashMap([]u8),
     pending: std.array_list.Managed(u8),
     cur_hash: ?[]u8 = null,
     cur_ts: i64 = 0,
     commit_count: usize = 0,
+    rename_detected: bool = false,
+    partial_lineage: bool = false,
 
     fn init(
         allocator: std.mem.Allocator,
@@ -139,6 +239,7 @@ const LogParser = struct {
         excluded_change_count: *usize,
         include_prefixes: []const []const u8,
         exclude_prefixes: []const []const u8,
+        aliases: *std.StringHashMap([]u8),
     ) LogParser {
         return .{
             .allocator = allocator,
@@ -150,6 +251,7 @@ const LogParser = struct {
             .excluded_change_count = excluded_change_count,
             .include_prefixes = include_prefixes,
             .exclude_prefixes = exclude_prefixes,
+            .aliases = aliases,
             .pending = std.array_list.Managed(u8).init(allocator),
         };
     }
@@ -204,7 +306,7 @@ const LogParser = struct {
         const del_s = parts.next() orelse return;
         const path = parts.rest();
         if (path.len == 0) return;
-        try applyNumstat(self.allocator, self.map, self.commit_paths, self.outside_include_paths, self.outside_include_change_count, self.excluded_paths, self.excluded_change_count, self.include_prefixes, self.exclude_prefixes, cur_hash, self.cur_ts, add_s, del_s, path);
+        try applyNumstat(self.allocator, self.map, self.commit_paths, self.outside_include_paths, self.outside_include_change_count, self.excluded_paths, self.excluded_change_count, self.include_prefixes, self.exclude_prefixes, self.aliases, &self.rename_detected, &self.partial_lineage, cur_hash, self.cur_ts, add_s, del_s, path);
     }
 };
 
@@ -354,11 +456,21 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
     var outside_include_change_count: usize = 0;
     var excluded_change_count: usize = 0;
 
+    var aliases = std.StringHashMap([]u8).init(allocator);
+    defer {
+        var alias_it = aliases.iterator();
+        while (alias_it.next()) |entry| {
+            allocator.free(entry.key_ptr.*);
+            allocator.free(entry.value_ptr.*);
+        }
+        aliases.deinit();
+    }
+
     var commit_count: usize = 0;
     var commit_paths = std.array_list.Managed([]const u8).init(allocator);
     defer commit_paths.deinit();
 
-    var parser = LogParser.init(allocator, &map, &commit_paths, &outside_include_paths, &outside_include_change_count, &excluded_paths, &excluded_change_count, cfg.include_prefixes, cfg.exclude_prefixes);
+    var parser = LogParser.init(allocator, &map, &commit_paths, &outside_include_paths, &outside_include_change_count, &excluded_paths, &excluded_change_count, cfg.include_prefixes, cfg.exclude_prefixes, &aliases);
     defer parser.deinit();
     try streamGitLog(allocator, io, cfg.repo_path, log_args.items, &parser);
     commit_count = parser.commit_count;
@@ -375,6 +487,8 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
     if (is_shallow) try addCaveat(allocator, &caveats, "history is shallow; auto_fetch is false");
     if (is_partial) try addCaveat(allocator, &caveats, "history may be partial/promisor; auto_fetch is false");
     if (dirty) try addCaveat(allocator, &caveats, "dirty worktree detected; ranking uses committed history only");
+    if (parser.rename_detected) try addCaveat(allocator, &caveats, "Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked");
+    if (parser.partial_lineage) try addCaveat(allocator, &caveats, "some observed rename edges were outside active scope filters; lineage may be partial");
 
     phase_started = std.Io.Clock.Timestamp.now(io, .awake);
     try writeProgress(progress, "scoring files");
@@ -397,7 +511,7 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
     if (cfg.inspect_path) |requested| {
         var found_index: ?usize = null;
         for (results.items, 0..) |row, i| {
-            if (std.mem.eql(u8, row.path, requested)) {
+            if (std.mem.eql(u8, row.path, requested) or hasLineageAlias(row, requested)) {
                 found_index = i;
                 break;
             }
@@ -449,14 +563,47 @@ fn applyNumstat(
     excluded_change_count: *usize,
     include_prefixes: []const []const u8,
     exclude_prefixes: []const []const u8,
+    aliases: *std.StringHashMap([]u8),
+    rename_detected: *bool,
+    partial_lineage: *bool,
     commit: []const u8,
     ts: i64,
     add_s: []const u8,
     del_s: []const u8,
     raw_path: []const u8,
 ) !void {
-    const path = try normalizePath(allocator, raw_path);
+    var path = try normalizePath(allocator, raw_path);
     defer allocator.free(path);
+    var row_lineage_partial = false;
+    if (try parseRenamePath(allocator, raw_path)) |rename| {
+        defer {
+            allocator.free(rename.old_path);
+            allocator.free(rename.new_path);
+        }
+        rename_detected.* = true;
+        const old_ok = pathPassesFilters(rename.old_path, include_prefixes, exclude_prefixes);
+        const new_ok = pathPassesFilters(rename.new_path, include_prefixes, exclude_prefixes);
+        if (old_ok and new_ok) {
+            const canonical_new = try resolveAliasOwned(allocator, aliases, rename.new_path);
+            defer allocator.free(canonical_new);
+            try putAlias(allocator, aliases, rename.old_path, canonical_new);
+            try addAliasToAgg(allocator, map, canonical_new, rename.old_path);
+            allocator.free(path);
+            path = try allocator.dupe(u8, canonical_new);
+        } else {
+            partial_lineage.* = true;
+            row_lineage_partial = true;
+            if (!old_ok) try noteFilteredPath(allocator, rename.old_path, outside_include_paths, outside_include_change_count, excluded_paths, excluded_change_count, include_prefixes, exclude_prefixes);
+        }
+    } else {
+        const canonical = try resolveAliasOwned(allocator, aliases, path);
+        if (!std.mem.eql(u8, canonical, path)) {
+            allocator.free(path);
+            path = canonical;
+        } else {
+            allocator.free(canonical);
+        }
+    }
     if (isExcludedPath(path, exclude_prefixes)) {
         excluded_change_count.* += 1;
         if (excluded_paths.get(path) == null) {
@@ -478,9 +625,13 @@ fn applyNumstat(
     const gop = try map.getOrPut(path);
     if (!gop.found_existing) {
         gop.key_ptr.* = try allocator.dupe(u8, path);
-        gop.value_ptr.* = .{ .path = try allocator.dupe(u8, path), .last_commit = try allocator.dupe(u8, ""), .evidence = std.array_list.Managed(EvidenceBuilder).init(allocator), .cochanges = std.StringHashMap(u32).init(allocator) };
+        gop.value_ptr.* = newAgg(allocator, path) catch |err| {
+            allocator.free(gop.key_ptr.*);
+            return err;
+        };
     }
     var agg = gop.value_ptr;
+    if (row_lineage_partial) agg.lineage_partial = true;
     agg.change_count += 1;
     if (ts >= agg.last_ts) {
         agg.last_ts = ts;
@@ -548,6 +699,37 @@ fn normalizePath(allocator: std.mem.Allocator, raw: []const u8) ![]u8 {
     const normalized = try allocator.dupe(u8, renamed);
     allocator.free(unquoted);
     return normalized;
+}
+
+const RenamePath = struct { old_path: []u8, new_path: []u8 };
+
+fn parseRenamePath(allocator: std.mem.Allocator, raw: []const u8) !?RenamePath {
+    const unquoted = try unquoteGitPath(allocator, raw);
+    defer allocator.free(unquoted);
+
+    if (std.mem.indexOf(u8, unquoted, " => ") == null) return null;
+
+    if (std.mem.indexOfScalar(u8, unquoted, '{')) |open| {
+        if (std.mem.lastIndexOfScalar(u8, unquoted, '}')) |close| {
+            if (open < close) {
+                const inner = unquoted[open + 1 .. close];
+                if (std.mem.indexOf(u8, inner, " => ")) |_| {
+                    var split = std.mem.splitSequence(u8, inner, " => ");
+                    const old_part = split.next() orelse return null;
+                    const new_part = split.next() orelse return null;
+                    return .{
+                        .old_path = try std.fmt.allocPrint(allocator, "{s}{s}{s}", .{ unquoted[0..open], old_part, unquoted[close + 1 ..] }),
+                        .new_path = try std.fmt.allocPrint(allocator, "{s}{s}{s}", .{ unquoted[0..open], new_part, unquoted[close + 1 ..] }),
+                    };
+                }
+            }
+        }
+    }
+
+    var split = std.mem.splitSequence(u8, unquoted, " => ");
+    const old_path = split.next() orelse return null;
+    const new_path = split.next() orelse return null;
+    return .{ .old_path = try allocator.dupe(u8, old_path), .new_path = try allocator.dupe(u8, new_path) };
 }
 
 fn unquoteGitPath(allocator: std.mem.Allocator, raw: []const u8) ![]u8 {
@@ -652,10 +834,15 @@ fn appendResult(allocator: std.mem.Allocator, io: std.Io, out: *std.array_list.M
     }
     for (agg.evidence.items) |ev| try evs.append(.{ .commit = try allocator.dupe(u8, ev.commit), .timestamp = ev.timestamp, .additions = ev.additions, .deletions = ev.deletions });
 
+    const lineage_aliases = try dupeStringList(allocator, agg.lineage_aliases.items);
+    errdefer freeStringList(allocator, lineage_aliases);
+
     const churn = agg.additions + agg.deletions;
     const breakdown = scoring.score(agg.change_count, churn, agg.last_ts, head_ts, cc_total);
     try out.append(.{
         .path = try allocator.dupe(u8, agg.path),
+        .lineage_aliases = lineage_aliases,
+        .lineage_partial = agg.lineage_partial,
         .score = breakdown,
         .change_count = agg.change_count,
         .additions = agg.additions,
@@ -706,6 +893,61 @@ test "normalizes braced rename before prefix matching" {
     try std.testing.expect(isExcludedPath(normalized, &.{"src/"}));
 }
 
+test "parses simple and braced rename aliases" {
+    const simple = (try parseRenamePath(std.testing.allocator, "old.zig => new.zig")).?;
+    defer std.testing.allocator.free(simple.old_path);
+    defer std.testing.allocator.free(simple.new_path);
+    try std.testing.expectEqualStrings("old.zig", simple.old_path);
+    try std.testing.expectEqualStrings("new.zig", simple.new_path);
+
+    const braced = (try parseRenamePath(std.testing.allocator, "src/{old.zig => new.zig}")).?;
+    defer std.testing.allocator.free(braced.old_path);
+    defer std.testing.allocator.free(braced.new_path);
+    try std.testing.expectEqualStrings("src/old.zig", braced.old_path);
+    try std.testing.expectEqualStrings("src/new.zig", braced.new_path);
+}
+
+test "lineage aliases canonicalize older history" {
+    const allocator = std.testing.allocator;
+    var map = std.StringHashMap(FileAgg).init(allocator);
+    defer {
+        var it = map.iterator();
+        while (it.next()) |entry| deinitAgg(entry.key_ptr.*, entry.value_ptr.*, allocator);
+        map.deinit();
+    }
+    var commit_paths = std.array_list.Managed([]const u8).init(allocator);
+    defer commit_paths.deinit();
+    var outside_include_paths = std.StringHashMap(void).init(allocator);
+    defer outside_include_paths.deinit();
+    var excluded_paths = std.StringHashMap(void).init(allocator);
+    defer excluded_paths.deinit();
+    var aliases = std.StringHashMap([]u8).init(allocator);
+    defer {
+        var it = aliases.iterator();
+        while (it.next()) |entry| {
+            allocator.free(entry.key_ptr.*);
+            allocator.free(entry.value_ptr.*);
+        }
+        aliases.deinit();
+    }
+    var outside_include_change_count: usize = 0;
+    var excluded_change_count: usize = 0;
+    var rename_detected = false;
+    var partial_lineage = false;
+
+    try applyNumstat(allocator, &map, &commit_paths, &outside_include_paths, &outside_include_change_count, &excluded_paths, &excluded_change_count, &.{}, &.{}, &aliases, &rename_detected, &partial_lineage, "aaaaaaaaaaaa", 2, "1", "1", "old.zig => new.zig");
+    try applyNumstat(allocator, &map, &commit_paths, &outside_include_paths, &outside_include_change_count, &excluded_paths, &excluded_change_count, &.{}, &.{}, &aliases, &rename_detected, &partial_lineage, "bbbbbbbbbbbb", 1, "2", "0", "old.zig");
+
+    try std.testing.expect(rename_detected);
+    try std.testing.expect(!partial_lineage);
+    try std.testing.expect(map.get("old.zig") == null);
+    const agg = map.get("new.zig").?;
+    try std.testing.expectEqual(@as(u32, 2), agg.change_count);
+    try std.testing.expectEqual(@as(u64, 3), agg.additions);
+    try std.testing.expectEqual(@as(usize, 1), agg.lineage_aliases.items.len);
+    try std.testing.expectEqualStrings("old.zig", agg.lineage_aliases.items[0]);
+}
+
 test "unquotes git quoted tab path before prefix matching" {
     const normalized = try normalizePath(std.testing.allocator, "\"weird/tab\\tname.txt\"");
     defer std.testing.allocator.free(normalized);
@@ -727,10 +969,19 @@ test "streaming log parser handles chunk boundaries and numstat edge cases" {
     defer outside_include_paths.deinit();
     var excluded_paths = std.StringHashMap(void).init(allocator);
     defer excluded_paths.deinit();
+    var aliases = std.StringHashMap([]u8).init(allocator);
+    defer {
+        var it = aliases.iterator();
+        while (it.next()) |entry| {
+            allocator.free(entry.key_ptr.*);
+            allocator.free(entry.value_ptr.*);
+        }
+        aliases.deinit();
+    }
     var outside_include_change_count: usize = 0;
     var excluded_change_count: usize = 0;
 
-    var parser = LogParser.init(allocator, &map, &commit_paths, &outside_include_paths, &outside_include_change_count, &excluded_paths, &excluded_change_count, &.{}, &.{});
+    var parser = LogParser.init(allocator, &map, &commit_paths, &outside_include_paths, &outside_include_change_count, &excluded_paths, &excluded_change_count, &.{}, &.{}, &aliases);
     defer parser.deinit();
 
     try parser.feed("aaaaaaaaaaaaaaaaaaaa");

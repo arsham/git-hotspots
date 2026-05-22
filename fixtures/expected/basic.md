@@ -31,12 +31,12 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 
 ## Top hotspots
 
-| Rank | Path | Score | Changes | Churn | Confidence | Last commit |
-| ---: | --- | ---: | ---: | ---: | --- | --- |
-| 1 | src/app.txt | 55.2 | 3 | 4 | high | 167229fed167 |
-| 2 | src/lib.txt | 42.1 | 2 | 3 | medium | f577978a22dd |
-| 3 | docs/guide.md | 31.1 | 1 | 2 | low | 167229fed167 |
-| 4 | README.md | 29.0 | 1 | 1 | low | df4a28000ad3 |
+| Rank | Path | Score | Changes | Churn | Confidence | Lineage | Last commit |
+| ---: | --- | ---: | ---: | ---: | --- | --- | --- |
+| 1 | src/app.txt | 55.2 | 3 | 4 | high | no | 167229fed167 |
+| 2 | src/lib.txt | 42.1 | 2 | 3 | medium | no | f577978a22dd |
+| 3 | docs/guide.md | 31.1 | 1 | 2 | low | no | 167229fed167 |
+| 4 | README.md | 29.0 | 1 | 1 | low | no | df4a28000ad3 |
 
 ## Evidence
 
@@ -49,6 +49,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 - Current size: 19
 - Confidence: high
 - Last commit: 167229fed167
+- Lineage: None
 - Top co-changes:
   - README.md (count=1)
   - docs/guide.md (count=1)
@@ -69,6 +70,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 - Current size: 17
 - Confidence: medium
 - Last commit: f577978a22dd
+- Lineage: None
 - Top co-changes:
   - src/app.txt (count=1)
 - Evidence commits:
@@ -86,6 +88,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 - Current size: 12
 - Confidence: low
 - Last commit: 167229fed167
+- Lineage: None
 - Top co-changes:
   - src/app.txt (count=1)
 - Evidence commits:
@@ -102,6 +105,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 - Current size: 21
 - Confidence: low
 - Last commit: df4a28000ad3
+- Lineage: None
 - Top co-changes:
   - src/app.txt (count=1)
 - Evidence commits:

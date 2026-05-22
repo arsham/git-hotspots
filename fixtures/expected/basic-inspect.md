@@ -37,9 +37,9 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 
 ## Top hotspots
 
-| Rank | Path | Score | Changes | Churn | Confidence | Last commit |
-| ---: | --- | ---: | ---: | ---: | --- | --- |
-| 1 | src/app.txt | 55.2 | 3 | 4 | high | 167229fed167 |
+| Rank | Path | Score | Changes | Churn | Confidence | Lineage | Last commit |
+| ---: | --- | ---: | ---: | ---: | --- | --- | --- |
+| 1 | src/app.txt | 55.2 | 3 | 4 | high | no | 167229fed167 |
 
 ## Evidence
 
@@ -52,6 +52,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 - Current size: 19
 - Confidence: high
 - Last commit: 167229fed167
+- Lineage: None
 - Top co-changes:
   - README.md (count=1)
   - docs/guide.md (count=1)

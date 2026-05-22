@@ -46,6 +46,7 @@ The first implementation target is file-level evidence from local Git history:
 - churn from additions and deletions;
 - recency;
 - co-change with other files;
+- conservative file lineage from Git-detected renames;
 - file size or similar scale signals;
 - confidence and caveats;
 - explainable evidence for each result.
@@ -155,15 +156,22 @@ hotspot scoring and co-change evidence, with excludes winning over includes.
 They are not globs, pathspecs, gitignore rules, regexes, or project
 configuration. `--inspect PATH` performs an exact file drilldown within the
 selected scope, returning only that file's existing hotspot row plus its rank in
-the full scoped evidence universe. Use the Git-style `\t` escape to target a
-path that contains a tab, for example `--inspect 'weird/tab\tname.txt'`; literal
-control characters remain invalid. It does not rescore or bypass scope,
-include, or exclude filters, and it cannot be combined with `--limit`. Reports
-include scope metadata showing the selected scope, effective prefixes, and
-bounded counts for paths and changes omitted by include or exclude filters.
-Markdown output is a deterministic stdout report with run summary, scope,
-caveats, ranked hotspots, and per-result evidence. `--version` is standalone
-and prints the alpha version without requiring a Git repository.
+the full scoped evidence universe. If an old path was accepted as an in-scope
+Git rename alias, `--inspect` may resolve that alias to the canonical current
+path row. Use the Git-style `\t` escape to target a path that contains a tab,
+for example `--inspect 'weird/tab\tname.txt'`; literal control characters
+remain invalid. It does not rescore or bypass scope, include, or exclude
+filters, and it cannot be combined with `--limit`. Reports include scope
+metadata showing the selected scope, effective prefixes, and bounded counts for
+paths and changes omitted by include or exclude filters. Markdown output is a
+deterministic stdout report with run summary, scope, caveats, ranked hotspots,
+and per-result evidence. `--version` is standalone and prints the alpha version
+without requiring a Git repository.
+
+Git-detected file renames are folded conservatively when both the old and new
+paths are in scope. This is file-path lineage from local Git history only, not
+symbol or function lineage, semantic ownership, bug prediction, quality scoring,
+or developer ranking.
 
 Use `--progress` when a long local analysis would benefit from coarse runtime
 feedback. It is opt-in, writes bounded phase and elapsed-time lines to stderr
@@ -213,7 +221,8 @@ recency, and co-change evidence:
 Confidence is `high` when a row has at least three changes and no caveats,
 `medium` when it has at least two changes, and `low` otherwise. Caveats call
 out shallow history, partial or promisor history, dirty worktrees, binary or
-non-text churn, large commits, and paths deleted or not present at HEAD.
+non-text churn, large commits, Git-detected rename lineage, scope-partial
+lineage, and paths deleted or not present at HEAD.
 
 Hotspots are local Git-history investigation prompts. They are not bug
 predictions, objective code-quality ratings, maintainer judgement, developer
