@@ -316,4 +316,756 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T01:49:50.901Z
-  updated_at: 2026-05-22T01:57:29.616Z
+  updated_at: 2026-05-22T01:59:14.312Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-22T01:59:14.312Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0004"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Scope filters for useful hotspot reports
+      problem: The file-level CLI spike is executable and validated, but reports
+        currently aggregate every Git-tracked path with no user-controlled
+        scope. On this repository, Flow lifecycle artefacts dominate the top
+        results, which makes public, demo, and source-oriented reports noisy.
+        Users need a small deterministic way to exclude known local workflow or
+        generated path prefixes without hiding evidence silently or introducing
+        a broad ignore/config system.
+      outcome: Add explicit repo-relative path-prefix exclusion for hotspot analysis,
+        with visible scope metadata in table and JSON output, so users can
+        produce focused reports such as excluding `.flow/` while preserving the
+        unfiltered default behaviour and local-first evidence model.
+      acceptance:
+        - The CLI accepts repeatable `--exclude-prefix PATH` arguments using
+          simple repo-relative literal path-prefix semantics; empty, absolute,
+          parent-traversal, or control-character inputs fail clearly on stderr
+          without panic.
+        - Default output remains unfiltered when no exclude prefixes are
+          supplied, preserving prior all-tracked-path visibility and
+          deterministic behaviour except for additive scope metadata if
+          implemented globally.
+        - When exclude prefixes are supplied, filtering happens before
+          aggregation, score calculation, co-change calculation, and result
+          limiting; excluded paths do not appear in result paths or co-change
+          paths.
+        - Table output visibly reports active scope when filters are used,
+          including the supplied prefixes and bounded exclusion counts, while
+          keeping paths project-relative.
+        - JSON output includes deterministic `analysis.scope` metadata with
+          active filters, supplied exclude prefixes, excluded path/change
+          counts, and no absolute paths or raw private report dumps.
+        - An empty scoped result set is a valid explainable report, not an
+          empty-repository or non-git error.
+        - README and help document prefix semantics, scoped examples such as
+          excluding `.flow/`, and the fact that filters change the evidence
+          universe without implying bug prediction, quality scoring, or
+          developer judgement.
+        - "Validation proves scoped filtering on fixtures and on this
+          repository: `--exclude-prefix .flow/` removes `.flow/**` rows and
+          co-change evidence while an unfiltered run can still analyse those
+          paths."
+        - The feature introduces no providers, cache/database, config files,
+          glob/pathspec/gitignore engine, network access, telemetry, author
+          metrics, hosted/commercial content, or scoring formula redesign beyond
+          filtered candidate selection.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Feature 0004 improves B001's local-first file-level reporting by adding
+        explicit scope controls while preserving deterministic evidence and
+        deferring providers/cache/default ignore policy.
+      checked_at: 2026-05-22T01:57:01.801Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0004_scope-filters-for-useful-hotspot-reports/prd.md
+  requirements_contract:
+    source_path: .flow/features/0004_scope-filters-for-useful-hotspot-reports/prd.md
+    source_digest: c522e94fe49f3514f2b240d8bbe160ca45325370eeacadcc81b673ee70908bb4
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#non-goals[1]
+        text: No default project scope or built-in default exclusions in this feature.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-002
+        source_ref: prd.md#non-goals[2]
+        text: No include flags, glob syntax, pathspec compatibility, or .gitignore
+          import.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-003
+        source_ref: prd.md#non-goals[3]
+        text: No config files, rule engines, or project-type detection.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-004
+        source_ref: prd.md#non-goals[4]
+        text: No providers, tree-sitter, LSP, ctags, cache/database work, release
+          packaging, GitHub Actions, network access, telemetry, author metrics,
+          hosted strategy, or commercial content.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-005
+        source_ref: prd.md#non-goals[5]
+        text: No scoring formula redesign beyond changing the candidate set when filters
+          are active.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-006
+        source_ref: prd.md#non-goals[6]
+        text: No claims that filtered hotspots predict bugs, score code quality, or
+          judge developers.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-007
+        source_ref: prd.md#requirements[1]
+        text: The CLI accepts repeatable --exclude-prefix PATH flags.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[2]
+        text: Prefixes are interpreted as repo-relative literal Git path prefixes using
+          / separators, not globs or regular expressions.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[3]
+        text: Empty prefixes fail clearly on stderr.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[4]
+        text: Absolute prefixes fail clearly on stderr.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[5]
+        text: Prefixes containing parent-traversal segments such as .. fail clearly on
+          stderr.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[6]
+        text: Prefixes containing NUL or dangerous control characters fail clearly on
+          stderr.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[7]
+        text: Existing flags --repo, --limit, --format, --since, and --help remain
+          compatible.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[8]
+        text: With no exclude prefixes, default output remains unfiltered and
+          deterministic.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#requirements[9]
+        text: Filtering is applied before file stats are aggregated.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#requirements[10]
+        text: Filtering is applied before score calculation.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#requirements[11]
+        text: Filtering is applied before co-change pair calculation.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#requirements[12]
+        text: Filtering is applied before --limit is applied.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#requirements[13]
+        text: Excluded paths never appear in JSON results[].path.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#requirements[14]
+        text: Excluded paths never appear in JSON results[].cochanges[].path.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#requirements[15]
+        text: Excluded paths never appear as table result rows.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#requirements[16]
+        text: Empty scoped result sets produce a successful report with clear
+          scope/caveat information, not an empty-repository or non-git error.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#requirements[17]
+        text: Deleted files that remain in scope keep current deleted-file behaviour,
+          such as missing size and deletion caveats.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#requirements[18]
+        text: Deleted files under excluded prefixes are excluded from results and
+          co-change evidence.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#requirements[19]
+        text: Renamed paths are filtered according to the path recorded in the current
+          change event model; the implementation must document any limitation
+          rather than inventing perfect rename semantics.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#requirements[20]
+        text: JSON output includes analysis.scope metadata.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#requirements[21]
+        text: analysis.scope includes whether filters are active.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#requirements[22]
+        text: analysis.scope includes supplied exclude_prefixes in deterministic order.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#requirements[23]
+        text: analysis.scope includes deterministic excludedpathcount.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#requirements[24]
+        text: analysis.scope includes deterministic excludedchangecount or equivalent
+          filtered-change count.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#requirements[25]
+        text: JSON output contains no absolute local paths, private repository names,
+          raw private report dumps, author identities, author emails, remote
+          URLs, or raw excluded path dumps by default.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#requirements[26]
+        text: Table output includes a compact scope line when filters are active.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#requirements[27]
+        text: Table output keeps paths project-relative.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#requirements[28]
+        text: Scope metadata must be rendered from the same analysis model as JSON, not
+          recomputed separately in the reporter.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#requirements[29]
+        text: README documents the flag and no-glob prefix semantics.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#requirements[30]
+        text: README includes a scoped example, such as excluding .flow/ for a
+          source-oriented public/demo report.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#requirements[31]
+        text: README explains that filters change the evidence universe and should be
+          used deliberately.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#requirements[32]
+        text: README remains visitor-facing and does not expose Flow process details.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#requirements[33]
+        text: Help output documents --exclude-prefix without commercial or hosted
+          strategy language.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#requirements[34]
+        text: The feature introduces no network, fetch, pull, push, upload, telemetry,
+          remote enrichment, provider runtime, cache requirement, release
+          automation, or CI service dependency.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#requirements[35]
+        text: The feature introduces no author/developer metrics.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-042
+        source_ref: prd.md#edge-cases[1]
+        text: .flow/ with high churn should be removable from this repository's scoped
+          output by passing --exclude-prefix .flow/.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-043
+        source_ref: prd.md#edge-cases[2]
+        text: Default unfiltered output should still be able to show .flow/ paths.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-044
+        source_ref: prd.md#edge-cases[3]
+        text: A fixture should include a normal source path such as src/app.zig and a
+          high-churn workflow path such as .flow/state.yaml.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-045
+        source_ref: prd.md#edge-cases[4]
+        text: Paths with spaces, unicode, tabs, and glob-looking characters should
+          behave as literal paths.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-046
+        source_ref: prd.md#edge-cases[5]
+        text: Prefixes such as vendor/ should not exclude src/vendor_adapter.zig unless
+          the prefix literally matches the beginning of the Git path.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-047
+        source_ref: prd.md#edge-cases[6]
+        text: Excluded-only ranges selected by --since should produce an empty scoped
+          report, not an error.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-048
+        source_ref: prd.md#edge-cases[7]
+        text: Invalid --since remains an error regardless of filters.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-049
+        source_ref: prd.md#edge-cases[8]
+        text: Large commits mixing included and excluded paths should not leak excluded
+          paths into co-change summaries.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-050
+        source_ref: prd.md#edge-cases[9]
+        text: Filter counters should stay bounded and deterministic; do not print full
+          excluded path lists by default.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-051
+        source_ref: prd.md#validation[1]
+        text: "Implementation close-out must include:"
+        category: verification
+        packet_refs: []
+        verification: "Implementation close-out must include:"
+        required_for_close_out: true
+      - id: REQ-052
+        source_ref: prd.md#validation[2]
+        text: zig fmt --check build.zig src tests
+        category: verification
+        packet_refs: []
+        verification: zig fmt --check build.zig src tests
+        required_for_close_out: true
+      - id: REQ-053
+        source_ref: prd.md#validation[3]
+        text: zig build test
+        category: verification
+        packet_refs: []
+        verification: zig build test
+        required_for_close_out: true
+      - id: REQ-054
+        source_ref: prd.md#validation[4]
+        text: zig build validate
+        category: verification
+        packet_refs: []
+        verification: zig build validate
+        required_for_close_out: true
+      - id: REQ-055
+        source_ref: prd.md#validation[5]
+        text: git diff --check
+        category: verification
+        packet_refs: []
+        verification: git diff --check
+        required_for_close_out: true
+      - id: REQ-056
+        source_ref: prd.md#validation[6]
+        text: clear stderr tests for invalid prefixes
+        category: verification
+        packet_refs: []
+        verification: clear stderr tests for invalid prefixes
+        required_for_close_out: true
+      - id: REQ-057
+        source_ref: prd.md#validation[7]
+        text: fixture tests proving default unfiltered output and scoped filtered output
+        category: verification
+        packet_refs: []
+        verification: fixture tests proving default unfiltered output and scoped
+          filtered output
+        required_for_close_out: true
+      - id: REQ-058
+        source_ref: prd.md#validation[8]
+        text: fixture tests proving excluded paths do not appear in results or cochanges
+        category: verification
+        packet_refs: []
+        verification: fixture tests proving excluded paths do not appear in results or
+          cochanges
+        required_for_close_out: true
+      - id: REQ-059
+        source_ref: prd.md#validation[9]
+        text: deterministic JSON diff with active filters
+        category: verification
+        packet_refs: []
+        verification: deterministic JSON diff with active filters
+        required_for_close_out: true
+      - id: REQ-060
+        source_ref: prd.md#validation[10]
+        text: empty scoped report test
+        category: verification
+        packet_refs: []
+        verification: empty scoped report test
+        required_for_close_out: true
+      - id: REQ-061
+        source_ref: prd.md#validation[11]
+        text: real-repository smoke on this repo proving --exclude-prefix .flow/ removes
+          .flow/** rows and co-change evidence
+        category: verification
+        packet_refs: []
+        verification: real-repository smoke on this repo proving --exclude-prefix .flow/
+          removes .flow/** rows and co-change evidence
+        required_for_close_out: true
+      - id: REQ-062
+        source_ref: prd.md#validation[12]
+        text: close-out sibling/local repo smoke through the existing validation
+          workflow, or an explicit privacy-safe skip reason
+        category: verification
+        packet_refs: []
+        verification: close-out sibling/local repo smoke through the existing validation
+          workflow, or an explicit privacy-safe skip reason
+        required_for_close_out: true
+      - id: REQ-063
+        source_ref: prd.md#validation[13]
+        text: flow validate --target feature:0004 --format json
+        category: verification
+        packet_refs: []
+        verification: flow validate --target feature:0004 --format json
+        required_for_close_out: true
+      - id: REQ-064
+        source_ref: prd.md#validation[14]
+        text: "Validation evidence must remain privacy-safe: labels and counts are
+          acceptable; absolute local paths, private repo names, raw private
+          reports, source snippets, author identities, author emails, and remote
+          URLs are not."
+        category: verification
+        packet_refs: []
+        verification: "Validation evidence must remain privacy-safe: labels and counts
+          are acceptable; absolute local paths, private repo names, raw private
+          reports, source snippets, author identities, author emails, and remote
+          URLs are not."
+        required_for_close_out: true
+      - id: REQ-065
+        source_ref: prd.md#acceptance[1]
+        text: The feature is done when a future runner can execute the canonical
+          validation workflow and prove that explicit prefix filtering is
+          deterministic, transparent, local-only, privacy-safe, and useful for
+          source-oriented reports without changing unfiltered default behaviour.
+        category: acceptance
+        packet_refs:
+          - P1
+          - P3
+        verification: null
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: Add explicit repo-relative path-prefix exclusion for hotspot analysis,
+      with visible scope metadata in table and JSON output, so users can produce
+      focused reports such as excluding `.flow/` while preserving the unfiltered
+      default behaviour and local-first evidence model.
+    acceptance:
+      - The CLI accepts repeatable `--exclude-prefix PATH` arguments using
+        simple repo-relative literal path-prefix semantics; empty, absolute,
+        parent-traversal, or control-character inputs fail clearly on stderr
+        without panic.
+      - Default output remains unfiltered when no exclude prefixes are supplied,
+        preserving prior all-tracked-path visibility and deterministic behaviour
+        except for additive scope metadata if implemented globally.
+      - When exclude prefixes are supplied, filtering happens before
+        aggregation, score calculation, co-change calculation, and result
+        limiting; excluded paths do not appear in result paths or co-change
+        paths.
+      - Table output visibly reports active scope when filters are used,
+        including the supplied prefixes and bounded exclusion counts, while
+        keeping paths project-relative.
+      - JSON output includes deterministic `analysis.scope` metadata with active
+        filters, supplied exclude prefixes, excluded path/change counts, and no
+        absolute paths or raw private report dumps.
+      - An empty scoped result set is a valid explainable report, not an
+        empty-repository or non-git error.
+      - README and help document prefix semantics, scoped examples such as
+        excluding `.flow/`, and the fact that filters change the evidence
+        universe without implying bug prediction, quality scoring, or developer
+        judgement.
+      - "Validation proves scoped filtering on fixtures and on this repository:
+        `--exclude-prefix .flow/` removes `.flow/**` rows and co-change evidence
+        while an unfiltered run can still analyse those paths."
+      - The feature introduces no providers, cache/database, config files,
+        glob/pathspec/gitignore engine, network access, telemetry, author
+        metrics, hosted/commercial content, or scoring formula redesign beyond
+        filtered candidate selection.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig fmt --check build.zig src tests
+      - zig build test
+      - zig build run -- --help
+      - zig build validate
+      - ./zig-out/bin/git-hotspots --repo . --exclude-prefix .flow/ --limit 10
+        --format json
+      - git diff --check
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
