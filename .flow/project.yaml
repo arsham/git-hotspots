@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 14
+  next_id: 15
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -81,6 +81,10 @@ features:
       slug: large-repo-runtime-feedback
       path: .flow/features/0013_large-repo-runtime-feedback
       created_at: 2026-05-22T18:52:59.240Z
+    - id: "0014"
+      slug: ergonomic-history-windows
+      path: .flow/features/0014_ergonomic-history-windows
+      created_at: 2026-05-22T19:39:14.147Z
 intake:
   mode: roadmap
   summary: null
