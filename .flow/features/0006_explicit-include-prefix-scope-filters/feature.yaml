@@ -1,0 +1,274 @@
+schema: flow-feature.v1
+feature:
+  id: "0006"
+  slug: explicit-include-prefix-scope-filters
+  title: Explicit include-prefix scope filters
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: The CLI supports explicit exclude-prefix filtering, but users cannot
+    focus hotspot analysis on selected repo subtrees such as `src/` without
+    post-processing reports. Focused reports need an equally explicit
+    include-prefix control that preserves deterministic local evidence and
+    avoids hidden defaults or a scope DSL.
+  outcome: Add repeatable `--include-prefix PATH` filters with the same
+    repo-relative literal prefix contract as `--exclude-prefix`. Includes narrow
+    the evidence universe, excludes remove from it, and table/JSON/Markdown
+    reports disclose the active scope and bounded counts.
+  acceptance:
+    - The CLI accepts repeatable `--include-prefix PATH` arguments using the
+      same repo-relative literal prefix validation rules as `--exclude-prefix`.
+    - Default output remains unfiltered when no include or exclude prefixes are
+      supplied.
+    - "Effective scope is flag-order independent: includes narrow candidates
+      when present, excludes remove matching paths, and excludes win over
+      includes."
+    - Filtering happens before aggregation, scoring, co-change expansion, result
+      limiting, table output, JSON output, and Markdown output.
+    - Out-of-include paths and excluded paths do not appear in result rows,
+      co-change rows, Markdown evidence sections, or validation summaries.
+    - Table, JSON, and Markdown disclose include prefixes, exclude prefixes,
+      filter-active state, and bounded include/exclude counts without raw
+      omitted-path dumps.
+    - Empty include-scoped reports exit successfully and remain explainable in
+      table, JSON, and Markdown.
+    - Validation covers include-only, repeated include, include plus exclude
+      precedence, no-match include, literal glob semantics, braced rename
+      normalization, Git-quoted tab normalization, invalid prefixes, and
+      this-repo `src/` smoke.
+    - README/help document literal repo-relative include/exclude semantics and
+      state that scoped reports change the evidence universe without making bug
+      prediction, quality scoring, or developer-ranking claims.
+    - The feature does not add default scopes, globs, pathspecs, regex,
+      `.gitignore` import, config files, providers, cache, network, telemetry,
+      author metrics, release/CI automation, hosted/commercial content, or
+      scoring formula changes beyond scoped input.
+planning:
+  state: ready
+  summary: "Narrow follow-up to Feature 0004: implement explicit include-prefix
+    filtering only. No default scopes, globs, pathspec/gitignore import, config
+    files, providers, cache, network, telemetry, author metrics, scoring
+    redesign, release/CI work, or commercial content."
+  brief_sync:
+    status: unchanged
+    reason: Feature 0006 is a focused follow-up within B001's agent-ready local CLI
+      capability; B001 remains current.
+    checked_at: 2026-05-22T02:58:10.629Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Feature 0006 improves B001's local-first file-level reports by adding
+      explicit include scope controls without changing deterministic product
+      truth.
+    checked_at: 2026-05-22T02:58:28.422Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-22T02:58:42.045Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-22T02:58:42.045Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-22T02:58:42.045Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-22T02:58:42.045Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: No active roadmap item existed after Feature 0005.
+    Include-prefix filtering is the smallest focused-report complement to
+    explicit exclude-prefix filtering.
+  depends_on_feature_ids:
+    - "0004"
+    - "0005"
+  blocked_by: []
+design:
+  rough_shape:
+    - Extend CLI parsing/help with repeatable `--include-prefix PATH` while
+      keeping `--exclude-prefix` unchanged.
+    - Refactor shared prefix validation if useful so include and exclude reject
+      the same invalid forms.
+    - Add include_prefixes and include-scope counts to Config/Scope/Analysis
+      deinit paths.
+    - Apply the predicate `(no includes OR path matches any include) AND NOT
+      path matches any exclude` before per-file aggregation and co-change
+      expansion.
+    - Render include metadata in table, JSON, and Markdown from the shared
+      Analysis model.
+    - Extend fixtures/goldens/integration tests and `zig build validate` for
+      include semantics and privacy-safe real-repo smoke.
+    - Update README examples with `--include-prefix src/` and `--include-prefix
+      src/ --exclude-prefix src/generated/`.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: End-to-end include-prefix runtime scope
+      goal: Implement repeatable `--include-prefix PATH` across CLI parsing,
+        config/model, Git analysis filtering, and table/JSON/Markdown scope
+        metadata.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/main.zig, src/model.zig, src/git.zig, src/report.zig,
+          tests/integration.sh, tools/setup-fixtures.sh, fixtures/expected/*."
+        - "In scope: parse and validate include prefixes, store normalized
+          prefixes, apply include narrowing before aggregation/co-change
+          expansion, keep exclude wins semantics, and render scope metadata in
+          all formats."
+        - "Out of scope: default scopes, globs, pathspec/gitignore import,
+          config files, providers, cache, network, telemetry, author metrics,
+          release/CI, commercial content, and scoring redesign."
+        - "Protected: no-flag default remains all tracked paths; existing
+          exclude-only goldens and semantics remain stable except intentional
+          additive scope metadata if needed."
+        - "Dependencies: Feature 0004 exclude-prefix behavior and Feature 0005
+          Markdown renderer are complete."
+        - "Validation/evidence: zig fmt --check build.zig src tests; zig build
+          test; fixture commands for include-only, repeated include,
+          include+exclude, empty include, literal glob, invalid include
+          prefixes, rename normalization, and quoted tab paths."
+        - "Review focus: filtering happens before aggregation and co-change
+          expansion; out-of-include paths cannot leak into results or cochanges;
+          metadata is deterministic and privacy-safe."
+        - "Escalate if: matching requires globs/pathspecs/config/default scopes,
+          output schema changes become breaking, or implementation touches
+          scoring/Git collection beyond scoped candidate selection."
+        - "Done boundary: runtime include scope works end-to-end in table, JSON,
+          and Markdown with targeted fixture tests."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: Validation and public docs hardening
+      goal: Extend canonical validation, real-repo smoke, and README/help
+        documentation for include-prefix scope controls.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: README.md, tools/validate.sh, tests/integration.sh,
+          fixtures/expected/*."
+        - "In scope: add `zig build validate` assertions for include semantics,
+          table/json/markdown real-repo smoke with `--include-prefix src/`,
+          privacy-safe evidence summaries, and visitor-facing README examples."
+        - "Out of scope: Flow/process clutter in README, raw private outputs,
+          package/release/CI work, new dependencies, provider/cache work,
+          commercial/hosted strategy."
+        - "Protected: docs keep hotspots framed as investigation prompts;
+          validation summaries use labels and bounded counts only."
+        - "Dependencies: P1 runtime behavior exists."
+        - "Validation/evidence: zig build validate; close-out mode with sibling
+          repo or explicit privacy-safe skip reason; git diff --check; flow
+          validate --target feature:0006 --format json."
+        - "Review focus: canonical validation catches include-scope regressions;
+          README accurately explains literal prefix semantics and
+          evidence-universe caveat."
+        - "Escalate if: validation needs private artefacts, network/fetch
+          behaviour, raw omitted path dumps, or new external tools."
+      verification_commands:
+        - zig build validate
+        - git diff --check
+  output_contract:
+    cli_flags:
+      - --include-prefix PATH (repeatable; repo-relative literal prefix; no glob
+        semantics)
+      - --exclude-prefix PATH remains repeatable and wins over include
+    scope_predicate: kept = (include_prefixes empty OR
+      starts_with_any(include_prefixes)) AND NOT
+      starts_with_any(exclude_prefixes)
+    json_scope_fields:
+      - filters_active
+      - include_prefixes
+      - exclude_prefixes
+      - included_path_count or equivalent
+      - included_change_count or equivalent
+      - out_of_scope_path_count
+      - out_of_scope_change_count
+      - excluded_path_count
+      - excluded_change_count
+    privacy: Only project-relative prefixes and bounded counts are reported; no raw
+      omitted path lists, absolute paths, author identities, remotes, or private
+      report dumps.
+    deferred:
+      - default source scope
+      - globs/pathspec/gitignore semantics
+      - config files
+      - scope DSL
+      - provider-generated classification
+      - raw filtered path lists
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-22T02:53:15.998Z
+  updated_at: 2026-05-22T02:58:42.045Z
