@@ -64,6 +64,25 @@ fn addCaveat(allocator: std.mem.Allocator, list: *std.array_list.Managed([]const
     try list.append(try allocator.dupe(u8, text));
 }
 
+fn freeStringList(allocator: std.mem.Allocator, values: []const []const u8) void {
+    for (values) |value| allocator.free(value);
+    allocator.free(values);
+}
+
+fn dupeStringList(allocator: std.mem.Allocator, values: []const []const u8) ![][]const u8 {
+    const out = try allocator.alloc([]const u8, values.len);
+    var initialized: usize = 0;
+    errdefer {
+        for (out[0..initialized]) |owned| allocator.free(owned);
+        allocator.free(out);
+    }
+    for (values, 0..) |value, i| {
+        out[i] = try allocator.dupe(u8, value);
+        initialized += 1;
+    }
+    return out;
+}
+
 fn isTrueText(text: []u8) bool {
     return std.mem.eql(u8, std.mem.trim(u8, text, "\r\n "), "true");
 }
@@ -137,6 +156,14 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config) Anal
         map.deinit();
     }
 
+    var excluded_paths = std.StringHashMap(void).init(allocator);
+    defer {
+        var it = excluded_paths.keyIterator();
+        while (it.next()) |key| allocator.free(key.*);
+        excluded_paths.deinit();
+    }
+    var excluded_change_count: usize = 0;
+
     var commit_count: usize = 0;
     var cur_hash: []const u8 = "";
     var cur_ts: i64 = 0;
@@ -164,7 +191,7 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config) Anal
         const del_s = parts.next() orelse continue;
         const path = parts.rest();
         if (path.len == 0) continue;
-        try applyNumstat(allocator, &map, &commit_paths, cur_hash, cur_ts, add_s, del_s, path);
+        try applyNumstat(allocator, &map, &commit_paths, &excluded_paths, &excluded_change_count, cfg.exclude_prefixes, cur_hash, cur_ts, add_s, del_s, path);
     }
     try finishCommit(allocator, &map, commit_paths.items);
 
@@ -211,17 +238,43 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config) Anal
         results.shrinkRetainingCapacity(cfg.limit);
     }
 
+    const scope_prefixes = try dupeStringList(allocator, cfg.exclude_prefixes);
+    errdefer freeStringList(allocator, scope_prefixes);
+
     return .{
         .allocator = allocator,
         .repo_root = repo_root,
         .history = .{ .head = head, .head_timestamp = head_ts, .range = range_owned, .is_shallow = is_shallow, .is_partial = is_partial, .dirty_worktree = dirty, .commit_count = commit_count },
+        .scope = .{ .filters_active = cfg.exclude_prefixes.len > 0, .exclude_prefixes = scope_prefixes, .excluded_path_count = excluded_paths.count(), .excluded_change_count = excluded_change_count },
         .results = try results.toOwnedSlice(),
         .caveats = try caveats.toOwnedSlice(),
     };
 }
 
-fn applyNumstat(allocator: std.mem.Allocator, map: *std.StringHashMap(FileAgg), commit_paths: *std.array_list.Managed([]const u8), commit: []const u8, ts: i64, add_s: []const u8, del_s: []const u8, raw_path: []const u8) !void {
-    const path = normalizePath(raw_path);
+fn applyNumstat(
+    allocator: std.mem.Allocator,
+    map: *std.StringHashMap(FileAgg),
+    commit_paths: *std.array_list.Managed([]const u8),
+    excluded_paths: *std.StringHashMap(void),
+    excluded_change_count: *usize,
+    exclude_prefixes: []const []const u8,
+    commit: []const u8,
+    ts: i64,
+    add_s: []const u8,
+    del_s: []const u8,
+    raw_path: []const u8,
+) !void {
+    const path = try normalizePath(allocator, raw_path);
+    defer allocator.free(path);
+    if (isExcludedPath(path, exclude_prefixes)) {
+        excluded_change_count.* += 1;
+        if (excluded_paths.get(path) == null) {
+            const owned = try allocator.dupe(u8, path);
+            errdefer allocator.free(owned);
+            try excluded_paths.put(owned, {});
+        }
+        return;
+    }
     const gop = try map.getOrPut(path);
     if (!gop.found_existing) {
         gop.key_ptr.* = try allocator.dupe(u8, path);
@@ -248,14 +301,84 @@ fn applyNumstat(allocator: std.mem.Allocator, map: *std.StringHashMap(FileAgg), 
     try commit_paths.append(agg.path);
 }
 
-fn normalizePath(raw: []const u8) []const u8 {
-    if (std.mem.indexOf(u8, raw, " => ")) |_| {
-        if (std.mem.lastIndexOfScalar(u8, raw, '}')) |brace| return raw[brace + 1 ..];
-        var split = std.mem.splitSequence(u8, raw, " => ");
-        _ = split.next();
-        return split.next() orelse raw;
+fn isExcludedPath(path: []const u8, exclude_prefixes: []const []const u8) bool {
+    for (exclude_prefixes) |prefix| {
+        if (std.mem.startsWith(u8, path, prefix)) return true;
     }
-    return raw;
+    return false;
+}
+
+fn normalizePath(allocator: std.mem.Allocator, raw: []const u8) ![]u8 {
+    const unquoted = try unquoteGitPath(allocator, raw);
+    errdefer allocator.free(unquoted);
+
+    if (std.mem.indexOf(u8, unquoted, " => ") == null) return unquoted;
+
+    if (std.mem.indexOfScalar(u8, unquoted, '{')) |open| {
+        if (std.mem.lastIndexOfScalar(u8, unquoted, '}')) |close| {
+            if (open < close) {
+                const inner = unquoted[open + 1 .. close];
+                if (std.mem.indexOf(u8, inner, " => ")) |_| {
+                    var split = std.mem.splitSequence(u8, inner, " => ");
+                    _ = split.next();
+                    const renamed = split.next() orelse inner;
+                    const normalized = try std.fmt.allocPrint(allocator, "{s}{s}{s}", .{ unquoted[0..open], renamed, unquoted[close + 1 ..] });
+                    allocator.free(unquoted);
+                    return normalized;
+                }
+            }
+        }
+    }
+
+    var split = std.mem.splitSequence(u8, unquoted, " => ");
+    _ = split.next();
+    const renamed = split.next() orelse return unquoted;
+    const normalized = try allocator.dupe(u8, renamed);
+    allocator.free(unquoted);
+    return normalized;
+}
+
+fn unquoteGitPath(allocator: std.mem.Allocator, raw: []const u8) ![]u8 {
+    if (raw.len < 2 or raw[0] != '"' or raw[raw.len - 1] != '"') return allocator.dupe(u8, raw);
+
+    var out = std.array_list.Managed(u8).init(allocator);
+    errdefer out.deinit();
+
+    var i: usize = 1;
+    while (i + 1 < raw.len) {
+        const c = raw[i];
+        i += 1;
+        if (c != '\\') {
+            try out.append(c);
+            continue;
+        }
+        if (i + 1 >= raw.len) {
+            try out.append('\\');
+            continue;
+        }
+        const escaped = raw[i];
+        i += 1;
+        switch (escaped) {
+            't' => try out.append('\t'),
+            'n' => try out.append('\n'),
+            'r' => try out.append('\r'),
+            'b' => try out.append(0x08),
+            'f' => try out.append(0x0c),
+            '\\' => try out.append('\\'),
+            '"' => try out.append('"'),
+            '0'...'7' => {
+                var value: u8 = escaped - '0';
+                var digits: usize = 1;
+                while (digits < 3 and i + 1 < raw.len and raw[i] >= '0' and raw[i] <= '7') : (digits += 1) {
+                    value = value * 8 + (raw[i] - '0');
+                    i += 1;
+                }
+                try out.append(value);
+            },
+            else => try out.append(escaped),
+        }
+    }
+    return out.toOwnedSlice();
 }
 
 fn finishCommit(allocator: std.mem.Allocator, map: *std.StringHashMap(FileAgg), paths: []const []const u8) !void {
@@ -342,5 +465,28 @@ fn cochangeLessThan(_: void, a: model.CoChange, b: model.CoChange) bool {
 }
 
 test "normalizes simple rename syntax" {
-    try std.testing.expectEqualStrings("new.zig", normalizePath("old.zig => new.zig"));
+    const normalized = try normalizePath(std.testing.allocator, "old.zig => new.zig");
+    defer std.testing.allocator.free(normalized);
+    try std.testing.expectEqualStrings("new.zig", normalized);
+}
+
+test "matches literal exclude prefixes" {
+    try std.testing.expect(isExcludedPath(".flow/state.yaml", &.{".flow/"}));
+    try std.testing.expect(isExcludedPath("vendor/lib.zig", &.{"vendor/"}));
+    try std.testing.expect(!isExcludedPath("src/vendor_adapter.zig", &.{"vendor/"}));
+    try std.testing.expect(!isExcludedPath("glob/[literal]*.zig", &.{"glob/*"}));
+}
+
+test "normalizes braced rename before prefix matching" {
+    const normalized = try normalizePath(std.testing.allocator, "src/{old.zig => new.zig}");
+    defer std.testing.allocator.free(normalized);
+    try std.testing.expectEqualStrings("src/new.zig", normalized);
+    try std.testing.expect(isExcludedPath(normalized, &.{"src/"}));
+}
+
+test "unquotes git quoted tab path before prefix matching" {
+    const normalized = try normalizePath(std.testing.allocator, "\"weird/tab\\tname.txt\"");
+    defer std.testing.allocator.free(normalized);
+    try std.testing.expectEqualStrings("weird/tab\tname.txt", normalized);
+    try std.testing.expect(isExcludedPath(normalized, &.{"weird/"}));
 }

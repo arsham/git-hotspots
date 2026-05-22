@@ -112,10 +112,14 @@ json_count_summary() {
 import json, sys
 with open(sys.argv[1], encoding='utf-8') as fh:
     data = json.load(fh)
-print('results=%d caveats=%d dirty=%s' % (
+scope = data.get('analysis', {}).get('scope', {})
+print('results=%d caveats=%d dirty=%s scope_active=%s excluded_paths=%d excluded_changes=%d' % (
     len(data.get('results', [])),
     len(data.get('analysis', {}).get('caveats', [])),
     str(data.get('analysis', {}).get('history', {}).get('dirty_worktree', False)).lower(),
+    str(scope.get('filters_active', False)).lower(),
+    int(scope.get('excluded_path_count', 0) or 0),
+    int(scope.get('excluded_change_count', 0) or 0),
 ))
 PY
 }
@@ -144,9 +148,9 @@ json_validity() {
 
 semantic_assertions() {
   have_python || return 1
-  python3 - "$BASIC_A" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" <<'PY'
+  python3 - "$BASIC_A" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" <<'PY'
 import json, os, re, sys
-basic_path, shallow_path, partial_path, self_path = sys.argv[1:]
+basic_path, shallow_path, partial_path, self_path, self_scoped_path, scope_unfiltered_path, scope_filtered_path, scope_src_filtered_path, scope_weird_filtered_path, scope_empty_path = sys.argv[1:]
 
 def load(path):
     with open(path, encoding='utf-8') as fh:
@@ -155,7 +159,52 @@ def load(path):
 basic = load(basic_path)
 assert basic['results'], 'basic results missing'
 assert basic['results'][0]['path'] == 'src/app.txt', 'unexpected basic top result'
+assert basic['analysis']['scope']['filters_active'] is False, 'basic scope unexpectedly active'
 assert all(not os.path.isabs(row['path']) for row in basic['results']), 'absolute basic result path'
+
+scope_unfiltered = load(scope_unfiltered_path)
+assert any(row['path'].startswith('.flow/') for row in scope_unfiltered.get('results', [])), 'unfiltered scope fixture lost .flow paths'
+unfiltered_paths = [row['path'] for row in scope_unfiltered.get('results', [])]
+assert 'src/new.zig' in unfiltered_paths, 'braced rename fixture missing normalized new path'
+assert '' not in unfiltered_paths, 'empty path leaked from braced rename parsing'
+assert 'weird/tab\tname.txt' in unfiltered_paths, 'quoted tab fixture missing unquoted path'
+
+scope_filtered = load(scope_filtered_path)
+scope = scope_filtered['analysis']['scope']
+assert scope['filters_active'] is True, 'filtered scope metadata inactive'
+assert scope['exclude_prefixes'] == ['.flow/'], 'filtered prefix order changed'
+assert scope['excluded_path_count'] == 2, 'filtered path count changed'
+assert scope['excluded_change_count'] == 5, 'filtered change count changed'
+for row in scope_filtered.get('results', []):
+    assert not row['path'].startswith('.flow/'), 'excluded result leaked'
+    for cc in row.get('cochanges', []):
+        assert not cc['path'].startswith('.flow/'), 'excluded cochange leaked'
+
+scope_src_filtered = load(scope_src_filtered_path)
+for row in scope_src_filtered.get('results', []):
+    assert row['path'], 'empty path leaked from excluded braced rename'
+    assert not row['path'].startswith('src/'), 'src result leaked'
+    for cc in row.get('cochanges', []):
+        assert not cc['path'].startswith('src/'), 'src cochange leaked'
+
+scope_weird_filtered = load(scope_weird_filtered_path)
+for row in scope_weird_filtered.get('results', []):
+    assert not row['path'].startswith('weird/'), 'weird result leaked'
+    assert not row['path'].startswith('"weird/'), 'quoted weird result leaked'
+    for cc in row.get('cochanges', []):
+        assert not cc['path'].startswith('weird/'), 'weird cochange leaked'
+
+scope_empty = load(scope_empty_path)
+assert scope_empty.get('results') == [], 'empty scoped fixture should produce no results'
+assert scope_empty['analysis']['scope']['filters_active'] is True, 'empty scoped report lost scope metadata'
+
+self_scoped = load(self_scoped_path)
+assert self_scoped['analysis']['scope']['filters_active'] is True, 'self scoped metadata inactive'
+assert self_scoped['analysis']['scope']['exclude_prefixes'] == ['.flow/'], 'self scoped prefix changed'
+for row in self_scoped.get('results', []):
+    assert not row['path'].startswith('.flow/'), 'self scoped result leaked .flow path'
+    for cc in row.get('cochanges', []):
+        assert not cc['path'].startswith('.flow/'), 'self scoped cochange leaked .flow path'
 
 shallow = load(shallow_path)
 history = shallow['analysis']['history']
@@ -167,7 +216,7 @@ history = partial['analysis']['history']
 assert history['is_partial'] is True, 'partial fixture not reported as partial'
 assert history['auto_fetch'] is False, 'partial fixture auto_fetch changed'
 
-for path in (basic_path, self_path):
+for path in (basic_path, self_path, self_scoped_path, scope_filtered_path, scope_src_filtered_path, scope_weird_filtered_path, scope_empty_path):
     data = load(path)
     for row in data.get('results', []):
         assert not os.path.isabs(row.get('path', '')), 'absolute result path in %s' % path
@@ -238,9 +287,18 @@ fixture_json_checks() {
   "$EXE" --repo fixtures/basic --format json > "$BASIC_B" || return 1
   diff -u fixtures/expected/basic.json "$BASIC_A" >/dev/null || return 1
   diff -u "$BASIC_A" "$BASIC_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/scope --format json > "$SCOPE_UNFILTERED_JSON" || return 1
+  "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format json > "$SCOPE_FILTERED_JSON" || return 1
+  diff -u fixtures/expected/scope-filtered.json "$SCOPE_FILTERED_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/scope --exclude-prefix src/ --format json > "$SCOPE_SRC_FILTERED_JSON" || return 1
+  "$EXE" --repo fixtures/scope --exclude-prefix weird/ --format json > "$SCOPE_WEIRD_FILTERED_JSON" || return 1
+  "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format json > "$SCOPE_EMPTY_JSON" || return 1
   "$EXE" --repo fixtures/shallow --format json > "$SHALLOW_JSON" || return 1
   "$EXE" --repo fixtures/partial --format json > "$PARTIAL_JSON" || return 1
   "$EXE" --repo . --format json > "$SELF_JSON" || return 1
+  "$EXE" --repo . --exclude-prefix .flow/ --limit 10 --format json > "$SELF_SCOPED_JSON" || return 1
+  summary=$(json_count_summary "$SELF_SCOPED_JSON") || return 1
+  printf 'this-repo scoped-flow %s\n' "$summary" >> "$SMOKES"
 }
 
 fixture_performance_smoke() {
@@ -293,9 +351,15 @@ real_repo_smoke() {
 
 BASIC_A=$ARTIFACT_DIR/basic-a.json
 BASIC_B=$ARTIFACT_DIR/basic-b.json
+SCOPE_UNFILTERED_JSON=$ARTIFACT_DIR/scope-unfiltered.json
+SCOPE_FILTERED_JSON=$ARTIFACT_DIR/scope-filtered.json
+SCOPE_SRC_FILTERED_JSON=$ARTIFACT_DIR/scope-src-filtered.json
+SCOPE_WEIRD_FILTERED_JSON=$ARTIFACT_DIR/scope-weird-filtered.json
+SCOPE_EMPTY_JSON=$ARTIFACT_DIR/scope-empty.json
 SHALLOW_JSON=$ARTIFACT_DIR/shallow.json
 PARTIAL_JSON=$ARTIFACT_DIR/partial.json
 SELF_JSON=$ARTIFACT_DIR/self.json
+SELF_SCOPED_JSON=$ARTIFACT_DIR/self-scoped.json
 
 run_quiet "format check" zig fmt --check build.zig src tests
 run_quiet "fast gate: zig build test" zig build test
@@ -311,7 +375,7 @@ else
 fi
 
 printf 'validate: RUN JSON validity\n'
-json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
+json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$SCOPE_UNFILTERED_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
 
 printf 'validate: RUN shallow, partial, and privacy assertions\n'
 if semantic_assertions; then

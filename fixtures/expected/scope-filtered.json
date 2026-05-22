@@ -1,0 +1,88 @@
+{
+  "schema_version": "1",
+  "tool": { "name": "git-hotspots", "version": "0.0.0-spike" },
+  "analysis": {
+    "history": { "head": "0fafb8d95c608858ec42de2ea9276c38c79b8866", "head_timestamp": 1772668800, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 5 },
+    "scope": { "filters_active": true, "exclude_prefixes": [".flow/"], "excluded_path_count": 2, "excluded_change_count": 5 },
+    "caveats": []
+  },
+  "results": [
+    {
+      "path": "src/vendor_adapter.zig",
+      "score": { "total": 64.120, "frequency": 30.000, "churn": 0.120, "recency": 20.000, "cochange": 14.000 },
+      "change_count": 3, "additions": 3, "deletions": 0, "churn": 3,
+      "recency": { "last_changed_timestamp": 1772668800, "last_changed_commit": "0fafb8d95c60" },
+      "current_size": 38,
+      "cochanges": [{ "path": "src/app.txt", "count": 2 }, { "path": "vendor/lib.txt", "count": 2 }, { "path": "glob/[literal]*.txt", "count": 1 }, { "path": "src/old.zig", "count": 1 }, { "path": "weird/tab\tname.txt", "count": 1 }],
+      "confidence": "high",
+      "caveats": [],
+      "evidence": [{ "commit": "0fafb8d95c60", "timestamp": 1772668800, "additions": 1, "deletions": 0 }, { "commit": "e573d3171435", "timestamp": 1772582400, "additions": 1, "deletions": 0 }, { "commit": "af64dae377af", "timestamp": 1772323200, "additions": 1, "deletions": 0 }]
+    },
+    {
+      "path": "src/app.txt",
+      "score": { "total": 62.240, "frequency": 30.000, "churn": 0.240, "recency": 20.000, "cochange": 12.000 },
+      "change_count": 3, "additions": 5, "deletions": 1, "churn": 6,
+      "recency": { "last_changed_timestamp": 1772668800, "last_changed_commit": "0fafb8d95c60" },
+      "current_size": 39,
+      "cochanges": [{ "path": "src/vendor_adapter.zig", "count": 2 }, { "path": "glob/[literal]*.txt", "count": 1 }, { "path": "src/new.zig", "count": 1 }, { "path": "src/old.zig", "count": 1 }, { "path": "vendor/lib.txt", "count": 1 }],
+      "confidence": "high",
+      "caveats": [],
+      "evidence": [{ "commit": "0fafb8d95c60", "timestamp": 1772668800, "additions": 1, "deletions": 0 }, { "commit": "06afcb1401d6", "timestamp": 1772409600, "additions": 3, "deletions": 1 }, { "commit": "af64dae377af", "timestamp": 1772323200, "additions": 1, "deletions": 0 }]
+    },
+    {
+      "path": "vendor/lib.txt",
+      "score": { "total": 51.080, "frequency": 20.000, "churn": 0.080, "recency": 19.000, "cochange": 12.000 },
+      "change_count": 2, "additions": 2, "deletions": 0, "churn": 2,
+      "recency": { "last_changed_timestamp": 1772582400, "last_changed_commit": "e573d3171435" },
+      "current_size": 22,
+      "cochanges": [{ "path": "src/vendor_adapter.zig", "count": 2 }, { "path": "glob/[literal]*.txt", "count": 1 }, { "path": "src/app.txt", "count": 1 }, { "path": "src/old.zig", "count": 1 }, { "path": "weird/tab\tname.txt", "count": 1 }],
+      "confidence": "medium",
+      "caveats": [],
+      "evidence": [{ "commit": "e573d3171435", "timestamp": 1772582400, "additions": 1, "deletions": 0 }, { "commit": "af64dae377af", "timestamp": 1772323200, "additions": 1, "deletions": 0 }]
+    },
+    {
+      "path": "glob/[literal]*.txt",
+      "score": { "total": 36.040, "frequency": 10.000, "churn": 0.040, "recency": 16.000, "cochange": 10.000 },
+      "change_count": 1, "additions": 1, "deletions": 0, "churn": 1,
+      "recency": { "last_changed_timestamp": 1772323200, "last_changed_commit": "af64dae377af" },
+      "current_size": 13,
+      "cochanges": [{ "path": "src/app.txt", "count": 1 }, { "path": "src/old.zig", "count": 1 }, { "path": "src/vendor_adapter.zig", "count": 1 }, { "path": "vendor/lib.txt", "count": 1 }, { "path": "weird/tab\tname.txt", "count": 1 }],
+      "confidence": "low",
+      "caveats": [],
+      "evidence": [{ "commit": "af64dae377af", "timestamp": 1772323200, "additions": 1, "deletions": 0 }]
+    },
+    {
+      "path": "src/old.zig",
+      "score": { "total": 36.040, "frequency": 10.000, "churn": 0.040, "recency": 16.000, "cochange": 10.000 },
+      "change_count": 1, "additions": 1, "deletions": 0, "churn": 1,
+      "recency": { "last_changed_timestamp": 1772323200, "last_changed_commit": "af64dae377af" },
+      "current_size": null,
+      "cochanges": [{ "path": "glob/[literal]*.txt", "count": 1 }, { "path": "src/app.txt", "count": 1 }, { "path": "src/vendor_adapter.zig", "count": 1 }, { "path": "vendor/lib.txt", "count": 1 }, { "path": "weird/tab\tname.txt", "count": 1 }],
+      "confidence": "low",
+      "caveats": ["path is deleted or not present at HEAD"],
+      "evidence": [{ "commit": "af64dae377af", "timestamp": 1772323200, "additions": 1, "deletions": 0 }]
+    },
+    {
+      "path": "weird/tab\tname.txt",
+      "score": { "total": 36.040, "frequency": 10.000, "churn": 0.040, "recency": 16.000, "cochange": 10.000 },
+      "change_count": 1, "additions": 1, "deletions": 0, "churn": 1,
+      "recency": { "last_changed_timestamp": 1772323200, "last_changed_commit": "af64dae377af" },
+      "current_size": 11,
+      "cochanges": [{ "path": "glob/[literal]*.txt", "count": 1 }, { "path": "src/app.txt", "count": 1 }, { "path": "src/old.zig", "count": 1 }, { "path": "src/vendor_adapter.zig", "count": 1 }, { "path": "vendor/lib.txt", "count": 1 }],
+      "confidence": "low",
+      "caveats": [],
+      "evidence": [{ "commit": "af64dae377af", "timestamp": 1772323200, "additions": 1, "deletions": 0 }]
+    },
+    {
+      "path": "src/new.zig",
+      "score": { "total": 29.000, "frequency": 10.000, "churn": 0.000, "recency": 17.000, "cochange": 2.000 },
+      "change_count": 1, "additions": 0, "deletions": 0, "churn": 0,
+      "recency": { "last_changed_timestamp": 1772409600, "last_changed_commit": "06afcb1401d6" },
+      "current_size": 9,
+      "cochanges": [{ "path": "src/app.txt", "count": 1 }],
+      "confidence": "low",
+      "caveats": [],
+      "evidence": [{ "commit": "06afcb1401d6", "timestamp": 1772409600, "additions": 0, "deletions": 0 }]
+    }
+  ]
+}

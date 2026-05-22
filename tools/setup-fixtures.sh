@@ -46,7 +46,7 @@ make_basic() {
 make_edge() {
   repo="$FIX/edge"
   rm -rf "$repo"
-  mkdir -p "$repo/weird" "$repo/bin" "$repo/mass" "$repo/tie"
+  mkdir -p "$repo/weird" "$repo/bin" "$repo/mass" "$repo/tie" "$repo/glob"
   setup_repo "$repo"
 
   printf 'one\n' > "$repo/tie/a.txt"
@@ -54,6 +54,7 @@ make_edge() {
   printf 'space\n' > "$repo/weird/path with space.txt"
   printf 'unicode\n' > "$repo/weird/éclair.txt"
   printf 'tab\n' > "$repo/weird/tab	name.txt"
+  printf 'glob literal\n' > "$repo/glob/[literal]*.txt"
   printf 'old\n' > "$repo/old-name.txt"
   printf 'gone\n' > "$repo/gone.txt"
   printf '\000\001\002\003' > "$repo/bin/blob.bin"
@@ -82,8 +83,43 @@ make_edge() {
   GIT_AUTHOR_DATE='2026-02-06T00:00:00+0000' GIT_COMMITTER_DATE='2026-02-06T00:00:00+0000' git -C "$repo" merge -q --no-ff side -m 'merge side branch'
 }
 
+make_scope() {
+  repo="$FIX/scope"
+  rm -rf "$repo"
+  mkdir -p "$repo/src" "$repo/.flow" "$repo/vendor" "$repo/glob" "$repo/weird"
+  setup_repo "$repo"
+
+  printf 'pub fn main() void {}\n' > "$repo/src/app.txt"
+  printf 'old name\n' > "$repo/src/old.zig"
+  printf 'adapter one\n' > "$repo/src/vendor_adapter.zig"
+  printf 'vendor one\n' > "$repo/vendor/lib.txt"
+  printf 'literal glob\n' > "$repo/glob/[literal]*.txt"
+  printf 'tab scoped\n' > "$repo/weird/tab	name.txt"
+  printf 'state one\n' > "$repo/.flow/state.yaml"
+  commit_all "$repo" '2026-03-01T00:00:00+0000' 'initial source and workflow files'
+
+  git -C "$repo" mv src/old.zig src/new.zig
+  printf 'pub fn main() void {\n  // v2\n}\n' > "$repo/src/app.txt"
+  printf 'state one\nstate two\n' > "$repo/.flow/state.yaml"
+  commit_all "$repo" '2026-03-02T00:00:00+0000' 'change app and workflow state'
+
+  printf 'state one\nstate two\nstate three\n' > "$repo/.flow/state.yaml"
+  printf 'other workflow\n' > "$repo/.flow/other.yaml"
+  commit_all "$repo" '2026-03-03T00:00:00+0000' 'workflow-only churn'
+
+  printf 'vendor one\nvendor two\n' > "$repo/vendor/lib.txt"
+  printf 'adapter one\nadapter two\n' > "$repo/src/vendor_adapter.zig"
+  commit_all "$repo" '2026-03-04T00:00:00+0000' 'vendor and adapter change'
+
+  printf 'pub fn main() void {\n  // v2\n  // v3\n}\n' > "$repo/src/app.txt"
+  printf 'state one\nstate two\nstate three\nstate four\n' > "$repo/.flow/state.yaml"
+  printf 'adapter one\nadapter two\nadapter three\n' > "$repo/src/vendor_adapter.zig"
+  commit_all "$repo" '2026-03-05T00:00:00+0000' 'mixed source and workflow churn'
+}
+
 make_basic
 make_edge
+make_scope
 rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked"
 git clone -q --depth 1 "file://$FIX/basic" "$FIX/shallow"
 git clone -q "$FIX/basic" "$FIX/medium"

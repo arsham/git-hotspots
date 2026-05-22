@@ -4,7 +4,7 @@ feature:
   slug: scope-filters-for-useful-hotspot-reports
   title: Scope filters for useful hotspot reports
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The file-level CLI spike is executable and validated, but reports
@@ -86,7 +86,7 @@ proposal:
     materialised_at: 2026-05-22T01:57:29.616Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -158,7 +158,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Explicit prefix filter contract
       goal: Add repeatable `--exclude-prefix PATH` parsing, validation, config/model
         fields, and help text without changing default unfiltered behaviour.
@@ -195,7 +195,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Filtered aggregation and scope metadata
       goal: Apply exclude prefixes before aggregation, ranking, and co-change
         evidence, then expose deterministic scope metadata in table and JSON
@@ -234,7 +234,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Validation and public docs
       goal: Extend canonical validation and visitor-facing docs so scope filtering
         stays tested, privacy-safe, and easy to use for public/demo reports.
@@ -316,7 +316,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T01:49:50.901Z
-  updated_at: 2026-05-22T01:59:14.312Z
+  updated_at: 2026-05-22T02:26:10.381Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-22T01:59:14.312Z

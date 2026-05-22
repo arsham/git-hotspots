@@ -4,6 +4,11 @@ const model = @import("model.zig");
 pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("git-hotspots: file-level Git-history investigation prompts\n", .{});
     try writer.print("commits={d} shallow={} partial={} dirty={} auto_fetch=false\n", .{ analysis.history.commit_count, analysis.history.is_shallow, analysis.history.is_partial, analysis.history.dirty_worktree });
+    if (analysis.scope.filters_active) {
+        try writer.print("scope: exclude_prefixes=", .{});
+        try renderInlineStringArray(writer, analysis.scope.exclude_prefixes);
+        try writer.print(" excluded_paths={d} excluded_changes={d}\n", .{ analysis.scope.excluded_path_count, analysis.scope.excluded_change_count });
+    }
     if (analysis.caveats.len > 0) {
         try writer.print("caveats: ", .{});
         for (analysis.caveats, 0..) |c, i| {
@@ -30,6 +35,9 @@ pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("\"range\": ", .{});
     if (analysis.history.range) |r| try jsonString(writer, r) else try writer.print("null", .{});
     try writer.print(", \"is_shallow\": {}, \"is_partial\": {}, \"auto_fetch\": false, \"dirty_worktree\": {}, \"commit_count\": {d} }},\n", .{ analysis.history.is_shallow, analysis.history.is_partial, analysis.history.dirty_worktree, analysis.history.commit_count });
+    try writer.print("    \"scope\": {{ \"filters_active\": {}, \"exclude_prefixes\": ", .{analysis.scope.filters_active});
+    try stringArray(writer, analysis.scope.exclude_prefixes);
+    try writer.print(", \"excluded_path_count\": {d}, \"excluded_change_count\": {d} }},\n", .{ analysis.scope.excluded_path_count, analysis.scope.excluded_change_count });
     try writer.print("    \"caveats\": ", .{});
     try stringArray(writer, analysis.caveats);
     try writer.print("\n", .{});
@@ -85,6 +93,15 @@ fn stringArray(writer: anytype, values: []const []const u8) !void {
     for (values, 0..) |v, i| {
         if (i != 0) try writer.print(", ", .{});
         try jsonString(writer, v);
+    }
+    try writer.print("]", .{});
+}
+
+fn renderInlineStringArray(writer: anytype, values: []const []const u8) !void {
+    try writer.print("[", .{});
+    for (values, 0..) |value, i| {
+        if (i != 0) try writer.print(",", .{});
+        try writer.print("{s}", .{value});
     }
     try writer.print("]", .{});
 }
