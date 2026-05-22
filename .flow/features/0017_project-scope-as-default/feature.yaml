@@ -4,7 +4,7 @@ feature:
   slug: project-scope-as-default
   title: Project scope as default
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Unflagged git-hotspots reports currently default to all tracked
@@ -72,7 +72,7 @@ proposal:
     materialised_at: 2026-05-22T21:53:31.984Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -151,7 +151,7 @@ design:
       goal: Make omitted --scope resolve to project while preserving explicit --scope
         all as the old full-evidence mode.
       depends_on: []
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: src/model.zig and src/main.zig."
@@ -183,7 +183,7 @@ design:
         --scope all preserves old all-scope evidence.
       depends_on:
         - P1
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: tests/integration.sh, tools/validate.sh,
@@ -214,7 +214,7 @@ design:
         privacy-safe real-repo evidence.
       depends_on:
         - P2
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: README.md, src/explain.zig, tools/validate.sh, validation
@@ -243,8 +243,7 @@ design:
 execution:
   active_run_id: null
   current_packet_id: null
-  next_packet_ids:
-    - P1
+  next_packet_ids: []
   blockers: []
   requires_confirmation: true
 links:
@@ -253,7 +252,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T21:46:21.845Z
-  updated_at: 2026-05-22T21:56:46.406Z
+  updated_at: 2026-05-22T22:24:50.889Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-22T21:56:46.406Z

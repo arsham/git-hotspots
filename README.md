@@ -131,6 +131,7 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --limit 10 --format table
 ./zig-out/bin/git-hotspots --repo . --limit 10 --format json
 ./zig-out/bin/git-hotspots --repo . --limit 10 --format markdown
+./zig-out/bin/git-hotspots --repo . --scope all --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --scope project --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --include-prefix src/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --exclude-prefix .flow/ --limit 10 --format markdown
@@ -144,11 +145,12 @@ Supported options are `--repo`, `--limit`, `--format table|json|markdown`,
 `--since`, `--scope all|project`, repeatable `--include-prefix`, repeatable
 `--exclude-prefix`, `--inspect`, `--progress`, `--explain`, `--version`, and
 `--help`.
-`--scope all` is the default unfiltered evidence universe unless explicit
-prefixes are supplied. `--scope project` is opt-in and currently expands only to
-the literal exclude prefix `.flow/`, so workflow metadata does not dominate a
-project-focused report. Include and exclude prefixes are literal repo-relative
-Git path prefixes using `/` separators; they are applied before
+During the alpha, omitted `--scope` defaults to `--scope project`, which
+currently expands only to the literal exclude prefix `.flow/`, so workflow
+metadata does not dominate a project-focused report. Use `--scope all` for the
+full local Git-history evidence universe with no built-in project excludes.
+Include and exclude prefixes are literal repo-relative Git path prefixes using
+`/` separators; they are applied before
 hotspot scoring and co-change evidence, with excludes winning over includes.
 They are not globs, pathspecs, gitignore rules, regexes, or project
 configuration. `--inspect PATH` performs an exact file drilldown within the
@@ -170,9 +172,10 @@ reports.
 
 ## Large repository recipes
 
-Large repositories can start with explicit exploratory scopes while preserving
-the default full-history behaviour. These recipes use only supported local CLI
-options and do not change scoring, report schemas, or runtime defaults.
+Large repositories can start with explicit exploratory scopes while preserving a
+clear escape hatch to full local Git-history evidence. These recipes use only
+supported local CLI options and do not change scoring, report schemas, or
+local-first runtime behaviour.
 
 For a project-focused recent run that keeps workflow metadata out of the first
 pass, bound history by revision and enable progress feedback:
@@ -190,8 +193,10 @@ revision range:
 
 Bounded runs are exploratory scopes: they reduce the selected history or output
 for a specific question, but they are not more correct than a full-history run
-and are not hidden defaults. If you omit `--since`, `git-hotspots` analyses the
-full reachable local history selected by the other scope and prefix options.
+and are not hidden correctness claims. If you omit `--since`, `git-hotspots`
+analyses the full reachable local history selected by the scope and prefix
+options. Use `--scope all` when you want the full tracked-path evidence universe
+instead of the alpha project preset.
 
 ## How to read scores
 

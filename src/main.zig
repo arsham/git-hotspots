@@ -20,8 +20,9 @@ const usage =
     \\  --limit N         Maximum ranked files to emit (default: 10)
     \\  --format FORMAT   table, json, or markdown (default: table)
     \\  --since REV       Analyse commits after REV through HEAD
-    \\  --scope VALUE     all (default) or project; project currently excludes
-    \\                    the literal .flow/ prefix before scoring
+    \\  --scope VALUE     project (default) or all; project currently excludes
+    \\                    the literal .flow/ prefix before scoring; all uses
+    \\                    the full local Git-history evidence universe
     \\  --include-prefix PATH
     \\                    Repeatable repo-relative literal Git path prefix to include;
     \\                    narrows the evidence universe before scoring; not a glob
@@ -393,8 +394,18 @@ test "parse defaults are documented through config shape" {
     const cfg = model.Config{ .repo_path = "." };
     try std.testing.expectEqual(@as(usize, 10), cfg.limit);
     try std.testing.expectEqual(model.Format.table, cfg.format);
-    try std.testing.expectEqual(model.ScopePreset.all, cfg.scope);
+    try std.testing.expectEqual(model.ScopePreset.project, cfg.scope);
     try std.testing.expect(!cfg.progress);
+}
+
+test "parse omitted scope defaults to project preset" {
+    const args = [_][:0]const u8{"git-hotspots"};
+    const mode = try parseArgs(std.testing.allocator, &args);
+    const cfg = mode.analyze;
+    defer freeConfig(std.testing.allocator, cfg);
+    try std.testing.expectEqual(model.ScopePreset.project, cfg.scope);
+    try std.testing.expectEqual(@as(usize, 1), cfg.exclude_prefixes.len);
+    try std.testing.expectEqualStrings(".flow/", cfg.exclude_prefixes[0]);
 }
 
 test "parse progress analysis flag independent of order" {

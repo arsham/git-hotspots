@@ -40,10 +40,10 @@ pub const text =
     \\
     \\## Scope filters
     \\
-    \\The --scope flag selects a deterministic evidence universe. The default
-    \\--scope all is unfiltered unless explicit prefixes are supplied. The
-    \\opt-in --scope project preset currently expands only to the literal
-    \\exclude prefix .flow/.
+    \\The --scope flag selects a deterministic evidence universe. During the
+    \\alpha, the default --scope project preset currently expands only to the
+    \\literal exclude prefix .flow/. Use --scope all for the full local
+    \\Git-history evidence universe with no built-in project excludes.
     \\
     \\Include and exclude prefixes are literal repo-relative prefixes using '/'
     \\separators. They are not globs, regexes, pathspecs, gitignore rules, or

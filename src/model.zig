@@ -15,7 +15,7 @@ pub const Config = struct {
     progress: bool = false,
     since: ?[]const u8 = null,
     inspect_path: ?[]const u8 = null,
-    scope: ScopePreset = .all,
+    scope: ScopePreset = .project,
     include_prefixes: []const []const u8 = &.{},
     exclude_prefixes: []const []const u8 = &.{},
 };

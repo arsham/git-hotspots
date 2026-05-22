@@ -178,9 +178,10 @@ def load(path):
 basic = load(basic_path)
 assert basic['results'], 'basic results missing'
 assert basic['results'][0]['path'] == 'src/app.txt', 'unexpected basic top result'
-assert basic['analysis']['scope']['selected_scope'] == 'all', 'basic selected scope changed'
-assert basic['analysis']['scope']['filters_active'] is False, 'basic scope unexpectedly active'
+assert basic['analysis']['scope']['selected_scope'] == 'project', 'basic selected scope changed'
+assert basic['analysis']['scope']['filters_active'] is True, 'basic scope unexpectedly inactive'
 assert basic['analysis']['scope']['include_prefixes'] == [], 'basic include prefixes changed'
+assert basic['analysis']['scope']['exclude_prefixes'] == ['.flow/'], 'basic exclude prefixes changed'
 assert all(not os.path.isabs(row['path']) for row in basic['results']), 'absolute basic result path'
 assert 'inspect' not in basic, 'normal JSON gained inspect metadata'
 basic_inspect = load(basic_inspect_path)
@@ -190,12 +191,14 @@ assert basic_inspect['results'][0] == basic['results'][0], 'inspect result no lo
 
 scope_unfiltered = load(scope_unfiltered_path)
 scope_all = load(scope_all_path)
-assert scope_all == scope_unfiltered, '--scope all changed unfiltered output'
-assert any(row['path'].startswith('.flow/') for row in scope_unfiltered.get('results', [])), 'unfiltered scope fixture lost .flow paths'
-unfiltered_paths = [row['path'] for row in scope_unfiltered.get('results', [])]
-assert 'src/new.zig' in unfiltered_paths, 'braced rename fixture missing normalized new path'
-assert '' not in unfiltered_paths, 'empty path leaked from braced rename parsing'
-assert 'weird/tab\tname.txt' in unfiltered_paths, 'quoted tab fixture missing unquoted path'
+assert scope_unfiltered['analysis']['scope']['selected_scope'] == 'project', 'default selected scope changed'
+assert scope_unfiltered['analysis']['scope']['exclude_prefixes'] == ['.flow/'], 'default project prefix missing'
+assert all(not row['path'].startswith('.flow/') for row in scope_unfiltered.get('results', [])), 'default leaked .flow paths'
+all_paths = [row['path'] for row in scope_all.get('results', [])]
+assert any(row['path'].startswith('.flow/') for row in scope_all.get('results', [])), '--scope all lost .flow paths'
+assert 'src/new.zig' in all_paths, 'braced rename fixture missing normalized new path'
+assert '' not in all_paths, 'empty path leaked from braced rename parsing'
+assert 'weird/tab\tname.txt' in all_paths, 'quoted tab fixture missing unquoted path'
 
 scope_filtered = load(scope_filtered_path)
 scope = scope_filtered['analysis']['scope']
@@ -223,6 +226,7 @@ assert project_scope['outside_include_change_count'] == 0, 'project outside incl
 assert project_scope['excluded_path_count'] == 2, 'project excluded path count changed'
 assert project_scope['excluded_change_count'] == 5, 'project excluded change count changed'
 assert scope_project['results'] == scope_filtered['results'], 'project preset rows differ from explicit .flow/ exclusion'
+assert scope_project == scope_unfiltered, 'omitted scope differs from explicit project'
 for row in scope_project.get('results', []):
     assert not row['path'].startswith('.flow/'), 'project result leaked .flow path'
     for cc in row.get('cochanges', []):
@@ -276,10 +280,10 @@ assert scope_empty['analysis']['scope']['filters_active'] is True, 'empty scoped
 
 scope_src_include = load(scope_src_include_path)
 scope = scope_src_include['analysis']['scope']
-assert scope['selected_scope'] == 'all', 'include selected scope changed'
+assert scope['selected_scope'] == 'project', 'include selected scope changed'
 assert scope['filters_active'] is True, 'include scope metadata inactive'
 assert scope['include_prefixes'] == ['src/'], 'include prefix order changed'
-assert scope['exclude_prefixes'] == [], 'include-only exclude metadata changed'
+assert scope['exclude_prefixes'] == ['.flow/'], 'include-only exclude metadata changed'
 assert scope['outside_include_path_count'] >= 1, 'include scope outside path count missing'
 assert scope['outside_include_change_count'] >= 1, 'include scope outside change count missing'
 paths = [row['path'] for row in scope_src_include.get('results', [])]
@@ -302,8 +306,8 @@ for row in scope_src_vendor_include.get('results', []):
 
 scope_include_exclude = load(scope_include_exclude_path)
 assert scope_include_exclude['analysis']['scope']['include_prefixes'] == ['src/'], 'include+exclude include prefix changed'
-assert scope_include_exclude['analysis']['scope']['exclude_prefixes'] == ['src/vendor_adapter.zig'], 'include+exclude exclude prefix changed'
-assert scope_include_exclude['analysis']['scope']['excluded_path_count'] == 1, 'exclude-over-include count changed'
+assert scope_include_exclude['analysis']['scope']['exclude_prefixes'] == ['.flow/', 'src/vendor_adapter.zig'], 'include+exclude exclude prefix changed'
+assert scope_include_exclude['analysis']['scope']['excluded_path_count'] == 3, 'exclude-over-include count changed'
 assert 'src/vendor_adapter.zig' not in [row['path'] for row in scope_include_exclude.get('results', [])], 'exclude did not win over include'
 for row in scope_include_exclude.get('results', []):
     for cc in row.get('cochanges', []):
@@ -330,7 +334,7 @@ assert len(edge_inspect_tab.get('results', [])) == 1, 'tab inspect result count 
 assert edge_inspect_tab['results'][0]['path'] == 'weird/tab\tname.txt', 'tab inspect did not match tab path'
 
 self_scoped = load(self_scoped_path)
-assert self_scoped['analysis']['scope']['selected_scope'] == 'all', 'self scoped selected scope changed'
+assert self_scoped['analysis']['scope']['selected_scope'] == 'project', 'self scoped selected scope changed'
 assert self_scoped['analysis']['scope']['filters_active'] is True, 'self scoped metadata inactive'
 assert self_scoped['analysis']['scope']['include_prefixes'] == [], 'self scoped include prefixes changed'
 assert self_scoped['analysis']['scope']['exclude_prefixes'] == ['.flow/'], 'self scoped prefix changed'
@@ -378,7 +382,7 @@ basic = read(basic_a)
 assert basic == read(basic_b), 'basic markdown repeated output changed'
 for section in ['# git-hotspots report', '## Run summary', '## Scope', '## Caveats', '## Top hotspots', '## Evidence']:
     assert section in basic, section
-assert '- Selected scope: all' in basic, 'basic selected scope missing'
+assert '- Selected scope: project' in basic, 'basic selected scope missing'
 assert 'File-level Git-history investigation prompts, not bug predictions or code-quality ratings.' in basic
 basic_inspect_text = read(basic_inspect)
 assert '## Inspect' in basic_inspect_text, 'inspect markdown section missing'
@@ -415,10 +419,10 @@ assert 'No hotspots matched the requested scope.' in empty, 'empty scoped top-ho
 assert 'No result evidence to show.' in empty, 'empty scoped evidence note missing'
 
 include_text = read(scope_src_include_md)
-assert '- Selected scope: all' in include_text, 'include markdown selected scope missing'
+assert '- Selected scope: project' in include_text, 'include markdown selected scope missing'
 assert '- Filters active: true' in include_text, 'include markdown filter flag missing'
 assert '- Include prefixes: src/' in include_text, 'include markdown prefix missing'
-assert '- Exclude prefixes: None' in include_text, 'include markdown exclude metadata missing'
+assert '- Exclude prefixes: .flow/' in include_text, 'include markdown exclude metadata missing'
 assert '- Outside include path count:' in include_text, 'include markdown outside path count missing'
 for line in include_text.splitlines():
     if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
@@ -439,7 +443,7 @@ assert '## Inspect' in edge_inspect_text, 'edge inspect section missing'
 assert 'glob/\\[literal\\]\\*.txt' in edge_inspect_text, 'edge inspect markdown escaping missing'
 
 self_scoped_text = read(self_scoped)
-assert '- Selected scope: all' in self_scoped_text, 'self scoped markdown lost selected scope'
+assert '- Selected scope: project' in self_scoped_text, 'self scoped markdown lost selected scope'
 assert '- Filters active: true' in self_scoped_text, 'self scoped markdown lost scope flag'
 assert '- Exclude prefixes: .flow/' in self_scoped_text, 'self scoped markdown lost prefix'
 for line in self_scoped_text.splitlines():
@@ -478,6 +482,7 @@ explain_output_checks() {
   grep -q -- '--version' "$help_out" || return 1
   grep -q -- '--inspect PATH' "$help_out" || return 1
   grep -q -- '--scope VALUE' "$help_out" || return 1
+  grep -q -- 'project (default) or all' "$help_out" || return 1
   grep -q -- '--progress' "$help_out" || return 1
   "$EXE" --progress --help > "$ARTIFACT_DIR/help-progress.txt" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
@@ -707,17 +712,17 @@ fixture_json_checks() {
   grep -q -- '--inspect target has no matching' "$ARTIFACT_DIR/inspect-missing.err" || return 1
   "$EXE" --repo fixtures/scope --format json > "$SCOPE_UNFILTERED_JSON" || return 1
   "$EXE" --repo fixtures/scope --scope all --format json > "$SCOPE_ALL_JSON" || return 1
-  diff -u "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" >/dev/null || return 1
-  "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format json > "$SCOPE_FILTERED_JSON" || return 1
+  "$EXE" --repo fixtures/scope --scope all --exclude-prefix .flow/ --format json > "$SCOPE_FILTERED_JSON" || return 1
   diff -u fixtures/expected/scope-filtered.json "$SCOPE_FILTERED_JSON" >/dev/null || return 1
-  if "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --inspect .flow/secret.txt --format json > "$ARTIFACT_DIR/inspect-excluded.out" 2> "$ARTIFACT_DIR/inspect-excluded.err"; then return 1; fi
+  if "$EXE" --repo fixtures/scope --scope all --exclude-prefix .flow/ --inspect .flow/secret.txt --format json > "$ARTIFACT_DIR/inspect-excluded.out" 2> "$ARTIFACT_DIR/inspect-excluded.err"; then return 1; fi
   grep -q -- '--inspect target has no matching' "$ARTIFACT_DIR/inspect-excluded.err" || return 1
-  "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --inspect src/vendor_adapter.zig --format json > "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" || return 1
-  "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > "$SCOPE_FILTERED_MD" || return 1
-  "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > "$SCOPE_FILTERED_MD_B" || return 1
+  "$EXE" --repo fixtures/scope --scope all --exclude-prefix .flow/ --inspect src/vendor_adapter.zig --format json > "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" || return 1
+  "$EXE" --repo fixtures/scope --scope all --exclude-prefix .flow/ --format markdown > "$SCOPE_FILTERED_MD" || return 1
+  "$EXE" --repo fixtures/scope --scope all --exclude-prefix .flow/ --format markdown > "$SCOPE_FILTERED_MD_B" || return 1
   diff -u fixtures/expected/scope-filtered.md "$SCOPE_FILTERED_MD" >/dev/null || return 1
   diff -u "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" >/dev/null || return 1
   "$EXE" --repo fixtures/scope --scope project --format json > "$SCOPE_PROJECT_JSON" || return 1
+  diff -u "$SCOPE_UNFILTERED_JSON" "$SCOPE_PROJECT_JSON" >/dev/null || return 1
   diff -u fixtures/expected/scope-project.json "$SCOPE_PROJECT_JSON" >/dev/null || return 1
   "$EXE" --repo fixtures/scope --scope project --progress --format json > "$SCOPE_PROJECT_PROGRESS_JSON" 2> "$SCOPE_PROJECT_PROGRESS_ERR" || return 1
   diff -u "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_PROGRESS_JSON" >/dev/null || return 1
