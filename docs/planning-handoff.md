@@ -1,122 +1,116 @@
-# Planning handoff
+# Development snapshot
 
-This handoff lets a future planner continue without relying on the original
-chat. It summarises the next likely feature and the constraints that must stay
-true when implementation planning begins.
+This snapshot lets a future planner continue without relying on the original
+chat. It records current project state after the initial CLI spike and points at
+remaining candidate seams without choosing the next implementation feature.
 
 ## Source of truth
 
 - Capability brief: `.flow/briefs/B001_local-first-hotspot-intelligence-cli.yaml`
-- Current feature: `.flow/features/0001_project-goals-and-planning-briefs/`
 - Project memory: `.flow/project-memory.md`
-- Public goals: `README.md`
+- Public overview: `README.md`
+- Current CLI behaviour: `./zig-out/bin/git-hotspots --help` and
+  `./zig-out/bin/git-hotspots --explain`
 
-B001 remains the source capability brief. Feature 0001 exists to preserve
-project goals and planning context, not to implement the CLI.
+B001 remains the source capability brief for the project thesis and boundaries.
+Feature files and PRDs own feature-specific execution truth.
 
 ## Current thesis
 
-`git-hotspots` should become a deterministic, local-first hotspot intelligence
-CLI for developers and coding agents.
+`git-hotspots` is a deterministic, local-first hotspot intelligence CLI for
+developers and coding agents.
 
 Tagline:
 
 > Before you refactor, ask Git where the pain is.
 
-The project should start by turning local Git history into explainable file-level
-evidence. Symbol-level and dependency-aware views can arrive later through
-optional providers.
+The product truth is deterministic local Git-history evidence. Hotspots are
+investigation prompts, not bug predictions, code-quality ratings, maintainer
+judgement, developer rankings, or productivity analytics.
 
-## Next likely feature
+## Current CLI state
 
-The next implementation-planning feature should probably be:
+The current Zig CLI can analyse local Git history at file level and emit:
 
-> File-level CLI spike
+- terminal table reports;
+- deterministic JSON reports;
+- deterministic Markdown reports;
+- a standalone `--explain` output for score, confidence, caveat, and scope
+  semantics.
 
-Suggested scope for that future feature:
+Supported user-facing options are:
 
-- decide the minimal Zig project/tooling boundary;
-- analyse a local Git repository without network access;
-- produce a ranked file-level hotspot report;
-- emit a human-readable table and a JSON or Markdown export;
-- include evidence and caveats for each hotspot;
-- avoid tree-sitter, LSP, ctags, cache schema, and GitHub Actions in the first
-  critical path.
+- `--repo PATH`
+- `--limit N`
+- `--format table|json|markdown`
+- `--since REV`
+- repeatable `--include-prefix PATH`
+- repeatable `--exclude-prefix PATH`
+- `--explain`
+- `--help`
 
-Feature 0001 must not create this implementation. It only records enough context
-for a later feature to shape it safely.
+Scope prefixes are explicit repo-relative literal Git path prefixes. They are
+not globs, pathspecs, gitignore rules, regexes, or project configuration.
+Includes narrow the evidence universe; excludes remove from it and win over
+includes.
 
-## Spike validation gates
+## Validation state
 
-A future file-level CLI spike should not be considered successful merely because
-it runs. It should pass these gates:
+The canonical local validation command is:
 
-- Useful output: on real repositories, top results should look worth inspecting
-  to maintainers or experienced contributors.
-- Determinism: repeated runs against the same repo, ref, config, and tool
-  version should produce the same results.
-- Explainability: each ranking should show why it appears, not just a score.
-- Bounded performance: the implementation should stream Git history and avoid
-  holding full history or repository contents in memory.
-- Privacy default: no network calls, telemetry, background upload, or remote
-  enrichment by default.
-- Careful claims: outputs should frame hotspots as investigation prompts, not
-  bug predictions or quality judgements.
+```sh
+zig build validate
+```
 
-## Deferred topics
+It runs the fast Zig test gate, deterministic fixture checks, JSON and Markdown
+validity checks, explain-output checks, privacy/local-first scans, and
+privacy-safe real-repository smoke on this repo. Close-out validation can also
+accept a sibling/local smoke repo or an explicit privacy-safe skip reason.
 
-These are important, but should not be forced into the first implementation
-slice:
+Implementation features should continue to include real-repository smoke once an
+executable exists. Do not rely on fixture-only evidence for close-out.
 
-- tree-sitter symbol extraction;
-- LSP-backed dependency or reference evidence;
-- ctags fallback support;
-- historical symbol identity across moves and renames;
-- SQLite or other persistent cache schema;
-- release automation and checksummed binaries;
-- GitHub Action output;
-- public case-study campaign;
-- hosted product work or commercial strategy.
+## Remaining candidate seams
 
-Repository artefacts should not contain hosted product plans, pricing, sales
-strategy, or commercial roadmap details.
+No next implementation feature is selected in this snapshot. Possible future
+shaping candidates include:
+
+- first public release polish and install instructions;
+- a stable version string instead of the spike version marker;
+- a small `inspect` or per-file explanation view;
+- more robust path selection ergonomics if prefix filters become limiting;
+- performance and large-repo benchmarking;
+- cache design, only as an optimisation and not product truth;
+- provider architecture for tree-sitter, LSP, ctags, dependency, blame, test, or
+  coverage enrichment;
+- public case-study examples framed as exploration, not judgement.
+
+Choose the next feature through Flow shaping rather than treating this list as a
+roadmap commitment.
 
 ## Operational guardrails to preserve
 
-- Cache is an optimisation, not product truth. The tool should work without it.
-- Future cache must be local-only, disableable, clearable, and invalidated by
-  Git range, ref, config, and provider-version changes.
-- Author identity metrics are sensitive. Keep them absent, anonymised, or
+- Runtime defaults stay local-first: no network calls, telemetry, background
+  upload, or remote enrichment by default.
+- Shareable output should prefer project-relative paths and warn when reports may
+  reveal sensitive repository structure or history.
+- Author identity metrics are sensitive and remain absent, anonymised, or
   explicit opt-in unless later safeguards are recorded.
-- Shareable output should prefer project-relative paths and warn that reports
-  may reveal sensitive repository structure or history.
-- Shallow or partial history must be detected and reported as scoped or
-  incomplete. Do not auto-fetch or contact remotes to hide missing history.
+- Shallow or partial history must be detected and reported honestly. Do not
+  auto-fetch or contact remotes to hide missing history.
 - Providers are optional enrichers. Their output should include source, version,
   freshness, confidence, and failure state.
-- Provider failures should degrade gracefully and must not silently rewrite core
-  Git findings.
+- Cache is a future optimisation, not product truth. The tool should work without
+  cache.
 
-## Open questions for future shaping
+## Stop conditions for future shaping
 
-Future implementation planning should answer these rather than guessing:
+Stop and reshape if a proposed feature requires:
 
-- Which exact Git command stream forms the first file-level evidence source?
-- What is the smallest honest scoring formula for the spike?
-- Which output format should be stable first: JSON, Markdown, or both?
-- What performance target should the first spike use for small and medium repos?
-- How much of the cache story belongs in the first implementation feature?
-- Which sample repositories should be used for usefulness checks?
-- What Zig version and package/build setup should the project standardise on?
-
-## Stop conditions for future implementation
-
-Stop and reshape if implementation planning starts to require:
-
-- provider API design;
-- tree-sitter, LSP, or ctags integration;
-- database/cache schema design;
-- telemetry or network behaviour;
-- hosted dashboards or commercial strategy;
-- bug-prediction claims;
-- developer ranking or productivity analytics.
+- hosted-product, pricing, sales, or commercial strategy in repo artefacts;
+- bug-prediction, objective code-quality, technical-debt-score, developer-ranking,
+  maintainer-judgement, or productivity-analytics claims;
+- network, telemetry, upload, remote enrichment, or auto-fetch behaviour;
+- provider, cache, release, or CI design inside an unrelated feature;
+- raw private smoke output, absolute local paths, author identities, or private
+  repo names in committed artefacts.

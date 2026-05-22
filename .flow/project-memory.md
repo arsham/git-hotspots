@@ -46,10 +46,12 @@ briefs, feature files, PRDs, and code own detailed active truth.
 
 - Keep B001 as the source capability brief for the project thesis and
   boundaries.
-- Prefer small, executable feature slices. The next likely implementation slice
-  is a file-level CLI spike, probably in Zig, with no provider critical path.
-- Do not let tree-sitter, LSP, or cache design become the first implementation
-  blocker.
+- Prefer small, executable feature slices. The current CLI spike already
+  supports table, JSON, Markdown, explicit include/exclude prefixes, `--explain`,
+  and `zig build validate`; do not plan as if the file-level spike is still
+  future work.
+- Do not let tree-sitter, LSP, cache design, release packaging, or public case
+  studies enter an unrelated feature by momentum.
 - Public case studies should be exploratory and careful, never judgemental.
 - Plan validation so future runners do not need Arsham to manually remember the
   real-project smoke checks after each implementation feature.

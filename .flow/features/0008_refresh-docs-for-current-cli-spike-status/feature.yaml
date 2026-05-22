@@ -1,0 +1,191 @@
+schema: flow-feature.v1
+feature:
+  id: "0008"
+  slug: refresh-docs-for-current-cli-spike-status
+  title: Refresh docs for current CLI spike status
+  lane: standard
+  status: done
+  autonomy_default: ask
+intent:
+  problem: Project documentation and durable planning memory still describe the
+    file-level CLI spike as future work even though Features 0002-0007 delivered
+    the executable CLI, validation workflow, scope filters, Markdown export, and
+    explain output.
+  outcome: Refresh docs and planning memory so a public visitor or future planner
+    sees the current CLI state without stale next-feature guidance, Flow process
+    clutter, or commercial/product overclaims.
+  acceptance:
+    - docs/planning-handoff.md no longer says the file-level CLI spike is future
+      work.
+    - docs/planning-handoff.md describes current CLI capabilities and validation
+      accurately.
+    - .flow/project-memory.md no longer points planners at the completed first
+      CLI spike.
+    - README remains public-facing and is changed only if current CLI truth
+      requires it.
+    - No implementation, build, test, fixture, validation-script,
+      generated-output, provider, cache, release, CI, network, telemetry, or
+      runtime behaviour changes are made.
+    - No monetisation, SaaS, pricing, sales, hosted-product roadmap,
+      bug-prediction, objective quality-score, technical-debt-score,
+      author-metric, maintainer-judgement, developer-ranking, or
+      productivity-analytics claims are introduced.
+    - Validation proves docs-only scope, no stale future-spike language, no
+      prohibited positive claims, help/explain availability, and clean
+      whitespace.
+planning:
+  state: ready
+  summary: "Docs-only maintenance feature: refresh stale planning handoff and
+    project memory after the first CLI spike features completed; keep README
+    public and polished."
+  brief_sync:
+    status: unchanged
+    reason: Docs refresh is a follow-up within B001 boundaries; B001 remains current.
+    checked_at: 2026-05-22T03:43:54.598Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Feature 0008 keeps B001 continuity accurate by refreshing stale docs
+      after the initial CLI spike features completed.
+    checked_at: 2026-05-22T03:44:00.062Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-22T03:45:13.860Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: done
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-22T03:45:13.860Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-22T03:45:13.860Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-22T03:45:13.860Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: null
+  depends_on_feature_ids:
+    - "0002"
+    - "0003"
+    - "0004"
+    - "0005"
+    - "0006"
+    - "0007"
+  blocked_by: []
+design:
+  rough_shape:
+    - Rewrite or replace docs/planning-handoff.md as a concise current
+      development snapshot.
+    - Update .flow/project-memory.md compactly where it refers to the CLI spike
+      as future work.
+    - Audit README against current --help and --explain; avoid changes unless it
+      is stale.
+    - Do not touch implementation, validation, fixtures, build, or
+      generated-output surfaces.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+  packets:
+    - id: P1
+      title: Refresh current CLI docs and planning memory
+      goal: Bring public docs and durable memory into alignment with the implemented
+        CLI state after Features 0002-0007.
+      depends_on: []
+      status: planned
+      owner_phase: runner
+      verification_commands:
+        - git diff --check
+        - ./zig-out/bin/git-hotspots --help
+        - ./zig-out/bin/git-hotspots --explain
+      execution_context:
+        - "Anchors: README.md, docs/planning-handoff.md,
+          .flow/project-memory.md. AGENTS.md is protected unless a new durable
+          agent rule is genuinely needed."
+        - "In scope: remove stale future file-level CLI spike language; describe
+          current CLI capabilities and validation workflow; preserve remaining
+          guardrails and candidate future seams without choosing a next
+          implementation feature."
+        - "Out of scope: source/build/test/tool/fixture edits, docs site,
+          roadmap commitments, provider/cache/release/CI design,
+          commercial/hosted strategy, raw private outputs, Flow run logs in
+          public docs."
+        - "Protected: README stays visitor-facing and OSS-safe; hotspots remain
+          investigation prompts; no stronger diagnostic or people-metric
+          claims."
+        - "Validation/evidence: steps/checks are git diff --check, changed-path
+          scan, --help spot check, --explain spot check, stale-language scan,
+          prohibited-claim scan, and zig build validate if README CLI examples
+          or validation wording change. Expected observations are clean
+          whitespace, docs-only changed paths, help/explain commands exiting 0,
+          no stale future-spike text, and only negated guardrail hits for
+          prohibited terms. Durable proof location is the runner/reviewer
+          close-out evidence for Feature 0008."
+        - "Review focus: docs match current CLI truth, no Flow/process clutter
+          in README, stale planning handoff claims removed, project memory
+          remains compact and cross-feature."
+        - "Escalate if: docs require unimplemented behaviour, a next feature
+          must be chosen, or implementation/tooling edits appear necessary."
+        - "Done boundary: docs and memory are current enough for a fresh
+          planner/public visitor without chat history."
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-22T03:39:30.209Z
+  updated_at: 2026-05-22T03:46:04.315Z

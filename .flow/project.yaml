@@ -7,7 +7,7 @@ state:
   status: active
   active_feature_id: null
   active_run_id: null
-  last_completed_feature_id: "0007"
+  last_completed_feature_id: "0008"
 defaults:
   autonomy: ask
   lane: standard
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 8
+  next_id: 9
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -57,6 +57,10 @@ features:
       slug: scoring-explanation-cli-output
       path: .flow/features/0007_scoring-explanation-cli-output
       created_at: 2026-05-22T03:20:08.309Z
+    - id: "0008"
+      slug: refresh-docs-for-current-cli-spike-status
+      path: .flow/features/0008_refresh-docs-for-current-cli-spike-status
+      created_at: 2026-05-22T03:39:30.209Z
 intake:
   mode: roadmap
   summary: null
