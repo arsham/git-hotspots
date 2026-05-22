@@ -4,7 +4,7 @@ feature:
   slug: rename-aware-file-lineage
   title: Rename-aware file lineage
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The file-level hotspot engine already asks Git for rename detection and
@@ -95,7 +95,7 @@ proposal:
     materialised_at: 2026-05-22T22:47:42.712Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -181,7 +181,7 @@ design:
       goal: Define and fixture the exact rename-lineage semantics before changing
         aggregation behaviour.
       depends_on: []
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: tools/setup-fixtures.sh, tests/integration.sh,
@@ -217,7 +217,7 @@ design:
         preserving scoring inputs and scope honesty.
       depends_on:
         - P1
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: src/git.zig and src/model.zig."
@@ -251,7 +251,7 @@ design:
         Markdown, table output, help/docs, and validation goldens.
       depends_on:
         - P2
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: src/report.zig, src/model.zig, README.md,
@@ -285,7 +285,7 @@ design:
         sibling-local-repo.
       depends_on:
         - P3
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: tools/validate.sh close-out mode, docs or feature evidence
@@ -327,7 +327,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T22:40:41.673Z
-  updated_at: 2026-05-22T22:49:38.710Z
+  updated_at: 2026-05-22T23:32:41.728Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-22T22:49:38.710Z
