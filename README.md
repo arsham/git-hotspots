@@ -99,19 +99,22 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --limit 10 --format table
 ./zig-out/bin/git-hotspots --repo . --limit 10 --format json
 ./zig-out/bin/git-hotspots --repo . --limit 10 --format markdown
+./zig-out/bin/git-hotspots --repo . --include-prefix src/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --exclude-prefix .flow/ --limit 10 --format markdown
 ```
 
 Supported options are `--repo`, `--limit`, `--format table|json|markdown`,
-`--since`, repeatable `--exclude-prefix`, and `--help`. Exclude prefixes are literal
-repo-relative Git path prefixes using `/` separators; they are applied before
-hotspot scoring and co-change evidence. They are not globs, pathspecs,
-gitignore rules, include lists, or project configuration. Reports include scope
-metadata showing whether filters were active and how many changed paths were
-excluded. Markdown output is a deterministic stdout report with run summary,
-scope, caveats, ranked hotspots, and per-result evidence. The spike reads local
-Git history only. It does not fetch, push, upload source, contact remotes, or
-emit telemetry.
+`--since`, repeatable `--include-prefix`, repeatable `--exclude-prefix`, and
+`--help`. Include and exclude prefixes are literal repo-relative Git path
+prefixes using `/` separators; they are applied before hotspot scoring and
+co-change evidence, with excludes winning over includes. They are not globs,
+pathspecs, gitignore rules, regexes, or project configuration. Reports include
+scope metadata showing whether filters were active, which prefixes were used,
+and bounded counts for paths and changes omitted by include or exclude filters.
+Markdown output is a deterministic stdout report with run summary, scope,
+caveats, ranked hotspots, and per-result evidence. The spike reads local Git
+history only. It does not fetch, push, upload source, contact remotes, or emit
+telemetry.
 
 Use the full local validation workflow before close-out:
 

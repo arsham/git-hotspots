@@ -17,7 +17,10 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 ## Scope
 
 - Filters active: true
+- Include prefixes: None
 - Exclude prefixes: .flow/
+- Outside include path count: 0
+- Outside include change count: 0
 - Excluded path count: 2
 - Excluded change count: 5
 

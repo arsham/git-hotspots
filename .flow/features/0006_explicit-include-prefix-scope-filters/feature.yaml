@@ -4,7 +4,7 @@ feature:
   slug: explicit-include-prefix-scope-filters
   title: Explicit include-prefix scope filters
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The CLI supports explicit exclude-prefix filtering, but users cannot
@@ -80,7 +80,7 @@ proposal:
     materialised_at: 2026-05-22T02:58:42.045Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -149,7 +149,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: End-to-end include-prefix runtime scope
       goal: Implement repeatable `--include-prefix PATH` across CLI parsing,
         config/model, Git analysis filtering, and table/JSON/Markdown scope
@@ -188,7 +188,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Validation and public docs hardening
       goal: Extend canonical validation, real-repo smoke, and README/help
         documentation for include-prefix scope controls.
@@ -271,7 +271,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T02:53:15.998Z
-  updated_at: 2026-05-22T02:59:12.180Z
+  updated_at: 2026-05-22T03:18:13.203Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-22T02:59:12.180Z

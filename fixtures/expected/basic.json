@@ -3,7 +3,7 @@
   "tool": { "name": "git-hotspots", "version": "0.0.0-spike" },
   "analysis": {
     "history": { "head": "f577978a22dd1db4fa1052dc677288d6325fc95c", "head_timestamp": 1767484800, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 4 },
-    "scope": { "filters_active": false, "exclude_prefixes": [], "excluded_path_count": 0, "excluded_change_count": 0 },
+    "scope": { "filters_active": false, "include_prefixes": [], "exclude_prefixes": [], "outside_include_path_count": 0, "outside_include_change_count": 0, "excluded_path_count": 0, "excluded_change_count": 0 },
     "caveats": []
   },
   "results": [

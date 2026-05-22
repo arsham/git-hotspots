@@ -113,11 +113,13 @@ import json, sys
 with open(sys.argv[1], encoding='utf-8') as fh:
     data = json.load(fh)
 scope = data.get('analysis', {}).get('scope', {})
-print('results=%d caveats=%d dirty=%s scope_active=%s excluded_paths=%d excluded_changes=%d' % (
+print('results=%d caveats=%d dirty=%s scope_active=%s outside_include_paths=%d outside_include_changes=%d excluded_paths=%d excluded_changes=%d' % (
     len(data.get('results', [])),
     len(data.get('analysis', {}).get('caveats', [])),
     str(data.get('analysis', {}).get('history', {}).get('dirty_worktree', False)).lower(),
     str(scope.get('filters_active', False)).lower(),
+    int(scope.get('outside_include_path_count', 0) or 0),
+    int(scope.get('outside_include_change_count', 0) or 0),
     int(scope.get('excluded_path_count', 0) or 0),
     int(scope.get('excluded_change_count', 0) or 0),
 ))
@@ -148,9 +150,9 @@ json_validity() {
 
 semantic_assertions() {
   have_python || return 1
-  python3 - "$BASIC_A" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" <<'PY'
+  python3 - "$BASIC_A" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" <<'PY'
 import json, os, re, sys
-basic_path, shallow_path, partial_path, self_path, self_scoped_path, scope_unfiltered_path, scope_filtered_path, scope_src_filtered_path, scope_weird_filtered_path, scope_empty_path = sys.argv[1:]
+basic_path, shallow_path, partial_path, self_path, self_scoped_path, scope_unfiltered_path, scope_filtered_path, scope_src_filtered_path, scope_weird_filtered_path, scope_empty_path, scope_src_include_path, scope_src_vendor_include_path, scope_include_exclude_path, scope_weird_include_path, scope_glob_star_include_path, scope_glob_include_path, scope_include_empty_path = sys.argv[1:]
 
 def load(path):
     with open(path, encoding='utf-8') as fh:
@@ -160,6 +162,7 @@ basic = load(basic_path)
 assert basic['results'], 'basic results missing'
 assert basic['results'][0]['path'] == 'src/app.txt', 'unexpected basic top result'
 assert basic['analysis']['scope']['filters_active'] is False, 'basic scope unexpectedly active'
+assert basic['analysis']['scope']['include_prefixes'] == [], 'basic include prefixes changed'
 assert all(not os.path.isabs(row['path']) for row in basic['results']), 'absolute basic result path'
 
 scope_unfiltered = load(scope_unfiltered_path)
@@ -172,7 +175,10 @@ assert 'weird/tab\tname.txt' in unfiltered_paths, 'quoted tab fixture missing un
 scope_filtered = load(scope_filtered_path)
 scope = scope_filtered['analysis']['scope']
 assert scope['filters_active'] is True, 'filtered scope metadata inactive'
+assert scope['include_prefixes'] == [], 'filtered include prefixes changed'
 assert scope['exclude_prefixes'] == ['.flow/'], 'filtered prefix order changed'
+assert scope['outside_include_path_count'] == 0, 'filtered outside include path count changed'
+assert scope['outside_include_change_count'] == 0, 'filtered outside include change count changed'
 assert scope['excluded_path_count'] == 2, 'filtered path count changed'
 assert scope['excluded_change_count'] == 5, 'filtered change count changed'
 for row in scope_filtered.get('results', []):
@@ -198,8 +204,54 @@ scope_empty = load(scope_empty_path)
 assert scope_empty.get('results') == [], 'empty scoped fixture should produce no results'
 assert scope_empty['analysis']['scope']['filters_active'] is True, 'empty scoped report lost scope metadata'
 
+scope_src_include = load(scope_src_include_path)
+scope = scope_src_include['analysis']['scope']
+assert scope['filters_active'] is True, 'include scope metadata inactive'
+assert scope['include_prefixes'] == ['src/'], 'include prefix order changed'
+assert scope['exclude_prefixes'] == [], 'include-only exclude metadata changed'
+assert scope['outside_include_path_count'] >= 1, 'include scope outside path count missing'
+assert scope['outside_include_change_count'] >= 1, 'include scope outside change count missing'
+paths = [row['path'] for row in scope_src_include.get('results', [])]
+assert 'src/new.zig' in paths, 'include scope lost normalized rename target'
+assert 'src/vendor_adapter.zig' in paths, 'include scope lost adapter path'
+for row in scope_src_include.get('results', []):
+    assert row['path'].startswith('src/'), 'include scope leaked result'
+    for cc in row.get('cochanges', []):
+        assert cc['path'].startswith('src/'), 'include scope leaked cochange'
+
+scope_src_vendor_include = load(scope_src_vendor_include_path)
+assert scope_src_vendor_include['analysis']['scope']['include_prefixes'] == ['src/', 'vendor/'], 'repeated include prefixes changed'
+for row in scope_src_vendor_include.get('results', []):
+    assert row['path'].startswith(('src/', 'vendor/')), 'repeated include leaked result'
+    for cc in row.get('cochanges', []):
+        assert cc['path'].startswith(('src/', 'vendor/')), 'repeated include leaked cochange'
+
+scope_include_exclude = load(scope_include_exclude_path)
+assert scope_include_exclude['analysis']['scope']['include_prefixes'] == ['src/'], 'include+exclude include prefix changed'
+assert scope_include_exclude['analysis']['scope']['exclude_prefixes'] == ['src/vendor_adapter.zig'], 'include+exclude exclude prefix changed'
+assert scope_include_exclude['analysis']['scope']['excluded_path_count'] == 1, 'exclude-over-include count changed'
+assert 'src/vendor_adapter.zig' not in [row['path'] for row in scope_include_exclude.get('results', [])], 'exclude did not win over include'
+for row in scope_include_exclude.get('results', []):
+    for cc in row.get('cochanges', []):
+        assert cc['path'] != 'src/vendor_adapter.zig', 'excluded cochange leaked'
+
+scope_weird_include = load(scope_weird_include_path)
+assert [row['path'] for row in scope_weird_include.get('results', [])] == ['weird/tab\tname.txt'], 'quoted tab include failed'
+
+scope_glob_star_include = load(scope_glob_star_include_path)
+assert 'glob/[literal]*.txt' not in [row['path'] for row in scope_glob_star_include.get('results', [])], 'include glob-like prefix acted as glob'
+scope_glob_include = load(scope_glob_include_path)
+assert 'glob/[literal]*.txt' in [row['path'] for row in scope_glob_include.get('results', [])], 'literal glob/ include failed'
+
+scope_include_empty = load(scope_include_empty_path)
+assert scope_include_empty.get('results') == [], 'empty include scope should produce no results'
+assert scope_include_empty['analysis']['scope']['filters_active'] is True, 'empty include scope metadata inactive'
+assert scope_include_empty['analysis']['scope']['include_prefixes'] == ['does-not-exist/'], 'empty include prefix changed'
+assert scope_include_empty['analysis']['scope']['outside_include_path_count'] >= 1, 'empty include outside path count missing'
+
 self_scoped = load(self_scoped_path)
 assert self_scoped['analysis']['scope']['filters_active'] is True, 'self scoped metadata inactive'
+assert self_scoped['analysis']['scope']['include_prefixes'] == [], 'self scoped include prefixes changed'
 assert self_scoped['analysis']['scope']['exclude_prefixes'] == ['.flow/'], 'self scoped prefix changed'
 for row in self_scoped.get('results', []):
     assert not row['path'].startswith('.flow/'), 'self scoped result leaked .flow path'
@@ -232,11 +284,11 @@ PY
 
 markdown_assertions() {
   have_python || return 1
-  python3 - "$BASIC_MD_A" "$BASIC_MD_B" "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" "$SCOPE_EMPTY_MD" "$EDGE_MD" "$SELF_MARKDOWN" "$SELF_SCOPED_MARKDOWN" <<'PY'
+  python3 - "$BASIC_MD_A" "$BASIC_MD_B" "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" "$SCOPE_EMPTY_MD" "$EDGE_MD" "$SELF_MARKDOWN" "$SELF_SCOPED_MARKDOWN" "$SCOPE_SRC_INCLUDE_MD" "$SCOPE_INCLUDE_EMPTY_MD" <<'PY'
 import os, re, sys
 from pathlib import Path
 
-basic_a, basic_b, scope_filtered, scope_filtered_b, scope_empty, edge, self_md, self_scoped = [Path(p) for p in sys.argv[1:]]
+basic_a, basic_b, scope_filtered, scope_filtered_b, scope_empty, edge, self_md, self_scoped, scope_src_include_md, scope_include_empty_md = [Path(p) for p in sys.argv[1:]]
 
 def read(path):
     return path.read_text(encoding='utf-8')
@@ -250,7 +302,10 @@ assert 'File-level Git-history investigation prompts, not bug predictions or cod
 scope = read(scope_filtered)
 assert scope == read(scope_filtered_b), 'scope markdown repeated output changed'
 assert '- Filters active: true' in scope, 'scope filter flag missing'
+assert '- Include prefixes: None' in scope, 'scope include prefix metadata missing'
 assert '- Exclude prefixes: .flow/' in scope, 'scope prefix missing'
+assert '- Outside include path count: 0' in scope, 'scope outside include path count missing'
+assert '- Outside include change count: 0' in scope, 'scope outside include change count missing'
 assert '- Excluded path count: 2' in scope, 'scope excluded path count missing'
 assert '- Excluded change count: 5' in scope, 'scope excluded change count missing'
 for line in scope.splitlines():
@@ -262,6 +317,20 @@ for section in ['## Run summary', '## Scope', '## Caveats', '## Top hotspots', '
     assert section in empty, 'empty scoped markdown missing %s' % section
 assert 'No hotspots matched the requested scope.' in empty, 'empty scoped top-hotspots note missing'
 assert 'No result evidence to show.' in empty, 'empty scoped evidence note missing'
+
+include_text = read(scope_src_include_md)
+assert '- Filters active: true' in include_text, 'include markdown filter flag missing'
+assert '- Include prefixes: src/' in include_text, 'include markdown prefix missing'
+assert '- Exclude prefixes: None' in include_text, 'include markdown exclude metadata missing'
+assert '- Outside include path count:' in include_text, 'include markdown outside path count missing'
+for line in include_text.splitlines():
+    if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
+        assert '.flow/' not in line and 'vendor/' not in line and 'glob/' not in line and 'weird/' not in line, 'include markdown leaked out-of-scope path: %r' % line
+
+include_empty = read(scope_include_empty_md)
+assert '- Include prefixes: does\\-not\\-exist/' in include_empty, 'empty include prefix missing'
+assert 'No hotspots matched the requested scope.' in include_empty, 'empty include top-hotspots note missing'
+assert 'No result evidence to show.' in include_empty, 'empty include evidence note missing'
 
 edge_text = read(edge)
 assert 'weird/tab\\tname.txt' in edge_text, 'tab path was not escaped deterministically'
@@ -276,7 +345,7 @@ for line in self_scoped_text.splitlines():
     if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
         assert '.flow/' not in line, 'self scoped markdown leaked .flow path: %r' % line
 
-for text in [basic, scope, empty, edge_text, read(self_md), self_scoped_text]:
+for text in [basic, scope, empty, edge_text, read(self_md), self_scoped_text, include_text, include_empty]:
     assert '\t' not in text, 'raw tab leaked in markdown'
     assert 'Fixture Author' not in text, 'fixture author name leaked'
     assert 'fixture@example.invalid' not in text, 'fixture author email leaked'
@@ -355,8 +424,18 @@ fixture_json_checks() {
   "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > "$SCOPE_FILTERED_MD_B" || return 1
   diff -u fixtures/expected/scope-filtered.md "$SCOPE_FILTERED_MD" >/dev/null || return 1
   diff -u "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/scope --include-prefix src/ --format json > "$SCOPE_SRC_INCLUDE_JSON" || return 1
+  "$EXE" --repo fixtures/scope --include-prefix src/ --format markdown > "$SCOPE_SRC_INCLUDE_MD" || return 1
+  "$EXE" --repo fixtures/scope --include-prefix src/ --format table > "$SCOPE_SRC_INCLUDE_TABLE" || return 1
+  "$EXE" --repo fixtures/scope --include-prefix src/ --include-prefix vendor/ --format json > "$SCOPE_SRC_VENDOR_INCLUDE_JSON" || return 1
+  "$EXE" --repo fixtures/scope --include-prefix src/ --exclude-prefix src/vendor_adapter.zig --format json > "$SCOPE_INCLUDE_EXCLUDE_JSON" || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix src/ --format json > "$SCOPE_SRC_FILTERED_JSON" || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix weird/ --format json > "$SCOPE_WEIRD_FILTERED_JSON" || return 1
+  "$EXE" --repo fixtures/scope --include-prefix weird/ --format json > "$SCOPE_WEIRD_INCLUDE_JSON" || return 1
+  "$EXE" --repo fixtures/scope --include-prefix 'glob/*' --format json > "$SCOPE_GLOB_STAR_INCLUDE_JSON" || return 1
+  "$EXE" --repo fixtures/scope --include-prefix glob/ --format json > "$SCOPE_GLOB_INCLUDE_JSON" || return 1
+  "$EXE" --repo fixtures/scope --include-prefix does-not-exist/ --format json > "$SCOPE_INCLUDE_EMPTY_JSON" || return 1
+  "$EXE" --repo fixtures/scope --include-prefix does-not-exist/ --format markdown > "$SCOPE_INCLUDE_EMPTY_MD" || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format json > "$SCOPE_EMPTY_JSON" || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format markdown > "$SCOPE_EMPTY_MD" || return 1
   "$EXE" --repo fixtures/edge --limit 200 --format markdown > "$EDGE_MD" || return 1
@@ -433,6 +512,16 @@ SCOPE_UNFILTERED_JSON=$ARTIFACT_DIR/scope-unfiltered.json
 SCOPE_FILTERED_JSON=$ARTIFACT_DIR/scope-filtered.json
 SCOPE_FILTERED_MD=$ARTIFACT_DIR/scope-filtered.md
 SCOPE_FILTERED_MD_B=$ARTIFACT_DIR/scope-filtered-b.md
+SCOPE_SRC_INCLUDE_JSON=$ARTIFACT_DIR/scope-src-include.json
+SCOPE_SRC_INCLUDE_MD=$ARTIFACT_DIR/scope-src-include.md
+SCOPE_SRC_INCLUDE_TABLE=$ARTIFACT_DIR/scope-src-include.txt
+SCOPE_SRC_VENDOR_INCLUDE_JSON=$ARTIFACT_DIR/scope-src-vendor-include.json
+SCOPE_INCLUDE_EXCLUDE_JSON=$ARTIFACT_DIR/scope-include-exclude.json
+SCOPE_WEIRD_INCLUDE_JSON=$ARTIFACT_DIR/scope-weird-include.json
+SCOPE_GLOB_STAR_INCLUDE_JSON=$ARTIFACT_DIR/scope-glob-star-include.json
+SCOPE_GLOB_INCLUDE_JSON=$ARTIFACT_DIR/scope-glob-include.json
+SCOPE_INCLUDE_EMPTY_JSON=$ARTIFACT_DIR/scope-include-empty.json
+SCOPE_INCLUDE_EMPTY_MD=$ARTIFACT_DIR/scope-include-empty.md
 SCOPE_SRC_FILTERED_JSON=$ARTIFACT_DIR/scope-src-filtered.json
 SCOPE_WEIRD_FILTERED_JSON=$ARTIFACT_DIR/scope-weird-filtered.json
 SCOPE_EMPTY_JSON=$ARTIFACT_DIR/scope-empty.json
@@ -460,7 +549,7 @@ else
 fi
 
 printf 'validate: RUN JSON validity\n'
-json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$SCOPE_UNFILTERED_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
+json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$SCOPE_UNFILTERED_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
 
 printf 'validate: RUN shallow, partial, and privacy assertions\n'
 if semantic_assertions; then

@@ -162,6 +162,13 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config) Anal
         while (it.next()) |key| allocator.free(key.*);
         excluded_paths.deinit();
     }
+    var outside_include_paths = std.StringHashMap(void).init(allocator);
+    defer {
+        var it = outside_include_paths.keyIterator();
+        while (it.next()) |key| allocator.free(key.*);
+        outside_include_paths.deinit();
+    }
+    var outside_include_change_count: usize = 0;
     var excluded_change_count: usize = 0;
 
     var commit_count: usize = 0;
@@ -191,7 +198,7 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config) Anal
         const del_s = parts.next() orelse continue;
         const path = parts.rest();
         if (path.len == 0) continue;
-        try applyNumstat(allocator, &map, &commit_paths, &excluded_paths, &excluded_change_count, cfg.exclude_prefixes, cur_hash, cur_ts, add_s, del_s, path);
+        try applyNumstat(allocator, &map, &commit_paths, &outside_include_paths, &outside_include_change_count, &excluded_paths, &excluded_change_count, cfg.include_prefixes, cfg.exclude_prefixes, cur_hash, cur_ts, add_s, del_s, path);
     }
     try finishCommit(allocator, &map, commit_paths.items);
 
@@ -238,14 +245,16 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config) Anal
         results.shrinkRetainingCapacity(cfg.limit);
     }
 
-    const scope_prefixes = try dupeStringList(allocator, cfg.exclude_prefixes);
-    errdefer freeStringList(allocator, scope_prefixes);
+    const scope_include_prefixes = try dupeStringList(allocator, cfg.include_prefixes);
+    errdefer freeStringList(allocator, scope_include_prefixes);
+    const scope_exclude_prefixes = try dupeStringList(allocator, cfg.exclude_prefixes);
+    errdefer freeStringList(allocator, scope_exclude_prefixes);
 
     return .{
         .allocator = allocator,
         .repo_root = repo_root,
         .history = .{ .head = head, .head_timestamp = head_ts, .range = range_owned, .is_shallow = is_shallow, .is_partial = is_partial, .dirty_worktree = dirty, .commit_count = commit_count },
-        .scope = .{ .filters_active = cfg.exclude_prefixes.len > 0, .exclude_prefixes = scope_prefixes, .excluded_path_count = excluded_paths.count(), .excluded_change_count = excluded_change_count },
+        .scope = .{ .filters_active = cfg.include_prefixes.len > 0 or cfg.exclude_prefixes.len > 0, .include_prefixes = scope_include_prefixes, .exclude_prefixes = scope_exclude_prefixes, .outside_include_path_count = outside_include_paths.count(), .outside_include_change_count = outside_include_change_count, .excluded_path_count = excluded_paths.count(), .excluded_change_count = excluded_change_count },
         .results = try results.toOwnedSlice(),
         .caveats = try caveats.toOwnedSlice(),
     };
@@ -255,8 +264,11 @@ fn applyNumstat(
     allocator: std.mem.Allocator,
     map: *std.StringHashMap(FileAgg),
     commit_paths: *std.array_list.Managed([]const u8),
+    outside_include_paths: *std.StringHashMap(void),
+    outside_include_change_count: *usize,
     excluded_paths: *std.StringHashMap(void),
     excluded_change_count: *usize,
+    include_prefixes: []const []const u8,
     exclude_prefixes: []const []const u8,
     commit: []const u8,
     ts: i64,
@@ -272,6 +284,15 @@ fn applyNumstat(
             const owned = try allocator.dupe(u8, path);
             errdefer allocator.free(owned);
             try excluded_paths.put(owned, {});
+        }
+        return;
+    }
+    if (!isIncludedPath(path, include_prefixes)) {
+        outside_include_change_count.* += 1;
+        if (outside_include_paths.get(path) == null) {
+            const owned = try allocator.dupe(u8, path);
+            errdefer allocator.free(owned);
+            try outside_include_paths.put(owned, {});
         }
         return;
     }
@@ -299,6 +320,14 @@ fn applyNumstat(
     }
     if (agg.evidence.items.len < 3) try agg.evidence.append(.{ .commit = commit[0..@min(commit.len, 12)], .timestamp = ts, .additions = add, .deletions = del });
     try commit_paths.append(agg.path);
+}
+
+fn isIncludedPath(path: []const u8, include_prefixes: []const []const u8) bool {
+    if (include_prefixes.len == 0) return true;
+    for (include_prefixes) |prefix| {
+        if (std.mem.startsWith(u8, path, prefix)) return true;
+    }
+    return false;
 }
 
 fn isExcludedPath(path: []const u8, exclude_prefixes: []const []const u8) bool {
@@ -475,6 +504,14 @@ test "matches literal exclude prefixes" {
     try std.testing.expect(isExcludedPath("vendor/lib.zig", &.{"vendor/"}));
     try std.testing.expect(!isExcludedPath("src/vendor_adapter.zig", &.{"vendor/"}));
     try std.testing.expect(!isExcludedPath("glob/[literal]*.zig", &.{"glob/*"}));
+}
+
+test "matches literal include prefixes" {
+    try std.testing.expect(isIncludedPath("src/app.zig", &.{}));
+    try std.testing.expect(isIncludedPath("src/app.zig", &.{"src/"}));
+    try std.testing.expect(isIncludedPath("vendor/lib.zig", &.{ "src/", "vendor/" }));
+    try std.testing.expect(!isIncludedPath("docs/readme.md", &.{ "src/", "vendor/" }));
+    try std.testing.expect(!isIncludedPath("glob/[literal]*.zig", &.{"glob/*"}));
 }
 
 test "normalizes braced rename before prefix matching" {

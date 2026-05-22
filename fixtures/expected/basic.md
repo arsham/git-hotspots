@@ -17,7 +17,10 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 ## Scope
 
 - Filters active: false
+- Include prefixes: None
 - Exclude prefixes: None
+- Outside include path count: 0
+- Outside include change count: 0
 - Excluded path count: 0
 - Excluded change count: 0
 

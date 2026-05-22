@@ -8,7 +8,7 @@ const usage =
     \\git-hotspots: deterministic file-level Git-history hotspot prompts
     \\
     \\Usage:
-    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--exclude-prefix PATH]...
+    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--include-prefix PATH]... [--exclude-prefix PATH]...
     \\  git-hotspots --help
     \\
     \\Options:
@@ -16,6 +16,9 @@ const usage =
     \\  --limit N         Maximum ranked files to emit (default: 10)
     \\  --format FORMAT   table, json, or markdown (default: table)
     \\  --since REV       Analyse commits after REV through HEAD
+    \\  --include-prefix PATH
+    \\                    Repeatable repo-relative literal Git path prefix to include;
+    \\                    narrows the evidence universe before scoring; not a glob
     \\  --exclude-prefix PATH
     \\                    Repeatable repo-relative literal Git path prefix to exclude
     \\                    before scoring; use / separators, not globs
@@ -61,6 +64,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
                 try stdout.writeAll(usage);
                 return;
             },
+            error.InvalidIncludePrefix => try stderr.print("error: --include-prefix must be a non-empty repo-relative path prefix without absolute roots, '..' segments, or control characters\n", .{}),
             error.InvalidExcludePrefix => try stderr.print("error: --exclude-prefix must be a non-empty repo-relative path prefix without absolute roots, '..' segments, or control characters\n", .{}),
             error.InvalidArguments => try stderr.print("error: invalid arguments\n\n{s}", .{usage}),
             else => try stderr.print("error: {s}\n", .{@errorName(err)}),
@@ -90,7 +94,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
     }
 }
 
-const CliError = error{ HelpRequested, InvalidArguments, InvalidExcludePrefix } || std.mem.Allocator.Error;
+const CliError = error{ HelpRequested, InvalidArguments, InvalidIncludePrefix, InvalidExcludePrefix } || std.mem.Allocator.Error;
 
 fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!model.Config {
     var cfg = model.Config{ .repo_path = try allocator.dupe(u8, ".") };
@@ -122,6 +126,10 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
             const v = args[i];
             if (cfg.since) |old| allocator.free(old);
             cfg.since = try allocator.dupe(u8, v);
+        } else if (std.mem.eql(u8, arg, "--include-prefix")) {
+            i += 1;
+            if (i >= args.len) return error.InvalidArguments;
+            try appendIncludePrefix(allocator, &cfg, args[i]);
         } else if (std.mem.eql(u8, arg, "--exclude-prefix")) {
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
@@ -135,12 +143,31 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
 fn freeConfig(allocator: std.mem.Allocator, cfg: model.Config) void {
     allocator.free(cfg.repo_path);
     if (cfg.since) |s| allocator.free(s);
+    for (cfg.include_prefixes) |prefix| allocator.free(prefix);
+    if (cfg.include_prefixes.len > 0) allocator.free(cfg.include_prefixes);
     for (cfg.exclude_prefixes) |prefix| allocator.free(prefix);
     if (cfg.exclude_prefixes.len > 0) allocator.free(cfg.exclude_prefixes);
 }
 
+fn appendIncludePrefix(allocator: std.mem.Allocator, cfg: *model.Config, raw: []const u8) CliError!void {
+    const normalized = normalizePrefix(allocator, raw) catch |err| switch (err) {
+        error.InvalidPrefix => return error.InvalidIncludePrefix,
+        error.OutOfMemory => return error.OutOfMemory,
+    };
+    errdefer allocator.free(normalized);
+
+    const expanded = try allocator.alloc([]const u8, cfg.include_prefixes.len + 1);
+    @memcpy(expanded[0..cfg.include_prefixes.len], cfg.include_prefixes);
+    expanded[cfg.include_prefixes.len] = normalized;
+    if (cfg.include_prefixes.len > 0) allocator.free(cfg.include_prefixes);
+    cfg.include_prefixes = expanded;
+}
+
 fn appendExcludePrefix(allocator: std.mem.Allocator, cfg: *model.Config, raw: []const u8) CliError!void {
-    const normalized = try normalizeExcludePrefix(allocator, raw);
+    const normalized = normalizePrefix(allocator, raw) catch |err| switch (err) {
+        error.InvalidPrefix => return error.InvalidExcludePrefix,
+        error.OutOfMemory => return error.OutOfMemory,
+    };
     errdefer allocator.free(normalized);
 
     const expanded = try allocator.alloc([]const u8, cfg.exclude_prefixes.len + 1);
@@ -150,17 +177,19 @@ fn appendExcludePrefix(allocator: std.mem.Allocator, cfg: *model.Config, raw: []
     cfg.exclude_prefixes = expanded;
 }
 
-fn normalizeExcludePrefix(allocator: std.mem.Allocator, raw: []const u8) CliError![]const u8 {
+const PrefixError = error{InvalidPrefix} || std.mem.Allocator.Error;
+
+fn normalizePrefix(allocator: std.mem.Allocator, raw: []const u8) PrefixError![]const u8 {
     var prefix = raw;
     while (std.mem.startsWith(u8, prefix, "./")) prefix = prefix[2..];
-    if (prefix.len == 0) return error.InvalidExcludePrefix;
-    if (std.fs.path.isAbsolute(prefix) or prefix[0] == '\\') return error.InvalidExcludePrefix;
-    if (prefix.len >= 2 and std.ascii.isAlphabetic(prefix[0]) and prefix[1] == ':') return error.InvalidExcludePrefix;
-    for (prefix) |c| if (c < 0x20 or c == 0x7f) return error.InvalidExcludePrefix;
+    if (prefix.len == 0) return error.InvalidPrefix;
+    if (std.fs.path.isAbsolute(prefix) or prefix[0] == '\\') return error.InvalidPrefix;
+    if (prefix.len >= 2 and std.ascii.isAlphabetic(prefix[0]) and prefix[1] == ':') return error.InvalidPrefix;
+    for (prefix) |c| if (c < 0x20 or c == 0x7f) return error.InvalidPrefix;
 
     var segments = std.mem.splitScalar(u8, prefix, '/');
     while (segments.next()) |segment| {
-        if (std.mem.eql(u8, segment, "..")) return error.InvalidExcludePrefix;
+        if (std.mem.eql(u8, segment, "..")) return error.InvalidPrefix;
     }
     return allocator.dupe(u8, prefix);
 }
@@ -180,12 +209,30 @@ test "parse repeatable exclude prefixes" {
     try std.testing.expectEqualStrings("vendor/", cfg.exclude_prefixes[1]);
 }
 
+test "parse repeatable include prefixes" {
+    const args = [_][:0]const u8{ "git-hotspots", "--include-prefix", "./src/", "--include-prefix", "vendor/" };
+    const cfg = try parseArgs(std.testing.allocator, &args);
+    defer freeConfig(std.testing.allocator, cfg);
+    try std.testing.expectEqual(@as(usize, 2), cfg.include_prefixes.len);
+    try std.testing.expectEqualStrings("src/", cfg.include_prefixes[0]);
+    try std.testing.expectEqualStrings("vendor/", cfg.include_prefixes[1]);
+}
+
 test "reject invalid exclude prefixes" {
     const cases = [_][]const u8{ "", "/tmp", "../src", "src/../lib", "bad\npath" };
     for (cases) |value| {
         var cfg = model.Config{ .repo_path = try std.testing.allocator.dupe(u8, ".") };
         defer freeConfig(std.testing.allocator, cfg);
         try std.testing.expectError(error.InvalidExcludePrefix, appendExcludePrefix(std.testing.allocator, &cfg, value));
+    }
+}
+
+test "reject invalid include prefixes" {
+    const cases = [_][]const u8{ "", "/tmp", "C:/tmp", "\\tmp", "../src", "src/../lib", "bad\npath" };
+    for (cases) |value| {
+        var cfg = model.Config{ .repo_path = try std.testing.allocator.dupe(u8, ".") };
+        defer freeConfig(std.testing.allocator, cfg);
+        try std.testing.expectError(error.InvalidIncludePrefix, appendIncludePrefix(std.testing.allocator, &cfg, value));
     }
 }
 

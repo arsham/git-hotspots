@@ -53,10 +53,20 @@ diff -u fixtures/expected/scope-filtered.md /tmp/git-hotspots-scope-filtered.md
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > /tmp/git-hotspots-scope-filtered-2.md
 diff -u /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-filtered-2.md
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format table > /tmp/git-hotspots-scope-filtered.txt
+"$EXE" --repo fixtures/scope --include-prefix src/ --format json > /tmp/git-hotspots-scope-src-include.json
+"$EXE" --repo fixtures/scope --include-prefix src/ --format markdown > /tmp/git-hotspots-scope-src-include.md
+"$EXE" --repo fixtures/scope --include-prefix src/ --format table > /tmp/git-hotspots-scope-src-include.txt
+"$EXE" --repo fixtures/scope --include-prefix src/ --include-prefix vendor/ --format json > /tmp/git-hotspots-scope-src-vendor-include.json
+"$EXE" --repo fixtures/scope --include-prefix src/ --exclude-prefix src/vendor_adapter.zig --format json > /tmp/git-hotspots-scope-include-exclude.json
 "$EXE" --repo fixtures/scope --exclude-prefix vendor/ --format json > /tmp/git-hotspots-scope-vendor-filtered.json
 "$EXE" --repo fixtures/scope --exclude-prefix src/ --format json > /tmp/git-hotspots-scope-src-filtered.json
 "$EXE" --repo fixtures/scope --exclude-prefix weird/ --format json > /tmp/git-hotspots-scope-weird-filtered.json
 "$EXE" --repo fixtures/scope --exclude-prefix 'glob/*' --format json > /tmp/git-hotspots-scope-glob-prefix.json
+"$EXE" --repo fixtures/scope --include-prefix weird/ --format json > /tmp/git-hotspots-scope-weird-include.json
+"$EXE" --repo fixtures/scope --include-prefix 'glob/*' --format json > /tmp/git-hotspots-scope-glob-star-include.json
+"$EXE" --repo fixtures/scope --include-prefix glob/ --format json > /tmp/git-hotspots-scope-glob-include.json
+"$EXE" --repo fixtures/scope --include-prefix does-not-exist/ --format json > /tmp/git-hotspots-scope-include-empty.json
+"$EXE" --repo fixtures/scope --include-prefix does-not-exist/ --format markdown > /tmp/git-hotspots-scope-include-empty.md
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format json > /tmp/git-hotspots-scope-empty.json
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format markdown > /tmp/git-hotspots-scope-empty.md
 
@@ -76,6 +86,12 @@ assert_fails_with_stderr invalid-exclude-absolute --exclude-prefix "$EXE" --repo
 assert_fails_with_stderr invalid-exclude-parent --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix src/../lib
 ctrl=$(printf 'bad\001prefix')
 assert_fails_with_stderr invalid-exclude-control --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix "$ctrl"
+assert_fails_with_stderr invalid-include-empty --include-prefix "$EXE" --repo fixtures/basic --include-prefix ""
+assert_fails_with_stderr invalid-include-absolute --include-prefix "$EXE" --repo fixtures/basic --include-prefix /tmp
+assert_fails_with_stderr invalid-include-drive --include-prefix "$EXE" --repo fixtures/basic --include-prefix C:/tmp
+assert_fails_with_stderr invalid-include-backslash --include-prefix "$EXE" --repo fixtures/basic --include-prefix '\tmp'
+assert_fails_with_stderr invalid-include-parent --include-prefix "$EXE" --repo fixtures/basic --include-prefix src/../lib
+assert_fails_with_stderr invalid-include-control --include-prefix "$EXE" --repo fixtures/basic --include-prefix "$ctrl"
 
 "$EXE" --repo fixtures/edge --limit 200 --format json > /tmp/git-hotspots-edge.json
 "$EXE" --repo fixtures/edge --limit 200 --format markdown > /tmp/git-hotspots-edge.md
@@ -85,14 +101,14 @@ assert_fails_with_stderr invalid-exclude-control --exclude-prefix "$EXE" --repo 
 "$EXE" --repo fixtures/detached --format json > /tmp/git-hotspots-detached.json
 "$EXE" --repo fixtures/linked --format json > /tmp/git-hotspots-linked.json
 
-python3 - /tmp/git-hotspots-basic.md /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-empty.md /tmp/git-hotspots-edge.md <<'PY'
+python3 - /tmp/git-hotspots-basic.md /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-empty.md /tmp/git-hotspots-edge.md /tmp/git-hotspots-scope-src-include.md /tmp/git-hotspots-scope-include-empty.md <<'PY'
 import json
 import os
 import re
 import sys
 from pathlib import Path
 
-basic_md_path, scope_md_path, scope_empty_md_path, edge_md_path = map(Path, sys.argv[1:])
+basic_md_path, scope_md_path, scope_empty_md_path, edge_md_path, include_md_path, include_empty_md_path = map(Path, sys.argv[1:])
 
 def load(path):
     return json.loads(Path(path).read_text())
@@ -102,6 +118,7 @@ def by_path(data):
 
 basic = load('/tmp/git-hotspots-basic.json')
 assert basic['analysis']['scope']['filters_active'] is False
+assert basic['analysis']['scope']['include_prefixes'] == []
 assert basic['analysis']['scope']['exclude_prefixes'] == []
 assert basic['results'][0]['path'] == 'src/app.txt'
 assert all(not row['path'].startswith('/') for row in basic['results'])
@@ -117,7 +134,10 @@ scope_filtered = load('/tmp/git-hotspots-scope-filtered.json')
 scope_meta = scope_filtered['analysis']['scope']
 assert scope_meta == {
     'filters_active': True,
+    'include_prefixes': [],
     'exclude_prefixes': ['.flow/'],
+    'outside_include_path_count': 0,
+    'outside_include_change_count': 0,
     'excluded_path_count': 2,
     'excluded_change_count': 5,
 }, scope_meta
@@ -146,14 +166,61 @@ for row in weird_filtered['results']:
 glob_prefix = load('/tmp/git-hotspots-scope-glob-prefix.json')
 assert 'glob/[literal]*.txt' in by_path(glob_prefix), 'glob-like prefix acted as a glob'
 
+src_include = load('/tmp/git-hotspots-scope-src-include.json')
+src_include_scope = src_include['analysis']['scope']
+assert src_include_scope['filters_active'] is True
+assert src_include_scope['include_prefixes'] == ['src/']
+assert src_include_scope['exclude_prefixes'] == []
+assert src_include_scope['outside_include_path_count'] >= 1
+assert src_include_scope['outside_include_change_count'] >= 1
+for row in src_include['results']:
+    assert row['path'].startswith('src/'), row['path']
+    assert all(cc['path'].startswith('src/') for cc in row['cochanges']), row['path']
+assert 'src/new.zig' in by_path(src_include), 'include scope lost normalized rename target'
+assert 'src/vendor_adapter.zig' in by_path(src_include), 'literal include prefix lost adapter path'
+
+src_vendor_include = load('/tmp/git-hotspots-scope-src-vendor-include.json')
+assert src_vendor_include['analysis']['scope']['include_prefixes'] == ['src/', 'vendor/']
+for row in src_vendor_include['results']:
+    assert row['path'].startswith(('src/', 'vendor/')), row['path']
+    assert all(cc['path'].startswith(('src/', 'vendor/')) for cc in row['cochanges']), row['path']
+
+include_exclude = load('/tmp/git-hotspots-scope-include-exclude.json')
+assert include_exclude['analysis']['scope']['include_prefixes'] == ['src/']
+assert include_exclude['analysis']['scope']['exclude_prefixes'] == ['src/vendor_adapter.zig']
+assert include_exclude['analysis']['scope']['excluded_path_count'] == 1
+assert 'src/vendor_adapter.zig' not in by_path(include_exclude), 'exclude did not win over include'
+for row in include_exclude['results']:
+    assert all(cc['path'] != 'src/vendor_adapter.zig' for cc in row['cochanges']), row['path']
+
+weird_include = load('/tmp/git-hotspots-scope-weird-include.json')
+assert [row['path'] for row in weird_include['results']] == ['weird/tab\tname.txt']
+
+glob_star_include = load('/tmp/git-hotspots-scope-glob-star-include.json')
+assert 'glob/[literal]*.txt' not in by_path(glob_star_include), 'include glob-like prefix acted as a glob'
+glob_include = load('/tmp/git-hotspots-scope-glob-include.json')
+assert 'glob/[literal]*.txt' in by_path(glob_include), 'literal glob/ include did not match path'
+
+include_empty = load('/tmp/git-hotspots-scope-include-empty.json')
+assert include_empty['results'] == []
+assert include_empty['analysis']['scope']['filters_active'] is True
+assert include_empty['analysis']['scope']['include_prefixes'] == ['does-not-exist/']
+assert include_empty['analysis']['scope']['outside_include_path_count'] >= 1
+
 scope_empty = load('/tmp/git-hotspots-scope-empty.json')
 assert scope_empty['results'] == []
 assert scope_empty['analysis']['scope']['filters_active'] is True
 assert scope_empty['analysis']['scope']['excluded_path_count'] >= 1
 
 table_text = Path('/tmp/git-hotspots-scope-filtered.txt').read_text()
-assert 'scope: exclude_prefixes=[.flow/]' in table_text
+assert 'scope: include_prefixes=[] exclude_prefixes=[.flow/]' in table_text
 assert '.flow/' not in '\n'.join(line for line in table_text.splitlines() if line[:1].isdigit())
+include_table_text = Path('/tmp/git-hotspots-scope-src-include.txt').read_text()
+assert 'scope: include_prefixes=[src/] exclude_prefixes=[]' in include_table_text
+for line in include_table_text.splitlines():
+    if line[:1].isdigit():
+        assert 'src/' in line, line
+        assert '.flow/' not in line and 'vendor/' not in line and 'glob/' not in line and 'weird/' not in line, line
 
 edge = load('/tmp/git-hotspots-edge.json')
 rows = by_path(edge)
@@ -193,7 +260,10 @@ for section in ['## Run summary', '## Scope', '## Caveats', '## Top hotspots', '
 
 scope_md = scope_md_path.read_text()
 assert '- Filters active: true' in scope_md
+assert '- Include prefixes: None' in scope_md
 assert '- Exclude prefixes: .flow/' in scope_md
+assert '- Outside include path count: 0' in scope_md
+assert '- Outside include change count: 0' in scope_md
 assert '- Excluded path count: 2' in scope_md
 assert '- Excluded change count: 5' in scope_md
 for line in scope_md.splitlines():
@@ -206,12 +276,25 @@ assert 'No result evidence to show.' in scope_empty_md
 for section in ['## Run summary', '## Scope', '## Caveats', '## Top hotspots', '## Evidence']:
     assert section in scope_empty_md, section
 
+include_md = include_md_path.read_text()
+assert '- Include prefixes: src/' in include_md
+assert '- Exclude prefixes: None' in include_md
+assert '- Outside include path count:' in include_md
+for line in include_md.splitlines():
+    if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
+        assert '.flow/' not in line and 'vendor/' not in line and 'glob/' not in line and 'weird/' not in line, line
+
+include_empty_md = include_empty_md_path.read_text()
+assert '- Include prefixes: does\\-not\\-exist/' in include_empty_md
+assert 'No hotspots matched the requested scope.' in include_empty_md
+assert 'No result evidence to show.' in include_empty_md
+
 edge_md = edge_md_path.read_text()
 assert 'weird/tab\\tname.txt' in edge_md
 assert 'glob/\\[literal\\]\\*.txt' in edge_md
 assert 'path is deleted or not present at HEAD' in edge_md
 assert 'binary or non\\-text churn unavailable for some changes' in edge_md
-for text in [basic_md, scope_md, scope_empty_md, edge_md]:
+for text in [basic_md, scope_md, scope_empty_md, edge_md, include_md, include_empty_md]:
     assert '\t' not in text, 'raw tab leaked in markdown'
     assert 'Fixture Author' not in text
     assert 'fixture@example.invalid' not in text

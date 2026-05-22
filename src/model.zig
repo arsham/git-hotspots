@@ -7,12 +7,16 @@ pub const Config = struct {
     limit: usize = 10,
     format: Format = .table,
     since: ?[]const u8 = null,
+    include_prefixes: []const []const u8 = &.{},
     exclude_prefixes: []const []const u8 = &.{},
 };
 
 pub const Scope = struct {
     filters_active: bool,
+    include_prefixes: [][]const u8,
     exclude_prefixes: [][]const u8,
+    outside_include_path_count: usize,
+    outside_include_change_count: usize,
     excluded_path_count: usize,
     excluded_change_count: usize,
 };
@@ -84,6 +88,8 @@ pub const Analysis = struct {
             self.allocator.free(row.evidence);
         }
         self.allocator.free(self.results);
+        for (self.scope.include_prefixes) |prefix| self.allocator.free(prefix);
+        self.allocator.free(self.scope.include_prefixes);
         for (self.scope.exclude_prefixes) |prefix| self.allocator.free(prefix);
         self.allocator.free(self.scope.exclude_prefixes);
         for (self.caveats) |c| self.allocator.free(c);
