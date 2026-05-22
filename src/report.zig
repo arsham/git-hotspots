@@ -1,5 +1,6 @@
 const std = @import("std");
 const model = @import("model.zig");
+const version = @import("version.zig");
 
 pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("git-hotspots: file-level Git-history investigation prompts\n", .{});
@@ -29,7 +30,7 @@ pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
 pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("{{\n", .{});
     try writer.print("  \"schema_version\": \"1\",\n", .{});
-    try writer.print("  \"tool\": {{ \"name\": \"git-hotspots\", \"version\": \"0.0.0-spike\" }},\n", .{});
+    try writer.print("  \"tool\": {{ \"name\": \"git-hotspots\", \"version\": \"{s}\" }},\n", .{version.value});
     try writer.print("  \"analysis\": {{\n", .{});
     try writer.print("    \"history\": {{ \"head\": ", .{});
     try jsonString(writer, analysis.history.head);
@@ -97,7 +98,7 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
     try writer.writeAll("File-level Git-history investigation prompts, not bug predictions or code-quality ratings.\n\n");
 
     try writer.writeAll("## Run summary\n\n");
-    try writer.writeAll("- Tool: git-hotspots 0.0.0-spike\n");
+    try writer.print("- Tool: git-hotspots {s}\n", .{version.value});
     try writer.writeAll("- Head commit: ");
     try markdownText(writer, analysis.history.head);
     try writer.writeByte('\n');
@@ -344,7 +345,7 @@ test "markdown report has stable sections and no raw private root" {
 
     try std.testing.expect(std.mem.indexOf(u8, out, "# git-hotspots report\n\n") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "File-level Git-history investigation prompts, not bug predictions or code-quality ratings.") != null);
-    try std.testing.expect(std.mem.indexOf(u8, out, "## Run summary\n\n- Tool: git-hotspots 0.0.0-spike") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "## Run summary\n\n- Tool: git-hotspots 0.1.0-alpha.1") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "## Scope") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "## Caveats") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "## Top hotspots") != null);

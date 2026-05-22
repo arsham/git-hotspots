@@ -3,6 +3,7 @@ const model = @import("model.zig");
 const git = @import("git.zig");
 const report = @import("report.zig");
 const explain = @import("explain.zig");
+const version = @import("version.zig");
 const Io = std.Io;
 
 const usage =
@@ -11,6 +12,7 @@ const usage =
     \\Usage:
     \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--include-prefix PATH]... [--exclude-prefix PATH]...
     \\  git-hotspots --explain
+    \\  git-hotspots --version
     \\  git-hotspots --help
     \\
     \\Options:
@@ -25,10 +27,11 @@ const usage =
     \\                    Repeatable repo-relative literal Git path prefix to exclude
     \\                    before scoring; use / separators, not globs
     \\  --explain         Explain current scoring semantics without analysing a repo
+    \\  --version         Show the git-hotspots version without analysing a repo
     \\  --help            Show this help
     \\
     \\Hotspots are investigation prompts from local Git history, not bug predictions,
-    \\developer rankings, or objective code-quality scores. The spike never fetches,
+    \\developer rankings, or objective code-quality scores. The alpha never fetches,
     \\pushes, uploads source, contacts remotes, or emits telemetry.
     \\
 ;
@@ -70,6 +73,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
             error.InvalidIncludePrefix => try stderr.print("error: --include-prefix must be a non-empty repo-relative path prefix without absolute roots, '..' segments, or control characters\n", .{}),
             error.InvalidExcludePrefix => try stderr.print("error: --exclude-prefix must be a non-empty repo-relative path prefix without absolute roots, '..' segments, or control characters\n", .{}),
             error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags (--repo, --limit, --format, --since, --include-prefix, --exclude-prefix)\n", .{}),
+            error.InvalidVersionCombination => try stderr.print("error: --version cannot be combined with --explain or analysis flags (--repo, --limit, --format, --since, --include-prefix, --exclude-prefix)\n", .{}),
             error.InvalidArguments => try stderr.print("error: invalid arguments\n\n{s}", .{usage}),
             else => try stderr.print("error: {s}\n", .{@errorName(err)}),
         }
@@ -82,6 +86,10 @@ pub fn main(init: std.process.Init.Minimal) !void {
             try stdout.writeAll(explain.text);
             return;
         },
+        .version => {
+            try stdout.print("git-hotspots {s}\n", .{version.value});
+            return;
+        },
         .analyze => |cfg| cfg,
     };
     defer freeConfig(allocator, cfg);
@@ -89,7 +97,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
     var analysis = git.analyze(allocator, io, cfg) catch |err| {
         switch (err) {
             error.NotGitRepository => try stderr.print("error: --repo must point to a local non-bare Git worktree\n", .{}),
-            error.BareRepository => try stderr.print("error: bare repositories are not supported by this spike; use a worktree\n", .{}),
+            error.BareRepository => try stderr.print("error: bare repositories are not supported by this alpha; use a worktree\n", .{}),
             error.EmptyRepository => try stderr.print("error: repository has no commits to analyse\n", .{}),
             error.InvalidSince => try stderr.print("error: --since must name an existing revision\n", .{}),
             else => try stderr.print("error: git history analysis failed: {s}\n", .{@errorName(err)}),
@@ -109,14 +117,16 @@ pub fn main(init: std.process.Init.Minimal) !void {
 const CliMode = union(enum) {
     analyze: model.Config,
     explain,
+    version,
 };
 
-const CliError = error{ HelpRequested, InvalidArguments, InvalidExplainCombination, InvalidIncludePrefix, InvalidExcludePrefix } || std.mem.Allocator.Error;
+const CliError = error{ HelpRequested, InvalidArguments, InvalidExplainCombination, InvalidVersionCombination, InvalidIncludePrefix, InvalidExcludePrefix } || std.mem.Allocator.Error;
 
 fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!CliMode {
     var cfg = model.Config{ .repo_path = try allocator.dupe(u8, ".") };
     errdefer freeConfig(allocator, cfg);
     var explain_requested = false;
+    var version_requested = false;
     var analysis_flag_seen = false;
 
     var i: usize = 1;
@@ -124,12 +134,19 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
         const arg = args[i];
         if (std.mem.eql(u8, arg, "--help") or std.mem.eql(u8, arg, "-h")) return error.HelpRequested;
         if (std.mem.eql(u8, arg, "--explain")) {
+            if (version_requested) return error.InvalidVersionCombination;
             explain_requested = true;
+            continue;
+        }
+        if (std.mem.eql(u8, arg, "--version")) {
+            if (explain_requested) return error.InvalidVersionCombination;
+            version_requested = true;
             continue;
         }
         if (std.mem.eql(u8, arg, "--repo")) {
             analysis_flag_seen = true;
             if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             const v = args[i];
@@ -138,6 +155,7 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
         } else if (std.mem.eql(u8, arg, "--limit")) {
             analysis_flag_seen = true;
             if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             const v = args[i];
@@ -145,6 +163,7 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
         } else if (std.mem.eql(u8, arg, "--format")) {
             analysis_flag_seen = true;
             if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             const v = args[i];
@@ -152,6 +171,7 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
         } else if (std.mem.eql(u8, arg, "--since")) {
             analysis_flag_seen = true;
             if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             const v = args[i];
@@ -160,12 +180,14 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
         } else if (std.mem.eql(u8, arg, "--include-prefix")) {
             analysis_flag_seen = true;
             if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             try appendIncludePrefix(allocator, &cfg, args[i]);
         } else if (std.mem.eql(u8, arg, "--exclude-prefix")) {
             analysis_flag_seen = true;
             if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             try appendExcludePrefix(allocator, &cfg, args[i]);
@@ -175,6 +197,11 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
         if (analysis_flag_seen) return error.InvalidExplainCombination;
         freeConfig(allocator, cfg);
         return .explain;
+    }
+    if (version_requested) {
+        if (analysis_flag_seen or explain_requested) return error.InvalidVersionCombination;
+        freeConfig(allocator, cfg);
+        return .version;
     }
     if (cfg.limit == 0) return error.InvalidArguments;
     return .{ .analyze = cfg };
@@ -246,6 +273,12 @@ test "parse standalone explain mode" {
     try std.testing.expectEqual(std.meta.Tag(CliMode).explain, mode);
 }
 
+test "parse standalone version mode" {
+    const args = [_][:0]const u8{ "git-hotspots", "--version" };
+    const mode = try parseArgs(std.testing.allocator, &args);
+    try std.testing.expectEqual(std.meta.Tag(CliMode).version, mode);
+}
+
 test "reject explain combined with analysis flags" {
     const cases = [_][]const [:0]const u8{
         &[_][:0]const u8{ "git-hotspots", "--explain", "--repo", "." },
@@ -257,6 +290,20 @@ test "reject explain combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--explain", "--exclude-prefix", ".flow/" },
     };
     for (cases) |args| try std.testing.expectError(error.InvalidExplainCombination, parseArgs(std.testing.allocator, args));
+}
+
+test "reject version combined with analysis flags" {
+    const cases = [_][]const [:0]const u8{
+        &[_][:0]const u8{ "git-hotspots", "--version", "--repo", "." },
+        &[_][:0]const u8{ "git-hotspots", "--repo", ".", "--version" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--limit", "1" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--format", "markdown" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--since", "HEAD~1" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--include-prefix", "src/" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--exclude-prefix", ".flow/" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--explain" },
+    };
+    for (cases) |args| try std.testing.expectError(error.InvalidVersionCombination, parseArgs(std.testing.allocator, args));
 }
 
 test "parse repeatable exclude prefixes" {
@@ -302,4 +349,5 @@ test {
     _ = @import("git.zig");
     _ = @import("report.zig");
     _ = @import("scoring.zig");
+    _ = @import("version.zig");
 }

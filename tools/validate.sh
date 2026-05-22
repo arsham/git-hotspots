@@ -365,6 +365,8 @@ explain_output_checks() {
   explain_a=$ARTIFACT_DIR/explain-a.txt
   explain_b=$ARTIFACT_DIR/explain-b.txt
   explain_nongit=$ARTIFACT_DIR/explain-nongit.txt
+  version_out=$ARTIFACT_DIR/version.txt
+  version_nongit=$ARTIFACT_DIR/version-nongit.txt
   explain_err=$ARTIFACT_DIR/explain.err
   help_out=$ARTIFACT_DIR/help.txt
 
@@ -377,11 +379,18 @@ explain_output_checks() {
   "$EXE" --help > "$help_out" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
   grep -q -- '--explain' "$help_out" || return 1
+  grep -q -- '--version' "$help_out" || return 1
+  "$EXE" --version > "$version_out" 2> "$explain_err" || return 1
+  [ ! -s "$explain_err" ] || return 1
+  [ "$(cat "$version_out")" = 'git-hotspots 0.1.0-alpha.1' ] || return 1
 
   nongit=$(mktemp -d "$ARTIFACT_DIR/nongit.XXXXXX")
   (cd "$nongit" && "$EXE_ABS" --explain > "$explain_nongit" 2> "$explain_err") || return 1
   [ ! -s "$explain_err" ] || return 1
   diff -u fixtures/expected/explain.txt "$explain_nongit" >/dev/null || return 1
+  (cd "$nongit" && "$EXE_ABS" --version > "$version_nongit" 2> "$explain_err") || return 1
+  [ ! -s "$explain_err" ] || return 1
+  [ "$(cat "$version_nongit")" = 'git-hotspots 0.1.0-alpha.1' ] || return 1
 
   for args in \
     '--repo .' \
@@ -397,11 +406,27 @@ explain_output_checks() {
     fi
     grep -q -- '--explain cannot be combined' "$explain_err" || return 1
   done
+
+  for args in \
+    '--repo .' \
+    '--limit 1' \
+    '--format markdown' \
+    '--since HEAD~1' \
+    '--include-prefix src/' \
+    '--exclude-prefix .flow/' \
+    '--explain'
+  do
+    # shellcheck disable=SC2086
+    if "$EXE" --version $args > "$ARTIFACT_DIR/version-invalid.out" 2> "$explain_err"; then
+      return 1
+    fi
+    grep -q -- '--version cannot be combined' "$explain_err" || return 1
+  done
 }
 
 prohibited_claim_scan() {
   have_python || return 1
-  python3 - fixtures/expected/explain.txt README.md <<'PY'
+  python3 - fixtures/expected/explain.txt README.md CONTRIBUTING.md <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -448,6 +473,42 @@ for path_name in sys.argv[1:]:
 if failures:
     raise SystemExit('positive prohibited claim(s):\n' + '\n'.join(failures))
 PY
+}
+
+license_version_checks() {
+  [ -f LICENSE ] || return 1
+  [ -f CONTRIBUTING.md ] || return 1
+  grep -q 'Copyright 2026 Arsham Shirvani' LICENSE || return 1
+  grep -q 'Apache License' LICENSE || return 1
+  grep -q 'Version 2.0' LICENSE || return 1
+  grep -q 'Apache License, Version 2.0' README.md || return 1
+  grep -q '0.1.0-alpha.1' README.md || return 1
+  grep -q 'Zig `0.16.0`' README.md || return 1
+  grep -q 'zig build validate' CONTRIBUTING.md || return 1
+  grep -q 'public alpha' CONTRIBUTING.md || return 1
+  [ "$("$EXE" --version)" = 'git-hotspots 0.1.0-alpha.1' ] || return 1
+  ! grep -R '0\.0\.0-spike' README.md CONTRIBUTING.md src fixtures/expected tests tools build.zig >/dev/null 2>&1 || return 1
+}
+
+source_install_smoke() {
+  copy=$ARTIFACT_DIR/source-copy
+  mkdir -p "$copy"
+  tar -cf - \
+    --exclude='./.git' \
+    --exclude='./zig-out' \
+    --exclude='./.zig-cache' \
+    --exclude='./fixtures' \
+    . | (cd "$copy" && tar -xf -) || return 1
+
+  (cd "$copy" && zig build >/dev/null 2>&1) || return 1
+  copy_exe=$copy/zig-out/bin/git-hotspots
+  [ "$($copy_exe --version)" = 'git-hotspots 0.1.0-alpha.1' ] || return 1
+  "$copy_exe" --help >/dev/null || return 1
+  "$copy_exe" --explain >/dev/null || return 1
+  copy_json=$ARTIFACT_DIR/source-copy-basic.json
+  "$copy_exe" --repo "$copy/fixtures/basic" --format json > "$copy_json" || return 1
+  summary=$(json_count_summary "$copy_json") || return 1
+  printf 'source-install-copy %s version=0.1.0-alpha.1\n' "$summary" >> "$SMOKES"
 }
 
 choose_timing_tool() {
@@ -645,6 +706,12 @@ if prohibited_claim_scan; then
 else
   fail_rung "prohibited claim scan" "positive prohibited claim detected or python3 unavailable"
 fi
+printf 'validate: RUN license and version consistency\n'
+if license_version_checks; then
+  pass_rung "license and version consistency"
+else
+  fail_rung "license and version consistency" "license, docs, fixtures, or CLI version contract failed"
+fi
 run_quiet "git diff whitespace check" git diff --check
 run_quiet "shell syntax checks" sh -c "for file in tools/*.sh tests/*.sh; do sh -n \"\$file\" || exit 1; done"
 
@@ -679,6 +746,13 @@ if fixture_performance_smoke; then
   pass_rung "medium fixture performance smoke"
 else
   fail_rung "medium fixture performance smoke" "timed fixture command failed"
+fi
+
+printf 'validate: RUN source install smoke\n'
+if source_install_smoke; then
+  pass_rung "source install smoke"
+else
+  fail_rung "source install smoke" "clean disposable source build or basic analysis failed"
 fi
 
 real_repo_smoke this-repo "$ROOT" || true

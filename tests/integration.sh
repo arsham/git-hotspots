@@ -47,16 +47,31 @@ diff -u fixtures/expected/explain.txt /tmp/git-hotspots-explain.txt
 diff -u /tmp/git-hotspots-explain.txt /tmp/git-hotspots-explain-2.txt
 "$EXE" --help > /tmp/git-hotspots-help.txt
 grep -q -- "--explain" /tmp/git-hotspots-help.txt
+grep -q -- "--version" /tmp/git-hotspots-help.txt
+"$EXE" --version > /tmp/git-hotspots-version.txt 2> /tmp/git-hotspots-version.err
+test "$(cat /tmp/git-hotspots-version.txt)" = "git-hotspots 0.1.0-alpha.1"
+test ! -s /tmp/git-hotspots-version.err
 explain_nongit=$(mktemp -d)
 (cd "$explain_nongit" && "$EXE_ABS" --explain > /tmp/git-hotspots-explain-nongit.txt 2> /tmp/git-hotspots-explain-nongit.err)
 diff -u fixtures/expected/explain.txt /tmp/git-hotspots-explain-nongit.txt
 test ! -s /tmp/git-hotspots-explain-nongit.err
+version_nongit=$(mktemp -d)
+(cd "$version_nongit" && "$EXE_ABS" --version > /tmp/git-hotspots-version-nongit.txt 2> /tmp/git-hotspots-version-nongit.err)
+test "$(cat /tmp/git-hotspots-version-nongit.txt)" = "git-hotspots 0.1.0-alpha.1"
+test ! -s /tmp/git-hotspots-version-nongit.err
 assert_fails_with_stderr explain-repo "--explain cannot be combined" "$EXE" --explain --repo .
 assert_fails_with_stderr explain-limit "--explain cannot be combined" "$EXE" --explain --limit 1
 assert_fails_with_stderr explain-format "--explain cannot be combined" "$EXE" --explain --format markdown
 assert_fails_with_stderr explain-since "--explain cannot be combined" "$EXE" --explain --since HEAD~1
 assert_fails_with_stderr explain-include "--explain cannot be combined" "$EXE" --explain --include-prefix src/
 assert_fails_with_stderr explain-exclude "--explain cannot be combined" "$EXE" --explain --exclude-prefix .flow/
+assert_fails_with_stderr version-repo "--version cannot be combined" "$EXE" --version --repo .
+assert_fails_with_stderr version-limit "--version cannot be combined" "$EXE" --version --limit 1
+assert_fails_with_stderr version-format "--version cannot be combined" "$EXE" --version --format markdown
+assert_fails_with_stderr version-since "--version cannot be combined" "$EXE" --version --since HEAD~1
+assert_fails_with_stderr version-include "--version cannot be combined" "$EXE" --version --include-prefix src/
+assert_fails_with_stderr version-exclude "--version cannot be combined" "$EXE" --version --exclude-prefix .flow/
+assert_fails_with_stderr version-explain "--version cannot be combined" "$EXE" --version --explain
 
 "$EXE" --repo fixtures/basic --format json > /tmp/git-hotspots-basic.json
 diff -u fixtures/expected/basic.json /tmp/git-hotspots-basic.json

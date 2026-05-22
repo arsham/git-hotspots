@@ -7,9 +7,10 @@ engineering attention because they change often. It turns Git history into
 clear, reproducible hotspot evidence for maintainers, refactoring work, code
 review, onboarding, and coding-agent context.
 
-The project is intentionally early. A first Zig CLI spike now proves that a
-small, transparent command-line tool can surface useful file-level hotspots
-before adding deeper language-aware analysis.
+The project is intentionally early. The current public alpha is source-buildable
+and proves that a small, transparent command-line tool can surface useful
+file-level hotspots before adding deeper language-aware analysis. It is not a
+packaged release yet.
 
 ## Why
 
@@ -90,9 +91,40 @@ provenance, and caveats.
 The product truth remains local Git evidence. Agents are consumers of reports,
 not the runtime authority for hotspot findings.
 
-## CLI spike
+## Public alpha status
 
-Build and run the current local spike with Zig:
+Current version: `0.1.0-alpha.1`.
+
+This repository contains a narrow public alpha for local source builds. It does
+not provide packaged binaries, package-manager installation, release tags, or a
+hosted service. Runtime behaviour is local-first: the CLI reads local Git
+history and does not fetch, push, upload source, contact remotes, or emit
+telemetry.
+
+## Install from source
+
+Prerequisites:
+
+- Git available on `PATH`;
+- Zig `0.16.0`, which is the currently validated Zig version for this alpha.
+
+Build and run from a local checkout:
+
+```sh
+git clone <repo-url>
+cd git-hotspots
+zig build
+./zig-out/bin/git-hotspots --version
+./zig-out/bin/git-hotspots --help
+```
+
+Replace `<repo-url>` with the repository URL you intend to use. Until a future
+feature adds packaging, source checkout plus `zig build` is the supported
+install path.
+
+## CLI usage
+
+Run the current local alpha with Zig:
 
 ```sh
 zig build
@@ -102,20 +134,21 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --include-prefix src/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --exclude-prefix .flow/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --explain
+./zig-out/bin/git-hotspots --version
 ```
 
 Supported options are `--repo`, `--limit`, `--format table|json|markdown`,
-`--since`, repeatable `--include-prefix`, repeatable `--exclude-prefix`, and
-`--explain`, and `--help`. Include and exclude prefixes are literal
-repo-relative Git path prefixes using `/` separators; they are applied before
-hotspot scoring and co-change evidence, with excludes winning over includes.
-They are not globs, pathspecs, gitignore rules, regexes, or project
+`--since`, repeatable `--include-prefix`, repeatable `--exclude-prefix`,
+`--explain`, `--version`, and `--help`. Include and exclude prefixes are
+literal repo-relative Git path prefixes using `/` separators; they are applied
+before hotspot scoring and co-change evidence, with excludes winning over
+includes. They are not globs, pathspecs, gitignore rules, regexes, or project
 configuration. Reports include scope metadata showing whether filters were
 active, which prefixes were used, and bounded counts for paths and changes
 omitted by include or exclude filters. Markdown output is a deterministic
 stdout report with run summary, scope, caveats, ranked hotspots, and
-per-result evidence. The spike reads local Git history only. It does not fetch,
-push, upload source, contact remotes, or emit telemetry.
+per-result evidence. `--version` is standalone and prints the alpha version
+without requiring a Git repository.
 
 ## How to read scores
 
@@ -147,7 +180,24 @@ zig build validate
 `zig build test` remains the faster unit and fixture gate. `zig build validate`
 runs the fuller local ladder and prints a privacy-safe evidence summary.
 
+## Current limitations
+
+- This alpha is source-buildable, not packaged.
+- Report truth is deterministic file-level Git-history evidence.
+- Provider, cache, dependency, test, and coverage enrichers are future work.
+- Runtime defaults remain local-only and do not perform network access.
+
+## Contributing
+
+Issues and small focused pull requests are welcome during alpha. Please see
+[`CONTRIBUTING.md`](CONTRIBUTING.md) before proposing changes.
+
+## License
+
+`git-hotspots` is licensed under the Apache License, Version 2.0. See
+[`LICENSE`](LICENSE).
+
 ## Status
 
-This repository has an executable file-level CLI spike. It is not a packaged
+This repository has an executable file-level public alpha. It is not a packaged
 release yet.

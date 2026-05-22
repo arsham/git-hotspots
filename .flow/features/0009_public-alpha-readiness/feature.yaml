@@ -4,7 +4,7 @@ feature:
   slug: public-alpha-readiness
   title: Public alpha readiness
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The repository has a useful local CLI alpha, but it is not ready for
@@ -85,7 +85,7 @@ proposal:
     materialised_at: 2026-05-22T13:51:13.511Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -161,7 +161,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: OSS license and alpha docs baseline
       goal: Add the legal/docs baseline needed for a public alpha without adding
         release automation or broader product commitments.
@@ -201,7 +201,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Alpha version and version flag
       goal: Replace the spike version marker with the agreed alpha identity and expose
         it through report metadata and `--version`.
@@ -241,7 +241,7 @@ design:
       depends_on:
         - P1
         - P2
-      status: planned
+      status: done
       title: Public alpha validation and hygiene
       goal: Extend or record validation evidence proving alpha docs/version/license
         consistency, install-from-source behaviour, and publication hygiene.
@@ -287,10 +287,13 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T13:40:29.901Z
-  updated_at: 2026-05-22T13:51:49.721Z
+  updated_at: 2026-05-22T14:12:24.430Z
 execution:
   blockers: []
   requires_confirmation: true
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
 dispatch:
   status: prepared
   prepared_at: 2026-05-22T13:51:49.721Z
