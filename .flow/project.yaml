@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0013"
   active_run_id: null
   last_completed_feature_id: "0012"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 13
+  next_id: 14
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -77,6 +77,10 @@ features:
       slug: default-project-scope-presets
       path: .flow/features/0012_default-project-scope-presets
       created_at: 2026-05-22T17:35:59.725Z
+    - id: "0013"
+      slug: large-repo-runtime-feedback
+      path: .flow/features/0013_large-repo-runtime-feedback
+      created_at: 2026-05-22T18:52:59.240Z
 intake:
   mode: roadmap
   summary: null

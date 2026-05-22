@@ -1,0 +1,281 @@
+schema: flow-feature.v1
+feature:
+  id: "0013"
+  slug: large-repo-runtime-feedback
+  title: Large-repo runtime feedback
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Large local repositories can take long enough to analyse that a user
+    may wonder whether git-hotspots is still working. Current reports stay
+    deterministic, but the CLI gives no runtime feedback while Git history is
+    being read and scored.
+  outcome: Add an opt-in --progress analysis flag that writes bounded coarse phase
+    and elapsed-time feedback to stderr only. Existing table, JSON, and Markdown
+    stdout reports remain byte-stable, local-first, and schema-stable. The
+    feature does not add automatic progress, cache, streaming parsing,
+    performance optimisation, providers, telemetry, or report timing fields.
+  acceptance:
+    - --progress is opt-in and successful analysis without it remains
+      stderr-silent except pre-existing error behaviour.
+    - --progress writes bounded coarse phase messages and a final elapsed-time
+      line to stderr only.
+    - Table, JSON, and Markdown stdout for equivalent commands are byte-for-byte
+      equal with and without --progress.
+    - JSON output with --progress remains valid JSON and does not gain timing or
+      progress fields.
+    - --progress is rejected with --explain and with --version; --help,
+      --version, and --explain do not emit progress phase lines.
+    - Progress messages do not include repo paths, file paths, raw omitted path
+      lists, commit hashes, commit messages, remotes, author identities, source
+      snippets, report rows, ANSI spinners, or carriage-return progress bars.
+    - --progress works with --repo, --since, --scope, include/exclude prefixes,
+      --inspect, and all report formats without changing scoring, filtering,
+      ranking, co-change, or inspect behaviour.
+    - Help and README document --progress as opt-in local stderr feedback for
+      long runs.
+    - zig build validate covers progress enabled and disabled, stdout/stderr
+      separation, JSON validity with progress enabled, deterministic stdout,
+      stderr privacy scans, no progress for standalone modes, this-repo smoke,
+      and close-out sibling-local-repo smoke.
+    - Close-out evidence records only privacy-safe labels, command shapes,
+      pass/fail status, bounded counts, dirty/scope/progress flags, elapsed
+      summary, commit count, and tracked-file count for sibling-local-repo.
+planning:
+  state: ready
+  summary: Feature 0013 adds opt-in stderr-only runtime feedback for long
+    analyses. --progress prints coarse phase messages and a final elapsed-time
+    line to stderr while preserving deterministic stdout for table, JSON, and
+    Markdown. It is validated with stdout/stderr separation, stderr privacy
+    scans, fixture checks, this-repo smoke, and sibling-local-repo close-out
+    smoke.
+  brief_sync:
+    status: updated
+    reason: "Feature 0013 remains within B001: deterministic local-first file-level
+      evidence, agent-consumable reports, explicit caveats, no runtime LLM
+      truth, no providers/cache/network/telemetry, and hotspots framed as
+      investigation prompts."
+    checked_at: 2026-05-22T19:00:18.714Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: "Follow-up capability slice for B001: opt-in progress feedback helps
+      users trust long local analyses while preserving deterministic stdout
+      reports and local-first product truth."
+    checked_at: 2026-05-22T19:00:28.438Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-22T19:00:44.023Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-22T19:00:44.023Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-22T19:00:44.023Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-22T19:00:44.023Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: null
+  depends_on_feature_ids:
+    - "0003"
+    - "0010"
+    - "0012"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add a Config progress boolean and parse --progress as an analysis flag.
+    - Thread a privacy-safe progress sink through the analysis path and renderer
+      boundary without changing report stdout.
+    - Emit only bounded coarse phase lines and a final elapsed-time line to
+      stderr when --progress is set.
+    - Extend validation to prove stdout stability, stderr-only progress, JSON
+      validity, privacy-safe progress text, and real-repo close-out smoke.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: CLI progress contract
+      goal: Add the --progress analysis flag and configuration contract without
+        changing report output or analysis semantics.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/main.zig, src/model.zig; parser/unit tests near existing
+          CLI tests."
+        - "In scope: add config progress boolean, parse --progress, document in
+          help, reject with --explain and --version, preserve default silent
+          success behaviour."
+        - "Out of scope: automatic progress, --quiet, timing fields in report
+          outputs, streaming parser, cache, performance optimisation, providers,
+          network, telemetry."
+        - "Protected: existing --repo, --limit, --format, --since, --scope,
+          include/exclude, --inspect, --explain, --version, and --help
+          behaviours except intentional help text additions."
+        - "Dependencies: Feature 0003 validation workflow and existing CLI
+          parser structure."
+        - "Validation/evidence: parser/unit tests for default disabled, enabled,
+          flag-order independence, and invalid standalone combinations."
+        - "Review focus: --progress is opt-in, analysis-only, and cannot affect
+          stdout by itself."
+        - Escalate if requested behaviour becomes automatic progress, TTY
+          detection, or changes to report schemas.
+        - "Done boundary: CLI accepts --progress for analysis commands, rejects
+          invalid combinations, and existing commands without the flag behave as
+          before."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: Stderr phase feedback
+      goal: Emit bounded privacy-safe phase feedback and elapsed timing to stderr only
+        when --progress is enabled.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/main.zig, src/git.zig, tests/integration.sh."
+        - "In scope: thread a progress sink or equivalent through analysis, emit
+          coarse phases such as checking repository, reading Git history,
+          scoring files, rendering report, and done, with final elapsed time on
+          stderr."
+        - "Out of scope: percentages, ETA, live commit counts, progress bars,
+          spinners, carriage-return updates, streaming git log parsing, changing
+          Git stdout limits, scoring changes, report schema changes."
+        - "Protected: stdout for table, JSON, and Markdown remains byte-stable;
+          scoring, ranking, tie-breaks, confidence, scope filtering,
+          include/exclude, inspect, and Git traversal remain unchanged."
+        - "Dependencies: P1 configuration contract."
+        - "Validation/evidence: integration checks capture stdout and stderr
+          separately, compare stdout with and without --progress, assert JSON
+          validity, and scan stderr for bounded phase lines and privacy safety."
+        - "Review focus: progress never leaks into stdout, never emits paths or
+          private evidence, and remains useful despite coarse buffered Git
+          history ingestion."
+        - Escalate if implementation requires streaming process supervision,
+          changing git log arguments, or exposing file/repo paths in progress
+          output.
+        - "Done boundary: --progress provides visible stderr phase feedback on
+          fixture and repo runs while preserving existing stdout reports
+          exactly."
+      verification_commands:
+        - zig build
+        - zig build test
+        - ./zig-out/bin/git-hotspots --repo fixtures/basic --progress --format
+          json > /tmp/git-hotspots-progress.json 2>
+          /tmp/git-hotspots-progress.stderr
+    - id: P3
+      depends_on:
+        - P2
+      status: planned
+      title: Validation docs and real-repo smoke
+      goal: Make progress feedback durable in validation and public docs with
+        privacy-safe close-out evidence.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: tests/integration.sh, tools/validate.sh, README.md,
+          docs/real-repo-validation.md only if a privacy-safe note is useful."
+        - "In scope: add validation rungs for progress enabled/disabled,
+          stdout/stderr separation, stderr privacy scans, standalone mode
+          checks, JSON validity, deterministic stdout, this-repo smoke, and
+          sibling-local-repo close-out smoke."
+        - "Out of scope: CI, release, packaging, cache, providers, performance
+          benchmarks, raw sibling reports, private paths, remotes, authors,
+          commit messages, source snippets, hosted/commercial plans."
+        - "Protected: README stays public and non-judgemental; validation
+          summaries use labels and bounded counts only."
+        - "Dependencies: P2 progress behaviour."
+        - "Validation/evidence: zig build validate, close-out validate with
+          sibling-local-repo, git diff --check, prohibited-claim scan, stderr
+          privacy scan, clean git status."
+        - "Review focus: docs tell users progress is opt-in stderr feedback for
+          long runs; validation proves progress helps without changing product
+          truth or leaking private information."
+        - Escalate if close-out needs private repo names, absolute paths, raw
+          report dumps, or broader performance claims.
+        - "Done boundary: canonical validation and docs cover --progress,
+          real-repo close-out passes, and all committed evidence remains
+          privacy-safe."
+      verification_commands:
+        - zig build validate
+        - zig build validate -Dcloseout=true
+          -Dsmoke-repo=<operator-provided-local-repo>
+          -Dsmoke-label=sibling-local-repo
+        - git diff --check
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-22T18:52:59.240Z
+  updated_at: 2026-05-22T19:00:44.023Z
