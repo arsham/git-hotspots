@@ -20,6 +20,9 @@ pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
         }
         try writer.print("\n", .{});
     }
+    if (analysis.inspect) |inspect| {
+        try writer.print("inspect: requested={s} matched={s} rank={d}\n", .{ inspect.requested_path, inspect.matched_path, inspect.rank });
+    }
     try writer.print("\n{s:<5} {s:<7} {s:<7} {s:<7} {s:<10} {s}\n", .{ "rank", "score", "changes", "churn", "confidence", "path" });
     for (analysis.results, 0..) |row, i| {
         try writer.print("{d:<5} {d:<7.1} {d:<7} {d:<7} {s:<10} {s}\n", .{ i + 1, row.score.total, row.change_count, row.churn, row.confidence, row.path });
@@ -47,6 +50,13 @@ pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
     try stringArray(writer, analysis.caveats);
     try writer.print("\n", .{});
     try writer.print("  }},\n", .{});
+    if (analysis.inspect) |inspect| {
+        try writer.print("  \"inspect\": {{ \"requested_path\": ", .{});
+        try jsonString(writer, inspect.requested_path);
+        try writer.print(", \"matched_path\": ", .{});
+        try jsonString(writer, inspect.matched_path);
+        try writer.print(", \"rank\": {d} }},\n", .{inspect.rank});
+    }
     try writer.print("  \"results\": [\n", .{});
     for (analysis.results, 0..) |row, i| {
         try writer.print("    {{\n", .{});
@@ -138,6 +148,17 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("- Outside include change count: {d}\n", .{analysis.scope.outside_include_change_count});
     try writer.print("- Excluded path count: {d}\n", .{analysis.scope.excluded_path_count});
     try writer.print("- Excluded change count: {d}\n\n", .{analysis.scope.excluded_change_count});
+
+    if (analysis.inspect) |inspect| {
+        try writer.writeAll("## Inspect\n\n");
+        try writer.writeAll("- Requested path: ");
+        try markdownText(writer, inspect.requested_path);
+        try writer.writeByte('\n');
+        try writer.writeAll("- Matched path: ");
+        try markdownText(writer, inspect.matched_path);
+        try writer.writeByte('\n');
+        try writer.print("- Rank in scoped evidence universe: {d}\n\n", .{inspect.rank});
+    }
 
     try writer.writeAll("## Caveats\n\n");
     try renderMarkdownStringList(writer, analysis.caveats);

@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "tool": { "name": "git-hotspots", "version": "0.1.0-alpha.1" },
+  "analysis": {
+    "history": { "head": "f577978a22dd1db4fa1052dc677288d6325fc95c", "head_timestamp": 1767484800, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 4 },
+    "scope": { "filters_active": false, "include_prefixes": [], "exclude_prefixes": [], "outside_include_path_count": 0, "outside_include_change_count": 0, "excluded_path_count": 0, "excluded_change_count": 0 },
+    "caveats": []
+  },
+  "inspect": { "requested_path": "src/app.txt", "matched_path": "src/app.txt", "rank": 1 },
+  "results": [
+    {
+      "path": "src/app.txt",
+      "score": { "total": 55.160, "frequency": 30.000, "churn": 0.160, "recency": 19.000, "cochange": 6.000 },
+      "change_count": 3, "additions": 4, "deletions": 0, "churn": 4,
+      "recency": { "last_changed_timestamp": 1767398400, "last_changed_commit": "167229fed167" },
+      "current_size": 19,
+      "cochanges": [{ "path": "README.md", "count": 1 }, { "path": "docs/guide.md", "count": 1 }, { "path": "src/lib.txt", "count": 1 }],
+      "confidence": "high",
+      "caveats": [],
+      "evidence": [{ "commit": "167229fed167", "timestamp": 1767398400, "additions": 1, "deletions": 0 }, { "commit": "7dafd085378d", "timestamp": 1767312000, "additions": 2, "deletions": 0 }, { "commit": "df4a28000ad3", "timestamp": 1767225600, "additions": 1, "deletions": 0 }]
+    }
+  ]
+}

@@ -4,6 +4,17 @@ const scoring = @import("scoring.zig");
 
 pub const AnalyzeError = anyerror;
 
+fn freeResult(allocator: std.mem.Allocator, r: *model.Result) void {
+    allocator.free(r.path);
+    allocator.free(r.last_changed_commit);
+    for (r.cochanges) |cc| allocator.free(cc.path);
+    allocator.free(r.cochanges);
+    for (r.caveats) |c| allocator.free(c);
+    allocator.free(r.caveats);
+    for (r.evidence) |ev| allocator.free(ev.commit);
+    allocator.free(r.evidence);
+}
+
 fn runGit(allocator: std.mem.Allocator, io: std.Io, repo: []const u8, args: []const []const u8) !std.process.RunResult {
     var argv = std.array_list.Managed([]const u8).init(allocator);
     defer argv.deinit();
@@ -215,32 +226,42 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config) Anal
 
     var results = std.array_list.Managed(model.Result).init(allocator);
     errdefer {
-        for (results.items) |*r| {
-            allocator.free(r.path);
-            allocator.free(r.last_changed_commit);
-            for (r.cochanges) |cc| allocator.free(cc.path);
-            allocator.free(r.cochanges);
-            for (r.caveats) |c| allocator.free(c);
-            allocator.free(r.caveats);
-            for (r.evidence) |ev| allocator.free(ev.commit);
-            allocator.free(r.evidence);
-        }
+        for (results.items) |*r| freeResult(allocator, r);
         results.deinit();
     }
 
     var it2 = map.iterator();
     while (it2.next()) |entry| try appendResult(allocator, io, &results, repo_root, entry.value_ptr.*, head_ts);
     std.mem.sort(model.Result, results.items, {}, scoring.lessThan);
-    if (results.items.len > cfg.limit) {
+
+    var inspect: ?model.Inspect = null;
+    errdefer if (inspect) |meta| {
+        allocator.free(meta.requested_path);
+        allocator.free(meta.matched_path);
+    };
+    if (cfg.inspect_path) |requested| {
+        var found_index: ?usize = null;
+        for (results.items, 0..) |row, i| {
+            if (std.mem.eql(u8, row.path, requested)) {
+                found_index = i;
+                break;
+            }
+        }
+        const keep_index = found_index orelse return error.InspectTargetNotFound;
+        const kept = results.items[keep_index];
+        for (results.items, 0..) |*r, i| {
+            if (i != keep_index) freeResult(allocator, r);
+        }
+        results.items[0] = kept;
+        results.shrinkRetainingCapacity(1);
+        inspect = .{
+            .requested_path = try allocator.dupe(u8, requested),
+            .matched_path = try allocator.dupe(u8, kept.path),
+            .rank = keep_index + 1,
+        };
+    } else if (results.items.len > cfg.limit) {
         for (results.items[cfg.limit..]) |*r| {
-            allocator.free(r.path);
-            allocator.free(r.last_changed_commit);
-            for (r.cochanges) |cc| allocator.free(cc.path);
-            allocator.free(r.cochanges);
-            for (r.caveats) |c| allocator.free(c);
-            allocator.free(r.caveats);
-            for (r.evidence) |ev| allocator.free(ev.commit);
-            allocator.free(r.evidence);
+            freeResult(allocator, r);
         }
         results.shrinkRetainingCapacity(cfg.limit);
     }
@@ -255,6 +276,7 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config) Anal
         .repo_root = repo_root,
         .history = .{ .head = head, .head_timestamp = head_ts, .range = range_owned, .is_shallow = is_shallow, .is_partial = is_partial, .dirty_worktree = dirty, .commit_count = commit_count },
         .scope = .{ .filters_active = cfg.include_prefixes.len > 0 or cfg.exclude_prefixes.len > 0, .include_prefixes = scope_include_prefixes, .exclude_prefixes = scope_exclude_prefixes, .outside_include_path_count = outside_include_paths.count(), .outside_include_change_count = outside_include_change_count, .excluded_path_count = excluded_paths.count(), .excluded_change_count = excluded_change_count },
+        .inspect = inspect,
         .results = try results.toOwnedSlice(),
         .caveats = try caveats.toOwnedSlice(),
     };

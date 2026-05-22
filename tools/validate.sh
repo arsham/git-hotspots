@@ -155,9 +155,9 @@ json_validity() {
 
 semantic_assertions() {
   have_python || return 1
-  python3 - "$BASIC_A" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" <<'PY'
+  python3 - "$BASIC_A" "$BASIC_INSPECT_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" <<'PY'
 import json, os, re, sys
-basic_path, shallow_path, partial_path, self_path, self_scoped_path, scope_unfiltered_path, scope_filtered_path, scope_src_filtered_path, scope_weird_filtered_path, scope_empty_path, scope_src_include_path, scope_src_vendor_include_path, scope_include_exclude_path, scope_weird_include_path, scope_glob_star_include_path, scope_glob_include_path, scope_include_empty_path = sys.argv[1:]
+basic_path, basic_inspect_path, shallow_path, partial_path, self_path, self_scoped_path, scope_unfiltered_path, scope_filtered_path, scope_inspect_excluded_flow_path, scope_inspect_renamed_path, scope_src_filtered_path, scope_weird_filtered_path, scope_empty_path, scope_src_include_path, scope_src_vendor_include_path, scope_include_exclude_path, scope_weird_include_path, scope_glob_star_include_path, scope_glob_include_path, scope_include_empty_path, edge_inspect_tab_path = sys.argv[1:]
 
 def load(path):
     with open(path, encoding='utf-8') as fh:
@@ -169,6 +169,11 @@ assert basic['results'][0]['path'] == 'src/app.txt', 'unexpected basic top resul
 assert basic['analysis']['scope']['filters_active'] is False, 'basic scope unexpectedly active'
 assert basic['analysis']['scope']['include_prefixes'] == [], 'basic include prefixes changed'
 assert all(not os.path.isabs(row['path']) for row in basic['results']), 'absolute basic result path'
+assert 'inspect' not in basic, 'normal JSON gained inspect metadata'
+basic_inspect = load(basic_inspect_path)
+assert basic_inspect.get('inspect') == {'requested_path': 'src/app.txt', 'matched_path': 'src/app.txt', 'rank': 1}, 'inspect metadata changed'
+assert len(basic_inspect.get('results', [])) == 1, 'inspect result count changed'
+assert basic_inspect['results'][0] == basic['results'][0], 'inspect result no longer matches full analysis row'
 
 scope_unfiltered = load(scope_unfiltered_path)
 assert any(row['path'].startswith('.flow/') for row in scope_unfiltered.get('results', [])), 'unfiltered scope fixture lost .flow paths'
@@ -190,6 +195,10 @@ for row in scope_filtered.get('results', []):
     assert not row['path'].startswith('.flow/'), 'excluded result leaked'
     for cc in row.get('cochanges', []):
         assert not cc['path'].startswith('.flow/'), 'excluded cochange leaked'
+scope_inspect_excluded_flow = load(scope_inspect_excluded_flow_path)
+assert len(scope_inspect_excluded_flow.get('results', [])) == 1, 'scoped inspect result count changed'
+filtered_by_path = {row['path']: row for row in scope_filtered.get('results', [])}
+assert scope_inspect_excluded_flow['results'][0] == filtered_by_path['src/vendor_adapter.zig'], 'scoped inspect row does not match full scoped analysis'
 
 scope_src_filtered = load(scope_src_filtered_path)
 for row in scope_src_filtered.get('results', []):
@@ -223,6 +232,9 @@ for row in scope_src_include.get('results', []):
     assert row['path'].startswith('src/'), 'include scope leaked result'
     for cc in row.get('cochanges', []):
         assert cc['path'].startswith('src/'), 'include scope leaked cochange'
+scope_inspect_renamed = load(scope_inspect_renamed_path)
+included_by_path = {row['path']: row for row in scope_src_include.get('results', [])}
+assert scope_inspect_renamed['results'][0] == included_by_path['src/new.zig'], 'renamed inspect row does not match full include analysis'
 
 scope_src_vendor_include = load(scope_src_vendor_include_path)
 assert scope_src_vendor_include['analysis']['scope']['include_prefixes'] == ['src/', 'vendor/'], 'repeated include prefixes changed'
@@ -253,6 +265,12 @@ assert scope_include_empty.get('results') == [], 'empty include scope should pro
 assert scope_include_empty['analysis']['scope']['filters_active'] is True, 'empty include scope metadata inactive'
 assert scope_include_empty['analysis']['scope']['include_prefixes'] == ['does-not-exist/'], 'empty include prefix changed'
 assert scope_include_empty['analysis']['scope']['outside_include_path_count'] >= 1, 'empty include outside path count missing'
+
+edge_inspect_tab = load(edge_inspect_tab_path)
+assert edge_inspect_tab['inspect']['requested_path'] == 'weird/tab\tname.txt', 'tab inspect requested path was not decoded'
+assert edge_inspect_tab['inspect']['matched_path'] == 'weird/tab\tname.txt', 'tab inspect matched path changed'
+assert len(edge_inspect_tab.get('results', [])) == 1, 'tab inspect result count changed'
+assert edge_inspect_tab['results'][0]['path'] == 'weird/tab\tname.txt', 'tab inspect did not match tab path'
 
 self_scoped = load(self_scoped_path)
 assert self_scoped['analysis']['scope']['filters_active'] is True, 'self scoped metadata inactive'
@@ -289,11 +307,11 @@ PY
 
 markdown_assertions() {
   have_python || return 1
-  python3 - "$BASIC_MD_A" "$BASIC_MD_B" "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" "$SCOPE_EMPTY_MD" "$EDGE_MD" "$SELF_MARKDOWN" "$SELF_SCOPED_MARKDOWN" "$SCOPE_SRC_INCLUDE_MD" "$SCOPE_INCLUDE_EMPTY_MD" <<'PY'
+  python3 - "$BASIC_MD_A" "$BASIC_MD_B" "$BASIC_INSPECT_MD" "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" "$SCOPE_EMPTY_MD" "$EDGE_MD" "$EDGE_INSPECT_MD" "$SELF_MARKDOWN" "$SELF_SCOPED_MARKDOWN" "$SCOPE_SRC_INCLUDE_MD" "$SCOPE_INCLUDE_EMPTY_MD" <<'PY'
 import os, re, sys
 from pathlib import Path
 
-basic_a, basic_b, scope_filtered, scope_filtered_b, scope_empty, edge, self_md, self_scoped, scope_src_include_md, scope_include_empty_md = [Path(p) for p in sys.argv[1:]]
+basic_a, basic_b, basic_inspect, scope_filtered, scope_filtered_b, scope_empty, edge, edge_inspect, self_md, self_scoped, scope_src_include_md, scope_include_empty_md = [Path(p) for p in sys.argv[1:]]
 
 def read(path):
     return path.read_text(encoding='utf-8')
@@ -303,6 +321,11 @@ assert basic == read(basic_b), 'basic markdown repeated output changed'
 for section in ['# git-hotspots report', '## Run summary', '## Scope', '## Caveats', '## Top hotspots', '## Evidence']:
     assert section in basic, section
 assert 'File-level Git-history investigation prompts, not bug predictions or code-quality ratings.' in basic
+basic_inspect_text = read(basic_inspect)
+assert '## Inspect' in basic_inspect_text, 'inspect markdown section missing'
+assert '- Requested path: src/app.txt' in basic_inspect_text, 'inspect markdown requested path missing'
+assert '- Matched path: src/app.txt' in basic_inspect_text, 'inspect markdown matched path missing'
+assert '- Rank in scoped evidence universe: 1' in basic_inspect_text, 'inspect markdown rank missing'
 
 scope = read(scope_filtered)
 assert scope == read(scope_filtered_b), 'scope markdown repeated output changed'
@@ -342,6 +365,9 @@ assert 'weird/tab\\tname.txt' in edge_text, 'tab path was not escaped determinis
 assert 'glob/\\[literal\\]\\*.txt' in edge_text, 'glob-like path markdown escaping missing'
 assert 'path is deleted or not present at HEAD' in edge_text, 'deleted-file caveat missing'
 assert 'binary or non\\-text churn unavailable for some changes' in edge_text, 'binary caveat missing'
+edge_inspect_text = read(edge_inspect)
+assert '## Inspect' in edge_inspect_text, 'edge inspect section missing'
+assert 'glob/\\[literal\\]\\*.txt' in edge_inspect_text, 'edge inspect markdown escaping missing'
 
 self_scoped_text = read(self_scoped)
 assert '- Filters active: true' in self_scoped_text, 'self scoped markdown lost scope flag'
@@ -350,7 +376,7 @@ for line in self_scoped_text.splitlines():
     if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
         assert '.flow/' not in line, 'self scoped markdown leaked .flow path: %r' % line
 
-for text in [basic, scope, empty, edge_text, read(self_md), self_scoped_text, include_text, include_empty]:
+for text in [basic, basic_inspect_text, scope, empty, edge_text, edge_inspect_text, read(self_md), self_scoped_text, include_text, include_empty]:
     assert '\t' not in text, 'raw tab leaked in markdown'
     assert 'Fixture Author' not in text, 'fixture author name leaked'
     assert 'fixture@example.invalid' not in text, 'fixture author email leaked'
@@ -380,6 +406,7 @@ explain_output_checks() {
   [ ! -s "$explain_err" ] || return 1
   grep -q -- '--explain' "$help_out" || return 1
   grep -q -- '--version' "$help_out" || return 1
+  grep -q -- '--inspect PATH' "$help_out" || return 1
   "$EXE" --version > "$version_out" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
   [ "$(cat "$version_out")" = 'git-hotspots 0.1.0-alpha.1' ] || return 1
@@ -398,7 +425,8 @@ explain_output_checks() {
     '--format markdown' \
     '--since HEAD~1' \
     '--include-prefix src/' \
-    '--exclude-prefix .flow/'
+    '--exclude-prefix .flow/' \
+    '--inspect src/app.txt'
   do
     # shellcheck disable=SC2086
     if "$EXE" --explain $args > "$ARTIFACT_DIR/explain-invalid.out" 2> "$explain_err"; then
@@ -414,6 +442,7 @@ explain_output_checks() {
     '--since HEAD~1' \
     '--include-prefix src/' \
     '--exclude-prefix .flow/' \
+    '--inspect src/app.txt' \
     '--explain'
   do
     # shellcheck disable=SC2086
@@ -568,18 +597,32 @@ fixture_json_checks() {
   "$EXE" --repo fixtures/basic --format json > "$BASIC_B" || return 1
   diff -u fixtures/expected/basic.json "$BASIC_A" >/dev/null || return 1
   diff -u "$BASIC_A" "$BASIC_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/basic --inspect src/app.txt --format json > "$BASIC_INSPECT_JSON" || return 1
+  diff -u fixtures/expected/basic-inspect.json "$BASIC_INSPECT_JSON" >/dev/null || return 1
   "$EXE" --repo fixtures/basic --format markdown > "$BASIC_MD_A" || return 1
   "$EXE" --repo fixtures/basic --format markdown > "$BASIC_MD_B" || return 1
   diff -u fixtures/expected/basic.md "$BASIC_MD_A" >/dev/null || return 1
   diff -u "$BASIC_MD_A" "$BASIC_MD_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/basic --inspect src/app.txt --format markdown > "$BASIC_INSPECT_MD" || return 1
+  diff -u fixtures/expected/basic-inspect.md "$BASIC_INSPECT_MD" >/dev/null || return 1
+  "$EXE" --repo fixtures/basic --inspect src/app.txt --format table > "$BASIC_INSPECT_TABLE" || return 1
+  diff -u fixtures/expected/basic-inspect.txt "$BASIC_INSPECT_TABLE" >/dev/null || return 1
+  if "$EXE" --repo fixtures/basic --inspect src/app.txt --limit 1 >/dev/null 2> "$ARTIFACT_DIR/inspect-limit.err"; then return 1; fi
+  grep -q -- '--limit cannot be combined with --inspect' "$ARTIFACT_DIR/inspect-limit.err" || return 1
+  if "$EXE" --repo fixtures/basic --inspect missing.txt >/dev/null 2> "$ARTIFACT_DIR/inspect-missing.err"; then return 1; fi
+  grep -q -- '--inspect target has no matching' "$ARTIFACT_DIR/inspect-missing.err" || return 1
   "$EXE" --repo fixtures/scope --format json > "$SCOPE_UNFILTERED_JSON" || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format json > "$SCOPE_FILTERED_JSON" || return 1
   diff -u fixtures/expected/scope-filtered.json "$SCOPE_FILTERED_JSON" >/dev/null || return 1
+  if "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --inspect .flow/secret.txt --format json > "$ARTIFACT_DIR/inspect-excluded.out" 2> "$ARTIFACT_DIR/inspect-excluded.err"; then return 1; fi
+  grep -q -- '--inspect target has no matching' "$ARTIFACT_DIR/inspect-excluded.err" || return 1
+  "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --inspect src/vendor_adapter.zig --format json > "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > "$SCOPE_FILTERED_MD" || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format markdown > "$SCOPE_FILTERED_MD_B" || return 1
   diff -u fixtures/expected/scope-filtered.md "$SCOPE_FILTERED_MD" >/dev/null || return 1
   diff -u "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" >/dev/null || return 1
   "$EXE" --repo fixtures/scope --include-prefix src/ --format json > "$SCOPE_SRC_INCLUDE_JSON" || return 1
+  "$EXE" --repo fixtures/scope --include-prefix src/ --inspect src/new.zig --format json > "$SCOPE_INSPECT_RENAMED_JSON" || return 1
   "$EXE" --repo fixtures/scope --include-prefix src/ --format markdown > "$SCOPE_SRC_INCLUDE_MD" || return 1
   "$EXE" --repo fixtures/scope --include-prefix src/ --format table > "$SCOPE_SRC_INCLUDE_TABLE" || return 1
   "$EXE" --repo fixtures/scope --include-prefix src/ --include-prefix vendor/ --format json > "$SCOPE_SRC_VENDOR_INCLUDE_JSON" || return 1
@@ -594,6 +637,8 @@ fixture_json_checks() {
   "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format json > "$SCOPE_EMPTY_JSON" || return 1
   "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format markdown > "$SCOPE_EMPTY_MD" || return 1
   "$EXE" --repo fixtures/edge --limit 200 --format markdown > "$EDGE_MD" || return 1
+  "$EXE" --repo fixtures/edge --inspect 'glob/[literal]*.txt' --format markdown > "$EDGE_INSPECT_MD" || return 1
+  "$EXE" --repo fixtures/edge --inspect 'weird/tab\tname.txt' --format json > "$EDGE_INSPECT_TAB_JSON" || return 1
   "$EXE" --repo fixtures/shallow --format json > "$SHALLOW_JSON" || return 1
   "$EXE" --repo fixtures/partial --format json > "$PARTIAL_JSON" || return 1
   "$EXE" --repo . --format json > "$SELF_JSON" || return 1
@@ -661,13 +706,18 @@ real_repo_smoke() {
 
 BASIC_A=$ARTIFACT_DIR/basic-a.json
 BASIC_B=$ARTIFACT_DIR/basic-b.json
+BASIC_INSPECT_JSON=$ARTIFACT_DIR/basic-inspect.json
 BASIC_MD_A=$ARTIFACT_DIR/basic-a.md
 BASIC_MD_B=$ARTIFACT_DIR/basic-b.md
+BASIC_INSPECT_MD=$ARTIFACT_DIR/basic-inspect.md
+BASIC_INSPECT_TABLE=$ARTIFACT_DIR/basic-inspect.txt
 SCOPE_UNFILTERED_JSON=$ARTIFACT_DIR/scope-unfiltered.json
 SCOPE_FILTERED_JSON=$ARTIFACT_DIR/scope-filtered.json
+SCOPE_INSPECT_EXCLUDED_FLOW_JSON=$ARTIFACT_DIR/scope-inspect-excluded-flow.json
 SCOPE_FILTERED_MD=$ARTIFACT_DIR/scope-filtered.md
 SCOPE_FILTERED_MD_B=$ARTIFACT_DIR/scope-filtered-b.md
 SCOPE_SRC_INCLUDE_JSON=$ARTIFACT_DIR/scope-src-include.json
+SCOPE_INSPECT_RENAMED_JSON=$ARTIFACT_DIR/scope-inspect-renamed.json
 SCOPE_SRC_INCLUDE_MD=$ARTIFACT_DIR/scope-src-include.md
 SCOPE_SRC_INCLUDE_TABLE=$ARTIFACT_DIR/scope-src-include.txt
 SCOPE_SRC_VENDOR_INCLUDE_JSON=$ARTIFACT_DIR/scope-src-vendor-include.json
@@ -684,6 +734,8 @@ SCOPE_EMPTY_MD=$ARTIFACT_DIR/scope-empty.md
 SHALLOW_JSON=$ARTIFACT_DIR/shallow.json
 PARTIAL_JSON=$ARTIFACT_DIR/partial.json
 EDGE_MD=$ARTIFACT_DIR/edge.md
+EDGE_INSPECT_MD=$ARTIFACT_DIR/edge-inspect.md
+EDGE_INSPECT_TAB_JSON=$ARTIFACT_DIR/edge-inspect-tab.json
 SELF_JSON=$ARTIFACT_DIR/self.json
 SELF_SCOPED_JSON=$ARTIFACT_DIR/self-scoped.json
 SELF_MARKDOWN=$ARTIFACT_DIR/self.md
@@ -723,7 +775,7 @@ else
 fi
 
 printf 'validate: RUN JSON validity\n'
-json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$SCOPE_UNFILTERED_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
+json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_INSPECT_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
 
 printf 'validate: RUN shallow, partial, and privacy assertions\n'
 if semantic_assertions; then

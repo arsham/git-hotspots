@@ -39,6 +39,8 @@ assert_fails_with_stderr() {
   fi
 }
 
+ctrl=$(printf 'bad\001path')
+
 sh tools/setup-fixtures.sh
 
 "$EXE" --explain > /tmp/git-hotspots-explain.txt
@@ -48,6 +50,7 @@ diff -u /tmp/git-hotspots-explain.txt /tmp/git-hotspots-explain-2.txt
 "$EXE" --help > /tmp/git-hotspots-help.txt
 grep -q -- "--explain" /tmp/git-hotspots-help.txt
 grep -q -- "--version" /tmp/git-hotspots-help.txt
+grep -q -- "--inspect PATH" /tmp/git-hotspots-help.txt
 "$EXE" --version > /tmp/git-hotspots-version.txt 2> /tmp/git-hotspots-version.err
 test "$(cat /tmp/git-hotspots-version.txt)" = "git-hotspots 0.1.0-alpha.1"
 test ! -s /tmp/git-hotspots-version.err
@@ -65,6 +68,7 @@ assert_fails_with_stderr explain-format "--explain cannot be combined" "$EXE" --
 assert_fails_with_stderr explain-since "--explain cannot be combined" "$EXE" --explain --since HEAD~1
 assert_fails_with_stderr explain-include "--explain cannot be combined" "$EXE" --explain --include-prefix src/
 assert_fails_with_stderr explain-exclude "--explain cannot be combined" "$EXE" --explain --exclude-prefix .flow/
+assert_fails_with_stderr explain-inspect "--explain cannot be combined" "$EXE" --explain --inspect src/app.txt
 assert_fails_with_stderr version-repo "--version cannot be combined" "$EXE" --version --repo .
 assert_fails_with_stderr version-limit "--version cannot be combined" "$EXE" --version --limit 1
 assert_fails_with_stderr version-format "--version cannot be combined" "$EXE" --version --format markdown
@@ -72,6 +76,7 @@ assert_fails_with_stderr version-since "--version cannot be combined" "$EXE" --v
 assert_fails_with_stderr version-include "--version cannot be combined" "$EXE" --version --include-prefix src/
 assert_fails_with_stderr version-exclude "--version cannot be combined" "$EXE" --version --exclude-prefix .flow/
 assert_fails_with_stderr version-explain "--version cannot be combined" "$EXE" --version --explain
+assert_fails_with_stderr version-inspect "--version cannot be combined" "$EXE" --version --inspect src/app.txt
 
 "$EXE" --repo fixtures/basic --format json > /tmp/git-hotspots-basic.json
 diff -u fixtures/expected/basic.json /tmp/git-hotspots-basic.json
@@ -81,6 +86,14 @@ diff -u /tmp/git-hotspots-basic.json /tmp/git-hotspots-basic-2.json
 diff -u fixtures/expected/basic.md /tmp/git-hotspots-basic.md
 "$EXE" --repo fixtures/basic --format markdown > /tmp/git-hotspots-basic-2.md
 diff -u /tmp/git-hotspots-basic.md /tmp/git-hotspots-basic-2.md
+"$EXE" --repo fixtures/basic --inspect src/app.txt --format json > /tmp/git-hotspots-basic-inspect.json
+diff -u fixtures/expected/basic-inspect.json /tmp/git-hotspots-basic-inspect.json
+"$EXE" --repo fixtures/basic --inspect src/app.txt --format json > /tmp/git-hotspots-basic-inspect-2.json
+diff -u /tmp/git-hotspots-basic-inspect.json /tmp/git-hotspots-basic-inspect-2.json
+"$EXE" --repo fixtures/basic --inspect src/app.txt --format markdown > /tmp/git-hotspots-basic-inspect.md
+diff -u fixtures/expected/basic-inspect.md /tmp/git-hotspots-basic-inspect.md
+"$EXE" --repo fixtures/basic --inspect src/app.txt --format table > /tmp/git-hotspots-basic-inspect.txt
+diff -u fixtures/expected/basic-inspect.txt /tmp/git-hotspots-basic-inspect.txt
 "$EXE" --repo fixtures/scope --format json > /tmp/git-hotspots-scope-unfiltered.json
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --format json > /tmp/git-hotspots-scope-filtered.json
 diff -u fixtures/expected/scope-filtered.json /tmp/git-hotspots-scope-filtered.json
@@ -105,6 +118,20 @@ diff -u /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-filtered-2.m
 "$EXE" --repo fixtures/scope --include-prefix does-not-exist/ --format markdown > /tmp/git-hotspots-scope-include-empty.md
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format json > /tmp/git-hotspots-scope-empty.json
 "$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format markdown > /tmp/git-hotspots-scope-empty.md
+"$EXE" --repo fixtures/scope --exclude-prefix .flow/ --inspect src/vendor_adapter.zig --format json > /tmp/git-hotspots-scope-inspect-excluded-flow.json
+"$EXE" --repo fixtures/scope --include-prefix src/ --inspect src/new.zig --format json > /tmp/git-hotspots-scope-inspect-include-renamed.json
+"$EXE" --repo fixtures/edge --inspect 'glob/[literal]*.txt' --format markdown > /tmp/git-hotspots-edge-inspect-glob.md
+"$EXE" --repo fixtures/edge --inspect 'weird/tab\tname.txt' --format json > /tmp/git-hotspots-edge-inspect-tab.json
+assert_fails_with_stderr inspect-limit "--limit cannot be combined with --inspect" "$EXE" --repo fixtures/basic --inspect src/app.txt --limit 1
+assert_fails_with_stderr inspect-missing "--inspect target has no matching Git-history evidence" "$EXE" --repo fixtures/basic --inspect src/missing.txt
+assert_fails_with_stderr inspect-outside-include "--inspect target has no matching Git-history evidence" "$EXE" --repo fixtures/scope --include-prefix src/ --inspect vendor/lib.txt
+assert_fails_with_stderr inspect-excluded "--inspect target has no matching Git-history evidence" "$EXE" --repo fixtures/scope --exclude-prefix src/ --inspect src/new.zig
+assert_fails_with_stderr inspect-empty "--inspect must be" "$EXE" --repo fixtures/basic --inspect ""
+assert_fails_with_stderr inspect-absolute "--inspect must be" "$EXE" --repo fixtures/basic --inspect /tmp/file
+assert_fails_with_stderr inspect-drive "--inspect must be" "$EXE" --repo fixtures/basic --inspect C:/tmp/file
+assert_fails_with_stderr inspect-backslash "--inspect must be" "$EXE" --repo fixtures/basic --inspect '\tmp\file'
+assert_fails_with_stderr inspect-parent "--inspect must be" "$EXE" --repo fixtures/basic --inspect src/../app.txt
+assert_fails_with_stderr inspect-control "--inspect must be" "$EXE" --repo fixtures/basic --inspect "$ctrl"
 
 nongit=$(mktemp -d)
 assert_fails_with_output non-git "$EXE" --repo "$nongit"
@@ -120,7 +147,6 @@ assert_fails_with_stderr invalid-format "invalid arguments" "$EXE" --repo fixtur
 assert_fails_with_stderr invalid-exclude-empty --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix ""
 assert_fails_with_stderr invalid-exclude-absolute --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix /tmp
 assert_fails_with_stderr invalid-exclude-parent --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix src/../lib
-ctrl=$(printf 'bad\001prefix')
 assert_fails_with_stderr invalid-exclude-control --exclude-prefix "$EXE" --repo fixtures/basic --exclude-prefix "$ctrl"
 assert_fails_with_stderr invalid-include-empty --include-prefix "$EXE" --repo fixtures/basic --include-prefix ""
 assert_fails_with_stderr invalid-include-absolute --include-prefix "$EXE" --repo fixtures/basic --include-prefix /tmp
@@ -137,14 +163,14 @@ assert_fails_with_stderr invalid-include-control --include-prefix "$EXE" --repo 
 "$EXE" --repo fixtures/detached --format json > /tmp/git-hotspots-detached.json
 "$EXE" --repo fixtures/linked --format json > /tmp/git-hotspots-linked.json
 
-python3 - /tmp/git-hotspots-basic.md /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-empty.md /tmp/git-hotspots-edge.md /tmp/git-hotspots-scope-src-include.md /tmp/git-hotspots-scope-include-empty.md <<'PY'
+python3 - /tmp/git-hotspots-basic.md /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-empty.md /tmp/git-hotspots-edge.md /tmp/git-hotspots-scope-src-include.md /tmp/git-hotspots-scope-include-empty.md /tmp/git-hotspots-basic-inspect.md /tmp/git-hotspots-edge-inspect-glob.md <<'PY'
 import json
 import os
 import re
 import sys
 from pathlib import Path
 
-basic_md_path, scope_md_path, scope_empty_md_path, edge_md_path, include_md_path, include_empty_md_path = map(Path, sys.argv[1:])
+basic_md_path, scope_md_path, scope_empty_md_path, edge_md_path, include_md_path, include_empty_md_path, basic_inspect_md_path, edge_inspect_md_path = map(Path, sys.argv[1:])
 
 def load(path):
     return json.loads(Path(path).read_text())
@@ -158,6 +184,11 @@ assert basic['analysis']['scope']['include_prefixes'] == []
 assert basic['analysis']['scope']['exclude_prefixes'] == []
 assert basic['results'][0]['path'] == 'src/app.txt'
 assert all(not row['path'].startswith('/') for row in basic['results'])
+basic_inspect = load('/tmp/git-hotspots-basic-inspect.json')
+assert basic_inspect['inspect'] == {'requested_path': 'src/app.txt', 'matched_path': 'src/app.txt', 'rank': 1}
+assert len(basic_inspect['results']) == 1
+assert basic_inspect['results'][0] == basic['results'][0]
+assert 'inspect' not in basic
 
 scope_unfiltered = load('/tmp/git-hotspots-scope-unfiltered.json')
 unfiltered_paths = [row['path'] for row in scope_unfiltered['results']]
@@ -181,6 +212,10 @@ for row in scope_filtered['results']:
     assert not row['path'].startswith('.flow/'), row['path']
     assert all(not cc['path'].startswith('.flow/') for cc in row['cochanges']), row['path']
 assert 'src/vendor_adapter.zig' in by_path(scope_filtered), 'vendor/ prefix semantics fixture missing adapter'
+scope_inspect_excluded_flow = load('/tmp/git-hotspots-scope-inspect-excluded-flow.json')
+assert len(scope_inspect_excluded_flow['results']) == 1
+assert scope_inspect_excluded_flow['results'][0] == by_path(scope_filtered)['src/vendor_adapter.zig']
+assert scope_inspect_excluded_flow['inspect']['matched_path'] == 'src/vendor_adapter.zig'
 
 vendor_filtered = load('/tmp/git-hotspots-scope-vendor-filtered.json')
 vendor_rows = by_path(vendor_filtered)
@@ -214,6 +249,10 @@ for row in src_include['results']:
     assert all(cc['path'].startswith('src/') for cc in row['cochanges']), row['path']
 assert 'src/new.zig' in by_path(src_include), 'include scope lost normalized rename target'
 assert 'src/vendor_adapter.zig' in by_path(src_include), 'literal include prefix lost adapter path'
+scope_inspect_renamed = load('/tmp/git-hotspots-scope-inspect-include-renamed.json')
+assert len(scope_inspect_renamed['results']) == 1
+assert scope_inspect_renamed['results'][0] == by_path(src_include)['src/new.zig']
+assert scope_inspect_renamed['inspect']['matched_path'] == 'src/new.zig'
 
 src_vendor_include = load('/tmp/git-hotspots-scope-src-vendor-include.json')
 assert src_vendor_include['analysis']['scope']['include_prefixes'] == ['src/', 'vendor/']
@@ -263,6 +302,10 @@ rows = by_path(edge)
 for path in ['weird/path with space.txt', 'weird/éclair.txt', 'renamed.txt']:
     assert path in rows, path
 assert any('tab' in path for path in rows), 'tab path missing'
+edge_inspect_tab = load('/tmp/git-hotspots-edge-inspect-tab.json')
+assert edge_inspect_tab['inspect']['requested_path'] == 'weird/tab\tname.txt'
+assert edge_inspect_tab['inspect']['matched_path'] == 'weird/tab\tname.txt'
+assert edge_inspect_tab['results'][0] == rows['weird/tab\tname.txt']
 assert 'glob/[literal]*.txt' in rows, 'glob-looking literal path missing'
 assert rows['gone.txt']['current_size'] is None
 assert any('deleted' in c for c in rows['gone.txt']['caveats'])
@@ -293,6 +336,11 @@ assert '# git-hotspots report' in basic_md
 assert 'File-level Git-history investigation prompts, not bug predictions or code-quality ratings.' in basic_md
 for section in ['## Run summary', '## Scope', '## Caveats', '## Top hotspots', '## Evidence']:
     assert section in basic_md, section
+basic_inspect_md = basic_inspect_md_path.read_text()
+assert '## Inspect' in basic_inspect_md
+assert '- Requested path: src/app.txt' in basic_inspect_md
+assert '- Matched path: src/app.txt' in basic_inspect_md
+assert '- Rank in scoped evidence universe: 1' in basic_inspect_md
 
 scope_md = scope_md_path.read_text()
 assert '- Filters active: true' in scope_md
@@ -330,7 +378,10 @@ assert 'weird/tab\\tname.txt' in edge_md
 assert 'glob/\\[literal\\]\\*.txt' in edge_md
 assert 'path is deleted or not present at HEAD' in edge_md
 assert 'binary or non\\-text churn unavailable for some changes' in edge_md
-for text in [basic_md, scope_md, scope_empty_md, edge_md, include_md, include_empty_md]:
+edge_inspect_md = edge_inspect_md_path.read_text()
+assert 'glob/\\[literal\\]\\*.txt' in edge_inspect_md
+assert '## Inspect' in edge_inspect_md
+for text in [basic_md, scope_md, scope_empty_md, edge_md, include_md, include_empty_md, basic_inspect_md, edge_inspect_md]:
     assert '\t' not in text, 'raw tab leaked in markdown'
     assert 'Fixture Author' not in text
     assert 'fixture@example.invalid' not in text

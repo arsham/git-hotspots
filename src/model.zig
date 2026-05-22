@@ -7,8 +7,15 @@ pub const Config = struct {
     limit: usize = 10,
     format: Format = .table,
     since: ?[]const u8 = null,
+    inspect_path: ?[]const u8 = null,
     include_prefixes: []const []const u8 = &.{},
     exclude_prefixes: []const []const u8 = &.{},
+};
+
+pub const Inspect = struct {
+    requested_path: []const u8,
+    matched_path: []const u8,
+    rank: usize,
 };
 
 pub const Scope = struct {
@@ -73,6 +80,7 @@ pub const Analysis = struct {
     repo_root: []const u8,
     history: History,
     scope: Scope,
+    inspect: ?Inspect = null,
     results: []Result,
     caveats: [][]const u8,
 
@@ -88,6 +96,10 @@ pub const Analysis = struct {
             self.allocator.free(row.evidence);
         }
         self.allocator.free(self.results);
+        if (self.inspect) |inspect| {
+            self.allocator.free(inspect.requested_path);
+            self.allocator.free(inspect.matched_path);
+        }
         for (self.scope.include_prefixes) |prefix| self.allocator.free(prefix);
         self.allocator.free(self.scope.include_prefixes);
         for (self.scope.exclude_prefixes) |prefix| self.allocator.free(prefix);

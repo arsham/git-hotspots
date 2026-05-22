@@ -10,7 +10,7 @@ const usage =
     \\git-hotspots: deterministic file-level Git-history hotspot prompts
     \\
     \\Usage:
-    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--include-prefix PATH]... [--exclude-prefix PATH]...
+    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--include-prefix PATH]... [--exclude-prefix PATH]... [--inspect PATH]
     \\  git-hotspots --explain
     \\  git-hotspots --version
     \\  git-hotspots --help
@@ -26,6 +26,9 @@ const usage =
     \\  --exclude-prefix PATH
     \\                    Repeatable repo-relative literal Git path prefix to exclude
     \\                    before scoring; use / separators, not globs
+    \\  --inspect PATH    Exact repo-relative file drilldown; selects one file after
+    \\                    scoring and ranking, before normal --limit truncation;
+    \\                    use \\t to target a tab in a Git path
     \\  --explain         Explain current scoring semantics without analysing a repo
     \\  --version         Show the git-hotspots version without analysing a repo
     \\  --help            Show this help
@@ -72,8 +75,10 @@ pub fn main(init: std.process.Init.Minimal) !void {
             },
             error.InvalidIncludePrefix => try stderr.print("error: --include-prefix must be a non-empty repo-relative path prefix without absolute roots, '..' segments, or control characters\n", .{}),
             error.InvalidExcludePrefix => try stderr.print("error: --exclude-prefix must be a non-empty repo-relative path prefix without absolute roots, '..' segments, or control characters\n", .{}),
-            error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags (--repo, --limit, --format, --since, --include-prefix, --exclude-prefix)\n", .{}),
-            error.InvalidVersionCombination => try stderr.print("error: --version cannot be combined with --explain or analysis flags (--repo, --limit, --format, --since, --include-prefix, --exclude-prefix)\n", .{}),
+            error.InvalidInspectPath => try stderr.print("error: --inspect must be a non-empty exact repo-relative Git path without absolute roots, '..' segments, or control characters\n", .{}),
+            error.InvalidInspectLimitCombination => try stderr.print("error: --limit cannot be combined with --inspect; inspect selects from the full scoped evidence universe\n", .{}),
+            error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags (--repo, --limit, --format, --since, --include-prefix, --exclude-prefix, --inspect)\n", .{}),
+            error.InvalidVersionCombination => try stderr.print("error: --version cannot be combined with --explain or analysis flags (--repo, --limit, --format, --since, --include-prefix, --exclude-prefix, --inspect)\n", .{}),
             error.InvalidArguments => try stderr.print("error: invalid arguments\n\n{s}", .{usage}),
             else => try stderr.print("error: {s}\n", .{@errorName(err)}),
         }
@@ -100,6 +105,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
             error.BareRepository => try stderr.print("error: bare repositories are not supported by this alpha; use a worktree\n", .{}),
             error.EmptyRepository => try stderr.print("error: repository has no commits to analyse\n", .{}),
             error.InvalidSince => try stderr.print("error: --since must name an existing revision\n", .{}),
+            error.InspectTargetNotFound => try stderr.print("error: --inspect target has no matching Git-history evidence in the selected scope\n", .{}),
             else => try stderr.print("error: git history analysis failed: {s}\n", .{@errorName(err)}),
         }
         try stderr.flush();
@@ -120,7 +126,7 @@ const CliMode = union(enum) {
     version,
 };
 
-const CliError = error{ HelpRequested, InvalidArguments, InvalidExplainCombination, InvalidVersionCombination, InvalidIncludePrefix, InvalidExcludePrefix } || std.mem.Allocator.Error;
+const CliError = error{ HelpRequested, InvalidArguments, InvalidExplainCombination, InvalidVersionCombination, InvalidIncludePrefix, InvalidExcludePrefix, InvalidInspectPath, InvalidInspectLimitCombination } || std.mem.Allocator.Error;
 
 fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!CliMode {
     var cfg = model.Config{ .repo_path = try allocator.dupe(u8, ".") };
@@ -128,6 +134,7 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
     var explain_requested = false;
     var version_requested = false;
     var analysis_flag_seen = false;
+    var limit_seen = false;
 
     var i: usize = 1;
     while (i < args.len) : (i += 1) {
@@ -159,6 +166,7 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             const v = args[i];
+            limit_seen = true;
             cfg.limit = std.fmt.parseInt(usize, v, 10) catch return error.InvalidArguments;
         } else if (std.mem.eql(u8, arg, "--format")) {
             analysis_flag_seen = true;
@@ -191,6 +199,17 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
             i += 1;
             if (i >= args.len) return error.InvalidArguments;
             try appendExcludePrefix(allocator, &cfg, args[i]);
+        } else if (std.mem.eql(u8, arg, "--inspect")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
+            i += 1;
+            if (i >= args.len) return error.InvalidArguments;
+            if (cfg.inspect_path) |old| allocator.free(old);
+            cfg.inspect_path = normalizeInspectPath(allocator, args[i]) catch |err| switch (err) {
+                error.InvalidPrefix => return error.InvalidInspectPath,
+                error.OutOfMemory => return error.OutOfMemory,
+            };
         } else return error.InvalidArguments;
     }
     if (explain_requested) {
@@ -204,16 +223,53 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
         return .version;
     }
     if (cfg.limit == 0) return error.InvalidArguments;
+    if (cfg.inspect_path != null and limit_seen) return error.InvalidInspectLimitCombination;
     return .{ .analyze = cfg };
 }
 
 fn freeConfig(allocator: std.mem.Allocator, cfg: model.Config) void {
     allocator.free(cfg.repo_path);
     if (cfg.since) |s| allocator.free(s);
+    if (cfg.inspect_path) |p| allocator.free(p);
     for (cfg.include_prefixes) |prefix| allocator.free(prefix);
     if (cfg.include_prefixes.len > 0) allocator.free(cfg.include_prefixes);
     for (cfg.exclude_prefixes) |prefix| allocator.free(prefix);
     if (cfg.exclude_prefixes.len > 0) allocator.free(cfg.exclude_prefixes);
+}
+
+fn normalizeInspectPath(allocator: std.mem.Allocator, raw: []const u8) PrefixError![]const u8 {
+    var path = raw;
+    while (std.mem.startsWith(u8, path, "./")) path = path[2..];
+    if (path.len == 0) return error.InvalidPrefix;
+    if (std.fs.path.isAbsolute(path) or path[0] == '\\') return error.InvalidPrefix;
+    if (path.len >= 2 and std.ascii.isAlphabetic(path[0]) and path[1] == ':') return error.InvalidPrefix;
+    for (path) |c| if (c < 0x20 or c == 0x7f) return error.InvalidPrefix;
+
+    var out = std.array_list.Managed(u8).init(allocator);
+    errdefer out.deinit();
+    var i: usize = 0;
+    while (i < path.len) {
+        const c = path[i];
+        i += 1;
+        if (c == '\\' and i < path.len and path[i] == 't') {
+            try out.append('\t');
+            i += 1;
+        } else {
+            try out.append(c);
+        }
+    }
+
+    const normalized = try out.toOwnedSlice();
+    errdefer allocator.free(normalized);
+    if (normalized.len == 0) return error.InvalidPrefix;
+    if (std.fs.path.isAbsolute(normalized) or normalized[0] == '\\') return error.InvalidPrefix;
+    if (normalized.len >= 2 and std.ascii.isAlphabetic(normalized[0]) and normalized[1] == ':') return error.InvalidPrefix;
+
+    var segments = std.mem.splitScalar(u8, normalized, '/');
+    while (segments.next()) |segment| {
+        if (std.mem.eql(u8, segment, "..")) return error.InvalidPrefix;
+    }
+    return normalized;
 }
 
 fn appendIncludePrefix(allocator: std.mem.Allocator, cfg: *model.Config, raw: []const u8) CliError!void {
@@ -288,6 +344,8 @@ test "reject explain combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--explain", "--since", "HEAD~1" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--include-prefix", "src/" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--exclude-prefix", ".flow/" },
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--inspect", "src/app.zig" },
+        &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--explain" },
     };
     for (cases) |args| try std.testing.expectError(error.InvalidExplainCombination, parseArgs(std.testing.allocator, args));
 }
@@ -302,6 +360,8 @@ test "reject version combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--version", "--include-prefix", "src/" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--exclude-prefix", ".flow/" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--explain" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--inspect", "src/app.zig" },
+        &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--version" },
     };
     for (cases) |args| try std.testing.expectError(error.InvalidVersionCombination, parseArgs(std.testing.allocator, args));
 }
@@ -324,6 +384,39 @@ test "parse repeatable include prefixes" {
     try std.testing.expectEqual(@as(usize, 2), cfg.include_prefixes.len);
     try std.testing.expectEqualStrings("src/", cfg.include_prefixes[0]);
     try std.testing.expectEqualStrings("vendor/", cfg.include_prefixes[1]);
+}
+
+test "parse inspect path" {
+    const args = [_][:0]const u8{ "git-hotspots", "--repo", "fixtures/basic", "--inspect", "./src/app.txt", "--format", "json" };
+    const mode = try parseArgs(std.testing.allocator, &args);
+    const cfg = mode.analyze;
+    defer freeConfig(std.testing.allocator, cfg);
+    try std.testing.expectEqualStrings("fixtures/basic", cfg.repo_path);
+    try std.testing.expectEqualStrings("src/app.txt", cfg.inspect_path.?);
+    try std.testing.expectEqual(model.Format.json, cfg.format);
+}
+
+test "parse inspect path decodes git-style tab escape" {
+    const args = [_][:0]const u8{ "git-hotspots", "--inspect", "weird/tab\\tname.txt" };
+    const mode = try parseArgs(std.testing.allocator, &args);
+    const cfg = mode.analyze;
+    defer freeConfig(std.testing.allocator, cfg);
+    try std.testing.expectEqualStrings("weird/tab\tname.txt", cfg.inspect_path.?);
+}
+
+test "reject invalid inspect paths and limit combination" {
+    const invalid = [_][]const [:0]const u8{
+        &[_][:0]const u8{ "git-hotspots", "--inspect", "" },
+        &[_][:0]const u8{ "git-hotspots", "--inspect", "/tmp" },
+        &[_][:0]const u8{ "git-hotspots", "--inspect", "C:/tmp" },
+        &[_][:0]const u8{ "git-hotspots", "--inspect", "\\tmp" },
+        &[_][:0]const u8{ "git-hotspots", "--inspect", "src/../lib" },
+        &[_][:0]const u8{ "git-hotspots", "--inspect", "bad\npath" },
+    };
+    for (invalid) |args| try std.testing.expectError(error.InvalidInspectPath, parseArgs(std.testing.allocator, args));
+
+    try std.testing.expectError(error.InvalidInspectLimitCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--limit", "1", "--inspect", "src/app.txt" }));
+    try std.testing.expectError(error.InvalidInspectLimitCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.txt", "--limit", "1" }));
 }
 
 test "reject invalid exclude prefixes" {
