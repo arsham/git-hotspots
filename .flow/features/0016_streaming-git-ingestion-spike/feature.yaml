@@ -1,0 +1,200 @@
+schema: flow-feature.v1
+feature:
+  id: "0016"
+  slug: streaming-git-ingestion-spike
+  title: Streaming Git ingestion spike
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Large-repository runs currently collect full git log history output
+    before parsing, which keeps cache tempting before we have a safe ingestion
+    and measurement seam.
+  outcome: Stream git history ingestion into the existing evidence model and
+    record privacy-safe phase evidence without changing report semantics or
+    adding cache.
+  acceptance:
+    - Main git history ingestion no longer needs to retain the full git log
+      --numstat stdout payload before parsing.
+    - Existing table, JSON, and Markdown outputs remain stable for fixtures
+      unless a documented bug fix requires an intentional fixture update.
+    - Streaming preserves scoring, ranking, confidence, caveats, co-change,
+      scope filtering, include/exclude, inspect, since, shallow/partial,
+      dirty-worktree, and error semantics.
+    - Parser or ingestion tests cover chunk boundaries, CRLF, binary numstat,
+      malformed/blank lines, braced renames, quoted tab paths, and unicode
+      paths.
+    - Progress and phase timing remain opt-in stderr-only and never change
+      table, JSON, or Markdown stdout.
+    - Close-out includes privacy-safe this-repo and sibling-local-repo
+      validation evidence.
+planning:
+  state: ready
+  summary: Implement a narrow streaming git log ingestion seam plus privacy-safe
+    phase evidence; cache remains explicitly out of scope.
+  brief_sync:
+    status: updated
+    reason: Linked B001 as the source capability brief for local-first deterministic
+      hotspot intelligence and no-cache-as-product-truth boundaries.
+    checked_at: 2026-05-22T20:52:29.723Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: "Follow-up optimisation slice under B001: preserves local deterministic
+      Git evidence while improving ingestion and measurement before any
+      cache/provider work."
+    checked_at: 2026-05-22T20:52:44.332Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - packet_verification_commands_missing
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-22T20:53:15.713Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-22T20:53:15.713Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-22T20:53:15.713Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-22T20:53:15.713Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Follow-up to Feature 0015 performance/cache decision, which
+    recommended streaming ingestion before persistent cache.
+  depends_on_feature_ids:
+    - "0015"
+  blocked_by: []
+design:
+  rough_shape:
+    - Refactor current git log parsing so history records can be consumed
+      incrementally.
+    - Stream git log stdout into the same aggregation semantics instead of
+      buffering all stdout first.
+    - Keep reports and scoring unchanged.
+    - Expose only bounded phase timing through existing opt-in progress stderr.
+  packets:
+    - id: P1
+      title: Streaming Git log ingestion parity
+      goal: Replace all-at-once git log stdout buffering with streaming ingestion while preserving output parity.
+      depends_on: []
+      owner_phase: runner
+      status: planned
+      execution_context:
+        - "Anchors: src/git.zig, existing parser/aggregation helpers,
+          tests/integration.sh, fixtures/expected."
+        - "In scope: child-process stdout streaming for git history, parser seam
+          tests, fixture parity, and preserving current Git error fidelity."
+        - "Out of scope: cache, scoring changes, report schema changes,
+          providers, network, telemetry, release/CI, broad CLI parser rewrites."
+        - "Protected: table/JSON/Markdown outputs, scoring/ranking/co-change
+          semantics, scope/include/exclude/inspect behaviour, Git range
+          semantics, and privacy boundaries."
+        - "Dependencies: Feature 0015 decision and all current CLI/report
+          semantics through Feature 0014."
+        - "Validation/evidence: zig build test, fixture output diffs, targeted
+          parser boundary coverage, and git diff --check."
+        - "Review focus: streaming parser correctness, memory ownership, chunk
+          boundaries, path normalization, rename/quoted-path handling, and Git
+          failure handling."
+        - "Escalate if: streaming needs broad rewrites, output schema changes,
+          changed Git arguments, or whole-history buffering remains the only
+          safe path."
+        - "Done boundary: existing fixture outputs remain stable and analysis no
+          longer requires retaining the full Git log output before parsing."
+    - id: P2
+      title: Phase timing evidence and close-out validation
+      goal: Add privacy-safe phase evidence and close-out validation after streaming parity is proven.
+      depends_on:
+        - P1
+      owner_phase: runner
+      status: planned
+      execution_context:
+        - "Anchors: src/git.zig, src/main.zig,
+          docs/performance-cache-decision.md or
+          docs/streaming-git-ingestion-spike.md, tools/validate.sh."
+        - "In scope: bounded phase timing, stdout/stderr separation validation,
+          privacy-safe this-repo and sibling-local-repo evidence."
+        - "Out of scope: public benchmark claims, persistent instrumentation
+          state, report schema timing fields, cache, benchmark harness
+          expansion, providers, CI, release packaging."
+        - "Protected: deterministic stdout, privacy boundaries, local-first
+          defaults, and cache-as-future-optimisation framing."
+        - "Dependencies: P1 complete and output parity preserved."
+        - "Validation/evidence: zig build validate, close-out smoke with
+          sibling-local-repo, stdout/stderr separation checks,
+          privacy/prohibited-content scan over changed docs."
+        - "Review focus: progress privacy, phase evidence usefulness, absence of
+          schema changes, and no overclaim that streaming solves large-repo
+          performance."
+        - "Escalate if: evidence requires raw private output, new public timing
+          schema, cache implementation, or persistent measurement state."
+        - "Done boundary: durable close-out evidence records what changed, what
+          was measured, what remains unknown, and whether cache remains
+          deferred."
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids:
+    - P1
+    - P2
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-22T20:46:41.521Z
+  updated_at: 2026-05-22T20:53:15.713Z
