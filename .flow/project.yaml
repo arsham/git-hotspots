@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0019"
   active_run_id: null
   last_completed_feature_id: "0018"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 19
+  next_id: 20
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -101,6 +101,10 @@ features:
       slug: rename-aware-file-lineage
       path: .flow/features/0018_rename-aware-file-lineage
       created_at: 2026-05-22T22:40:41.673Z
+    - id: "0019"
+      slug: better-project-scope-exclusions
+      path: .flow/features/0019_better-project-scope-exclusions
+      created_at: 2026-05-22T23:43:51.716Z
 intake:
   mode: roadmap
   summary: null
