@@ -278,4 +278,762 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T18:52:59.240Z
-  updated_at: 2026-05-22T19:00:44.023Z
+  updated_at: 2026-05-22T19:01:46.537Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-22T19:01:46.537Z
+  assurance_level: sensitive
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Balanced
+    runner_model: Balanced
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level sensitive requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0013"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Large-repo runtime feedback
+      problem: Large local repositories can take long enough to analyse that a user
+        may wonder whether git-hotspots is still working. Current reports stay
+        deterministic, but the CLI gives no runtime feedback while Git history
+        is being read and scored.
+      outcome: Add an opt-in --progress analysis flag that writes bounded coarse phase
+        and elapsed-time feedback to stderr only. Existing table, JSON, and
+        Markdown stdout reports remain byte-stable, local-first, and
+        schema-stable. The feature does not add automatic progress, cache,
+        streaming parsing, performance optimisation, providers, telemetry, or
+        report timing fields.
+      acceptance:
+        - --progress is opt-in and successful analysis without it remains
+          stderr-silent except pre-existing error behaviour.
+        - --progress writes bounded coarse phase messages and a final
+          elapsed-time line to stderr only.
+        - Table, JSON, and Markdown stdout for equivalent commands are
+          byte-for-byte equal with and without --progress.
+        - JSON output with --progress remains valid JSON and does not gain
+          timing or progress fields.
+        - --progress is rejected with --explain and with --version; --help,
+          --version, and --explain do not emit progress phase lines.
+        - Progress messages do not include repo paths, file paths, raw omitted
+          path lists, commit hashes, commit messages, remotes, author
+          identities, source snippets, report rows, ANSI spinners, or
+          carriage-return progress bars.
+        - --progress works with --repo, --since, --scope, include/exclude
+          prefixes, --inspect, and all report formats without changing scoring,
+          filtering, ranking, co-change, or inspect behaviour.
+        - Help and README document --progress as opt-in local stderr feedback
+          for long runs.
+        - zig build validate covers progress enabled and disabled, stdout/stderr
+          separation, JSON validity with progress enabled, deterministic stdout,
+          stderr privacy scans, no progress for standalone modes, this-repo
+          smoke, and close-out sibling-local-repo smoke.
+        - Close-out evidence records only privacy-safe labels, command shapes,
+          pass/fail status, bounded counts, dirty/scope/progress flags, elapsed
+          summary, commit count, and tracked-file count for sibling-local-repo.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: "Follow-up capability slice for B001: opt-in progress feedback helps
+        users trust long local analyses while preserving deterministic stdout
+        reports and local-first product truth."
+      checked_at: 2026-05-22T19:00:28.438Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0013_large-repo-runtime-feedback/prd.md
+  requirements_contract:
+    source_path: .flow/features/0013_large-repo-runtime-feedback/prd.md
+    source_digest: 94d00d6fc5ea30ed79a68fc81b07f8fb15415a2bb4ec9ce933e48b22e3a67cb0
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: Add an optional --progress analysis flag.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: --progress is opt-in. Existing commands without --progress remain
+          stderr-silent on successful analysis, except pre-existing error
+          behaviour.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: --progress is an analysis flag and must be rejected with standalone
+          --explain and standalone --version.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: --progress --help may show help without running analysis or emitting
+          progress phases.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: Progress output must be written only to stderr.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: Progress output must never be written to table, JSON, or Markdown stdout.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: Table, JSON, and Markdown stdout must remain byte-stable for the same
+          command with and without --progress.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: JSON output with --progress must remain valid JSON and must not gain
+          timing or progress fields.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: Progress messages must be bounded, line-oriented, and human-readable.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: Progress messages must be coarse phase feedback only, such as checking the
+          repository, reading Git history, scoring files, rendering the report,
+          and completing the run.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: The final progress line may include elapsed wall-clock time on stderr
+          only.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: Progress messages must not include repo paths, file paths, raw omitted
+          path lists, commit hashes, commit messages, remotes, author
+          identities, source snippets, or report rows.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: Progress messages must not imply telemetry, network activity, remote
+          enrichment, cache use, provider use, bug prediction, code-quality
+          scoring, developer ranking, or productivity analytics.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: The implementation may thread a progress sink through analysis, but it
+          must not change scoring, ranking, tie-breaks, confidence thresholds,
+          Git log arguments, scope filtering, include/exclude semantics, inspect
+          selection, report rendering semantics, cache behaviour, provider
+          behaviour, network behaviour, or telemetry behaviour.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#requirements[15]
+        text: The implementation must not rewrite Git history ingestion into a streaming
+          parser as part of this feature. Coarse progress is acceptable because
+          the current implementation buffers git log output.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#requirements[16]
+        text: Errors during analysis may be accompanied by any progress lines that were
+          already emitted, but the final error must still be clear on stderr and
+          the process must exit non-zero.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#requirements[17]
+        text: --progress must work with --repo, --since, --scope, --include-prefix,
+          --exclude-prefix, --inspect, and all report formats.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#requirements[18]
+        text: --progress --inspect PATH must preserve inspect semantics and stdout shape
+          while emitting progress only to stderr.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#requirements[19]
+        text: Help and README documentation must describe --progress as opt-in local
+          stderr feedback for long runs.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#requirements[20]
+        text: The canonical validation workflow must cover progress enabled and
+          disabled, stdout/stderr separation, JSON validity with progress
+          enabled, deterministic stdout, stderr privacy scans, no progress for
+          standalone modes, this-repo smoke, and sibling-local-repo close-out
+          smoke.
+        category: requirement
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#acceptance[1]
+        text: git-hotspots --help documents --progress.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#acceptance[2]
+        text: git-hotspots --progress --repo . --format table writes a normal table to
+          stdout and progress lines to stderr.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#acceptance[3]
+        text: git-hotspots --progress --repo . --format json writes valid JSON to stdout
+          and progress lines to stderr.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#acceptance[4]
+        text: git-hotspots --progress --repo . --format markdown writes a normal
+          Markdown report to stdout and progress lines to stderr.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#acceptance[5]
+        text: For equivalent commands, stdout with --progress is byte-for-byte equal to
+          stdout without --progress.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#acceptance[6]
+        text: Successful analysis without --progress remains stderr-silent in fixture
+          and smoke tests.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#acceptance[7]
+        text: --progress is rejected with --explain and with --version.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#acceptance[8]
+        text: --help, --version, and --explain do not emit progress phase lines.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#acceptance[9]
+        text: Progress stderr contains only bounded phase/timing lines and passes
+          privacy scans.
+        category: acceptance
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#acceptance[10]
+        text: Progress works with scope presets, explicit prefixes, and inspect without
+          changing filtering, ranking, co-change, or inspect behaviour.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#acceptance[11]
+        text: zig build validate includes progress-specific checks and remains the
+          canonical local validation entrypoint.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#acceptance[12]
+        text: Close-out validation runs on this repo and sibling-local-repo, recording
+          only privacy-safe labels, command shapes, pass/fail status, bounded
+          counts, dirty/scope/progress flags, elapsed summary, commit count, and
+          tracked-file count.
+        category: acceptance
+        packet_refs:
+          - P2
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#edge-cases[1]
+        text: --progress appears before or after other analysis flags.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#edge-cases[2]
+        text: --progress is combined with --format table, --format json, and --format
+          markdown.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#edge-cases[3]
+        text: --progress is combined with --scope project, --scope all, include
+          prefixes, exclude prefixes, and --inspect.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#edge-cases[4]
+        text: --progress is combined with invalid --since, invalid repo, bare repo,
+          empty repo, shallow repo, partial repo, dirty worktree, detached HEAD,
+          and linked worktree fixture cases.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#edge-cases[5]
+        text: --progress with JSON output remains valid when stdout is redirected and
+          stderr is captured separately.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#edge-cases[6]
+        text: --progress 2>/dev/null still leaves valid stdout output.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#edge-cases[7]
+        text: Progress stderr contains no ANSI escape sequences, carriage-return
+          spinners, absolute paths, home paths, remotes, emails, author names,
+          commit messages, raw source snippets, or raw report rows.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#edge-cases[8]
+        text: Validation timing helpers do not mix their own timing output with
+          application progress stderr in assertions.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#edge-cases[9]
+        text: Large-history close-out smoke proves the feature gives user-visible
+          feedback during the slow path without changing report truth.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-042
+        source_ref: prd.md#verification[1]
+        text: "Required local gates:"
+        category: verification
+        packet_refs: []
+        verification: "Required local gates:"
+        required_for_close_out: true
+      - id: REQ-043
+        source_ref: prd.md#verification[2]
+        text: "``sh zig fmt --check build.zig src tests zig build test zig build
+          validate git diff --check git status --short --branch ``"
+        category: verification
+        packet_refs: []
+        verification: "``sh zig fmt --check build.zig src tests zig build test zig build
+          validate git diff --check git status --short --branch ``"
+        required_for_close_out: true
+      - id: REQ-044
+        source_ref: prd.md#verification[3]
+        text: "Required fixture checks include command shapes equivalent to:"
+        category: verification
+        packet_refs: []
+        verification: "Required fixture checks include command shapes equivalent to:"
+        required_for_close_out: true
+      - id: REQ-045
+        source_ref: prd.md#verification[4]
+        text: "``sh ./zig-out/bin/git-hotspots --repo fixtures/basic --format json
+          ./zig-out/bin/git-hotspots --repo fixtures/basic --progress --format
+          json ./zig-out/bin/git-hotspots --repo fixtures/basic --progress
+          --format table ./zig-out/bin/git-hotspots --repo fixtures/basic
+          --progress --format markdown ./zig-out/bin/git-hotspots --repo
+          fixtures/basic --progress --inspect src/app.txt --format json
+          ./zig-out/bin/git-hotspots --repo fixtures/scope --progress --scope
+          project --format json ./zig-out/bin/git-hotspots --progress --explain
+          ./zig-out/bin/git-hotspots --progress --version ``"
+        category: verification
+        packet_refs: []
+        verification: "``sh ./zig-out/bin/git-hotspots --repo fixtures/basic --format
+          json ./zig-out/bin/git-hotspots --repo fixtures/basic --progress
+          --format json ./zig-out/bin/git-hotspots --repo fixtures/basic
+          --progress --format table ./zig-out/bin/git-hotspots --repo
+          fixtures/basic --progress --format markdown ./zig-out/bin/git-hotspots
+          --repo fixtures/basic --progress --inspect src/app.txt --format json
+          ./zig-out/bin/git-hotspots --repo fixtures/scope --progress --scope
+          project --format json ./zig-out/bin/git-hotspots --progress --explain
+          ./zig-out/bin/git-hotspots --progress --version ``"
+        required_for_close_out: true
+      - id: REQ-046
+        source_ref: prd.md#verification[5]
+        text: Validation must separately capture stdout and stderr. It must compare
+          stdout for progress-enabled and progress-disabled commands, assert
+          progress is stderr-only, assert JSON validity, and privacy-scan
+          captured stderr.
+        category: verification
+        packet_refs:
+          - P2
+        verification: Validation must separately capture stdout and stderr. It must
+          compare stdout for progress-enabled and progress-disabled commands,
+          assert progress is stderr-only, assert JSON validity, and privacy-scan
+          captured stderr.
+        required_for_close_out: true
+      - id: REQ-047
+        source_ref: prd.md#verification[6]
+        text: "Close-out validation must use the existing privacy-safe real-repo
+          workflow:"
+        category: verification
+        packet_refs:
+          - P3
+        verification: "Close-out validation must use the existing privacy-safe real-repo
+          workflow:"
+        required_for_close_out: true
+      - id: REQ-048
+        source_ref: prd.md#verification[7]
+        text: "``sh zig build validate -Dcloseout=true
+          -Dsmoke-repo=<operator-provided-local-repo>
+          -Dsmoke-label=sibling-local-repo ``"
+        category: verification
+        packet_refs: []
+        verification: "``sh zig build validate -Dcloseout=true
+          -Dsmoke-repo=<operator-provided-local-repo>
+          -Dsmoke-label=sibling-local-repo ``"
+        required_for_close_out: true
+      - id: REQ-049
+        source_ref: prd.md#verification[8]
+        text: If the sibling repo is unavailable, use only an explicit approved safe
+          skip reason. Do not commit private repo paths, private repo names, raw
+          private reports, remotes, author identities, commit messages, or
+          source snippets.
+        category: verification
+        packet_refs: []
+        verification: If the sibling repo is unavailable, use only an explicit approved
+          safe skip reason. Do not commit private repo paths, private repo
+          names, raw private reports, remotes, author identities, commit
+          messages, or source snippets.
+        required_for_close_out: true
+      - id: REQ-050
+        source_ref: prd.md#non-goals[1]
+        text: No automatic progress.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-051
+        source_ref: prd.md#non-goals[2]
+        text: No --quiet flag.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-052
+        source_ref: prd.md#non-goals[3]
+        text: No percentages, ETAs, progress bars, spinners, carriage-return updates, or
+          live commit counts.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-053
+        source_ref: prd.md#non-goals[4]
+        text: No timing or progress fields in JSON, Markdown, or table reports.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-054
+        source_ref: prd.md#non-goals[5]
+        text: No streaming Git parser rewrite.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-055
+        source_ref: prd.md#non-goals[6]
+        text: No cache, database, or performance optimisation.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-056
+        source_ref: prd.md#non-goals[7]
+        text: No change to the current Git stdout capture limit.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-057
+        source_ref: prd.md#non-goals[8]
+        text: No scoring, confidence, ranking, co-change, recency, scope, or inspect
+          semantics changes.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-058
+        source_ref: prd.md#non-goals[9]
+        text: No providers, tree-sitter, LSP, ctags, dependency, blame, test, or
+          coverage enrichment.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-059
+        source_ref: prd.md#non-goals[10]
+        text: No source snippets, diffs, commit messages, author identities, ownership,
+          developer metrics, or productivity analytics.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-060
+        source_ref: prd.md#non-goals[11]
+        text: No network, fetch, upload, telemetry, remote enrichment, CI, release,
+          package, hosted-product, or commercial planning work.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: Add an opt-in --progress analysis flag that writes bounded coarse phase
+      and elapsed-time feedback to stderr only. Existing table, JSON, and
+      Markdown stdout reports remain byte-stable, local-first, and
+      schema-stable. The feature does not add automatic progress, cache,
+      streaming parsing, performance optimisation, providers, telemetry, or
+      report timing fields.
+    acceptance:
+      - --progress is opt-in and successful analysis without it remains
+        stderr-silent except pre-existing error behaviour.
+      - --progress writes bounded coarse phase messages and a final elapsed-time
+        line to stderr only.
+      - Table, JSON, and Markdown stdout for equivalent commands are
+        byte-for-byte equal with and without --progress.
+      - JSON output with --progress remains valid JSON and does not gain timing
+        or progress fields.
+      - --progress is rejected with --explain and with --version; --help,
+        --version, and --explain do not emit progress phase lines.
+      - Progress messages do not include repo paths, file paths, raw omitted
+        path lists, commit hashes, commit messages, remotes, author identities,
+        source snippets, report rows, ANSI spinners, or carriage-return progress
+        bars.
+      - --progress works with --repo, --since, --scope, include/exclude
+        prefixes, --inspect, and all report formats without changing scoring,
+        filtering, ranking, co-change, or inspect behaviour.
+      - Help and README document --progress as opt-in local stderr feedback for
+        long runs.
+      - zig build validate covers progress enabled and disabled, stdout/stderr
+        separation, JSON validity with progress enabled, deterministic stdout,
+        stderr privacy scans, no progress for standalone modes, this-repo smoke,
+        and close-out sibling-local-repo smoke.
+      - Close-out evidence records only privacy-safe labels, command shapes,
+        pass/fail status, bounded counts, dirty/scope/progress flags, elapsed
+        summary, commit count, and tracked-file count for sibling-local-repo.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig fmt --check build.zig src tests
+      - zig build test
+      - zig build
+      - ./zig-out/bin/git-hotspots --repo fixtures/basic --progress --format
+        json > /tmp/git-hotspots-progress.json 2>
+        /tmp/git-hotspots-progress.stderr
+      - zig build validate
+      - zig build validate -Dcloseout=true
+        -Dsmoke-repo=<operator-provided-local-repo>
+        -Dsmoke-label=sibling-local-repo
+      - git diff --check
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
