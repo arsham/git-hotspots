@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0007"
   active_run_id: null
   last_completed_feature_id: "0006"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 7
+  next_id: 8
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -53,6 +53,10 @@ features:
       slug: explicit-include-prefix-scope-filters
       path: .flow/features/0006_explicit-include-prefix-scope-filters
       created_at: 2026-05-22T02:53:15.998Z
+    - id: "0007"
+      slug: scoring-explanation-cli-output
+      path: .flow/features/0007_scoring-explanation-cli-output
+      created_at: 2026-05-22T03:20:08.309Z
 intake:
   mode: roadmap
   summary: null

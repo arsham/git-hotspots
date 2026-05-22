@@ -1,0 +1,306 @@
+schema: flow-feature.v1
+feature:
+  id: "0007"
+  slug: scoring-explanation-cli-output
+  title: Scoring explanation CLI output
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Reports expose score components and caveats, but the CLI does not
+    provide a self-contained explanation of what the current score, confidence
+    labels, caveats, and scope filters mean. Users need a deterministic local
+    explanation so they can interpret reports without guessing or treating
+    scores as bug predictions, quality ratings, or developer judgements.
+  outcome: Add a standalone static `--explain` CLI output that describes current
+    scoring semantics, confidence thresholds, caveats, scope filters,
+    limitations, and non-claims without requiring repo analysis or changing
+    analysis/report behaviour.
+  acceptance:
+    - "`git-hotspots --explain` exits 0 and writes deterministic static
+      explanation text to stdout without requiring a Git repository."
+    - "`--explain` is standalone: combining it with analysis flags such as
+      `--repo`, `--limit`, `--format`, `--since`, `--include-prefix`, or
+      `--exclude-prefix` fails clearly on stderr."
+    - Help text documents `--explain` and existing analysis options remain
+      otherwise unchanged.
+    - Existing table, JSON, and Markdown report outputs remain byte-stable
+      except for unrelated generated timestamps or explicitly documented fixture
+      updates; Feature 0007 does not change Git analysis, scoring, filtering,
+      ranking, tie-breakers, or report schemas.
+    - "Explanation text matches current `src/scoring.zig`: frequency =
+      change_count * 10; churn = min(churn / 25, 40); recency = max(0, 20 -
+      age_days) with 20 for HEAD timestamp; cochange = min(cochange_total * 2,
+      20); total is the sum."
+    - "Explanation text matches current confidence thresholds: high requires at
+      least 3 changes and no caveats; medium requires at least 2 changes; low
+      otherwise."
+    - Explanation text describes current caveat classes, including shallow
+      history, partial/promisor history, dirty worktree, binary/non-text churn,
+      large commits, and deleted/not-present-at-HEAD paths.
+    - "Explanation text describes scope filters: include/exclude prefixes are
+      literal repo-relative prefixes, filters apply before
+      aggregation/scoring/co-change/limit, and excludes win over includes."
+    - Explanation text states hotspots are local Git-history investigation
+      prompts, not bug predictions, objective code-quality ratings, maintainer
+      judgement, developer rankings, productivity analytics, AI/LLM judgement,
+      or technical-debt scores.
+    - "`zig build validate` includes explain-output golden/determinism and
+      prohibited-claim validation; close-out also runs normal validation and
+      Flow validation when available."
+planning:
+  state: ready
+  summary: "Narrow docs-like CLI feature: `git-hotspots --explain` writes
+    deterministic stdout outside any repo, help documents it, validation owns a
+    golden output and prohibited-claim checks. No scoring formula changes,
+    report schema changes, per-repo explanation mode, providers, cache, network,
+    telemetry, author metrics, commercial content, or docs system."
+  brief_sync:
+    status: unchanged
+    reason: Feature 0007 is a focused trust/explainability follow-up within B001's
+      local-first CLI capability; B001 remains current.
+    checked_at: 2026-05-22T03:24:14.863Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Feature 0007 improves B001's deterministic evidence reporting by making
+      existing scoring and caveats self-explanatory without changing product
+      truth.
+    checked_at: 2026-05-22T03:24:09.876Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-22T03:24:28.118Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-22T03:24:28.118Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-22T03:24:28.118Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-22T03:24:28.118Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: No active roadmap item existed after Feature 0006. The next
+    trust-building slice is making the existing evidence model self-explanatory
+    from the CLI.
+  depends_on_feature_ids:
+    - "0002"
+    - "0003"
+    - "0004"
+    - "0005"
+    - "0006"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add a static explanation renderer/helper, preferably in `src/report.zig`
+      or a small dedicated module, with unit tests for exact key snippets.
+    - Extend CLI parser with a boolean `--explain` mode that exits before repo
+      analysis and rejects combinations with analysis flags.
+    - Add `fixtures/expected/explain.txt` and integration tests for repeated
+      deterministic output, stdout-only success, and clear invalid-combination
+      errors.
+    - Extend `tools/validate.sh` with explain golden/determinism and
+      allowlist-aware prohibited-claim scans.
+    - Update README with a compact `How to read scores` section mirroring the
+      CLI explanation without overclaiming.
+    - Do not modify `src/scoring.zig`, `src/git.zig`, score formulas, ranking
+      order, filter semantics, table/JSON/Markdown report schemas, or existing
+      report goldens except where validation commands add explicit explain
+      outputs.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Scoring explanation contract
+      goal: Add deterministic static explanation text that matches the existing
+        scoring/confidence/caveat/filter semantics without changing analysis
+        behaviour.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/scoring.zig, src/git.zig, src/report.zig or a small
+          explanation module, tests/integration.sh."
+        - "In scope: explanation content for score components, total=sum,
+          confidence thresholds, caveat classes, include/exclude scope filters,
+          and non-claims."
+        - "Out of scope: scoring formula changes, confidence threshold changes,
+          Git collection/filtering changes, report schema changes, per-repo
+          explanation mode, machine-readable explanation schema."
+        - "Protected: no changes to score(), confidence(), lessThan(), Git
+          analysis, scope filtering, co-change expansion, table/JSON/Markdown
+          report outputs, or privacy posture."
+        - "Dependencies: completed scoring/report/filter baseline from Features
+          0002-0006."
+        - "Validation/evidence: zig fmt --check build.zig src tests; zig build
+          test; unit or integration assertions for key exact explanation
+          snippets."
+        - "Review focus: explanation matches current code, especially
+          churn/recency/cochange caps and confidence thresholds, and does not
+          overclaim risk, quality, bugs, or developer performance."
+        - "Escalate if: accurate explanation requires changing scoring, adding
+          data to the model, or committing to a JSON explanation schema."
+        - "Done boundary: static explanation text exists and is testable, but
+          CLI exposure may wait for P2."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: Standalone CLI exposure
+      goal: Expose the static explanation as `git-hotspots --explain`, rejecting
+        analysis-flag combinations and preserving existing default/report
+        behaviour.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/main.zig, fixtures/expected/explain.txt,
+          tests/integration.sh."
+        - "In scope: parse `--explain`, document it in help, exit before repo
+          analysis, reject combinations with analysis flags, add deterministic
+          golden output and repeated-output diff."
+        - "Out of scope: explain subcommands, `--format` variants for explain,
+          per-repo explanation, report schema additions, default verbosity
+          changes."
+        - "Protected: `git-hotspots` default remains table analysis; `--help`,
+          invalid format, and existing table/json/markdown outputs remain stable
+          except help text mentioning `--explain`."
+        - "Dependencies: P1 explanation content exists."
+        - "Validation/evidence: zig build; zig build test; zig build run --
+          --help; `git-hotspots --explain` golden diff; invalid combination
+          stderr tests; repeated explain output diff."
+        - "Review focus: standalone mode works outside Git repos, succeeds with
+          stdout only, and cannot accidentally run Git analysis or leak repo
+          paths."
+        - "Escalate if: CLI needs subcommands, format-specific explain output,
+          or breaking parser behaviour."
+        - "Done boundary: users can run `--explain` safely and
+          deterministically."
+      verification_commands:
+        - zig build
+        - zig build test
+        - zig build run -- --help
+    - id: P3
+      depends_on:
+        - P2
+      status: planned
+      title: Validation and public docs hardening
+      goal: Make explain output part of canonical validation and document score
+        interpretation in public README without overclaiming.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: tools/validate.sh, tests/integration.sh, README.md,
+          fixtures/expected/explain.txt."
+        - "In scope: add `zig build validate` rungs for explain
+          golden/determinism and allowlist-aware prohibited-claim scan; add
+          README `How to read scores` section."
+        - "Out of scope: docs site, man page, templates, configurable scoring,
+          provider/cache docs, commercial/hosted strategy, release/CI work."
+        - "Protected: README stays visitor-facing and OSS-safe; validation
+          summaries stay privacy-safe and do not print raw private reports."
+        - "Dependencies: P2 CLI exposure exists."
+        - "Validation/evidence: zig build validate; close-out mode with sibling
+          repo or explicit privacy-safe skip reason; git diff --check; flow
+          validate --target feature:0007 --format json."
+        - "Review focus: validation catches explanation drift and positive
+          prohibited claims while allowing safe negated disclaimers."
+        - "Escalate if: prohibited-claim scanning becomes too brittle,
+          validation needs new external tools, or docs need broader product
+          positioning."
+        - "Done boundary: future validation protects the explanation output and
+          public docs mirror the current semantics."
+      verification_commands:
+        - zig build validate
+        - git diff --check
+  output_contract:
+    cli_flag: --explain
+    mode: standalone static stdout; no repo analysis required
+    invalid_combinations:
+      - --repo
+      - --limit
+      - --format
+      - --since
+      - --include-prefix
+      - --exclude-prefix
+    format: plain text with stable headings; no JSON schema or machine-readable
+      explanation contract yet
+    required_topics:
+      - investigation-prompt framing
+      - score formula components
+      - confidence thresholds
+      - caveats
+      - scope filters
+      - limitations and non-claims
+    deferred:
+      - explain subcommand
+      - per-repo explanation mode
+      - JSON explanation schema
+      - configurable weights
+      - score redesign
+      - man page/docs site
+      - interactive tutorial
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-22T03:20:08.309Z
+  updated_at: 2026-05-22T03:24:28.118Z
