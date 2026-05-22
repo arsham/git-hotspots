@@ -46,7 +46,7 @@ fn dupTrim(allocator: std.mem.Allocator, s: []u8) ![]u8 {
     return allocator.dupe(u8, std.mem.trim(u8, s, "\r\n "));
 }
 
-const EvidenceBuilder = struct { commit: []const u8, timestamp: i64, additions: ?u64, deletions: ?u64 };
+const EvidenceBuilder = struct { commit: []u8, timestamp: i64, additions: ?u64, deletions: ?u64 };
 const FileAgg = struct {
     path: []u8,
     change_count: u32 = 0,
@@ -64,6 +64,7 @@ fn deinitAgg(key: []const u8, agg: FileAgg, allocator: std.mem.Allocator) void {
     allocator.free(key);
     allocator.free(agg.path);
     allocator.free(agg.last_commit);
+    for (agg.evidence.items) |ev| allocator.free(ev.commit);
     agg.evidence.deinit();
     var it = agg.cochanges.keyIterator();
     while (it.next()) |k| allocator.free(k.*);
@@ -105,7 +106,167 @@ fn writeProgress(progress: ?*std.Io.Writer, message: []const u8) !void {
     }
 }
 
+fn writeTimedProgress(progress: ?*std.Io.Writer, phase: []const u8, started: std.Io.Clock.Timestamp, io: std.Io) !void {
+    if (progress) |writer| {
+        const elapsed = started.durationTo(std.Io.Clock.Timestamp.now(io, .awake));
+        try writer.print("progress: phase {s} {d}ms\n", .{ phase, elapsed.raw.toMilliseconds() });
+        try writer.flush();
+    }
+}
+
+const LogParser = struct {
+    allocator: std.mem.Allocator,
+    map: *std.StringHashMap(FileAgg),
+    commit_paths: *std.array_list.Managed([]const u8),
+    outside_include_paths: *std.StringHashMap(void),
+    outside_include_change_count: *usize,
+    excluded_paths: *std.StringHashMap(void),
+    excluded_change_count: *usize,
+    include_prefixes: []const []const u8,
+    exclude_prefixes: []const []const u8,
+    pending: std.array_list.Managed(u8),
+    cur_hash: ?[]u8 = null,
+    cur_ts: i64 = 0,
+    commit_count: usize = 0,
+
+    fn init(
+        allocator: std.mem.Allocator,
+        map: *std.StringHashMap(FileAgg),
+        commit_paths: *std.array_list.Managed([]const u8),
+        outside_include_paths: *std.StringHashMap(void),
+        outside_include_change_count: *usize,
+        excluded_paths: *std.StringHashMap(void),
+        excluded_change_count: *usize,
+        include_prefixes: []const []const u8,
+        exclude_prefixes: []const []const u8,
+    ) LogParser {
+        return .{
+            .allocator = allocator,
+            .map = map,
+            .commit_paths = commit_paths,
+            .outside_include_paths = outside_include_paths,
+            .outside_include_change_count = outside_include_change_count,
+            .excluded_paths = excluded_paths,
+            .excluded_change_count = excluded_change_count,
+            .include_prefixes = include_prefixes,
+            .exclude_prefixes = exclude_prefixes,
+            .pending = std.array_list.Managed(u8).init(allocator),
+        };
+    }
+
+    fn deinit(self: *LogParser) void {
+        if (self.cur_hash) |hash| self.allocator.free(hash);
+        self.pending.deinit();
+    }
+
+    fn feed(self: *LogParser, data: []const u8) !void {
+        var rest = data;
+        while (std.mem.indexOfScalar(u8, rest, '\n')) |newline| {
+            const segment = rest[0..newline];
+            if (self.pending.items.len == 0) {
+                try self.processLine(segment);
+            } else {
+                try self.pending.appendSlice(segment);
+                try self.processLine(self.pending.items);
+                self.pending.clearRetainingCapacity();
+            }
+            rest = rest[newline + 1 ..];
+        }
+        if (rest.len > 0) try self.pending.appendSlice(rest);
+    }
+
+    fn finish(self: *LogParser) !void {
+        if (self.pending.items.len > 0) {
+            try self.processLine(self.pending.items);
+            self.pending.clearRetainingCapacity();
+        }
+        try finishCommit(self.allocator, self.map, self.commit_paths.items);
+    }
+
+    fn processLine(self: *LogParser, raw_line: []const u8) !void {
+        const line = std.mem.trim(u8, raw_line, "\r");
+        if (line.len == 0) return;
+        if (std.mem.indexOfScalar(u8, line, '\t')) |tab| {
+            const first = line[0..tab];
+            if (first.len == 40 and std.mem.indexOfScalar(u8, line[tab + 1 ..], '\t') == null) {
+                try finishCommit(self.allocator, self.map, self.commit_paths.items);
+                self.commit_paths.clearRetainingCapacity();
+                if (self.cur_hash) |hash| self.allocator.free(hash);
+                self.cur_hash = try self.allocator.dupe(u8, first);
+                self.cur_ts = std.fmt.parseInt(i64, line[tab + 1 ..], 10) catch 0;
+                self.commit_count += 1;
+                return;
+            }
+        }
+        const cur_hash = self.cur_hash orelse return;
+        var parts = std.mem.splitScalar(u8, line, '\t');
+        const add_s = parts.next() orelse return;
+        const del_s = parts.next() orelse return;
+        const path = parts.rest();
+        if (path.len == 0) return;
+        try applyNumstat(self.allocator, self.map, self.commit_paths, self.outside_include_paths, self.outside_include_change_count, self.excluded_paths, self.excluded_change_count, self.include_prefixes, self.exclude_prefixes, cur_hash, self.cur_ts, add_s, del_s, path);
+    }
+};
+
+const git_stderr_limit = 1024 * 1024;
+
+fn streamGitLog(
+    allocator: std.mem.Allocator,
+    io: std.Io,
+    repo: []const u8,
+    args: []const []const u8,
+    parser: *LogParser,
+) !void {
+    var argv = std.array_list.Managed([]const u8).init(allocator);
+    defer argv.deinit();
+    try argv.append("git");
+    try argv.append("-c");
+    try argv.append("core.quotePath=false");
+    try argv.append("-C");
+    try argv.append(repo);
+    for (args) |arg| try argv.append(arg);
+
+    var child = try std.process.spawn(io, .{ .argv = argv.items, .stdin = .ignore, .stdout = .pipe, .stderr = .pipe });
+    defer child.kill(io);
+
+    var multi_reader_buffer: std.Io.File.MultiReader.Buffer(2) = undefined;
+    var multi_reader: std.Io.File.MultiReader = undefined;
+    multi_reader.init(allocator, io, multi_reader_buffer.toStreams(), &.{ child.stdout.?, child.stderr.? });
+    defer multi_reader.deinit();
+
+    const stdout_reader = multi_reader.reader(0);
+    const stderr_reader = multi_reader.reader(1);
+
+    while (multi_reader.fill(1, .none)) |_| {
+        const available = stdout_reader.buffered();
+        if (available.len > 0) {
+            try parser.feed(available);
+            stdout_reader.toss(available.len);
+        }
+        if (stderr_reader.bufferedLen() > git_stderr_limit) return error.StreamTooLong;
+    } else |err| switch (err) {
+        error.EndOfStream => {},
+        else => |e| return e,
+    }
+
+    const remaining = stdout_reader.buffered();
+    if (remaining.len > 0) {
+        try parser.feed(remaining);
+        stdout_reader.toss(remaining.len);
+    }
+    try parser.finish();
+    try multi_reader.checkAnyError();
+
+    const term = try child.wait(io);
+    switch (term) {
+        .exited => |code| if (code == 0) return,
+        else => {},
+    }
+    return error.GitFailed;
+}
+
 pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, progress: ?*std.Io.Writer) AnalyzeError!model.Analysis {
+    var phase_started = std.Io.Clock.Timestamp.now(io, .awake);
     try writeProgress(progress, "checking repository");
 
     const bare_out = runGitOk(allocator, io, cfg.repo_path, &.{ "rev-parse", "--is-bare-repository" }) catch return error.NotGitRepository;
@@ -166,9 +327,10 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
     }
     errdefer if (range_owned) |r| allocator.free(r);
 
+    try writeTimedProgress(progress, "repository-check", phase_started, io);
+
+    phase_started = std.Io.Clock.Timestamp.now(io, .awake);
     try writeProgress(progress, "reading Git history");
-    const log_out = try runGitOk(allocator, io, cfg.repo_path, log_args.items);
-    defer allocator.free(log_out);
 
     var map = std.StringHashMap(FileAgg).init(allocator);
     defer {
@@ -193,37 +355,17 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
     var excluded_change_count: usize = 0;
 
     var commit_count: usize = 0;
-    var cur_hash: []const u8 = "";
-    var cur_ts: i64 = 0;
     var commit_paths = std.array_list.Managed([]const u8).init(allocator);
     defer commit_paths.deinit();
 
-    var lines = std.mem.splitScalar(u8, log_out, '\n');
-    while (lines.next()) |raw_line| {
-        const line = std.mem.trim(u8, raw_line, "\r");
-        if (line.len == 0) continue;
-        if (std.mem.indexOfScalar(u8, line, '\t')) |tab| {
-            const first = line[0..tab];
-            if (first.len == 40 and std.mem.indexOfScalar(u8, line[tab + 1 ..], '\t') == null) {
-                try finishCommit(allocator, &map, commit_paths.items);
-                commit_paths.clearRetainingCapacity();
-                cur_hash = first;
-                cur_ts = std.fmt.parseInt(i64, line[tab + 1 ..], 10) catch 0;
-                commit_count += 1;
-                continue;
-            }
-        }
-        if (cur_hash.len == 0) continue;
-        var parts = std.mem.splitScalar(u8, line, '\t');
-        const add_s = parts.next() orelse continue;
-        const del_s = parts.next() orelse continue;
-        const path = parts.rest();
-        if (path.len == 0) continue;
-        try applyNumstat(allocator, &map, &commit_paths, &outside_include_paths, &outside_include_change_count, &excluded_paths, &excluded_change_count, cfg.include_prefixes, cfg.exclude_prefixes, cur_hash, cur_ts, add_s, del_s, path);
-    }
-    try finishCommit(allocator, &map, commit_paths.items);
+    var parser = LogParser.init(allocator, &map, &commit_paths, &outside_include_paths, &outside_include_change_count, &excluded_paths, &excluded_change_count, cfg.include_prefixes, cfg.exclude_prefixes);
+    defer parser.deinit();
+    try streamGitLog(allocator, io, cfg.repo_path, log_args.items, &parser);
+    commit_count = parser.commit_count;
 
     if (commit_count == 0) return error.EmptyRepository;
+
+    try writeTimedProgress(progress, "git-read-parse", phase_started, io);
 
     var caveats = std.array_list.Managed([]const u8).init(allocator);
     errdefer {
@@ -234,6 +376,7 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
     if (is_partial) try addCaveat(allocator, &caveats, "history may be partial/promisor; auto_fetch is false");
     if (dirty) try addCaveat(allocator, &caveats, "dirty worktree detected; ranking uses committed history only");
 
+    phase_started = std.Io.Clock.Timestamp.now(io, .awake);
     try writeProgress(progress, "scoring files");
 
     var results = std.array_list.Managed(model.Result).init(allocator);
@@ -277,6 +420,8 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
         }
         results.shrinkRetainingCapacity(cfg.limit);
     }
+
+    try writeTimedProgress(progress, "score-results", phase_started, io);
 
     const scope_include_prefixes = try dupeStringList(allocator, cfg.include_prefixes);
     errdefer freeStringList(allocator, scope_include_prefixes);
@@ -352,7 +497,11 @@ fn applyNumstat(
     } else {
         agg.binary_count += 1;
     }
-    if (agg.evidence.items.len < 3) try agg.evidence.append(.{ .commit = commit[0..@min(commit.len, 12)], .timestamp = ts, .additions = add, .deletions = del });
+    if (agg.evidence.items.len < 3) {
+        const evidence_commit = try allocator.dupe(u8, commit[0..@min(commit.len, 12)]);
+        errdefer allocator.free(evidence_commit);
+        try agg.evidence.append(.{ .commit = evidence_commit, .timestamp = ts, .additions = add, .deletions = del });
+    }
     try commit_paths.append(agg.path);
 }
 
@@ -562,4 +711,40 @@ test "unquotes git quoted tab path before prefix matching" {
     defer std.testing.allocator.free(normalized);
     try std.testing.expectEqualStrings("weird/tab\tname.txt", normalized);
     try std.testing.expect(isExcludedPath(normalized, &.{"weird/"}));
+}
+
+test "streaming log parser handles chunk boundaries and numstat edge cases" {
+    const allocator = std.testing.allocator;
+    var map = std.StringHashMap(FileAgg).init(allocator);
+    defer {
+        var it = map.iterator();
+        while (it.next()) |entry| deinitAgg(entry.key_ptr.*, entry.value_ptr.*, allocator);
+        map.deinit();
+    }
+    var commit_paths = std.array_list.Managed([]const u8).init(allocator);
+    defer commit_paths.deinit();
+    var outside_include_paths = std.StringHashMap(void).init(allocator);
+    defer outside_include_paths.deinit();
+    var excluded_paths = std.StringHashMap(void).init(allocator);
+    defer excluded_paths.deinit();
+    var outside_include_change_count: usize = 0;
+    var excluded_change_count: usize = 0;
+
+    var parser = LogParser.init(allocator, &map, &commit_paths, &outside_include_paths, &outside_include_change_count, &excluded_paths, &excluded_change_count, &.{}, &.{});
+    defer parser.deinit();
+
+    try parser.feed("aaaaaaaaaaaaaaaaaaaa");
+    try parser.feed("aaaaaaaaaaaaaaaaaaaa\t100\r\n");
+    try parser.feed("1\t2\tsrc/{old.zig => new.zig}\r\n\r\nmalformed\r\n");
+    try parser.feed("-\t-\tbin/blob.dat\n3\t4\t\"weird/tab\\tname.txt\"\n");
+    try parser.feed("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\t200\n5\t6\tunicod");
+    try parser.feed("e/雪.zig");
+    try parser.finish();
+
+    try std.testing.expectEqual(@as(usize, 2), parser.commit_count);
+    try std.testing.expectEqual(@as(u32, 1), map.get("src/new.zig").?.change_count);
+    try std.testing.expectEqual(@as(u32, 1), map.get("bin/blob.dat").?.binary_count);
+    try std.testing.expectEqual(@as(u64, 3), map.get("weird/tab\tname.txt").?.additions);
+    try std.testing.expectEqual(@as(u64, 6), map.get("unicode/雪.zig").?.deletions);
+    try std.testing.expect(map.get("malformed") == null);
 }

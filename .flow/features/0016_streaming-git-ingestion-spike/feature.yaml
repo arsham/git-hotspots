@@ -4,7 +4,7 @@ feature:
   slug: streaming-git-ingestion-spike
   title: Streaming Git ingestion spike
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Large-repository runs currently collect full git log history output
@@ -63,7 +63,7 @@ proposal:
     materialised_at: 2026-05-22T20:53:15.713Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -125,7 +125,7 @@ design:
         while preserving output parity.
       depends_on: []
       owner_phase: runner
-      status: planned
+      status: done
       execution_context:
         - "Anchors: src/git.zig, existing parser/aggregation helpers,
           tests/integration.sh, fixtures/expected."
@@ -155,7 +155,7 @@ design:
       depends_on:
         - P1
       owner_phase: runner
-      status: planned
+      status: done
       execution_context:
         - "Anchors: src/git.zig, src/main.zig,
           docs/performance-cache-decision.md or
@@ -188,9 +188,7 @@ design:
 execution:
   active_run_id: null
   current_packet_id: null
-  next_packet_ids:
-    - P1
-    - P2
+  next_packet_ids: []
   blockers: []
   requires_confirmation: true
 links:
@@ -199,7 +197,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T20:46:41.521Z
-  updated_at: 2026-05-22T21:00:53.609Z
+  updated_at: 2026-05-22T21:35:02.892Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-22T21:00:53.609Z
