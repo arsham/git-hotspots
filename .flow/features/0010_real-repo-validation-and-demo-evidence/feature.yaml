@@ -1,0 +1,324 @@
+schema: flow-feature.v1
+feature:
+  id: "0010"
+  slug: real-repo-validation-and-demo-evidence
+  title: Real-repo validation and demo evidence
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: The public alpha CLI is now published, but its usefulness has only been
+    proven by fixtures, this-repo validation, and smoke checks. Before adding
+    broader features, we need privacy-safe real-repository evidence that
+    file-level reports are understandable, useful, and not dominated by
+    avoidable noise.
+  outcome: Produce a narrow validation-and-demo evidence slice using the existing
+    CLI on this repo and one operator-provided local/sibling repo, committing
+    only privacy-safe summaries and this-repo demo material so the next product
+    feature is chosen from evidence rather than assumption.
+  acceptance:
+    - This repo is exercised from a clean worktree with unscoped and scoped
+      commands, including `--exclude-prefix .flow/`, JSON, Markdown, table, and
+      `--explain` where relevant.
+    - Public demo material, if committed, is generated only from this public
+      repo, uses repo-relative paths, records the exact command and version,
+      excludes `.flow/` as approved, and frames hotspots as investigation
+      prompts rather than judgements.
+    - One operator-provided local or sibling Git worktree is exercised with
+      privacy-safe label `sibling-local-repo`, or execution stops before
+      dispatch until such a path is provided; no raw sibling reports are
+      committed.
+    - Committed sibling evidence contains only safe labels, command shapes,
+      pass/fail summaries, bounded result/caveat/scope counts, elapsed timing,
+      and 1-2 categorical usefulness/noise observations without private paths,
+      repo names, authors, remotes, commit messages, source snippets, or raw
+      reports.
+    - Evidence checks cover usefulness basics: reports have non-empty results where
+        expected, positive scores, confidence/caveat fields, evidence commits,
+        Markdown sections, JSON validity, and scoped output without `.flow/`
+        leakage.
+    - Evidence checks record performance and scale basics: tool version, Git/Zig
+        versions when relevant, analysed commit count, tracked-file count,
+        elapsed time, dirty flag, caveat count, and whether reports stay within
+        small-output bounds.
+    - No scoring, Git traversal, provider, cache, package/release, CI, network,
+      telemetry, upload, remote enrichment, author/developer metric,
+      commercial/SaaS, or hosted-product behaviour is added.
+    - Docs and committed evidence do not claim bug prediction, objective
+      code-quality scoring, technical-debt scoring, maintainer judgement,
+      developer ranking, productivity analytics, or third-party OSS blame.
+    - Close-out evidence includes `zig build validate`, close-out validation
+      with the operator-provided sibling repo, `git diff --check`,
+      docs/prohibited-claim scan, privacy scan of committed demo/evidence
+      artefacts, and clean git status.
+planning:
+  state: ready
+  summary: Evidence-first validation feature. Public raw demo is limited to this
+    repo with `.flow/` explicitly excluded as approved. A second local/sibling
+    repo is required before dispatch because Arsham chose to provide it;
+    committed evidence for that repo must be summary-only and privacy-safe.
+  brief_sync:
+    status: unchanged
+    reason: Feature 0010 validates the current B001 capability with real-repo
+      evidence; B001 remains current.
+    checked_at: 2026-05-22T16:12:00.000Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Feature 0010 tests whether deterministic file-level hotspot reports are
+      useful on real repositories without expanding runtime truth or public
+      claims.
+    checked_at: 2026-05-22T16:12:00.000Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - multi_packet_scope
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-22T15:12:49.012Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-22T15:12:49.012Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-22T15:12:49.012Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-22T15:12:49.012Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: No active roadmap item existed after Feature 0009. The next
+    evidence gap is validating the public alpha on real repositories before
+    adding more product surface.
+  depends_on_feature_ids:
+    - "0002"
+    - "0003"
+    - "0004"
+    - "0005"
+    - "0006"
+    - "0007"
+    - "0008"
+    - "0009"
+  blocked_by: []
+design:
+  rough_shape:
+    - Create a privacy-safe real-repo validation note, likely
+      `docs/real-repo-validation.md`, describing commands, evidence policy, and
+      this-repo demo observations.
+    - Generate this-repo demo evidence from a clean worktree with
+      `--exclude-prefix .flow/`, using table/JSON/Markdown as needed and
+      committing only bounded, non-judgemental excerpts or summaries.
+    - Run the same existing CLI on an operator-provided sibling/local repo and
+      commit only label/count/caveat/timing/category summaries.
+    - Do not add new CLI behaviour unless validation exposes a separately shaped
+      bug.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+  packets:
+    - id: P1
+      title: Evidence contract and demo policy
+      goal: Establish the exact evidence policy, commands, and privacy/publicity
+        boundaries for real-repo validation.
+      depends_on: []
+      status: planned
+      owner_phase: runner
+      execution_context:
+        - "Anchors:
+          .flow/features/0010_real-repo-validation-and-demo-evidence/prd.md,
+          docs/real-repo-validation.md if created."
+        - "In scope: define command set, safe evidence fields, public this-repo
+          demo boundary, sibling summary-only boundary, and close-out evidence
+          requirements."
+        - "Out of scope: scoring changes, CLI behaviour changes, providers,
+          cache, CI, release, packaging, network, telemetry, upload, public
+          third-party case studies, or private raw report publication."
+        - "Protected: project-memory privacy rules; public claims remain
+          investigation-prompt framing; no raw sibling repo paths, names,
+          reports, authors, remotes, commit messages, or source snippets."
+        - "Dependencies: completed Features 0002-0009 and operator-approved
+          `.flow/` exclusion for this-repo demo."
+        - "Validation/evidence: manual read-through against project memory and
+          PRD; expected observation is an evidence policy that a fresh
+          runner/reviewer can apply without chat context; durable proof location
+          is docs/real-repo-validation.md and runner handoff."
+        - "Review focus: the policy prevents leaks and judgemental framing while
+          still collecting usefulness evidence."
+        - "Escalate if: execution needs a named private repo in committed
+          artefacts, a public third-party case study, raw private output, or new
+          runtime behaviour."
+        - "Done boundary: evidence policy is durable enough to run this repo and
+          sibling smoke safely."
+      verification_commands:
+        - git diff --check
+    - id: P2
+      title: This-repo demo evidence
+      goal: Produce and document a small public-safe demo from this repo only, using
+        the existing CLI and approved `.flow/` exclusion.
+      depends_on:
+        - P1
+      status: planned
+      owner_phase: runner
+      execution_context:
+        - "Anchors: docs/real-repo-validation.md, README.md only if a tiny link
+          or summary is justified."
+        - "In scope: run this repo with unscoped and scoped commands; include
+          `--exclude-prefix .flow/`; verify table, JSON, and Markdown; record
+          version, command, clean/dirty state, result counts, caveats, scope
+          counts, and 1-2 non-judgemental usefulness/noise observations."
+        - "Out of scope: publishing full raw reports unless they are from this
+          repo, privacy-scanned, small, and framed as sample output; no
+          third-party repo naming or excerpts."
+        - "Protected: no Flow process exposition in README; no claim that top
+          files are bad, buggy, low quality, or maintained poorly."
+        - "Dependencies: clean worktree or explicit explanation of dirty caveat;
+          P1 evidence policy."
+        - "Validation/evidence: run `zig build validate`; run
+          `./zig-out/bin/git-hotspots --repo . --exclude-prefix .flow/ --limit
+          10 --format json`; run table and Markdown equivalents; verify no
+          `.flow/` result/cochange paths; record bounded counts only."
+        - "Review focus: demo is useful, reproducible, scope-disclosed, and not
+          judgemental."
+        - "Escalate if: useful demo requires hiding scope metadata, editing
+          scoring, or publishing private/process-heavy output."
+        - "Done boundary: this-repo demo evidence is committed in a
+          privacy-safe, public-safe form."
+      verification_commands:
+        - zig build validate
+        - git diff --check
+    - id: P3
+      title: Sibling repo smoke summary
+      goal: Validate the CLI on one operator-provided local/sibling repo and record
+        only privacy-safe summary evidence.
+      depends_on:
+        - P1
+      status: planned
+      owner_phase: runner
+      execution_context:
+        - "Anchors: docs/real-repo-validation.md or Flow run evidence; no raw
+          sibling reports committed."
+        - "In scope: run close-out validation with `-Dsmoke-repo=<operator-path>
+          -Dsmoke-label=sibling-local-repo`; run table/JSON/Markdown command
+          shapes if needed; record safe label, result count, caveat count, dirty
+          flag, scope-active flag, elapsed time, and categorical
+          usefulness/noise observations."
+        - "Out of scope: committing sibling repo name, absolute path, raw
+          output, remote URL, author identity, commit messages, source snippets,
+          or org-specific structure."
+        - "Protected: no clone/fetch/pull to prepare the repo; use only the
+          provided local Git worktree."
+        - "Dependencies: operator provided a local/sibling repo path for
+          execution-time use; do not persist the actual path in committed
+          artefacts."
+        - "Validation/evidence: `zig build validate -Dcloseout=true
+          -Dsmoke-repo=<operator-path> -Dsmoke-label=sibling-local-repo`;
+          expected observation is pass with privacy-safe summary. Durable proof
+          location is runner handoff and committed summary without private
+          names/paths."
+        - "Review focus: sibling evidence proves real-repo viability without
+          leaking private structure."
+        - "Escalate if: provided repo is missing, not a Git worktree, too small
+          to be meaningful, requires network access, or output cannot be
+          summarised safely."
+        - "Done boundary: sibling smoke is completed or the feature is
+          explicitly reshaped with an approved skip reason."
+      verification_commands:
+        - zig build validate
+        - git diff --check
+    - id: P4
+      title: Close-out validation and hygiene
+      goal: Prove the evidence artefacts are safe, current, and useful enough to guide
+        the next product feature.
+      depends_on:
+        - P2
+        - P3
+      status: planned
+      owner_phase: runner
+      execution_context:
+        - "Anchors: docs/real-repo-validation.md, README.md if touched, Flow run
+          evidence."
+        - "In scope: final validation, prohibited-claim scan, privacy scan, git
+          status, and concise next-feature observations from evidence."
+        - "Out of scope: selecting a new implementation feature as a commitment;
+          release/GitHub Release/CI work; history rewrite unless a specific leak
+          is found and operator explicitly approves."
+        - "Protected: committed artefacts must not contain private repo names,
+          absolute paths, raw private reports, emails, remote URLs, author
+          identities, source snippets, or positive bug/quality/developer-ranking
+          claims."
+        - "Dependencies: P2 and P3 complete."
+        - "Validation/evidence: `zig build validate`; close-out validation with
+          sibling repo; `git diff --check`; `git status --short --branch`; scans
+          for prohibited claims and private path/URL/email patterns; review doc
+          size for raw report dumps."
+        - "Review focus: close-out evidence is enough to decide the next product
+          slice from real data, not assumptions."
+        - "Escalate if: validation fails, evidence implies scoring/noise changes
+          are required before docs can be honest, or privacy scan finds unsafe
+          content."
+        - "Done boundary: Feature 0010 leaves a clean repo with privacy-safe
+          real-repo validation evidence and explicit candidate next seams, not a
+          roadmap commitment."
+      verification_commands:
+        - zig build validate
+        - git diff --check
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-22T14:56:46.028Z
+  updated_at: 2026-05-22T15:12:49.012Z
