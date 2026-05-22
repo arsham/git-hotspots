@@ -7,9 +7,9 @@ engineering attention because they change often. It turns Git history into
 clear, reproducible hotspot evidence for maintainers, refactoring work, code
 review, onboarding, and coding-agent context.
 
-The project is intentionally early. The first goal is to prove that a small,
-transparent command-line tool can surface useful hotspots before adding deeper
-language-aware analysis.
+The project is intentionally early. A first Zig CLI spike now proves that a
+small, transparent command-line tool can surface useful file-level hotspots
+before adding deeper language-aware analysis.
 
 ## Why
 
@@ -90,7 +90,21 @@ provenance, and caveats.
 The product truth remains local Git evidence. Agents are consumers of reports,
 not the runtime authority for hotspot findings.
 
+## CLI spike
+
+Build and run the current local spike with Zig:
+
+```sh
+zig build
+./zig-out/bin/git-hotspots --repo . --limit 10 --format table
+./zig-out/bin/git-hotspots --repo . --limit 10 --format json
+```
+
+Supported options are `--repo`, `--limit`, `--format table|json`, `--since`,
+and `--help`. The spike reads local Git history only. It does not fetch, push,
+upload source, contact remotes, or emit telemetry.
+
 ## Status
 
-This repository is currently establishing the project direction. No CLI release
-or installation path exists yet.
+This repository has an executable file-level CLI spike. It is not a packaged
+release yet.

@@ -1,0 +1,9 @@
+/zig-out/
+/.zig-cache/
+/fixtures/basic/
+/fixtures/shallow/
+/fixtures/medium/
+/fixtures/edge/
+/fixtures/partial/
+/fixtures/detached/
+/fixtures/linked/
