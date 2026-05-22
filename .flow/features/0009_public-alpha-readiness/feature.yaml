@@ -287,7 +287,856 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-22T13:40:29.901Z
-  updated_at: 2026-05-22T13:51:13.511Z
+  updated_at: 2026-05-22T13:51:49.721Z
 execution:
   blockers: []
   requires_confirmation: true
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-22T13:51:49.721Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0009"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Public alpha readiness
+      problem: The repository has a useful local CLI alpha, but it is not ready for
+        public OSS use because it lacks an explicit license, still reports the
+        spike version marker, has no `--version` surface, and does not yet
+        document alpha install and contribution expectations.
+      outcome: Prepare the repository for a narrow source-available public alpha by
+        adding Apache-2.0 licensing, alpha version identity, `--version`,
+        minimal install and contribution docs, and alpha readiness validation
+        without adding packaging, release automation, CI, hosted strategy, or
+        new hotspot analysis behaviour.
+      acceptance:
+        - A root `LICENSE` file contains the Apache-2.0 license with copyright
+          holder `Arsham Shirvani` and year `2026` recorded in the repo where
+          appropriate.
+        - README includes a compact license note, alpha status,
+          install-from-source guidance, Git/Zig prerequisites, current
+          limitations, and validation guidance without promising packaged
+          releases or hosted services.
+        - "A lightweight `CONTRIBUTING.md` explains the alpha contribution
+          posture: issues and small focused PRs are welcome, contributors should
+          run `zig build validate`, and changes must preserve
+          local-first/no-telemetry defaults and avoid diagnostic overclaims."
+        - Version identity is centralised in source and the public alpha version
+          is `0.1.0-alpha.1`; JSON and Markdown report metadata use that
+          version.
+        - "`git-hotspots --version` exits 0 outside a Git repository, prints a
+          deterministic version line, and rejects analysis-flag combinations
+          clearly if the implementation chooses standalone semantics."
+        - Existing analysis behaviour, scoring, filtering, report schemas apart
+          from intentional version metadata, fixtures, and validation outputs
+          remain stable.
+        - Public docs and runtime text do not add commercial, SaaS,
+          hosted-product, pricing, sales, bug-prediction, objective
+          quality-score, technical-debt-score, author-metric,
+          maintainer-judgement, developer-ranking, productivity-analytics, or
+          AI/LLM-judgement claims.
+        - Public alpha readiness does not add package registries, binary release
+          automation, Homebrew, GitHub Actions, release tags, provider/cache
+          design, network access, telemetry, upload, remote enrichment, or
+          author metrics.
+        - Close-out evidence includes `zig build validate`, close-out validation
+          with a privacy-safe sibling smoke repo or explicit approved skip
+          reason, help/version/explain smoke, install-from-source smoke in a
+          clean disposable copy, docs/prohibited-claim scans, license/version
+          checks, and git hygiene checks.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Feature 0009 makes the existing CLI alpha legally and publicly
+        understandable without changing deterministic hotspot product truth.
+      checked_at: 2026-05-22T13:55:00.000Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0009_public-alpha-readiness/prd.md
+  requirements_contract:
+    source_path: .flow/features/0009_public-alpha-readiness/prd.md
+    source_digest: 557d5240c5437085012714559baa8e7999440bd6baf08fb1595e97602bcfcef9
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#operator-decisions[1]
+        text: "The operator approved these decisions for this feature:"
+        category: constraint
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#operator-decisions[2]
+        text: "License: Apache-2.0."
+        category: constraint
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#operator-decisions[3]
+        text: "Copyright holder/year: Copyright 2026 Arsham Shirvani."
+        category: constraint
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#operator-decisions[4]
+        text: "Alpha version: 0.1.0-alpha.1."
+        category: constraint
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#operator-decisions[5]
+        text: "Version flag: add git-hotspots --version."
+        category: constraint
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#operator-decisions[6]
+        text: "Contribution posture: issues and small focused PRs are welcome."
+        category: constraint
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#operator-decisions[7]
+        text: "Zig version to document: 0.16.0 is the currently validated Zig version."
+        category: constraint
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[1]
+        text: Add a root LICENSE file containing Apache-2.0 license text and the agreed
+          copyright identity where appropriate.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[2]
+        text: Add a compact README license note that names Apache-2.0.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[3]
+        text: Update README alpha status so visitors understand this is a
+          source-buildable public alpha, not a packaged release.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[4]
+        text: Add install-from-source documentation with prerequisites for local Git and
+          the currently validated Zig version 0.16.0.
+        category: requirement
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[5]
+        text: Keep README public-facing and free of Flow lifecycle or process
+          exposition.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[6]
+        text: Add CONTRIBUTING.md with lightweight alpha contribution guidance.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[7]
+        text: CONTRIBUTING.md must say issues and small focused PRs are welcome.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#requirements[8]
+        text: CONTRIBUTING.md must instruct contributors to run zig build validate.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#requirements[9]
+        text: CONTRIBUTING.md must preserve the local-first/no-network/no-telemetry
+          default and the no-overclaim boundaries.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#requirements[10]
+        text: Centralise the version string 0.1.0-alpha.1 in source rather than keeping
+          separate hard-coded report literals.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#requirements[11]
+        text: JSON report metadata must use 0.1.0-alpha.1.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#requirements[12]
+        text: Markdown report metadata must use 0.1.0-alpha.1.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#requirements[13]
+        text: Add git-hotspots --version.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#requirements[14]
+        text: git-hotspots --version must exit 0 outside a Git repository.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#requirements[15]
+        text: git-hotspots --version must write a deterministic version line to stdout
+          and no stderr on success.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#requirements[16]
+        text: --version must be documented in help text and README.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#requirements[17]
+        text: If --version is standalone, combinations with analysis flags must fail
+          clearly on stderr; if another combination policy is chosen, it must be
+          documented and tested.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#requirements[18]
+        text: Existing default analysis output remains table format.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#requirements[19]
+        text: Existing --help and --explain behaviour remain available and local-only.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#requirements[20]
+        text: Existing scoring, ranking, Git traversal, filter semantics, confidence,
+          caveats, co-change calculation, and result limiting must not change.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#requirements[21]
+        text: Existing table, JSON, and Markdown report shapes must remain stable except
+          for intentional version metadata changes and docs/help additions.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#requirements[22]
+        text: Fixture expectations must be updated only for intentional alpha identity,
+          help, version, or docs validation changes.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#requirements[23]
+        text: zig build validate must continue to pass.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#requirements[24]
+        text: Close-out validation must include the standard validation ladder and
+          either a privacy-safe sibling/local repo smoke or an explicit approved
+          skip reason.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#requirements[25]
+        text: Close-out evidence must include help, explain, version, and at least one
+          analysis smoke.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#requirements[26]
+        text: Close-out evidence must include an install-from-source smoke in a clean
+          disposable copy or worktree.
+        category: requirement
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#requirements[27]
+        text: Close-out evidence must include a license/version consistency check.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#requirements[28]
+        text: Close-out evidence must include docs/prohibited-claim scans and their
+          interpretation.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#requirements[29]
+        text: Close-out evidence must include git status and branch/remote hygiene
+          summary.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#requirements[30]
+        text: Public docs and runtime text must not include monetisation, SaaS, hosted
+          product, pricing, sales, or commercial roadmap plans.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#requirements[31]
+        text: Public docs and runtime text must not claim bug prediction, objective
+          code-quality rating, technical-debt score, maintainer judgement,
+          developer ranking, productivity analytics, author metrics, or AI/LLM
+          judgement.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#requirements[32]
+        text: "Runtime defaults must remain local-first: no fetch, pull, push, upload,
+          telemetry, remote enrichment, or network behaviour by default."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#requirements[33]
+        text: This feature must not add providers, cache/database, package registries,
+          binary release automation, Homebrew, GitHub Actions, release tags, or
+          remote publishing.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#requirements[34]
+        text: No raw private smoke output, absolute local paths, private repo names,
+          author identities, or commercial strategy may be committed.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-042
+        source_ref: prd.md#requirements[35]
+        text: If a history leak is found, stop and ask before any history rewrite.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-043
+        source_ref: prd.md#acceptance[1]
+        text: "The feature is done when:"
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-044
+        source_ref: prd.md#acceptance[2]
+        text: Apache-2.0 licensing is present and documented.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-045
+        source_ref: prd.md#acceptance[3]
+        text: README describes public alpha status, source install, validation, and
+          current limitations honestly.
+        category: acceptance
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-046
+        source_ref: prd.md#acceptance[4]
+        text: CONTRIBUTING.md gives lightweight contribution guidance.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-047
+        source_ref: prd.md#acceptance[5]
+        text: 0.1.0-alpha.1 is the central version used by reports and --version.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-048
+        source_ref: prd.md#acceptance[6]
+        text: git-hotspots --version works outside a Git repository.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-049
+        source_ref: prd.md#acceptance[7]
+        text: zig build validate and close-out validation pass.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-050
+        source_ref: prd.md#acceptance[8]
+        text: A clean-copy source install smoke is recorded.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-051
+        source_ref: prd.md#acceptance[9]
+        text: Docs and runtime text pass prohibited-claim scans.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-052
+        source_ref: prd.md#acceptance[10]
+        text: Git hygiene evidence is recorded.
+        category: acceptance
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-053
+        source_ref: prd.md#acceptance[11]
+        text: No out-of-scope release automation, package publishing, hosted/commercial
+          strategy, providers, cache, telemetry, or network behaviour is added.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-054
+        source_ref: prd.md#edge-cases[1]
+        text: Running --version outside a Git repository should not attempt repo
+          analysis.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-055
+        source_ref: prd.md#edge-cases[2]
+        text: Running --version with analysis flags should follow the documented policy
+          and fail clearly if standalone semantics are used.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-056
+        source_ref: prd.md#edge-cases[3]
+        text: README should not imply binary downloads, package-manager installation, or
+          tagged release availability unless those are implemented in a later
+          feature.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-057
+        source_ref: prd.md#edge-cases[4]
+        text: License docs should not imply legal advice.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-058
+        source_ref: prd.md#edge-cases[5]
+        text: Contributing docs should not promise broad maintainer capacity or
+          long-term API stability during alpha.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-059
+        source_ref: prd.md#edge-cases[6]
+        text: Install-from-source docs should avoid absolute local paths and should not
+          rely on private project structure.
+        category: edge_case
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-060
+        source_ref: prd.md#edge-cases[7]
+        text: Backup branches created during local history cleanup must remain local and
+          must not be presented as release branches.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-061
+        source_ref: prd.md#edge-cases[8]
+        text: The remote configuration may be incomplete locally; do not push or tag as
+          part of this feature.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-062
+        source_ref: prd.md#verification[1]
+        text: "Required validation/evidence:"
+        category: verification
+        packet_refs:
+          - P3
+        verification: "Required validation/evidence:"
+        required_for_close_out: true
+      - id: REQ-063
+        source_ref: prd.md#verification[2]
+        text: "```sh zig fmt --check build.zig src tests zig build test zig build zig
+          build run -- --help zig build run -- --explain zig build run --
+          --version zig build validate zig build validate -Dcloseout=true
+          -Dsmoke-repo=<local-repo> -Dsmoke-label=<safe-label> # or an explicit
+          approved skip reason when no sibling repo is available"
+        category: verification
+        packet_refs: []
+        verification: "```sh zig fmt --check build.zig src tests zig build test zig
+          build zig build run -- --help zig build run -- --explain zig build run
+          -- --version zig build validate zig build validate -Dcloseout=true
+          -Dsmoke-repo=<local-repo> -Dsmoke-label=<safe-label> # or an explicit
+          approved skip reason when no sibling repo is available"
+        required_for_close_out: true
+      - id: REQ-064
+        source_ref: prd.md#verification[3]
+        text: git diff --check git status --short --branch ```
+        category: verification
+        packet_refs: []
+        verification: git diff --check git status --short --branch ```
+        required_for_close_out: true
+      - id: REQ-065
+        source_ref: prd.md#verification[4]
+        text: "Also record:"
+        category: verification
+        packet_refs: []
+        verification: "Also record:"
+        required_for_close_out: true
+      - id: REQ-066
+        source_ref: prd.md#verification[5]
+        text: zig version and git --version.
+        category: verification
+        packet_refs: []
+        verification: zig version and git --version.
+        required_for_close_out: true
+      - id: REQ-067
+        source_ref: prd.md#verification[6]
+        text: License file presence and Apache-2.0 identification.
+        category: verification
+        packet_refs: []
+        verification: License file presence and Apache-2.0 identification.
+        required_for_close_out: true
+      - id: REQ-068
+        source_ref: prd.md#verification[7]
+        text: Search results for remaining 0.0.0-spike literals.
+        category: verification
+        packet_refs: []
+        verification: Search results for remaining 0.0.0-spike literals.
+        required_for_close_out: true
+      - id: REQ-069
+        source_ref: prd.md#verification[8]
+        text: Docs/prohibited-claim scan results with safe negative-disclaimer
+          interpretation.
+        category: verification
+        packet_refs: []
+        verification: Docs/prohibited-claim scan results with safe negative-disclaimer
+          interpretation.
+        required_for_close_out: true
+      - id: REQ-070
+        source_ref: prd.md#verification[9]
+        text: Help/version/report consistency checks.
+        category: verification
+        packet_refs: []
+        verification: Help/version/report consistency checks.
+        required_for_close_out: true
+      - id: REQ-071
+        source_ref: prd.md#verification[10]
+        text: "Clean disposable copy or worktree source-install smoke:"
+        category: verification
+        packet_refs: []
+        verification: "Clean disposable copy or worktree source-install smoke:"
+        required_for_close_out: true
+      - id: REQ-072
+        source_ref: prd.md#verification[11]
+        text: build from source;
+        category: verification
+        packet_refs:
+          - P3
+        verification: build from source;
+        required_for_close_out: true
+      - id: REQ-073
+        source_ref: prd.md#verification[12]
+        text: run --help;
+        category: verification
+        packet_refs: []
+        verification: run --help;
+        required_for_close_out: true
+      - id: REQ-074
+        source_ref: prd.md#verification[13]
+        text: run --explain;
+        category: verification
+        packet_refs: []
+        verification: run --explain;
+        required_for_close_out: true
+      - id: REQ-075
+        source_ref: prd.md#verification[14]
+        text: run --version;
+        category: verification
+        packet_refs: []
+        verification: run --version;
+        required_for_close_out: true
+      - id: REQ-076
+        source_ref: prd.md#verification[15]
+        text: run one local repo analysis.
+        category: verification
+        packet_refs: []
+        verification: run one local repo analysis.
+        required_for_close_out: true
+      - id: REQ-077
+        source_ref: prd.md#verification[16]
+        text: Branch/remote hygiene summary, including local backup branches and whether
+          a usable remote is configured.
+        category: verification
+        packet_refs: []
+        verification: Branch/remote hygiene summary, including local backup branches and
+          whether a usable remote is configured.
+        required_for_close_out: true
+      - id: REQ-078
+        source_ref: prd.md#verification[17]
+        text: Do not print or commit raw private smoke reports, absolute local paths,
+          private repo names, author identities, or private commercial context.
+        category: verification
+        packet_refs: []
+        verification: Do not print or commit raw private smoke reports, absolute local
+          paths, private repo names, author identities, or private commercial
+          context.
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: Prepare the repository for a narrow source-available public alpha by
+      adding Apache-2.0 licensing, alpha version identity, `--version`, minimal
+      install and contribution docs, and alpha readiness validation without
+      adding packaging, release automation, CI, hosted strategy, or new hotspot
+      analysis behaviour.
+    acceptance:
+      - A root `LICENSE` file contains the Apache-2.0 license with copyright
+        holder `Arsham Shirvani` and year `2026` recorded in the repo where
+        appropriate.
+      - README includes a compact license note, alpha status,
+        install-from-source guidance, Git/Zig prerequisites, current
+        limitations, and validation guidance without promising packaged releases
+        or hosted services.
+      - "A lightweight `CONTRIBUTING.md` explains the alpha contribution
+        posture: issues and small focused PRs are welcome, contributors should
+        run `zig build validate`, and changes must preserve
+        local-first/no-telemetry defaults and avoid diagnostic overclaims."
+      - Version identity is centralised in source and the public alpha version
+        is `0.1.0-alpha.1`; JSON and Markdown report metadata use that version.
+      - "`git-hotspots --version` exits 0 outside a Git repository, prints a
+        deterministic version line, and rejects analysis-flag combinations
+        clearly if the implementation chooses standalone semantics."
+      - Existing analysis behaviour, scoring, filtering, report schemas apart
+        from intentional version metadata, fixtures, and validation outputs
+        remain stable.
+      - Public docs and runtime text do not add commercial, SaaS,
+        hosted-product, pricing, sales, bug-prediction, objective quality-score,
+        technical-debt-score, author-metric, maintainer-judgement,
+        developer-ranking, productivity-analytics, or AI/LLM-judgement claims.
+      - Public alpha readiness does not add package registries, binary release
+        automation, Homebrew, GitHub Actions, release tags, provider/cache
+        design, network access, telemetry, upload, remote enrichment, or author
+        metrics.
+      - Close-out evidence includes `zig build validate`, close-out validation
+        with a privacy-safe sibling smoke repo or explicit approved skip reason,
+        help/version/explain smoke, install-from-source smoke in a clean
+        disposable copy, docs/prohibited-claim scans, license/version checks,
+        and git hygiene checks.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig build validate
+      - zig fmt --check build.zig src tests
+      - zig build test
+      - zig build run -- --help
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
