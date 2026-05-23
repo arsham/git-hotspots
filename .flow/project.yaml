@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0022"
   active_run_id: null
   last_completed_feature_id: "0021"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 22
+  next_id: 23
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -113,6 +113,10 @@ features:
       slug: provider-symbol-evidence-seam
       path: .flow/features/0021_provider-symbol-evidence-seam
       created_at: 2026-05-23T02:52:09.228Z
+    - id: "0022"
+      slug: tree-sitter-zig-symbol-provider-spike
+      path: .flow/features/0022_tree-sitter-zig-symbol-provider-spike
+      created_at: 2026-05-23T03:41:43.139Z
 intake:
   mode: roadmap
   summary: null
