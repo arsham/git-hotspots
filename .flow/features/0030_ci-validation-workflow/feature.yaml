@@ -1,0 +1,175 @@
+schema: flow-feature.v1
+feature:
+  id: "0030"
+  slug: ci-validation-workflow
+  title: CI validation workflow
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: The project now has non-trivial Zig validation, vendored Tree-sitter
+    sources, and inspect-only symbol evidence, but the public repository has no
+    CI signal that the validation contract passes for contributors or publicity
+    readers.
+  outcome: Add a minimal GitHub Actions workflow that runs the public validation
+    gate on push and pull request without release automation, uploads, cache,
+    telemetry, or product behaviour changes.
+  acceptance:
+    - A single GitHub Actions workflow validates the project on push and pull
+      request.
+    - The workflow uses full checkout history because git-hotspots is
+      Git-history-sensitive.
+    - The workflow uses Zig 0.16.0.
+    - The workflow runs `zig build validate`.
+    - The workflow runs `zig build tree-sitter-build-proof` and `zig build
+      tree-sitter-symbol-proof`.
+    - The workflow has least-privilege read-only repository permissions.
+    - The workflow contains no release, package, artifact-upload, cache,
+      coverage, telemetry, secret, or publish steps.
+    - Local validation remains green after adding the workflow.
+planning:
+  state: ready
+  summary: Minimal public CI validation only. CI proves the public/default
+    validation and explicit Tree-sitter proof steps; sibling/local close-out
+    smoke remains a local operator gate.
+  brief_sync:
+    status: updated
+    role: derived
+    notes: CI supports B001's OSS/publicity and local-first validation posture
+      without changing product behaviour. No brief text change is required.
+    checked_at: 2026-05-23T22:30:00Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: CI is a follow-up validation capability for the public OSS CLI and does
+      not change B001's product thesis or runtime behaviour.
+    notes: Supports public confidence and contributor validation while preserving
+      deterministic local-first runtime constraints and avoiding release or
+      hosted product scope.
+    checked_at: 2026-05-23T22:30:00Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-23T22:28:11.793Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-23T22:28:11.793Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-23T22:28:11.793Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-23T22:28:11.793Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Next logical public validation slice after symbol line-history work.
+  depends_on_feature_ids:
+    - "0029"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add `.github/workflows/ci.yml` or equivalent minimal validation workflow.
+    - Use checkout with full history and Zig 0.16.0.
+    - Run canonical validation and explicit Tree-sitter proof steps.
+    - Avoid all release/publish/upload/cache/matrix scope.
+  packets:
+    - id: P1
+      title: Minimal GitHub Actions validation workflow
+      goal: Add one minimal GitHub Actions workflow for public validation.
+      status: planned
+      depends_on: []
+      owner_phase: runner
+      execution_context:
+        - "Anchors: `.github/workflows/ci.yml`, `build.zig`,
+          `tools/validate.sh`, `README.md`, `CONTRIBUTING.md`."
+        - "In scope: add one workflow on push/pull_request that checks out full
+          history, uses Zig 0.16.0, and runs validation/proof commands."
+        - "Out of scope: release automation, packaging, artifacts, cache,
+          coverage, matrix, badges, secrets, telemetry, runtime behaviour
+          changes."
+        - "Protected: local-first runtime defaults, public OSS framing, existing
+          validation semantics, no sibling/local repo data in CI."
+        - "Dependencies: existing `zig build validate`,
+          `tree-sitter-build-proof`, and `tree-sitter-symbol-proof` steps."
+        - "Validation/evidence: run `git diff --check`, `zig build validate`,
+          `zig build tree-sitter-build-proof`, `zig build
+          tree-sitter-symbol-proof`; inspect workflow YAML for scope and
+          permissions."
+        - "Review focus: minimal triggers, full checkout history, Zig 0.16.0,
+          read-only permissions, no prohibited CI behaviours."
+        - "Escalate if: Zig setup requires an unacceptable unpinned third-party
+          action, CI needs secrets, validation is too slow/flaky, or workflow
+          scope expands."
+        - "Done boundary: workflow exists, local gates pass, and reviewer can
+          prove no prohibited CI scope was added."
+      verification_commands:
+        - git diff --check
+        - zig build validate
+        - zig build tree-sitter-build-proof
+        - zig build tree-sitter-symbol-proof
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids:
+    - P1
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-23T22:22:04.682Z
+  updated_at: 2026-05-23T22:28:11.793Z
