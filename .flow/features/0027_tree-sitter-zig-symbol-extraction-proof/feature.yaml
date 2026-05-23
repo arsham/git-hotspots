@@ -1,0 +1,209 @@
+schema: flow-feature.v1
+feature:
+  id: "0027"
+  slug: tree-sitter-zig-symbol-extraction-proof
+  title: Tree-sitter Zig symbol extraction proof
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Vendored Tree-sitter sources compile and parse a tiny Zig snippet, but
+    the project has not yet proven deterministic current-symbol extraction
+    semantics for Zig. Exposing provider output in CLI reports now would force
+    schema and UX decisions before the extractor is proven.
+  outcome: Add an internal, test-only Tree-sitter Zig current-symbol extraction
+    proof that maps in-memory Zig source to provider.CurrentSymbolEvidence for a
+    repo-relative path, with deterministic ranges, ordering, and failure or
+    unsupported behaviour, while preserving all existing CLI output unchanged.
+  acceptance:
+    - Internal extractor/proof exists for Zig current-symbol extraction from
+      in-memory source and a repo-relative path.
+    - Extractor uses only vendored local Tree-sitter core and tree-sitter-zig
+      sources.
+    - At least named Zig function declarations are extracted into
+      provider.CurrentSymbolEvidence or a directly compatible internal result
+      shape.
+    - Supported symbol subset and range convention are documented in code or
+      docs.
+    - Deterministic ordering and deterministic current ranges are covered by
+      tests.
+    - Empty, invalid or partial Zig, and unsupported non-Zig input are handled
+      without crashes, snippets, raw parser diagnostics, absolute paths, or
+      private details.
+    - No user-facing symbols surface is added: no --symbols, no report schema change,
+        no inspect semantic change, no scoring or ranking change.
+    - Normal no-provider table, JSON, Markdown, and inspect outputs remain
+      byte-stable.
+    - Required validation passes, including zig build validate, zig build
+      tree-sitter-build-proof, and any new symbol proof step.
+    - Close-out smoke uses this repo and sibling-local-repo with privacy-safe
+      label-only evidence.
+planning:
+  state: ready
+  summary: "Internal proof slice after the Tree-sitter build proof: validate Zig
+    symbol extraction semantics before exposing provider output. The first
+    user-visible --symbols feature is intentionally deferred."
+  brief_sync:
+    status: unchanged
+    reason: Feature 0027 is a bounded provider-enrichment prerequisite under B001;
+      B001 already captures local-first deterministic evidence, optional
+      providers, and file-level Git truth. No brief text change is needed.
+    checked_at: 2026-05-23T07:29:49.927Z
+  brief_alignment:
+    status: aligned
+    role: prerequisite
+    summary: "Internal Tree-sitter Zig symbol extraction proof prepares the optional
+      provider path while preserving B001 boundaries: local-first, deterministic
+      file-level evidence remains product truth, and provider evidence is
+      current-only enrichment."
+    checked_at: 2026-05-23T07:30:42.000Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-23T07:31:24.748Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-23T07:31:24.748Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-23T07:31:24.748Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-23T07:31:24.748Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Follow-on to the completed provider contract, source import,
+    and offline build proof sequence. No roadmap candidate existed.
+  depends_on_feature_ids:
+    - "0021"
+    - "0025"
+    - "0026"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add a narrow internal Tree-sitter Zig extraction module or proof source.
+    - Reuse provider.CurrentSymbolEvidence or a directly compatible internal
+      result shape.
+    - Test deterministic extraction for at least named Zig functions.
+    - Keep parser integration behind non-product tests/proof only.
+    - Record docs/evidence for supported subset, range convention, and deferred
+      --symbols output.
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+  packets:
+    - id: P1
+      title: Internal Zig symbol extraction proof
+      goal: Add the internal Tree-sitter Zig extractor/proof and synthetic tests
+        without product CLI or report wiring.
+      depends_on: []
+      status: planned
+      owner_phase: runner
+      execution_context:
+        - "Anchors: build.zig, src/provider.zig, candidate
+          src/tree_sitter_zig.zig or tests/tree_sitter_symbol_proof.zig,
+          tests/tree_sitter_build_proof.zig, third_party/tree-sitter-core,
+          third_party/tree-sitter-zig."
+        - "In scope: in-memory Zig source parsing, current symbol evidence for
+          repo-relative paths, deterministic ordering, explicit supported
+          subset, tests for functions/ranges/failure/unsupported input."
+        - "Out of scope: --symbols, CLI/report/schema changes, scoring/ranking
+          changes, provider registry, cache, network, parser generation, system
+          Tree-sitter dependencies, historical symbol lineage."
+        - "Protected: normal no-provider table/JSON/Markdown/inspect outputs;
+          local-first/no-network posture; provider contract current-only
+          semantics."
+        - "Dependencies: completed Features 0021, 0025, and 0026."
+        - "Validation/evidence: run Zig format/build/test/validate, tree-sitter
+          build proof, new symbol proof if added, no-provider parity, local-only
+          scans, and close-out smoke. Proof locations: tests,
+          docs/tree-sitter-source-import-evidence.md or provider docs, and
+          validation summaries."
+        - "Review focus: extraction semantics are proven internally; no
+          user-visible symbol output exists; parser resources are cleaned up;
+          failures degrade safely in tests."
+        - "Escalate if: product runtime wiring is required, output schema must
+          change, vendored sources fail to compile, system
+          packages/network/parser generation are needed, or symbol ranges cannot
+          be made deterministic."
+        - "Done boundary: extractor/proof tests and validation pass, docs record
+          supported subset and deferrals, and repo is clean."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build
+        - zig build validate
+        - zig build tree-sitter-build-proof
+        - new symbol proof step if added
+        - git diff --check
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+timestamps:
+  created_at: 2026-05-23T07:23:24.225Z
+  updated_at: 2026-05-23T07:31:24.748Z
