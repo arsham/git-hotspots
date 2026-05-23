@@ -1,0 +1,280 @@
+schema: flow-feature.v1
+feature:
+  id: "0026"
+  slug: tree-sitter-offline-build-integration-proof
+  title: Tree-sitter offline build integration proof
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Vendored Tree-sitter sources are present, but the project has not yet
+    proven they can compile and link offline through the local Zig build without
+    becoming product runtime or weakening source-install/local-first behaviour.
+  outcome: Add a narrow non-product build proof that compiles and links the
+    vendored Tree-sitter core and tree-sitter-zig parser from local files only,
+    runs a tiny in-memory Zig parse smoke, records evidence, and preserves all
+    normal no-provider CLI outputs and product boundaries.
+  acceptance:
+    - A dedicated proof step such as `zig build tree-sitter-build-proof`
+      compiles and links local vendored Tree-sitter core and tree-sitter-zig
+      sources.
+    - Normal `zig build` continues to build/install only the existing
+      `git-hotspots` executable and does not include Tree-sitter provider
+      runtime.
+    - The proof uses only repo-local vendored files under
+      `third_party/tree-sitter-core/v0.26.9` and
+      `third_party/tree-sitter-zig/v1.1.2`.
+    - No `build.zig.zon`, package manager, pkg-config, system Tree-sitter,
+      global Tree-sitter CLI, submodule, build-time network, or parser
+      generation is introduced.
+    - A tiny non-product smoke parses an in-memory Zig snippet and asserts only
+      parser setup/root-node basics.
+    - No provider registry, CLI flag, report/schema/scoring/cache behaviour,
+      symbol output, real-repo parsing, telemetry, upload, remote enrichment, or
+      background analysis is added.
+    - Existing no-provider table, JSON, Markdown, and inspect outputs remain
+      byte-stable.
+    - Documentation records build proof commands, Zig version, target, local
+      source files/include paths, timing/size evidence, parity evidence,
+      offline/local-only scans, and privacy-safe close-out smoke.
+    - "`zig build validate`, the explicit proof step, and close-out validation
+      with `sibling-local-repo` pass."
+    - Committed evidence contains no private paths, private repo names, raw
+      sibling output, raw parser stderr, author identities, commercial strategy,
+      bug-prediction claims, quality scoring, developer ranking, or maintainer
+      judgement.
+planning:
+  state: ready
+  summary: Prove offline compile/link viability for the vendored Tree-sitter core
+    and Zig grammar through an isolated non-product build/test proof. Preserve
+    current CLI/runtime behaviour and stop before provider integration.
+  brief_sync:
+    status: unchanged
+    reason: "B001 remains current: the build proof preserves local-first defaults,
+      no network/telemetry, optional future provider enrichment, and file-level
+      Git evidence as product truth."
+    checked_at: 2026-05-23T07:25:00.000Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Follow-up prerequisite for future provider work; proves offline parser
+      build viability while preserving B001 local-first and deterministic
+      file-level evidence boundaries.
+    checked_at: 2026-05-23T07:25:00.000Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-23T06:27:01.799Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-23T06:27:01.799Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-23T06:27:01.799Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-23T06:27:01.799Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: "Follow-up to Feature 0025 source import proof: compile/link
+    the imported sources in a non-product offline proof before runtime provider
+    work."
+  depends_on_feature_ids:
+    - "0023"
+    - "0024"
+    - "0025"
+  blocked_by: []
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+design:
+  rough_shape:
+    - Add an explicit non-product Tree-sitter build proof step.
+    - Compile/link vendored Tree-sitter core and tree-sitter-zig parser from
+      repo-local third_party paths only.
+    - Add a tiny in-memory Zig parse smoke for parser setup/root basics.
+    - Record build proof evidence and preserve no-provider output parity.
+    - Stop before CLI/report/schema/scoring/cache/provider runtime or symbol
+      output.
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+  packets:
+    - id: P1
+      title: Offline build proof target
+      goal: Add an explicit non-product build proof that compiles and links the
+        vendored Tree-sitter core and Zig grammar from repo-local sources only.
+      depends_on: []
+      status: pending
+      owner_phase: runner
+      execution_context:
+        - "Anchors: build.zig; third_party/tree-sitter-core/v0.26.9;
+          third_party/tree-sitter-zig/v1.1.2;
+          docs/tree-sitter-source-import-evidence.md."
+        - "In scope: named build proof step, local vendored C source
+          compile/link, repo-relative include paths, libc link if needed,
+          no-product install boundary."
+        - "Out of scope: provider runtime, provider registry, CLI flags, report
+          fields, scoring, cache, build.zig.zon, package fetches, system parser
+          packages, parser generation."
+        - "Protected: normal git-hotspots executable/runtime; no-provider output
+          bytes; vendored provenance/license/notice identity."
+        - "Dependencies: Features 0023, 0024, and 0025 source identity,
+          provenance, and vendored source import."
+        - "Validation/evidence: zig build tree-sitter-build-proof; zig build;
+          git diff --check; scans for build.zig.zon, submodules, pkg-config,
+          global tree-sitter CLI, package managers, network commands."
+        - "Review focus: proof target isolation, local-only vendored inputs, no
+          product runtime integration, portable Zig 0.16.0 build approach."
+        - "Escalate if: C compile/link needs non-local inputs, system packages,
+          package managers, generated sources, runtime provider semantics, or
+          unresolved duplicate/missing symbols."
+        - "Done boundary: proof target builds from local vendored files and
+          normal zig build remains product-runtime unchanged."
+      verification_commands:
+        - zig build tree-sitter-build-proof
+        - zig build
+        - git diff --check
+    - id: P2
+      title: Tiny parse smoke and validation integration
+      goal: Add a tiny internal parser smoke and validation coverage without
+        user-visible provider output or normal report changes.
+      depends_on:
+        - P1
+      status: pending
+      owner_phase: runner
+      execution_context:
+        - "Anchors: build.zig; tests/ or dedicated proof source;
+          tools/validate.sh only if needed for canonical proof coverage."
+        - "In scope: parse a tiny in-memory Zig snippet, assert parser
+          setup/root basics, cleanup/deinit, integrate proof into validation if
+          overhead is acceptable or record separate mandatory close-out
+          command."
+        - "Out of scope: symbol extraction, CurrentSymbolEvidence emission,
+          provider envelope output, real-repo file parsing, parser diagnostics
+          in user reports."
+        - "Protected: existing table/JSON/Markdown/inspect outputs and fixture
+          expected outputs; no report schema or CLI changes."
+        - "Dependencies: P1 build proof target."
+        - "Validation/evidence: zig build test; zig build validate; explicit
+          proof command evidence; byte-stable output parity for representative
+          no-provider table, JSON, Markdown, and inspect outputs."
+        - "Review focus: test-only/non-product boundary, deterministic smoke,
+          cleanup/deinit, validation coverage, no-provider output stability."
+        - "Escalate if: smoke needs provider runtime/report semantics, parser
+          diagnostics leak private data, validation overhead is material, or
+          no-provider bytes change."
+        - "Done boundary: tiny parse smoke proves parser setup while product
+          output remains unchanged."
+      verification_commands:
+        - zig build test
+        - zig build validate
+        - zig build tree-sitter-build-proof
+    - id: P3
+      title: Evidence privacy and close-out proof
+      goal: Record bounded build-proof evidence, local-only scans, timing/size
+        observations, parity proof, and close-out smoke.
+      depends_on:
+        - P2
+      status: pending
+      owner_phase: runner
+      execution_context:
+        - "Anchors: docs/tree-sitter-offline-build-proof.md or justified
+          equivalent; tools/validate.sh if validation summaries need updates."
+        - "In scope: document proof commands, Zig version/target, vendored
+          source files/include paths, timing/size evidence, offline scans,
+          no-provider parity, sibling-local-repo close-out summary."
+        - "Out of scope: public claims that symbol evidence exists; release/CI;
+          parser/provider runtime; broader platform matrix beyond local target."
+        - "Protected: privacy-safe evidence only; no absolute sibling path,
+          private repo name, raw sibling report, raw parser stderr, remotes,
+          author identities, or source snippets in docs."
+        - "Dependencies: P1 and P2 proof target and smoke."
+        - "Validation/evidence: full validation ladder, close-out validation
+          with sibling-local-repo, protected path scan, local-only scan, privacy
+          and prohibited-claim scan."
+        - "Review focus: evidence honesty, local-first/offline proof,
+          no-provider byte stability, no product overclaiming, exact
+          stop-before-runtime boundary."
+        - "Escalate if: private data appears, validation requires network/global
+          tools, build time or size materially regresses, or docs imply symbol
+          hotspot support."
+        - "Done boundary: all close-out rows are proven and Feature 0026 can
+          close as a build proof only."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build
+        - zig build validate
+        - zig build tree-sitter-build-proof
+        - git diff --check
+        - zig build validate -Dcloseout=true -Dsmoke-repo=<operator-local-repo>
+          -Dsmoke-label=sibling-local-repo
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+timestamps:
+  created_at: 2026-05-23T06:20:13.219Z
+  updated_at: 2026-05-23T06:27:01.799Z

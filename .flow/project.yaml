@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0026"
   active_run_id: null
   last_completed_feature_id: "0025"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 26
+  next_id: 27
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -129,6 +129,10 @@ features:
       slug: tree-sitter-source-import-proof
       path: .flow/features/0025_tree-sitter-source-import-proof
       created_at: 2026-05-23T05:31:06.444Z
+    - id: "0026"
+      slug: tree-sitter-offline-build-integration-proof
+      path: .flow/features/0026_tree-sitter-offline-build-integration-proof
+      created_at: 2026-05-23T06:20:13.219Z
 intake:
   mode: roadmap
   summary: null
