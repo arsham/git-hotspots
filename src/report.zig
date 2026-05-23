@@ -42,6 +42,11 @@ pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
             for (symbols.symbols) |symbol| {
                 const range = displayLineRange(symbol.current_range);
                 try writer.print("  function {s} lines {d}-{d} confidence={s}\n", .{ symbol.name, range.start, range.end, @tagName(symbol.confidence) });
+                if (symbol.current_line_history) |line_history| {
+                    try writer.print("    Current-line Git evidence: commits={d} lines={d} unblamable={d} freshness={s} failure={s} confidence={s} caveats=", .{ line_history.distinct_last_touch_commit_count, line_history.line_count, line_history.uncommitted_or_unblamable_line_count, @tagName(line_history.freshness), @tagName(line_history.failure), @tagName(line_history.confidence) });
+                    try renderCaveatInline(writer, line_history.caveats);
+                    try writer.writeByte('\n');
+                }
             }
         }
     }
@@ -336,6 +341,10 @@ fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport) !void {
         try jsonString(writer, @tagName(symbol.confidence));
         try writer.print(", \"caveats\": ", .{});
         try stringArray(writer, symbol.caveats);
+        if (symbol.current_line_history) |line_history| {
+            try writer.print(", \"current_line_history\": ", .{});
+            try renderCurrentLineHistoryJson(writer, line_history);
+        }
         try writer.print(" }}{s}\n", .{if (i + 1 == symbols.symbols.len) "" else ","});
     }
     try writer.print("    ]\n  }}", .{});
@@ -358,18 +367,77 @@ fn renderSymbolReportMarkdown(writer: anytype, symbols: model.SymbolReport) !voi
             try writer.writeByte('\n');
         }
     }
-    try writer.writeAll("\n| Name | Kind | Lines | Confidence |\n| --- | --- | ---: | --- |\n");
+    const has_line_history = symbolsHaveLineHistory(symbols.symbols);
+    if (has_line_history) {
+        try writer.writeAll("\n| Name | Kind | Lines | Confidence | Current-line Git evidence |\n| --- | --- | ---: | --- | --- |\n");
+    } else {
+        try writer.writeAll("\n| Name | Kind | Lines | Confidence |\n| --- | --- | ---: | --- |\n");
+    }
     if (symbols.symbols.len == 0) {
-        try writer.writeAll("| None | - | - | - |\n\n");
+        if (has_line_history) try writer.writeAll("| None | - | - | - | - |\n\n") else try writer.writeAll("| None | - | - | - |\n\n");
         return;
     }
     for (symbols.symbols) |symbol| {
         const range = displayLineRange(symbol.current_range);
         try writer.writeAll("| ");
         try markdownText(writer, symbol.name);
-        try writer.print(" | {s} | {d}-{d} | {s} |\n", .{ @tagName(symbol.kind), range.start, range.end, @tagName(symbol.confidence) });
+        try writer.print(" | {s} | {d}-{d} | {s} |", .{ @tagName(symbol.kind), range.start, range.end, @tagName(symbol.confidence) });
+        if (has_line_history) {
+            if (symbol.current_line_history) |line_history| {
+                try writer.print(" Current-line Git evidence: commits={d}; lines={d}; unblamable={d}; freshness={s}; failure={s}; confidence={s}; caveats=", .{ line_history.distinct_last_touch_commit_count, line_history.line_count, line_history.uncommitted_or_unblamable_line_count, @tagName(line_history.freshness), @tagName(line_history.failure), @tagName(line_history.confidence) });
+                try renderMarkdownCaveatInline(writer, line_history.caveats);
+                try writer.writeAll(" |\n");
+            } else {
+                try writer.writeAll(" - |\n");
+            }
+        } else try writer.writeByte('\n');
     }
     try writer.writeByte('\n');
+}
+
+fn symbolsHaveLineHistory(symbols: []const provider.CurrentSymbolEvidence) bool {
+    for (symbols) |symbol| if (symbol.current_line_history != null) return true;
+    return false;
+}
+
+fn renderCurrentLineHistoryJson(writer: anytype, line_history: provider.CurrentLineHistoryEvidence) !void {
+    try writer.print("{{ \"basis\": ", .{});
+    try jsonString(writer, line_history.basis);
+    try writer.print(", \"current_only\": {}, \"line_count\": {d}, \"distinct_last_touch_commit_count\": {d}, \"most_recent_line_touched_timestamp\": ", .{ line_history.current_only, line_history.line_count, line_history.distinct_last_touch_commit_count });
+    if (line_history.most_recent_line_touched_timestamp) |ts| try writer.print("{d}", .{ts}) else try writer.print("null", .{});
+    try writer.print(", \"uncommitted_or_unblamable_line_count\": {d}, \"sample_commits\": ", .{line_history.uncommitted_or_unblamable_line_count});
+    try stringArray(writer, line_history.sample_commits);
+    try writer.print(", \"freshness\": ", .{});
+    try jsonString(writer, @tagName(line_history.freshness));
+    try writer.print(", \"failure\": ", .{});
+    try jsonString(writer, @tagName(line_history.failure));
+    try writer.print(", \"confidence\": ", .{});
+    try jsonString(writer, @tagName(line_history.confidence));
+    try writer.print(", \"caveats\": ", .{});
+    try stringArray(writer, line_history.caveats);
+    try writer.print(" }}", .{});
+}
+
+fn renderCaveatInline(writer: anytype, caveats: []const []const u8) !void {
+    if (caveats.len == 0) {
+        try writer.writeAll("none");
+        return;
+    }
+    for (caveats, 0..) |caveat, i| {
+        if (i != 0) try writer.writeAll("; ");
+        try writer.writeAll(caveat);
+    }
+}
+
+fn renderMarkdownCaveatInline(writer: anytype, caveats: []const []const u8) !void {
+    if (caveats.len == 0) {
+        try writer.writeAll("none");
+        return;
+    }
+    for (caveats, 0..) |caveat, i| {
+        if (i != 0) try writer.writeAll("; ");
+        try markdownText(writer, caveat);
+    }
 }
 
 fn stringArray(writer: anytype, values: []const []const u8) !void {

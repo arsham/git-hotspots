@@ -42,6 +42,12 @@ pub const Extraction = struct {
         for (self.symbols) |symbol| {
             allocator.free(symbol.path);
             allocator.free(symbol.name);
+            if (symbol.current_line_history) |line_history| {
+                for (line_history.sample_commits) |commit| allocator.free(commit);
+                allocator.free(line_history.sample_commits);
+                for (line_history.caveats) |caveat| allocator.free(caveat);
+                allocator.free(line_history.caveats);
+            }
         }
         allocator.free(self.symbols);
         self.* = undefined;

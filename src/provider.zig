@@ -93,10 +93,25 @@ pub const CurrentSymbolEvidence = struct {
     provider_name: []const u8,
     confidence: Confidence,
     caveats: []const []const u8 = &.{},
+    current_line_history: ?CurrentLineHistoryEvidence = null,
 
     /// This seam models only current working-tree evidence. It deliberately has
     /// no lineage, ownership, dependency, snippet, or scoring fields.
     pub const semantics = "current-only";
+};
+
+pub const CurrentLineHistoryEvidence = struct {
+    basis: []const u8 = "current-line-range-at-head",
+    current_only: bool = true,
+    line_count: u32,
+    distinct_last_touch_commit_count: usize,
+    most_recent_line_touched_timestamp: ?i64,
+    uncommitted_or_unblamable_line_count: u32,
+    sample_commits: [][]const u8,
+    freshness: Freshness,
+    failure: Failure,
+    confidence: Confidence,
+    caveats: [][]const u8,
 };
 
 pub fn validateRepoRelativePath(path: []const u8) PathError!void {

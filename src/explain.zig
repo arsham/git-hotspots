@@ -80,6 +80,14 @@ pub const text =
     \\Unsupported or unavailable current files preserve inspected file evidence
     \\and report provider caveats without parser diagnostics or source snippets.
     \\
+    \\--symbol-line-history is opt-in and valid only with --inspect PATH
+    \\--symbols. It adds current-line Git blame evidence for the current symbol
+    \\line ranges using one local blame process only when current symbol ranges
+    \\are valid and the inspected file is clean. It reports commit-count and
+    \\timestamp summaries without author identities, commit messages, source
+    \\snippets, remotes, or absolute paths. This is not symbol lineage,
+    \\ownership, scoring input, or semantic history.
+    \\
     \\## Limitations and non-claims
     \\
     \\Scores are not bug predictions, objective code-quality ratings, maintainer
@@ -119,6 +127,7 @@ test "explanation includes confidence and non-claim boundaries" {
         "productivity analytics",
         "AI/LLM judgement",
         "--symbols flag is opt-in and valid only with --inspect PATH",
+        "--symbol-line-history is opt-in and valid only with --inspect PATH",
         "Symbol evidence does not change file score",
     }) |snippet| {
         try std.testing.expect(std.mem.indexOf(u8, text, snippet) != null);

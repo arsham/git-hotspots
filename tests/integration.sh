@@ -91,6 +91,7 @@ grep -q -- "--scope VALUE" /tmp/git-hotspots-help.txt
 grep -q -- "project (default) or all" /tmp/git-hotspots-help.txt
 grep -q -- "--progress" /tmp/git-hotspots-help.txt
 grep -q -- "--symbols" /tmp/git-hotspots-help.txt
+grep -q -- "--symbol-line-history" /tmp/git-hotspots-help.txt
 "$EXE" --progress --help > /tmp/git-hotspots-progress-help.txt 2> /tmp/git-hotspots-progress-help.err
 grep -q -- "--progress" /tmp/git-hotspots-progress-help.txt
 test ! -s /tmp/git-hotspots-progress-help.err
@@ -130,6 +131,8 @@ assert_fails_with_stderr version-progress "--version cannot be combined" "$EXE" 
 assert_fails_with_stderr symbols-alone "--symbols can only be combined with --inspect PATH" "$EXE" --symbols
 assert_fails_with_stderr symbols-explain "--explain cannot be combined" "$EXE" --symbols --explain
 assert_fails_with_stderr symbols-version "--version cannot be combined" "$EXE" --symbols --version
+assert_fails_with_stderr symbol-line-history-explain "--explain cannot be combined" "$EXE" --symbol-line-history --explain
+assert_fails_with_stderr symbol-line-history-version "--version cannot be combined" "$EXE" --symbol-line-history --version
 
 "$EXE" --repo fixtures/basic --format json > /tmp/git-hotspots-basic.json 2> /tmp/git-hotspots-basic.err
 test ! -s /tmp/git-hotspots-basic.err
@@ -167,6 +170,49 @@ diff -u fixtures/expected/symbols-inspect-symbols.json /tmp/git-hotspots-symbols
 diff -u fixtures/expected/symbols-inspect-symbols.md /tmp/git-hotspots-symbols-inspect-symbols.md
 "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --format table > /tmp/git-hotspots-symbols-inspect-symbols.txt
 diff -u fixtures/expected/symbols-inspect-symbols.txt /tmp/git-hotspots-symbols-inspect-symbols.txt
+"$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-line-history --format json > /tmp/git-hotspots-symbols-line-history.json
+python3 -m json.tool /tmp/git-hotspots-symbols-line-history.json >/dev/null
+grep -Fq -- '"current_line_history"' /tmp/git-hotspots-symbols-line-history.json
+grep -Fq -- '"basis": "current-line-range-at-head"' /tmp/git-hotspots-symbols-line-history.json
+grep -Fq -- '"distinct_last_touch_commit_count": 1' /tmp/git-hotspots-symbols-line-history.json
+! grep -Eiq -- 'Fixture Author|fixture@example|expand zig function|initial symbol files|file://' /tmp/git-hotspots-symbols-line-history.json
+"$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-line-history --format markdown > /tmp/git-hotspots-symbols-line-history.md
+grep -Fq -- 'Current-line Git evidence' /tmp/git-hotspots-symbols-line-history.md
+"$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-line-history --format table > /tmp/git-hotspots-symbols-line-history.txt
+grep -Fq -- 'Current-line Git evidence: commits=1' /tmp/git-hotspots-symbols-line-history.txt
+"$EXE" --repo fixtures/symbol-line-history --inspect src/current.zig --symbols --symbol-line-history --format json > /tmp/git-hotspots-line-history-success.json
+diff -u fixtures/expected/line-history-success.json /tmp/git-hotspots-line-history-success.json
+"$EXE" --repo fixtures/symbol-line-history --inspect src/current.zig --symbols --symbol-line-history --format json > /tmp/git-hotspots-line-history-success-2.json
+diff -u /tmp/git-hotspots-line-history-success.json /tmp/git-hotspots-line-history-success-2.json
+"$EXE" --repo fixtures/symbol-line-history --inspect src/current.zig --symbols --symbol-line-history --format markdown > /tmp/git-hotspots-line-history-success.md
+diff -u fixtures/expected/line-history-success.md /tmp/git-hotspots-line-history-success.md
+"$EXE" --repo fixtures/symbol-line-history --inspect src/current.zig --symbols --symbol-line-history --format table > /tmp/git-hotspots-line-history-success.txt
+diff -u fixtures/expected/line-history-success.txt /tmp/git-hotspots-line-history-success.txt
+"$EXE" --repo fixtures/symbol-line-history-shallow --inspect src/current.zig --symbols --symbol-line-history --format json > /tmp/git-hotspots-line-history-shallow.json
+grep -Fq -- 'current-line Git evidence may be incomplete: repository history is shallow; auto_fetch is false' /tmp/git-hotspots-line-history-shallow.json
+"$EXE" --repo fixtures/symbol-line-history-partial --inspect src/current.zig --symbols --symbol-line-history --format json > /tmp/git-hotspots-line-history-partial.json
+grep -Fq -- 'current-line Git evidence may be incomplete: repository history may be partial/promisor; auto_fetch is false' /tmp/git-hotspots-line-history-partial.json
+"$EXE" --repo fixtures/symbol-line-history --inspect src/readme.txt --symbols --symbol-line-history --format json > /tmp/git-hotspots-line-history-unsupported.json
+grep -Fq -- '"failure": "unsupported"' /tmp/git-hotspots-line-history-unsupported.json
+! grep -Fq -- '"current_line_history"' /tmp/git-hotspots-line-history-unsupported.json
+"$EXE" --repo fixtures/symbol-line-history --inspect src/empty.zig --symbols --symbol-line-history --format json > /tmp/git-hotspots-line-history-empty.json
+grep -Fq -- '"items": [' /tmp/git-hotspots-line-history-empty.json
+! grep -Fq -- '"current_line_history"' /tmp/git-hotspots-line-history-empty.json
+"$EXE" --repo fixtures/symbol-line-history --inspect src/broken.zig --symbols --symbol-line-history --format json > /tmp/git-hotspots-line-history-broken.json
+grep -Eq -- '"failure": "(failed|ok)"' /tmp/git-hotspots-line-history-broken.json
+"$EXE" --repo fixtures/symbol-line-history --inspect src/link.zig --symbols --symbol-line-history --format json > /tmp/git-hotspots-line-history-link.json
+grep -Fq -- '"failure": "unavailable"' /tmp/git-hotspots-line-history-link.json
+printf 'dirty inspected\n' >> fixtures/symbol-line-history/src/current.zig
+"$EXE" --repo fixtures/symbol-line-history --inspect src/current.zig --symbols --symbol-line-history --format json > /tmp/git-hotspots-line-history-dirty-inspected.json
+grep -Fq -- 'current-line Git evidence skipped: inspected file has staged or unstaged content changes' /tmp/git-hotspots-line-history-dirty-inspected.json
+git -C fixtures/symbol-line-history checkout -q -- src/current.zig
+printf 'dirty unrelated\n' >> fixtures/symbol-line-history/src/readme.txt
+"$EXE" --repo fixtures/symbol-line-history --inspect src/current.zig --symbols --symbol-line-history --format json > /tmp/git-hotspots-line-history-dirty-unrelated.json
+grep -Fq -- '"failure": "ok"' /tmp/git-hotspots-line-history-dirty-unrelated.json
+git -C fixtures/symbol-line-history checkout -q -- src/readme.txt
+! grep -Eiq -- 'Fixture Author|fixture@example|fixture function|private|file://|raw blame|source line|previous filename|ownership|productivity|developer ranking' /tmp/git-hotspots-line-history-success.json /tmp/git-hotspots-line-history-success.md /tmp/git-hotspots-line-history-success.txt /tmp/git-hotspots-line-history-shallow.json /tmp/git-hotspots-line-history-partial.json /tmp/git-hotspots-line-history-unsupported.json /tmp/git-hotspots-line-history-empty.json /tmp/git-hotspots-line-history-broken.json /tmp/git-hotspots-line-history-link.json /tmp/git-hotspots-line-history-dirty-inspected.json /tmp/git-hotspots-line-history-dirty-unrelated.json
+assert_fails_with_stderr symbol-line-history-alone "--symbol-line-history can only be combined" "$EXE" --symbol-line-history
+assert_fails_with_stderr symbol-line-history-no-symbols "--symbol-line-history can only be combined" "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbol-line-history
 "$EXE" --repo fixtures/symbols --inspect src/readme.txt --symbols --format json > /tmp/git-hotspots-symbols-unsupported.json
 diff -u fixtures/expected/symbols-unsupported.json /tmp/git-hotspots-symbols-unsupported.json
 "$EXE" --repo fixtures/symbols --inspect src/link.zig --symbols --format json > /tmp/git-hotspots-symbols-symlink-unavailable.json

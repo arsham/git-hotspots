@@ -142,6 +142,7 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --exclude-prefix .flow/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
 ./zig-out/bin/git-hotspots --repo . --progress --format json
 ./zig-out/bin/git-hotspots --explain
 ./zig-out/bin/git-hotspots --version
@@ -149,8 +150,8 @@ zig build
 
 Supported options are `--repo`, `--limit`, `--format table|json|markdown`,
 `--since`, `--scope all|project`, repeatable `--include-prefix`, repeatable
-`--exclude-prefix`, `--inspect`, `--symbols`, `--progress`, `--explain`,
-`--version`, and `--help`.
+`--exclude-prefix`, `--inspect`, `--symbols`, `--symbol-line-history`,
+`--progress`, `--explain`, `--version`, and `--help`.
 During the alpha, omitted `--scope` defaults to `--scope project`, which
 expands to the root literal exclude prefixes `.flow/`, `.zig-cache/`,
 `zig-out/`, `target/`, `node_modules/`, `dist/`, `build/`, and `coverage/`, in
@@ -183,6 +184,15 @@ lineage, scope, or inclusion/exclusion decisions. Unsupported or unavailable
 current files preserve the inspected file evidence and report provider caveats
 without parser diagnostics, source snippets, absolute paths, remotes, author
 identities, or commit messages.
+
+`--symbol-line-history` is a second opt-in layer that works only with
+`--inspect PATH --symbols`. It adds current-line Git evidence for the current
+symbol line ranges using one local blame process only when symbol ranges are
+valid and the inspected file is clean. Output is summary-only: commit counts,
+bounded sample commit ids, timestamps, confidence, freshness, failure state,
+and caveats. It does not emit author identities, commit messages, source
+snippets, remotes, private repo names, or absolute paths, and it does not
+change file score, rank, confidence, co-change evidence, scope, or lineage.
 
 Git-detected file renames are folded conservatively when both the old and new
 paths are in scope. This is file-path lineage from local Git history only, not

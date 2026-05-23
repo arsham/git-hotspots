@@ -1,0 +1,33 @@
+{
+  "schema_version": "1",
+  "tool": { "name": "git-hotspots", "version": "0.1.0-alpha.1" },
+  "analysis": {
+    "history": { "head": "f60b6c476b88d8c0092d41831e433a942015557d", "head_timestamp": 1780444800, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 3 },
+    "scope": { "selected_scope": "project", "filters_active": true, "include_prefixes": [], "exclude_prefixes": [".flow/", ".zig-cache/", "zig-out/", "target/", "node_modules/", "dist/", "build/", "coverage/"], "outside_include_path_count": 0, "outside_include_change_count": 0, "excluded_path_count": 0, "excluded_change_count": 0 },
+    "caveats": []
+  },
+  "symbols": {
+    "current_only": true,
+    "provider": { "name": "tree-sitter-zig", "kind": "symbol", "version": "tree-sitter-core@v0.26.9/tree-sitter-zig@v1.1.2", "contract_version": "provider-symbol-evidence-v1", "freshness": "fresh", "failure": "ok", "confidence": "high", "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"], "provenance": { "input": "working-tree:src/current.zig", "local_only": true } },
+    "items": [
+      { "path": "src/current.zig", "name": "alpha", "kind": "function", "range": { "type": "lines", "start": 2, "end": 5 }, "provider": "tree-sitter-zig", "confidence": "high", "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"], "current_line_history": { "basis": "current-line-range-at-head", "current_only": true, "line_count": 4, "distinct_last_touch_commit_count": 1, "most_recent_line_touched_timestamp": 1780358400, "uncommitted_or_unblamable_line_count": 0, "sample_commits": ["924ba585871e"], "freshness": "fresh", "failure": "ok", "confidence": "high", "caveats": [] } },
+      { "path": "src/current.zig", "name": "beta", "kind": "function", "range": { "type": "lines", "start": 7, "end": 9 }, "provider": "tree-sitter-zig", "confidence": "high", "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"], "current_line_history": { "basis": "current-line-range-at-head", "current_only": true, "line_count": 3, "distinct_last_touch_commit_count": 1, "most_recent_line_touched_timestamp": 1780444800, "uncommitted_or_unblamable_line_count": 0, "sample_commits": ["f60b6c476b88"], "freshness": "fresh", "failure": "ok", "confidence": "high", "caveats": [] } },
+      { "path": "src/current.zig", "name": "gamma", "kind": "function", "range": { "type": "lines", "start": 11, "end": 11 }, "provider": "tree-sitter-zig", "confidence": "high", "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"], "current_line_history": { "basis": "current-line-range-at-head", "current_only": true, "line_count": 1, "distinct_last_touch_commit_count": 1, "most_recent_line_touched_timestamp": 1780272000, "uncommitted_or_unblamable_line_count": 0, "sample_commits": ["539f44c2b0a8"], "freshness": "fresh", "failure": "ok", "confidence": "high", "caveats": [] } }
+    ]
+  },
+  "inspect": { "requested_path": "src/current.zig", "matched_path": "src/current.zig", "rank": 1 },
+  "results": [
+    {
+      "path": "src/current.zig",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
+      "score": { "total": 60.600, "frequency": 30.000, "churn": 0.600, "recency": 20.000, "cochange": 10.000 },
+      "change_count": 3, "additions": 13, "deletions": 2, "churn": 15,
+      "recency": { "last_changed_timestamp": 1780444800, "last_changed_commit": "f60b6c476b88" },
+      "current_size": 164,
+      "cochanges": [{ "path": "src/broken.zig", "count": 1 }, { "path": "src/empty.zig", "count": 1 }, { "path": "src/link.zig", "count": 1 }, { "path": "src/readme.txt", "count": 1 }, { "path": "src/target.zig", "count": 1 }],
+      "confidence": "high",
+      "caveats": [],
+      "evidence": [{ "commit": "f60b6c476b88", "timestamp": 1780444800, "additions": 4, "deletions": 1 }, { "commit": "924ba585871e", "timestamp": 1780358400, "additions": 4, "deletions": 1 }, { "commit": "539f44c2b0a8", "timestamp": 1780272000, "additions": 5, "deletions": 0 }]
+    }
+  ]
+}

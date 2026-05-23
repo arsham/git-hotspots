@@ -216,12 +216,65 @@ EOF
   commit_all "$repo" '2026-05-02T00:00:00+0000' 'expand zig function'
 }
 
+make_symbol_line_history() {
+  repo="$FIX/symbol-line-history"
+  rm -rf "$repo"
+  mkdir -p "$repo/src"
+  setup_repo "$repo"
+
+  cat > "$repo/src/current.zig" <<'EOF'
+pub fn alpha() void {}
+
+pub fn beta() void {}
+
+fn gamma() void {}
+EOF
+  printf 'not zig\n' > "$repo/src/readme.txt"
+  printf '' > "$repo/src/empty.zig"
+  cat > "$repo/src/broken.zig" <<'EOF'
+pub fn broken() void {
+EOF
+  cat > "$repo/src/target.zig" <<'EOF'
+pub fn target() void {}
+EOF
+  ln -s target.zig "$repo/src/link.zig"
+  commit_all "$repo" '2026-06-01T00:00:00+0000' 'initial current-line fixture files'
+
+  cat > "$repo/src/current.zig" <<'EOF'
+pub fn alpha() void {
+    const value = 1;
+    _ = value;
+}
+
+pub fn beta() void {}
+
+fn gamma() void {}
+EOF
+  commit_all "$repo" '2026-06-02T00:00:00+0000' 'expand alpha fixture function'
+
+  cat > "$repo/src/current.zig" <<'EOF'
+// current-line fixture comment outside symbols
+pub fn alpha() void {
+    const value = 1;
+    _ = value;
+}
+
+pub fn beta() void {
+    return;
+}
+
+fn gamma() void {}
+EOF
+  commit_all "$repo" '2026-06-03T00:00:00+0000' 'shift lines and expand beta fixture function'
+}
+
 make_basic
 make_edge
 make_scope
 make_lineage
 make_symbols
-rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked"
+make_symbol_line_history
+rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked" "$FIX/symbol-line-history-shallow" "$FIX/symbol-line-history-partial"
 git clone -q --depth 1 "file://$FIX/basic" "$FIX/shallow"
 git clone -q "$FIX/basic" "$FIX/medium"
 printf 'local dirty note\n' >> "$FIX/medium/docs/guide.md"
@@ -230,3 +283,6 @@ git -C "$FIX/partial" config remote.origin.promisor true
 git clone -q "$FIX/basic" "$FIX/detached"
 git -C "$FIX/detached" checkout -q --detach HEAD~1
 git -C "$FIX/basic" worktree add -q "$FIX/linked" HEAD
+git clone -q --depth 1 "file://$FIX/symbol-line-history" "$FIX/symbol-line-history-shallow"
+git clone -q "$FIX/symbol-line-history" "$FIX/symbol-line-history-partial"
+git -C "$FIX/symbol-line-history-partial" config remote.origin.promisor true

@@ -15,6 +15,7 @@ pub const Config = struct {
     format: Format = .table,
     progress: bool = false,
     symbols: bool = false,
+    symbol_line_history: bool = false,
     since: ?[]const u8 = null,
     inspect_path: ?[]const u8 = null,
     scope: ScopePreset = .project,
@@ -122,6 +123,12 @@ pub const Analysis = struct {
             for (symbols.symbols) |symbol| {
                 self.allocator.free(symbol.path);
                 self.allocator.free(symbol.name);
+                if (symbol.current_line_history) |line_history| {
+                    for (line_history.sample_commits) |commit| self.allocator.free(commit);
+                    self.allocator.free(line_history.sample_commits);
+                    for (line_history.caveats) |caveat| self.allocator.free(caveat);
+                    self.allocator.free(line_history.caveats);
+                }
             }
             self.allocator.free(symbols.symbols);
         }

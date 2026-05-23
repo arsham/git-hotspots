@@ -1,0 +1,19 @@
+git-hotspots: file-level Git-history investigation prompts
+commits=3 shallow=false partial=false dirty=false auto_fetch=false
+scope: selected=project include_prefixes=[] exclude_prefixes=[.flow/,.zig-cache/,zig-out/,target/,node_modules/,dist/,build/,coverage/] outside_include_paths=0 outside_include_changes=0 excluded_paths=0 excluded_changes=0
+inspect: requested=src/current.zig matched=src/current.zig rank=1
+symbols: provider=tree-sitter-zig state=current-only freshness=fresh failure=ok confidence=high count=3
+symbols caveat: current working-tree enrichment only; file-level Git evidence, score, rank, lineage, and confidence are unchanged
+
+rank  score   changes churn   confidence lineage path
+1     60.6    3       15      high       no      src/current.zig
+
+current Zig symbols (do not affect ranking):
+  function alpha lines 2-5 confidence=high
+    Current-line Git evidence: commits=1 lines=4 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+  function beta lines 7-9 confidence=high
+    Current-line Git evidence: commits=1 lines=3 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+  function gamma lines 11-11 confidence=high
+    Current-line Git evidence: commits=1 lines=1 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+
+Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.

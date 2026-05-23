@@ -10,3 +10,6 @@
 /fixtures/partial/
 /fixtures/detached/
 /fixtures/linked/
+/fixtures/symbol-line-history/
+/fixtures/symbol-line-history-shallow/
+/fixtures/symbol-line-history-partial/
