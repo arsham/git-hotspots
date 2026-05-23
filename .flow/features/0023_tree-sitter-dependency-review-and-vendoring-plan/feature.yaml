@@ -1,0 +1,239 @@
+schema: flow-feature.v1
+feature:
+  id: "0023"
+  slug: tree-sitter-dependency-review-and-vendoring-plan
+  title: Tree-sitter dependency review and vendoring plan
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Feature 0022 established that a future Tree-sitter Zig provider must
+    not add parser runtime until pinned parser sources, generated grammar
+    provenance, license obligations, offline build constraints, and
+    source-install impact are reviewed. The project needs a concrete dependency
+    review and vendoring plan before importing third-party parser sources or
+    changing the build graph.
+  outcome: Produce a documentation-only dependency review, bill-of-materials
+    candidate, and vendoring go/no-go plan for a future Tree-sitter Zig provider
+    while preserving current runtime, build, validation, and report behaviour.
+  acceptance:
+    - A new dependency review document records candidate upstreams, immutable
+      revisions, source archive or checkout identities, checksums when available
+      or generated, license/SPDX information, notice obligations,
+      generated-source provenance, expected vendoring layout, update policy, and
+      source-install impact for Tree-sitter core and a Zig grammar source.
+    - The document compares system packages, build-time fetches, Tree-sitter CLI
+      shell-out, vendored pinned local sources, and deferral, and rejects
+      non-local or non-portable product runtime paths unless a later feature
+      explicitly reshapes them.
+    - The document ends with a clear go, conditional-go, or no-go recommendation
+      for the next feature and lists blockers or evidence required before any
+      vendored-source import or offline build proof.
+    - The document defines acceptance requirements for a later vendored-source
+      import and a later offline build/provider runtime proof, including no
+      build-time network, no global parser dependency, license/notice handling,
+      byte-stable no-provider outputs, and opt-in inspect-oriented provider
+      behaviour.
+    - This feature changes only documentation and Flow state; it does not add
+      vendored sources, build.zig.zon, C build/linking, parser runtime, provider
+      registry, CLI flags, report schema fields, scoring/ranking changes, cache,
+      source/test/fixture changes, network runtime, telemetry, upload, remote
+      enrichment, or background analysis.
+    - Validation passes and scans prove the documentation contains no private
+      paths, private remotes, raw parser stderr, raw private reports, author
+      identities, hosted/pricing/sales strategy, bug-prediction claims,
+      code-quality scoring claims, developer ranking, or maintainer judgement.
+planning:
+  state: ready
+  summary: Shape 0023 as a documentation-only Tree-sitter dependency review, BOM
+    candidate, and vendoring go/no-go plan. It should collect concrete
+    upstream/license/provenance facts and define the next implementation
+    contract, but stop before vendored sources, build integration, parser
+    runtime, CLI/report behaviour, scoring, cache, or provider registry work.
+  brief_sync:
+    status: updated
+    reason: B001 defines the local-first OSS/provider boundary. Feature 0023 records
+      dependency and vendoring facts needed before a future optional tree-sitter
+      provider can be implemented safely.
+    checked_at: 2026-05-23T04:19:32.568Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Feature 0023 follows the provider roadmap by reviewing pinned local
+      tree-sitter dependencies before any optional parser runtime, preserving
+      file-level Git evidence as product truth and local-first defaults.
+    checked_at: 2026-05-23T04:19:50.673Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-23T04:20:28.128Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-23T04:20:28.128Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-23T04:20:28.128Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-23T04:20:28.128Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: No active/candidate roadmap work existed. Operator requested
+    the next tree-sitter dependency step after Feature 0022 recorded that
+    runtime integration must wait for pinned, offline, license-reviewed parser
+    sources.
+  depends_on_feature_ids:
+    - "0020"
+    - "0021"
+    - "0022"
+  blocked_by: []
+design:
+  rough_shape:
+    - Create a focused dependency review and vendoring plan document for
+      Tree-sitter core and a Zig grammar source.
+    - Record exact candidate upstream URLs, immutable revisions/tags, source
+      identities, checksums when available, license/SPDX details, notices,
+      generated-source provenance, vendoring layout, and update policy.
+    - Compare system package, build-time fetch, CLI shell-out, vendored local
+      sources, and deferral strategies against
+      local-first/offline/source-install constraints.
+    - End with a go, conditional-go, or no-go decision for the next feature and
+      a precise acceptance contract for vendored-source import or offline build
+      proof.
+    - Keep this feature documentation-only and preserve all current
+      runtime/build/report behaviour.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Dependency review and vendoring go/no-go record
+      goal: Produce the documentation-only Tree-sitter dependency review, BOM
+        candidate, vendoring plan, and next-feature go/no-go recommendation
+        without adding parser/build/runtime behaviour.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: docs/tree-sitter-zig-provider-spike.md,
+          docs/provider-symbol-evidence-contract.md, new
+          docs/tree-sitter-dependency-vendoring-plan.md, build.zig, README.md,
+          src/provider.zig."
+        - "In scope: public upstream dependency research, candidate immutable
+          revisions or tags, source archive/checksum notes, license/SPDX and
+          notice obligations, generated grammar provenance, expected vendoring
+          layout, update policy, source-size/build-risk notes, strategy
+          comparison, future validation matrix, and go/conditional-go/no-go
+          recommendation."
+        - "Out of scope: vendored Tree-sitter or grammar sources, generated C
+          files, build.zig.zon, build.zig C compilation/linking, parser
+          wrapper/runtime, provider registry, CLI flags, report schema fields,
+          scoring/ranking changes, cache, source/test/fixture changes, CI,
+          release packaging, network runtime, telemetry, upload, remote
+          enrichment, or background analysis."
+        - "Protected: current dependency-free source install, no-provider
+          table/JSON/Markdown outputs, local-first runtime defaults, file-level
+          Git evidence as product truth, provider contract, and OSS/publicity
+          boundary."
+        - "Dependencies: Feature 0020 provider contract, Feature 0021 provider
+          symbol seam, Feature 0022 tree-sitter feasibility record, and B001
+          local-first capability brief."
+        - "Validation/evidence: git diff --check; zig build validate;
+          changed-path scan proving docs plus Flow only; no-runtime/dependency
+          scan; no-network scan; privacy/prohibited-claim scan over the new
+          document."
+        - "Review focus: exactness of upstream/license/provenance facts, clear
+          separation of facts from decisions, adequacy of future
+          vendoring/offline-build contract, and proof that no
+          runtime/build/provider behaviour changed."
+        - "Escalate if: exact revisions or licenses cannot be determined,
+          generated-source provenance is unclear, upstream terms are
+          incompatible, vendoring would require build-time network/global
+          packages/submodules, or implementation pressure requires
+          build/runtime/report/schema/scoring changes."
+        - "Done boundary: dependency review document exists, next feature
+          recommendation is explicit, current validation passes, changed paths
+          stay documentation/Flow only, and all no-runtime/privacy/local-first
+          scans pass."
+      verification_commands:
+        - git diff --check
+        - zig build validate
+        - "changed-path scan: docs plus Flow only; no
+          src/tests/fixtures/tools/build.zig/build.zig.zon/third_party/parser-s\
+          ource changes"
+        - "no-runtime/dependency scan: no tree-sitter sources, grammar sources,
+          C build/linking, parser runtime, provider registry,
+          CLI/report/scoring/cache changes"
+        - privacy/prohibited scan over
+          docs/tree-sitter-dependency-vendoring-plan.md
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-23T04:11:27.018Z
+  updated_at: 2026-05-23T04:20:28.128Z

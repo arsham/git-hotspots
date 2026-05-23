@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0023"
   active_run_id: null
   last_completed_feature_id: "0022"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 23
+  next_id: 24
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -117,6 +117,10 @@ features:
       slug: tree-sitter-zig-symbol-provider-spike
       path: .flow/features/0022_tree-sitter-zig-symbol-provider-spike
       created_at: 2026-05-23T03:41:43.139Z
+    - id: "0023"
+      slug: tree-sitter-dependency-review-and-vendoring-plan
+      path: .flow/features/0023_tree-sitter-dependency-review-and-vendoring-plan
+      created_at: 2026-05-23T04:11:27.018Z
 intake:
   mode: roadmap
   summary: null
