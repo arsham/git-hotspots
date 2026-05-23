@@ -1,0 +1,200 @@
+schema: flow-feature.v1
+feature:
+  id: "0031"
+  slug: ci-status-documentation-and-post-push-verification
+  title: CI status documentation and post-push verification
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: The public GitHub Actions workflow from Feature 0030 has now been
+    pushed and reportedly succeeded, but the repo has not durably recorded
+    post-push verification or clarified the public/contributor CI expectation.
+  outcome: Verify the public Validation workflow succeeded on GitHub, then make
+    the smallest useful public documentation clarification for CI status and
+    local validation expectations without adding badges or broader CI behaviour.
+  acceptance:
+    - Latest pushed GitHub Actions Validation run for master is verified as
+      successful or a clear blocker is reported.
+    - Documentation is updated only if it improves public/contributor clarity.
+    - Any documentation change keeps local validation as source of truth and
+      avoids Flow process details.
+    - No badge, release automation, artifacts, cache, coverage, matrix, secrets,
+      telemetry, deployment, or package publishing is added.
+    - Product runtime, reports, providers, scoring, build scripts, validation
+      scripts, and workflow behaviour remain unchanged unless a concrete
+      verification issue is found and reshaped.
+planning:
+  state: ready
+  summary: Low-risk post-push CI verification and minimal documentation slice
+    after Feature 0030. The GitHub Validation run already appears successful;
+    execution should verify that evidence and make at most a small public docs
+    clarification.
+  brief_sync:
+    status: updated
+    reason: CI status documentation supports B001's public OSS/local-first CLI
+      posture by making validation expectations clear without changing runtime
+      behaviour.
+    checked_at: 2026-05-23T22:54:01.551Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Post-push CI verification is a follow-up
+      validation/public-documentation feature for the OSS CLI and does not alter
+      the core capability or runtime truth.
+    checked_at: 2026-05-23T22:54:32.186Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - packet_verification_commands_missing
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-23T22:57:04.867Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-23T22:57:04.867Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-23T22:57:04.867Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-23T22:57:04.867Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Post-push verification follow-up after Feature 0030.
+  depends_on_feature_ids:
+    - "0030"
+  blocked_by: []
+design:
+  rough_shape:
+    - Verify GitHub Actions Validation run status for latest pushed master.
+    - Add a small CI/local-validation note to CONTRIBUTING or README only if
+      useful.
+    - Keep workflow and runtime unchanged.
+  packets:
+    - id: P1
+      title: CI status verification and minimal docs
+      goal: Verify pushed CI success and add the smallest useful public documentation
+        clarification.
+      owner_phase: runner
+      depends_on: []
+      status: planned
+      execution_context:
+        - "Anchors: .github/workflows/ci.yml, CONTRIBUTING.md, README.md, GitHub
+          Actions run list."
+        - "In scope: verify pushed GitHub Actions success; add minimal public
+          documentation note if useful."
+        - "Out of scope: badges, release automation, package publishing,
+          artifacts, cache, coverage, CodeQL, schedule, matrix, secrets,
+          deployment, workflow broadening, runtime code changes."
+        - "Protected: local validation remains source of truth; README remains
+          polished and visitor-facing; repo contains no
+          monetisation/SaaS/commercial strategy."
+        - "Dependencies: Feature 0030 must have been pushed and a GitHub Actions
+          Validation run must be observable."
+        - "Validation/evidence: GitHub run status check, git diff --check, zig
+          build validate, changed-path inspection, prohibited-claim scan."
+        - "Review focus: CI evidence is real/current; docs are minimal and
+          accurate; no public clutter or workflow broadening was added."
+        - "Escalate if: GitHub run is missing/pending/failed, GitHub access is
+          unavailable, workflow fix is required, or docs need a badge/release
+          promise."
+        - "Done boundary: successful GitHub run evidence recorded, docs/no-docs
+          decision justified, validation green, and git status clean."
+      anchors:
+        - .github/workflows/ci.yml
+        - CONTRIBUTING.md
+        - README.md
+      in_scope:
+        - Verify public CI status.
+        - Minimal docs clarification.
+      out_of_scope:
+        - Workflow behaviour changes beyond a concrete reshaped fix.
+        - Release, package, artifact, cache, coverage, matrix, secret,
+          telemetry, or deployment changes.
+        - Runtime product changes.
+      protected_surfaces:
+        - public README polish
+        - local-first OSS boundary
+        - minimal CI scope
+      dependencies:
+        - "0030"
+      validation:
+        - gh run list --repo arsham/git-hotspots --limit 5 --json
+          databaseId,status,conclusion,workflowName,headBranch,headSha,event,createdAt,url
+        - git diff --check
+        - zig build validate
+      review_focus:
+        - public CI evidence
+        - docs minimality
+        - no workflow broadening
+      escalate_if:
+        - CI run is missing, pending, or failed.
+        - Documentation would require a badge or release promise.
+        - Workflow correction is needed.
+      done_boundary: CI verification and docs/no-docs decision are durable, validation
+        passes, and repo is clean.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids:
+    - P1
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-23T22:50:30.048Z
+  updated_at: 2026-05-23T22:57:04.867Z
