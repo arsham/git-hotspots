@@ -2,8 +2,8 @@
 
 This is the Feature 0025 execution evidence for the non-runtime source import. It
 records repo-relative source identity, local source-size measurements, offline
-validation, and no-provider byte stability. It adds no parser compile path, link
-path, parser runtime, provider registry, CLI/report/schema/scoring/cache change,
+validation, a non-product compile proof, and no-provider byte stability. It adds
+no parser runtime, provider registry, CLI/report/schema/scoring/cache change,
 network runtime, telemetry, upload, remote enrichment, or background analysis.
 
 ## Imported source identity
@@ -77,16 +77,104 @@ The validation command shape was:
 
 ```sh
 zig build validate
+zig build validate -Dcloseout=true -Dsmoke-repo <local-sibling-path> -Dsmoke-label sibling-local-repo
 ```
+
+The proof step intentionally remains separate from `zig build validate`. The
+reason is that it compiles non-product vendored C parser sources only for this
+import gate, while the canonical validation path continues to exercise the
+installed CLI and no-provider product behavior. Close-out still treats
+`zig build tree-sitter-build-proof` as mandatory and records explicit proof that
+it ran.
 
 Observed timing evidence:
 
 - Before import: pass, `real 8.76`, `user 7.24`, `sys 3.95`.
 - After import: pass, `real 9.46`, `user 7.79`, `sys 4.34`.
+- Execute close-out rerun after the proof step: pass, including the
+  `sibling-local-repo` smoke label.
+
+Fresh validation ladder summary from the Feature 0026 repair pass:
+
+| Command summary | Exit status | Privacy-safe observation |
+| --- | --- | --- |
+| `zig fmt --check build.zig src tests` | `0` | Owned Zig files were already formatted; vendored C/generated files were not reformatted. |
+| `zig build test` | `0` | Unit and integration tests passed with local fixtures. |
+| `zig build` | `0` | Normal product build completed without installing the proof executable. |
+| `zig build validate` | `0` | All default validation rungs passed, including no-provider fixture and this-repo smoke checks. |
+| `zig build tree-sitter-build-proof` | `0` | Explicit proof target compiled, linked, and ran with no stdout or stderr. |
+| `git diff --check` | `0` | No whitespace errors were reported. |
+| `zig build validate -Dcloseout=true -Dsmoke-repo <local-sibling-path> -Dsmoke-label sibling-local-repo` | `0` | Close-out validation passed; sibling evidence used only the `sibling-local-repo` label. |
+
+The close-out validation summary reported `PASS` for every rung, including real
+repo smoke `this-repo` and real repo smoke `sibling-local-repo`. Its emitted
+privacy statement said summaries use labels and bounded counts only, with raw
+reports and absolute private paths omitted.
 
 Validation reported local-only behavior: no fetch, pull, push, upload,
 telemetry, remote enrichment, CI service, provider runtime, cache requirement,
 packaging, or release automation.
+
+## Non-product compile proof
+
+The dedicated proof step compiles the imported Tree-sitter C runtime and Zig
+grammar parser with a tiny Zig executable, runs one in-memory parse of
+`const x = 1;`, and asserts that the root node is `source_file`. The proof is
+not installed by the normal product build, is not wired into the CLI, and does
+not add provider runtime, parser registry, report schema, scoring, cache, or
+network behavior.
+
+Proof entry points:
+
+- `zig build tree-sitter-build-proof`
+- `build.zig` step: `tree-sitter-build-proof`
+- Zig proof source: `tests/tree_sitter_build_proof.zig`
+- C inputs:
+  - `third_party/tree-sitter-core/v0.26.9/lib/src/lib.c`
+  - `third_party/tree-sitter-zig/v1.1.2/src/parser.c`
+- Include paths:
+  - `third_party/tree-sitter-core/v0.26.9/lib/include`
+  - `third_party/tree-sitter-zig/v1.1.2/src`
+- Zig version: `0.16.0`.
+- Local target: `x86_64-linux.7.0.9...7.0.9-gnu.2.43`.
+
+Fresh isolated-cache measurement:
+
+- Command: `zig build --cache-dir <tmp>/cache --global-cache-dir <tmp>/global tree-sitter-build-proof`
+- Result: pass.
+- Elapsed wall-clock time: `5439` ms.
+- Proof executable size in the isolated Zig cache: `16964216` bytes.
+- Target from local `zig env`: `x86_64-linux.7.0.9...7.0.9-gnu.2.43`.
+
+Cached repo-local proof measurement:
+
+- Command: `zig build tree-sitter-build-proof`
+- Result: pass.
+- Elapsed wall-clock time: `70` ms.
+- Existing cached proof executable size: `16960117` bytes.
+
+Single translation unit compile/link cleanliness proof:
+
+- The proof step passes `third_party/tree-sitter-core/v0.26.9/lib/src/lib.c` to
+  Zig as one C source file. That file includes the selected Tree-sitter runtime
+  implementation units and is linked together with the Zig grammar
+  `parser.c`.
+- Command summary: `zig build tree-sitter-build-proof`.
+- Exit status: `0`.
+- Sanitised output observation: no stdout and no stderr were emitted.
+- Result: no duplicate-symbol, missing-symbol, compile, or link failure was
+  observed for the `lib.c` single-translation-unit path.
+- Stop condition: if this command later emits duplicate/missing symbols or
+  requires an individual-file compile set, system package, package manager,
+  network access, parser generation, or provider runtime semantics, this proof
+  must stop for planning rather than broadening locally.
+
+Platform caveat:
+
+- This proof is recorded for the local Zig `0.16.0` target shown above. No
+  broader platform matrix is claimed. Cross-platform or Windows-specific
+  failures should be recorded as a later portability follow-up unless they
+  block the current supported local target.
 
 ## No-provider byte-stability evidence
 
@@ -104,11 +192,14 @@ Stable output digests were:
 
 ## Protected-surface evidence
 
-Protected runtime, test, fixture, build, and validation script paths were not
-changed by this feature. The expected protected scan command is:
+Protected runtime, fixture, expected-output, package-manifest, validation script,
+provider, scoring, report, and CLI paths were not changed by this feature. The
+build graph change is limited to the explicit non-product proof step, and the
+test path change is limited to the proof executable source. The expected
+protected scan command is:
 
 ```sh
-git diff --name-only -- src tests fixtures/expected build.zig build.zig.zon tools/validate.sh
+git diff --name-only -- src fixtures/expected build.zig.zon tools/validate.sh
 ```
 
 The expected result is no output. The feature also keeps `.gitmodules` and
@@ -120,3 +211,27 @@ The close-out smoke command uses a local operator-supplied repository and the
 privacy-safe label `sibling-local-repo`. Committed evidence intentionally omits
 the absolute sibling path, private repository name, raw private report output,
 author identities, source snippets, remotes, and commit messages.
+
+## Feature 0026 close-out evidence set
+
+- Build proof transcript summary: `zig build tree-sitter-build-proof`, exit
+  status `0`, no stdout/stderr, proof source and C inputs listed above.
+- Default validation summary: `zig build validate`, exit status `0`, all rungs
+  passed.
+- Close-out smoke summary: `zig build validate -Dcloseout=true ...
+  -Dsmoke-label sibling-local-repo`, exit status `0`, all rungs passed,
+  sibling evidence labelled only `sibling-local-repo`.
+- No-provider parity result: representative table, JSON, Markdown, and inspect
+  outputs matched byte-for-byte; stable digests are listed above.
+- Changed-path/protected-surface proof: protected runtime, fixture,
+  expected-output, package-manifest, validation script, provider, scoring,
+  report, and CLI paths were not changed by the proof repair.
+- Local-only/offline scan result: no `build.zig.zon`, package manager,
+  pkg-config, submodule, system Tree-sitter package, global Tree-sitter CLI,
+  parser generation, build-time download, telemetry, upload, remote enrichment,
+  or background analysis was introduced.
+- Privacy/prohibited-claim scan result: committed evidence uses repo-relative
+  paths and public upstream component identifiers only; it omits private paths,
+  private repo names, raw sibling output, raw parser stderr, author identities,
+  commercial strategy, bug-prediction claims, quality scoring, developer
+  ranking, and maintainer judgement.
