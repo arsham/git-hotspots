@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 29
+  next_id: 30
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -141,6 +141,10 @@ features:
       slug: inspect-only-tree-sitter-zig-symbol-output
       path: .flow/features/0028_inspect-only-tree-sitter-zig-symbol-output
       created_at: 2026-05-23T08:04:51.757Z
+    - id: "0029"
+      slug: inspect-only-symbol-line-history-evidence
+      path: .flow/features/0029_inspect-only-symbol-line-history-evidence
+      created_at: 2026-05-23T20:51:51.709Z
 intake:
   mode: roadmap
   summary: null
