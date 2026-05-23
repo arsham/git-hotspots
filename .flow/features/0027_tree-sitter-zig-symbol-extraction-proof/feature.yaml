@@ -30,8 +30,8 @@ intent:
     - Empty, invalid or partial Zig, and unsupported non-Zig input are handled
       without crashes, snippets, raw parser diagnostics, absolute paths, or
       private details.
-    - No user-facing symbols surface is added: no --symbols, no report schema change,
-        no inspect semantic change, no scoring or ranking change.
+    - "No user-facing symbols surface is added: no --symbols, no report schema
+      change, no inspect semantic change, no scoring or ranking change."
     - Normal no-provider table, JSON, Markdown, and inspect outputs remain
       byte-stable.
     - Required validation passes, including zig build validate, zig build
@@ -206,4 +206,582 @@ execution:
   requires_confirmation: true
 timestamps:
   created_at: 2026-05-23T07:23:24.225Z
-  updated_at: 2026-05-23T07:31:24.748Z
+  updated_at: 2026-05-23T07:33:48.244Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-23T07:33:48.244Z
+  assurance_level: sensitive
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Balanced
+    runner_model: Balanced
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level sensitive requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0027"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Tree-sitter Zig symbol extraction proof
+      problem: Vendored Tree-sitter sources compile and parse a tiny Zig snippet, but
+        the project has not yet proven deterministic current-symbol extraction
+        semantics for Zig. Exposing provider output in CLI reports now would
+        force schema and UX decisions before the extractor is proven.
+      outcome: Add an internal, test-only Tree-sitter Zig current-symbol extraction
+        proof that maps in-memory Zig source to provider.CurrentSymbolEvidence
+        for a repo-relative path, with deterministic ranges, ordering, and
+        failure or unsupported behaviour, while preserving all existing CLI
+        output unchanged.
+      acceptance:
+        - Internal extractor/proof exists for Zig current-symbol extraction from
+          in-memory source and a repo-relative path.
+        - Extractor uses only vendored local Tree-sitter core and
+          tree-sitter-zig sources.
+        - At least named Zig function declarations are extracted into
+          provider.CurrentSymbolEvidence or a directly compatible internal
+          result shape.
+        - Supported symbol subset and range convention are documented in code or
+          docs.
+        - Deterministic ordering and deterministic current ranges are covered by
+          tests.
+        - Empty, invalid or partial Zig, and unsupported non-Zig input are
+          handled without crashes, snippets, raw parser diagnostics, absolute
+          paths, or private details.
+        - "No user-facing symbols surface is added: no --symbols, no report
+          schema change, no inspect semantic change, no scoring or ranking
+          change."
+        - Normal no-provider table, JSON, Markdown, and inspect outputs remain
+          byte-stable.
+        - Required validation passes, including zig build validate, zig build
+          tree-sitter-build-proof, and any new symbol proof step.
+        - Close-out smoke uses this repo and sibling-local-repo with
+          privacy-safe label-only evidence.
+    brief_alignment:
+      status: aligned
+      role: prerequisite
+      summary: "Internal Tree-sitter Zig symbol extraction proof prepares the optional
+        provider path while preserving B001 boundaries: local-first,
+        deterministic file-level evidence remains product truth, and provider
+        evidence is current-only enrichment."
+      checked_at: 2026-05-23T07:30:42.000Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0027_tree-sitter-zig-symbol-extraction-proof/prd.md
+  requirements_contract:
+    source_path: .flow/features/0027_tree-sitter-zig-symbol-extraction-proof/prd.md
+    source_digest: 596665e475f470a78aea2f0b8c2a9b3911064335319f66507829940c36e3a561
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#r4-failure-and-unsupported-behaviour[1]
+        text: The extractor must handle unsupported file types, empty files,
+          partial/invalid Zig, and parser failure without crashing the CLI
+          build/test process.
+        category: behaviour
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#r4-failure-and-unsupported-behaviour[2]
+        text: Failure state must be testable through provider failure/caveat semantics
+          or a small internal result type that maps cleanly to the provider
+          contract. Raw parser stderr and source snippets must not be exposed.
+        category: behaviour
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#acceptance-criteria[1]
+        text: A dedicated internal extractor/proof exists for Zig current-symbol
+          extraction.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#acceptance-criteria[2]
+        text: The extractor uses only vendored local Tree-sitter sources.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#acceptance-criteria[3]
+        text: Synthetic tests prove at least named Zig function extraction.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#acceptance-criteria[4]
+        text: Tests prove deterministic ordering and deterministic range semantics.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#acceptance-criteria[5]
+        text: Tests cover empty/invalid or partial Zig input and unsupported non-Zig
+          input.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#acceptance-criteria[6]
+        text: Tests cover privacy-safe handling of weird names where supported,
+          including unicode and Markdown-sensitive characters if those are
+          accepted symbols.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#acceptance-criteria[7]
+        text: Normal CLI output remains unchanged when no future provider flag exists.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#acceptance-criteria[8]
+        text: No --symbols or other provider-facing CLI/report surface is added.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#acceptance-criteria[9]
+        text: zig build validate passes.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#acceptance-criteria[10]
+        text: The Tree-sitter build proof still passes.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#acceptance-criteria[11]
+        text: The new symbol proof command, if added, passes.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#acceptance-criteria[12]
+        text: Close-out validation includes this repo and sibling-local-repo using only
+          the privacy-safe label.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#edge-cases[1]
+        text: Empty .zig file returns no symbols or an explicit partial/failed state.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#edge-cases[2]
+        text: Invalid or partial Zig source does not crash and does not expose raw
+          parser diagnostics or source snippets.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#edge-cases[3]
+        text: Unsupported non-.zig path does not parse and reports unsupported state in
+          the internal proof.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#edge-cases[4]
+        text: Symbol names requiring Markdown or JSON escaping remain deterministic and
+          safe in provider evidence values, even though they are not rendered
+          publicly yet.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#edge-cases[5]
+        text: Nested function declarations are either deterministically supported or
+          explicitly excluded by the supported-symbol contract.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#edge-cases[6]
+        text: Container/type declarations are either deterministically supported with
+          tests or explicitly deferred.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#verification[1]
+        text: "Required validation evidence:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Required validation evidence:"
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#verification[2]
+        text: zig fmt --check build.zig src tests
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig fmt --check build.zig src tests
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#verification[3]
+        text: zig build test
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig build test
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#verification[4]
+        text: zig build
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig build
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#verification[5]
+        text: zig build validate
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig build validate
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#verification[6]
+        text: zig build tree-sitter-build-proof
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig build tree-sitter-build-proof
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#verification[7]
+        text: new symbol proof step if added, for example zig build
+          tree-sitter-symbol-proof
+        category: verification
+        packet_refs:
+          - P1
+        verification: new symbol proof step if added, for example zig build
+          tree-sitter-symbol-proof
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#verification[8]
+        text: git diff --check
+        category: verification
+        packet_refs:
+          - P1
+        verification: git diff --check
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#verification[9]
+        text: no-provider byte-stability or golden parity evidence for table, JSON,
+          Markdown, and inspect outputs
+        category: verification
+        packet_refs:
+          - P1
+        verification: no-provider byte-stability or golden parity evidence for table,
+          JSON, Markdown, and inspect outputs
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#verification[10]
+        text: local-only/offline scan proving no network, package manager, parser
+          generation, submodule, system Tree-sitter, telemetry, upload, or
+          background analysis
+        category: verification
+        packet_refs:
+          - P1
+        verification: local-only/offline scan proving no network, package manager,
+          parser generation, submodule, system Tree-sitter, telemetry, upload,
+          or background analysis
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#verification[11]
+        text: close-out validation with sibling-local-repo label only
+        category: verification
+        packet_refs:
+          - P1
+        verification: close-out validation with sibling-local-repo label only
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#non-goals[1]
+        text: No user-facing --symbols output.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-033
+        source_ref: prd.md#non-goals[2]
+        text: No JSON/Markdown/table provider schema.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-034
+        source_ref: prd.md#non-goals[3]
+        text: No symbol ranking or scoring.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-035
+        source_ref: prd.md#non-goals[4]
+        text: No historical symbol lineage.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-036
+        source_ref: prd.md#non-goals[5]
+        text: No multi-language support.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-037
+        source_ref: prd.md#non-goals[6]
+        text: No provider registry.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-038
+        source_ref: prd.md#non-goals[7]
+        text: No cache.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-039
+        source_ref: prd.md#non-goals[8]
+        text: No CI/release/package manager work.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: Feature 0026 proved that the vendored Tree-sitter core and Zig grammar
+          compile, link, and parse a tiny Zig source in an isolated non-product
+          build step. It did not prove that the project can extract useful,
+          deterministic current symbol evidence for Zig files.
+      - source_ref: prd.md#problem[2]
+        text: Jumping directly to CLI/report symbol output would force public schema and
+          UX choices before the extractor's behaviour is known. We need a small
+          internal proof first.
+      - source_ref: prd.md#outcome[1]
+        text: A future runner can extract deterministic provider.CurrentSymbolEvidence
+          from in-memory Zig source for a repo-relative .zig path using vendored
+          Tree-sitter sources, with tests covering supported symbols, ranges,
+          ordering, and failure or unsupported states.
+      - source_ref: prd.md#outcome[2]
+        text: Normal CLI behaviour remains unchanged. No user-visible symbol output
+          exists in this feature.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 4 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: Add an internal, test-only Tree-sitter Zig current-symbol extraction
+      proof that maps in-memory Zig source to provider.CurrentSymbolEvidence for
+      a repo-relative path, with deterministic ranges, ordering, and failure or
+      unsupported behaviour, while preserving all existing CLI output unchanged.
+    acceptance:
+      - Internal extractor/proof exists for Zig current-symbol extraction from
+        in-memory source and a repo-relative path.
+      - Extractor uses only vendored local Tree-sitter core and tree-sitter-zig
+        sources.
+      - At least named Zig function declarations are extracted into
+        provider.CurrentSymbolEvidence or a directly compatible internal result
+        shape.
+      - Supported symbol subset and range convention are documented in code or
+        docs.
+      - Deterministic ordering and deterministic current ranges are covered by
+        tests.
+      - Empty, invalid or partial Zig, and unsupported non-Zig input are handled
+        without crashes, snippets, raw parser diagnostics, absolute paths, or
+        private details.
+      - "No user-facing symbols surface is added: no --symbols, no report schema
+        change, no inspect semantic change, no scoring or ranking change."
+      - Normal no-provider table, JSON, Markdown, and inspect outputs remain
+        byte-stable.
+      - Required validation passes, including zig build validate, zig build
+        tree-sitter-build-proof, and any new symbol proof step.
+      - Close-out smoke uses this repo and sibling-local-repo with privacy-safe
+        label-only evidence.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig fmt --check build.zig src tests
+      - zig build test
+      - zig build
+      - zig build validate
+      - zig build tree-sitter-build-proof
+      - new symbol proof step if added
+      - git diff --check
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
