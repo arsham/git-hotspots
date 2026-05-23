@@ -7,7 +7,7 @@ truth or a prerequisite for useful reports.
 
 This document is a design guardrail for future provider work, especially a
 future tree-sitter symbol spike. It does not define a runtime plugin framework
-and does not add provider execution in the current CLI.
+and does not add provider execution or current symbol evidence in the CLI.
 
 ## Goals
 
@@ -51,6 +51,19 @@ implemented, but the envelope should contain at least:
 Provider evidence should use repo-relative paths and bounded metadata. It must
 not require absolute local paths, remotes, author identities, source snippets,
 raw private reports, or provider network calls.
+
+## Provenance and caveats
+
+Local-only provenance means the envelope records what local input the provider
+analysed and which local provider produced the evidence. It should be enough to
+explain the evidence source without exposing private machine state or implying
+that a remote service validated the result.
+
+Caveats are required when provider evidence is incomplete, ambiguous, stale,
+generated from excluded paths, or affected by unsupported language constructs.
+They should be visible beside the enriched result rather than buried in logs.
+Caveats and confidence describe evidence quality only; they are not code-health,
+bug-likelihood, or maintainer-performance judgements.
 
 ## Freshness
 
@@ -123,7 +136,8 @@ state visible:
 - which providers contributed evidence;
 - which providers were unavailable, stale, partial, skipped, or failed;
 - whether symbol evidence is current-only;
-- whether provider evidence changed ranking or only enriched explanation;
+- that provider evidence enriched explanation without replacing file-level
+  ranking or deterministic Git-history evidence;
 - caveats and confidence for provider-derived fields.
 
 Provider evidence should be additive. If no provider evidence exists, current

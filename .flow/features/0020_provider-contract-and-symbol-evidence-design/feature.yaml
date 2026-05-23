@@ -4,7 +4,7 @@ feature:
   slug: provider-contract-and-symbol-evidence-design
   title: Provider contract and symbol evidence design
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Provider and symbol evidence boundaries are not durable yet, so a
@@ -66,7 +66,7 @@ proposal:
     materialised_at: 2026-05-23T01:48:11.975Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -127,7 +127,7 @@ design:
         work without adding runtime provider behaviour.
       owner_phase: runner
       depends_on: []
-      status: ready
+      status: done
       execution_context:
         - "Anchors: docs/provider-symbol-evidence-contract.md, README.md, B001,
           .flow/project-memory.md, src/model.zig, src/report.zig."
@@ -175,8 +175,7 @@ design:
 execution:
   active_run_id: null
   current_packet_id: null
-  next_packet_ids:
-    - P1
+  next_packet_ids: []
   blockers: []
   requires_confirmation: true
 links:
@@ -185,7 +184,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-23T01:42:29.130Z
-  updated_at: 2026-05-23T02:34:51.733Z
+  updated_at: 2026-05-23T02:46:32.916Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-23T02:34:51.733Z
