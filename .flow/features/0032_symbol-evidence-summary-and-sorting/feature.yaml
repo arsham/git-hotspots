@@ -1,0 +1,299 @@
+schema: flow-feature.v1
+feature:
+  id: "0032"
+  slug: symbol-evidence-summary-and-sorting
+  title: Symbol evidence summary and sorting
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Inspect-only symbol reports can emit many symbols, burying the most
+    useful current-line Git evidence in human table and Markdown output.
+  outcome: Human symbol reports summarize total, shown, and omitted counts and
+    show current-line evidence first in deterministic human output while JSON
+    remains complete.
+  acceptance:
+    - Human table and Markdown symbol sections disclose total, shown, omitted,
+      active limit, and sort basis.
+    - Human symbol rows are ordered by current-line Git evidence fields only
+      when --symbol-line-history is present.
+    - JSON symbols.items remains complete and is not truncated by the default
+      display cap or --symbol-limit.
+    - --symbol-limit N is documented as a human display limit valid only with
+      --inspect PATH --symbols.
+    - Existing non-symbol, plain inspect, and no-provider outputs remain
+      byte-stable when new controls are absent.
+    - Output avoids rank, score, risk, quality, ownership, productivity, bug
+      prediction, symbol history, and symbol lineage claims.
+    - Validation covers over-limit, exact-limit, zero-symbol, unsupported,
+      degraded, tie, unicode, and Markdown-sensitive cases.
+planning:
+  state: ready
+  summary: Human-readable symbol output should become summary-first and easier to
+    read without truncating complete JSON symbols.items or implying symbol
+    ranking/scoring.
+  brief_sync:
+    status: updated
+    reason: Improves optional provider export readability while preserving
+      file-level Git evidence as product truth.
+    checked_at: 2026-05-23T23:45:00.000Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Keeps provider evidence opt-in, local-only, deterministic, and
+      carefully caveated; no commercial or hosted scope.
+    checked_at: 2026-05-23T23:45:00.000Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - packet_verification_commands_missing
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-23T23:37:46.239Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-23T23:37:46.239Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-23T23:37:46.239Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-23T23:37:46.239Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Follow-up to inspect-only symbols and symbol line-history
+    output after real-repo output proved the human report is too verbose.
+  depends_on_feature_ids:
+    - "0028"
+    - "0029"
+  blocked_by: []
+design:
+  rough_shape:
+    - Keep JSON symbols.items complete and untruncated.
+    - Add human symbol summary metadata and a default human display cap.
+    - Sort human rows by current-line Git evidence only when symbol-line-history
+      exists.
+    - Add --symbol-limit as a human display limit only.
+  packets:
+    - id: P1
+      title: Symbol display contract and model
+      goal: Define human symbol display metadata, --symbol-limit parsing,
+        deterministic human sort key, and unit tests.
+      owner_phase: runner
+      depends_on: []
+      status: planned
+      execution_context:
+        - "Anchors: src/model.zig, src/provider.zig, src/main.zig,
+          src/report.zig."
+        - "In scope: define human symbol display metadata, --symbol-limit
+          parsing, deterministic human sort key, and unit tests."
+        - "Out of scope: JSON truncation, symbol scoring, symbol ranking,
+          provider registry, cache, or default provider execution."
+        - "Protected: existing provider ordering remains available for complete
+          JSON symbols.items; file-level score/rank/lineage/confidence
+          unchanged."
+        - "Dependencies: Feature 0028 symbol output and Feature 0029
+          line-history evidence are complete."
+        - "Validation/evidence: zig fmt --check build.zig src tests; zig build
+          test; focused unit tests for parsing/sort metadata."
+        - "Review focus: sort key is deterministic and wording does not imply
+          ranking/scoring."
+        - "Escalate if: implementation needs to reorder or truncate JSON
+          symbols.items, add broad provider execution, or change scoring."
+        - "Done boundary: model/parse/sort contract is implemented with tests
+          and no report output drift except planned packet follow-up."
+      anchors:
+        - src/model.zig
+        - src/provider.zig
+        - src/main.zig
+        - src/report.zig
+      in_scope:
+        - Human symbol display metadata.
+        - --symbol-limit parsing and validation.
+        - Deterministic human sort key.
+      out_of_scope:
+        - JSON truncation or symbol scoring.
+        - Default provider execution.
+      protected_surfaces:
+        - File-level score/rank/lineage/confidence.
+        - Complete JSON symbols.items.
+      validation_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+      review_focus:
+        - deterministic sort key
+        - JSON completeness protected
+        - flag validity and error handling
+      escalation_triggers:
+        - Need to truncate or reorder JSON symbols.items.
+        - Need to alter file-level scoring.
+      done_boundary: Contract implemented with tests and no unintended output drift.
+    - id: P2
+      title: Human renderer summaries and goldens
+      goal: Update table and Markdown symbol sections with summary, human cap, and
+        golden-backed output.
+      owner_phase: runner
+      depends_on:
+        - P1
+      status: planned
+      execution_context:
+        - "Anchors: src/report.zig, fixtures/expected, tests/integration.sh,
+          tools/validate.sh."
+        - "In scope: table/Markdown symbol summary, default human cap, explicit
+          --symbol-limit human cap, JSON additive metadata only if needed."
+        - "Out of scope: altering non-symbol reports or changing JSON
+          symbols.items completeness/order."
+        - "Protected: no authors, emails, commit messages, snippets, raw
+          blame/diff, absolute paths, remotes, or private labels."
+        - "Dependencies: P1 display metadata and parse contract."
+        - "Validation/evidence: fixture goldens for table/Markdown/JSON,
+          deterministic reruns, privacy/prohibited scans."
+        - "Review focus: human output clarity, complete JSON, caveats/failure
+          states remain visible under limits."
+        - "Escalate if: table/Markdown summary cannot avoid ranking language or
+          JSON metadata needs a schema-version decision."
+        - "Done boundary: affected outputs are golden-backed and
+          no-provider/default outputs remain stable."
+      anchors:
+        - src/report.zig
+        - fixtures/expected
+        - tests/integration.sh
+        - tools/validate.sh
+      in_scope:
+        - Human table and Markdown symbol summaries.
+        - Golden fixtures for affected outputs.
+      out_of_scope:
+        - Non-symbol report changes.
+        - JSON symbols.items truncation.
+      protected_surfaces:
+        - Privacy-safe output.
+        - Existing no-provider/default output stability.
+      validation_commands:
+        - zig build validate
+        - git diff --check
+      review_focus:
+        - human output summary clarity
+        - golden fixture correctness
+        - privacy and wording scans
+      escalation_triggers:
+        - Need for schema-version change.
+        - Inability to keep caveats visible under limit.
+      done_boundary: Renderer changes are golden-backed and validation passes.
+    - id: P3
+      title: Close-out validation and real-repo smoke
+      goal: Run full validation ladder and privacy-safe real-repo smoke evidence.
+      owner_phase: runner
+      depends_on:
+        - P1
+        - P2
+      status: planned
+      execution_context:
+        - "Anchors: tools/validate.sh, README.md if help/docs need tiny
+          clarification, real-repo smoke evidence."
+        - "In scope: full validation ladder, close-out smoke on this repo and
+          sibling-local-repo, privacy-safe evidence summary."
+        - "Out of scope: public demo report, release, CI broadening, cache,
+          provider expansion, or docs beyond needed flag semantics."
+        - "Protected: committed evidence must not include raw sibling output,
+          absolute private path, repo name, remotes, author identity, commit
+          messages, snippets, or raw reports."
+        - "Dependencies: P1 and P2 complete."
+        - "Validation/evidence: full close-out commands from PRD, including
+          tree-sitter proof steps and sibling-local-repo smoke."
+        - "Review focus: all PRD rows proven, no overclaims, and repo clean
+          after generated fixtures."
+        - "Escalate if: real-repo output suggests the human cap hides required
+          caveats or needs a product decision."
+        - "Done boundary: feature passes validation, independent review can
+          prove every close-out row, and repo is clean."
+      anchors:
+        - tools/validate.sh
+        - README.md
+      in_scope:
+        - Full validation ladder.
+        - Privacy-safe real-repo smoke.
+      out_of_scope:
+        - Public demo report.
+        - Release or CI broadening.
+      protected_surfaces:
+        - No raw sibling output or private path.
+        - No overclaiming.
+      validation_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build
+        - zig build validate
+        - zig build tree-sitter-build-proof
+        - zig build tree-sitter-symbol-proof
+        - git diff --check
+      review_focus:
+        - close-out evidence completeness
+        - real-repo privacy-safe smoke
+        - no public/product overclaims
+      escalation_triggers:
+        - Real-repo output shows cap/sort semantics need redesign.
+      done_boundary: Full validation passes, independent review can close out, and
+        repo is clean.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+dispatch:
+  status: stale
+  prepared_at: null
+  assurance: sensitive
+  control_model: split
+  execution_topology: serial_feature
+  review_mode: delegated_reviewer
+  runner_model: Balanced
+  reviewer_model: Strong
+timestamps:
+  updated_at: 2026-05-23T23:37:46.239Z
+execution:
+  blockers: []
+  requires_confirmation: true

@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0032"
   active_run_id: null
   last_completed_feature_id: "0031"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 32
+  next_id: 33
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -153,6 +153,10 @@ features:
       slug: ci-status-documentation-and-post-push-verification
       path: .flow/features/0031_ci-status-documentation-and-post-push-verification
       created_at: 2026-05-23T22:50:30.048Z
+    - id: "0032"
+      slug: symbol-evidence-summary-and-sorting
+      path: .flow/features/0032_symbol-evidence-summary-and-sorting
+      created_at: 2026-05-23T23:32:24.526Z
 intake:
   mode: roadmap
   summary: null
