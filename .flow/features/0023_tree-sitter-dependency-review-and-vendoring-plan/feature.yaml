@@ -4,7 +4,7 @@ feature:
   slug: tree-sitter-dependency-review-and-vendoring-plan
   title: Tree-sitter dependency review and vendoring plan
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Feature 0022 established that a future Tree-sitter Zig provider must
@@ -81,7 +81,7 @@ proposal:
     materialised_at: 2026-05-23T04:20:28.128Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -150,7 +150,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Dependency review and vendoring go/no-go record
       goal: Produce the documentation-only Tree-sitter dependency review, BOM
         candidate, vendoring plan, and next-feature go/no-go recommendation
@@ -236,7 +236,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-23T04:11:27.018Z
-  updated_at: 2026-05-23T04:22:17.883Z
+  updated_at: 2026-05-23T04:36:37.859Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-23T04:22:17.883Z
