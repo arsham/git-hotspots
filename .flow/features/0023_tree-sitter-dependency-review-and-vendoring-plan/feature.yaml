@@ -236,4 +236,560 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-23T04:11:27.018Z
-  updated_at: 2026-05-23T04:20:28.128Z
+  updated_at: 2026-05-23T04:22:17.883Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-23T04:22:17.883Z
+  assurance_level: sensitive
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Balanced
+    runner_model: Balanced
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level sensitive requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0023"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Tree-sitter dependency review and vendoring plan
+      problem: Feature 0022 established that a future Tree-sitter Zig provider must
+        not add parser runtime until pinned parser sources, generated grammar
+        provenance, license obligations, offline build constraints, and
+        source-install impact are reviewed. The project needs a concrete
+        dependency review and vendoring plan before importing third-party parser
+        sources or changing the build graph.
+      outcome: Produce a documentation-only dependency review, bill-of-materials
+        candidate, and vendoring go/no-go plan for a future Tree-sitter Zig
+        provider while preserving current runtime, build, validation, and report
+        behaviour.
+      acceptance:
+        - A new dependency review document records candidate upstreams,
+          immutable revisions, source archive or checkout identities, checksums
+          when available or generated, license/SPDX information, notice
+          obligations, generated-source provenance, expected vendoring layout,
+          update policy, and source-install impact for Tree-sitter core and a
+          Zig grammar source.
+        - The document compares system packages, build-time fetches, Tree-sitter
+          CLI shell-out, vendored pinned local sources, and deferral, and
+          rejects non-local or non-portable product runtime paths unless a later
+          feature explicitly reshapes them.
+        - The document ends with a clear go, conditional-go, or no-go
+          recommendation for the next feature and lists blockers or evidence
+          required before any vendored-source import or offline build proof.
+        - The document defines acceptance requirements for a later
+          vendored-source import and a later offline build/provider runtime
+          proof, including no build-time network, no global parser dependency,
+          license/notice handling, byte-stable no-provider outputs, and opt-in
+          inspect-oriented provider behaviour.
+        - This feature changes only documentation and Flow state; it does not
+          add vendored sources, build.zig.zon, C build/linking, parser runtime,
+          provider registry, CLI flags, report schema fields, scoring/ranking
+          changes, cache, source/test/fixture changes, network runtime,
+          telemetry, upload, remote enrichment, or background analysis.
+        - Validation passes and scans prove the documentation contains no
+          private paths, private remotes, raw parser stderr, raw private
+          reports, author identities, hosted/pricing/sales strategy,
+          bug-prediction claims, code-quality scoring claims, developer ranking,
+          or maintainer judgement.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Feature 0023 follows the provider roadmap by reviewing pinned local
+        tree-sitter dependencies before any optional parser runtime, preserving
+        file-level Git evidence as product truth and local-first defaults.
+      checked_at: 2026-05-23T04:19:50.673Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0023_tree-sitter-dependency-review-and-vendoring-plan/prd.md
+  requirements_contract:
+    source_path: .flow/features/0023_tree-sitter-dependency-review-and-vendoring-plan/prd.md
+    source_digest: 7b4531b94b8709a0099384a653925d64c761c848d24fec1dc4a811b6a695e7fb
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#scope-and-artefact[1]
+        text: "Add a dependency review document, expected path:
+          docs/tree-sitter-dependency-vendoring-plan.md."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#scope-and-artefact[2]
+        text: The document must cover both Tree-sitter core and a Zig grammar source.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#scope-and-artefact[3]
+        text: The document must distinguish candidate facts from decisions. Unknowns
+          must be labelled as blockers or follow-up requirements, not guessed.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#scope-and-artefact[4]
+        text: The feature is documentation-only. It may update Flow state and docs, but
+          it must not add or modify runtime source, tests, fixtures, build
+          dependencies, CLI behaviour, report schemas, scoring, cache, provider
+          registry, vendored parser sources, generated grammar sources,
+          submodules, or third-party source trees.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#go-no-go-decision[1]
+        text: "The document must end with a clear recommendation for the next feature:"
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#go-no-go-decision[2]
+        text: "go: proceed to a vendored-source import feature;"
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#go-no-go-decision[3]
+        text: "conditional_go: proceed only after listed blockers are resolved;"
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#go-no-go-decision[4]
+        text: "no_go: do not vendor or build Tree-sitter yet."
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#go-no-go-decision[5]
+        text: The decision must list concrete blockers, risks, and required evidence for
+          the next feature. A future vendoring feature must remain separate from
+          this one.
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#non-goals[1]
+        text: No vendored Tree-sitter core source files.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-011
+        source_ref: prd.md#non-goals[2]
+        text: No vendored tree-sitter-zig grammar source or generated C files.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-012
+        source_ref: prd.md#non-goals[3]
+        text: No build.zig.zon.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-013
+        source_ref: prd.md#non-goals[4]
+        text: No build.zig C build or linking changes.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-014
+        source_ref: prd.md#non-goals[5]
+        text: No parser wrapper, parser runtime, provider registry, CLI flags, report
+          schema additions, scoring or ranking changes, cache,
+          source/test/fixture changes, CI, release packaging, network runtime,
+          telemetry, upload, remote enrichment, or background provider
+          execution.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-015
+        source_ref: prd.md#non-goals[6]
+        text: No claim that symbol evidence exists in current CLI reports.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-016
+        source_ref: prd.md#edge-cases-and-stop-conditions[1]
+        text: "Stop and return a blocker or conditional_go if:"
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#edge-cases-and-stop-conditions[2]
+        text: exact upstream revisions cannot be selected;
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#edge-cases-and-stop-conditions[3]
+        text: license files, SPDX identifiers, copyright, or notice obligations are
+          unclear;
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#edge-cases-and-stop-conditions[4]
+        text: generated Zig grammar provenance cannot be established;
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#edge-cases-and-stop-conditions[5]
+        text: grammar C output cannot be pinned, reproduced, or trusted enough for
+          vendoring;
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#edge-cases-and-stop-conditions[6]
+        text: the only viable path requires build-time network fetches, global system
+          packages, submodules, or remote parser services;
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#edge-cases-and-stop-conditions[7]
+        text: vendoring would materially degrade source-install UX without a mitigation;
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#edge-cases-and-stop-conditions[8]
+        text: the next implementation would require report schema, scoring, cache,
+          provider registry, or runtime provider semantics that are not shaped
+          yet;
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#edge-cases-and-stop-conditions[9]
+        text: the document would need private paths, private repository names, raw
+          parser stderr, raw private reports, author identities, commercial
+          strategy, bug-prediction claims, code-quality scoring claims,
+          developer ranking, or maintainer judgement.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#verification[1]
+        text: "Close-out for this docs-only feature requires:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Close-out for this docs-only feature requires:"
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#verification[2]
+        text: git diff --check passes;
+        category: verification
+        packet_refs:
+          - P1
+        verification: git diff --check passes;
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#verification[3]
+        text: zig build validate passes;
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig build validate passes;
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#verification[4]
+        text: changed-path scan proves only docs plus Flow planning/lifecycle files
+          changed;
+        category: verification
+        packet_refs:
+          - P1
+        verification: changed-path scan proves only docs plus Flow planning/lifecycle
+          files changed;
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#verification[5]
+        text: no src/, tests/, fixtures/, tools/, build.zig, build.zig.zon,
+          third_party/, parser sources, grammar sources, submodules, generated
+          C, CLI/report/scoring/cache/provider-registry changes were added;
+        category: verification
+        packet_refs:
+          - P1
+        verification: no src/, tests/, fixtures/, tools/, build.zig, build.zig.zon,
+          third_party/, parser sources, grammar sources, submodules, generated
+          C, CLI/report/scoring/cache/provider-registry changes were added;
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#verification[6]
+        text: no-runtime/dependency scan proves no runtime tree-sitter integration was
+          added;
+        category: verification
+        packet_refs:
+          - P1
+        verification: no-runtime/dependency scan proves no runtime tree-sitter
+          integration was added;
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#verification[7]
+        text: no-network scan finds no fetch/upload/telemetry/remote
+          enrichment/background analysis path and no curl, wget, git clone,
+          submodule, or build-time fetch workflow committed;
+        category: verification
+        packet_refs:
+          - P1
+        verification: no-network scan finds no fetch/upload/telemetry/remote
+          enrichment/background analysis path and no curl, wget, git clone,
+          submodule, or build-time fetch workflow committed;
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#verification[8]
+        text: privacy/prohibited-claim scan finds no absolute private paths, private
+          remotes, raw parser stderr, raw private reports, author identities,
+          private repo names, hosted/pricing/sales strategy, bug-prediction,
+          quality-score, developer-ranking, or maintainer-judgement claims;
+        category: verification
+        packet_refs:
+          - P1
+        verification: privacy/prohibited-claim scan finds no absolute private paths,
+          private remotes, raw parser stderr, raw private reports, author
+          identities, private repo names, hosted/pricing/sales strategy,
+          bug-prediction, quality-score, developer-ranking, or
+          maintainer-judgement claims;
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#verification[9]
+        text: real-repo smoke beyond the existing zig build validate self-repo smoke is
+          not required because runtime/build behaviour is unchanged.
+        category: verification
+        packet_refs:
+          - P1
+        verification: real-repo smoke beyond the existing zig build validate self-repo
+          smoke is not required because runtime/build behaviour is unchanged.
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: Feature 0022 recorded that a future Tree-sitter Zig provider should not
+          proceed until parser sources, grammar provenance, license obligations,
+          offline build constraints, and source-install impact are reviewed. The
+          repository still has no build.zig.zon, no vendored Tree-sitter
+          sources, no generated Zig grammar sources, and no parser runtime.
+          Jumping directly to vendoring or build integration would combine
+          dependency, legal, source-install, and provider semantics risk in one
+          feature.
+      - source_ref: prd.md#outcome[1]
+        text: Produce a documentation-only dependency review, bill-of-materials
+          candidate, and vendoring go/no-go plan for a future Tree-sitter Zig
+          provider. The record must be specific enough for a later feature to
+          import pinned sources or stop safely, but this feature must not add
+          vendored code, build graph changes, parser runtime, CLI surface,
+          report schema fields, scoring changes, provider registry, cache,
+          network runtime behaviour, telemetry, or background analysis.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 2 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: Produce a documentation-only dependency review, bill-of-materials
+      candidate, and vendoring go/no-go plan for a future Tree-sitter Zig
+      provider while preserving current runtime, build, validation, and report
+      behaviour.
+    acceptance:
+      - A new dependency review document records candidate upstreams, immutable
+        revisions, source archive or checkout identities, checksums when
+        available or generated, license/SPDX information, notice obligations,
+        generated-source provenance, expected vendoring layout, update policy,
+        and source-install impact for Tree-sitter core and a Zig grammar source.
+      - The document compares system packages, build-time fetches, Tree-sitter
+        CLI shell-out, vendored pinned local sources, and deferral, and rejects
+        non-local or non-portable product runtime paths unless a later feature
+        explicitly reshapes them.
+      - The document ends with a clear go, conditional-go, or no-go
+        recommendation for the next feature and lists blockers or evidence
+        required before any vendored-source import or offline build proof.
+      - The document defines acceptance requirements for a later vendored-source
+        import and a later offline build/provider runtime proof, including no
+        build-time network, no global parser dependency, license/notice
+        handling, byte-stable no-provider outputs, and opt-in inspect-oriented
+        provider behaviour.
+      - This feature changes only documentation and Flow state; it does not add
+        vendored sources, build.zig.zon, C build/linking, parser runtime,
+        provider registry, CLI flags, report schema fields, scoring/ranking
+        changes, cache, source/test/fixture changes, network runtime, telemetry,
+        upload, remote enrichment, or background analysis.
+      - Validation passes and scans prove the documentation contains no private
+        paths, private remotes, raw parser stderr, raw private reports, author
+        identities, hosted/pricing/sales strategy, bug-prediction claims,
+        code-quality scoring claims, developer ranking, or maintainer judgement.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig build validate
+      - "changed-path scan: docs plus Flow only; no
+        src/tests/fixtures/tools/build.zig/build.zig.zon/third_party/parser-sou\
+        rce changes"
+      - "no-runtime/dependency scan: no tree-sitter sources, grammar sources, C
+        build/linking, parser runtime, provider registry,
+        CLI/report/scoring/cache changes"
+      - privacy/prohibited scan over
+        docs/tree-sitter-dependency-vendoring-plan.md
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
