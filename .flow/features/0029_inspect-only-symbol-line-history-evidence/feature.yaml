@@ -4,7 +4,7 @@ feature:
   slug: inspect-only-symbol-line-history-evidence
   title: Inspect-only symbol line-history evidence
   lane: standard
-  status: shaping
+  status: done
   autonomy_default: ask
 intent:
   problem: Current inspect-only Tree-sitter Zig symbols show function ranges in a
@@ -58,7 +58,7 @@ planning:
       under B001. B001 already captures local-first deterministic evidence,
       provider caution, and the rule that provider evidence must not replace Git
       history truth. No brief text change is needed.
-    checked_at: 2026-05-23T21:02:00Z
+    checked_at: 2026-05-23 21:02:00+00:00
   brief_alignment:
     status: aligned
     role: primary
@@ -66,18 +66,18 @@ planning:
       provider-enrichment capability while preserving B001 constraints: local
       deterministic evidence, no network/telemetry, no scoring replacement, no
       developer ranking, and explicit caveats."
-    checked_at: 2026-05-23T21:02:00Z
+    checked_at: 2026-05-23 21:02:00+00:00
 proposal:
   lifecycle_state: shaping
   outcome_contract_ref: null
   risk_assessment: null
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
-    materialised_at: 2026-05-23T21:02:00Z
+    materialised_at: 2026-05-23 21:02:00+00:00
   quality_plan:
     assurance_band: high_assurance
     review_mode: delegated_reviewer
@@ -91,35 +91,95 @@ project_feature:
       evidence_policy:
         parity_claims: required
         synthetic_only_is_insufficient: true
-      route_matrix:
+      route_matrix: &a2
         required: true
         routes:
-          - --inspect PATH --symbols --symbol-line-history success
-          - invalid --symbol-line-history combinations
-          - degraded current-line evidence states
-      resolution_matrix:
+          - route: --inspect PATH --symbols --symbol-line-history success
+            status: proven
+            evidence:
+              - delegated reviewer verified table/JSON/Markdown line-history success output
+                and goldens
+          - route: invalid --symbol-line-history combinations
+            status: proven
+            evidence:
+              - delegated reviewer verified stable non-zero invalid combinations
+          - route: degraded current-line evidence states
+            status: proven
+            evidence:
+              - delegated reviewer verified degraded/edge coverage
+      resolution_matrix: &a3
         required: true
         cases:
-          - clean inspected Zig file
-          - dirty inspected Zig file
-          - dirty unrelated file
-          - symlink or non-regular current file
-          - unsupported non-Zig target
-          - empty or invalid Zig target
-          - rename alias resolving to matched path
-          - shallow or partial history caveat
-      operator_examples:
+          - case: clean inspected Zig file
+            status: proven
+            evidence:
+              - delegated reviewer verified current-line Git evidence output
+          - case: dirty inspected Zig file
+            status: proven
+            evidence:
+              - delegated reviewer verified degraded dirty inspected file
+          - case: dirty unrelated file
+            status: proven
+            evidence:
+              - delegated reviewer verified dirty unrelated does not block
+          - case: symlink or non-regular current file
+            status: proven
+            evidence:
+              - delegated reviewer verified unavailable/symlink case
+          - case: unsupported non-Zig target
+            status: proven
+            evidence:
+              - delegated reviewer verified unsupported target degradation
+          - case: empty or invalid Zig target
+            status: proven
+            evidence:
+              - delegated reviewer verified empty/broken cases
+          - case: rename alias resolving to matched path
+            status: proven
+            evidence:
+              - delegated reviewer verified alias resolution
+          - case: shallow or partial history caveat
+            status: proven
+            evidence:
+              - delegated reviewer verified shallow/partial caveats
+      operator_examples: &a4
         required: true
         cases:
-          - this-repo close-out smoke
-          - sibling-local-repo close-out smoke
+          - case: this-repo close-out smoke
+            status: proven
+            evidence:
+              - delegated reviewer verified this-repo smoke
+          - case: sibling-local-repo close-out smoke
+            status: proven
+            evidence:
+              - delegated reviewer verified sibling-local-repo smoke with label-only
+                evidence
+      mandatory_reviewer_questions: &a1
+        - question: Did we prove inclusion on real provider wire for all active routes?
+          answer: true
+          status: proven
+          evidence:
+            - delegated reviewer verified active --symbol-line-history route and
+              absent-flag stability
+        - question: Did we prove all required target-resolution cases?
+          answer: true
+          status: proven
+          evidence:
+            - delegated reviewer verified degraded, alias, dirty, shallow/partial, target,
+              and edge cases
+        - question: Did we prove operator-provided example cases with deterministic tests?
+          answer: true
+          status: proven
+          evidence:
+            - delegated reviewer verified this repo and sibling-local-repo smoke
+      reviewer_questions: *a1
     derived_from_risk_assessment_ref: proposal.risk_assessment
-    materialised_at: 2026-05-23T21:02:00Z
+    materialised_at: 2026-05-23 21:02:00+00:00
   authority_refinement:
     selected_sign_off_authority: orchestrator
     explicit_pause_required: true
     verification_independence_requirement: continuity_safe_delegated
-    materialised_at: 2026-05-23T21:02:00Z
+    materialised_at: 2026-05-23 21:02:00+00:00
 verification_independence_requirement: continuity_safe_delegated
 readiness:
   requirements_ready: true
@@ -136,7 +196,7 @@ context:
     - "0025"
     - "0026"
     - "0027"
-    - "0028"
+    - 28
   blocked_by: []
 design:
   rough_shape:
@@ -170,7 +230,7 @@ design:
       goal: Add an internal privacy-safe current-line blame parser and model for
         symbol range aggregation without any CLI/report output changes.
       depends_on: []
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: src/git.zig, src/model.zig, src/provider.zig, tests, fixture
@@ -207,7 +267,7 @@ design:
         additive current-line Git evidence in JSON, table, and Markdown.
       depends_on:
         - P1
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: src/main.zig, src/git.zig, src/model.zig, src/report.zig,
@@ -248,7 +308,7 @@ design:
         sibling-local-repo.
       depends_on:
         - P2
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: README.md, fixtures/expected, tests/integration.sh,
@@ -287,8 +347,7 @@ design:
 execution:
   active_run_id: null
   current_packet_id: null
-  next_packet_ids:
-    - P1
+  next_packet_ids: []
   blockers: []
   requires_confirmation: true
 links:
@@ -296,11 +355,11 @@ links:
   brief_ids:
     - B001
 timestamps:
-  created_at: 2026-05-23T20:51:51.709Z
-  updated_at: 2026-05-23T21:03:29.465Z
+  created_at: 2026-05-23 20:51:51.709000+00:00
+  updated_at: 2026-05-23T22:10:15.383Z
 dispatch:
   status: prepared
-  prepared_at: 2026-05-23T21:03:29.465Z
+  prepared_at: 2026-05-23 21:03:29.465000+00:00
   assurance_level: sensitive
   control_model: split
   execution_topology: serial_feature
@@ -322,7 +381,7 @@ dispatch:
     reason: Assurance level sensitive requires stronger than Fast execution.
   scope:
     mode: packets
-    feature_id: "0029"
+    feature_id: 29
     packet_ids:
       - P1
       - P2
@@ -380,7 +439,7 @@ dispatch:
         provider-enrichment capability while preserving B001 constraints: local
         deterministic evidence, no network/telemetry, no scoring replacement, no
         developer ranking, and explicit caveats."
-      checked_at: 2026-05-23T21:02:00Z
+      checked_at: 2026-05-23 21:02:00+00:00
     briefs:
       - id: B001
         title: Local-first hotspot intelligence CLI
@@ -1203,15 +1262,11 @@ dispatch:
     evidence_policy:
       parity_claims: null
       synthetic_only_is_insufficient: true
-    route_matrix:
-      required: true
-      routes: []
-    resolution_matrix:
-      required: true
-      cases: []
-    operator_examples:
-      required: true
-      cases: []
+    route_matrix: *a2
+    resolution_matrix: *a3
+    operator_examples: *a4
+    mandatory_reviewer_questions: *a1
+    reviewer_questions: *a1
   ownership:
     reviewer_expectations:
       - verify line-history semantics against dispatch comparison basis
