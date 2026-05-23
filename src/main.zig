@@ -20,9 +20,11 @@ const usage =
     \\  --limit N         Maximum ranked files to emit (default: 10)
     \\  --format FORMAT   table, json, or markdown (default: table)
     \\  --since REV       Analyse commits after REV through HEAD
-    \\  --scope VALUE     project (default) or all; project currently excludes
-    \\                    the literal .flow/ prefix before scoring; all uses
-    \\                    the full local Git-history evidence universe
+    \\  --scope VALUE     project (default) or all; project excludes the literal
+    \\                    repo-root prefixes .flow/, .zig-cache/, zig-out/,
+    \\                    target/, node_modules/, dist/, build/, and coverage/
+    \\                    before scoring; all uses the full local Git-history
+    \\                    evidence universe
     \\  --include-prefix PATH
     \\                    Repeatable repo-relative literal Git path prefix to include;
     \\                    narrows the evidence universe before scoring; not a glob
@@ -352,20 +354,22 @@ fn applyScopePreset(allocator: std.mem.Allocator, cfg: *model.Config) CliError!v
 }
 
 fn applyProjectScopePreset(allocator: std.mem.Allocator, cfg: *model.Config) CliError!void {
-    const project_prefix = ".flow/";
+    const project_prefixes = [_][]const u8{ ".flow/", ".zig-cache/", "zig-out/", "target/", "node_modules/", "dist/", "build/", "coverage/" };
     var duplicate_count: usize = 0;
     for (cfg.exclude_prefixes) |existing| {
-        if (std.mem.eql(u8, existing, project_prefix)) duplicate_count += 1;
+        if (containsString(project_prefixes[0..], existing)) duplicate_count += 1;
     }
 
-    const expanded = try allocator.alloc([]const u8, cfg.exclude_prefixes.len - duplicate_count + 1);
+    const expanded = try allocator.alloc([]const u8, cfg.exclude_prefixes.len - duplicate_count + project_prefixes.len);
     errdefer allocator.free(expanded);
-    const owned = try allocator.dupe(u8, project_prefix);
-    errdefer allocator.free(owned);
-    expanded[0] = owned;
-    var out_i: usize = 1;
+    var out_i: usize = 0;
+    errdefer for (expanded[0..out_i]) |owned| allocator.free(owned);
+    for (project_prefixes) |project_prefix| {
+        expanded[out_i] = try allocator.dupe(u8, project_prefix);
+        out_i += 1;
+    }
     for (cfg.exclude_prefixes) |existing| {
-        if (std.mem.eql(u8, existing, project_prefix)) {
+        if (containsString(project_prefixes[0..], existing)) {
             allocator.free(existing);
         } else {
             expanded[out_i] = existing;
@@ -374,6 +378,13 @@ fn applyProjectScopePreset(allocator: std.mem.Allocator, cfg: *model.Config) Cli
     }
     if (cfg.exclude_prefixes.len > 0) allocator.free(cfg.exclude_prefixes);
     cfg.exclude_prefixes = expanded;
+}
+
+fn containsString(haystack: []const []const u8, needle: []const u8) bool {
+    for (haystack) |value| {
+        if (std.mem.eql(u8, value, needle)) return true;
+    }
+    return false;
 }
 
 const PrefixError = error{InvalidPrefix} || std.mem.Allocator.Error;
@@ -407,8 +418,7 @@ test "parse omitted scope defaults to project preset" {
     const cfg = mode.analyze;
     defer freeConfig(std.testing.allocator, cfg);
     try std.testing.expectEqual(model.ScopePreset.project, cfg.scope);
-    try std.testing.expectEqual(@as(usize, 1), cfg.exclude_prefixes.len);
-    try std.testing.expectEqualStrings(".flow/", cfg.exclude_prefixes[0]);
+    try expectProjectScopePrefixes(cfg.exclude_prefixes);
 }
 
 test "parse progress analysis flag independent of order" {
@@ -490,8 +500,7 @@ test "parse scope preset values" {
     const project_cfg = project_mode.analyze;
     defer freeConfig(std.testing.allocator, project_cfg);
     try std.testing.expectEqual(model.ScopePreset.project, project_cfg.scope);
-    try std.testing.expectEqual(@as(usize, 1), project_cfg.exclude_prefixes.len);
-    try std.testing.expectEqualStrings(".flow/", project_cfg.exclude_prefixes[0]);
+    try expectProjectScopePrefixes(project_cfg.exclude_prefixes);
 }
 
 test "reject invalid scope values" {
@@ -506,29 +515,39 @@ test "reject invalid scope values" {
 }
 
 test "project scope combines with prefixes independent of flag order" {
-    const before_args = [_][:0]const u8{ "git-hotspots", "--scope", "project", "--include-prefix", ".flow/", "--exclude-prefix", "vendor/", "--exclude-prefix", ".flow/" };
+    const before_args = [_][:0]const u8{ "git-hotspots", "--scope", "project", "--include-prefix", ".flow/", "--exclude-prefix", "vendor/", "--exclude-prefix", ".flow/", "--exclude-prefix", "target/" };
     const before_mode = try parseArgs(std.testing.allocator, &before_args);
     const before_cfg = before_mode.analyze;
     defer freeConfig(std.testing.allocator, before_cfg);
     try std.testing.expectEqual(model.ScopePreset.project, before_cfg.scope);
     try std.testing.expectEqual(@as(usize, 1), before_cfg.include_prefixes.len);
     try std.testing.expectEqualStrings(".flow/", before_cfg.include_prefixes[0]);
-    try std.testing.expectEqual(@as(usize, 2), before_cfg.exclude_prefixes.len);
-    try std.testing.expectEqualStrings(".flow/", before_cfg.exclude_prefixes[0]);
-    try std.testing.expectEqualStrings("vendor/", before_cfg.exclude_prefixes[1]);
+    try std.testing.expectEqual(@as(usize, 9), before_cfg.exclude_prefixes.len);
+    try expectProjectScopePrefixes(before_cfg.exclude_prefixes[0..8]);
+    try std.testing.expectEqualStrings("vendor/", before_cfg.exclude_prefixes[8]);
 
-    const after_args = [_][:0]const u8{ "git-hotspots", "--exclude-prefix", ".flow/", "--exclude-prefix", "vendor/", "--include-prefix", ".flow/", "--scope", "project" };
+    const after_args = [_][:0]const u8{ "git-hotspots", "--exclude-prefix", ".flow/", "--exclude-prefix", "target/", "--exclude-prefix", "vendor/", "--include-prefix", ".flow/", "--scope", "project" };
     const after_mode = try parseArgs(std.testing.allocator, &after_args);
     const after_cfg = after_mode.analyze;
     defer freeConfig(std.testing.allocator, after_cfg);
     try std.testing.expectEqual(model.ScopePreset.project, after_cfg.scope);
     try std.testing.expectEqualStrings(before_cfg.include_prefixes[0], after_cfg.include_prefixes[0]);
-    try std.testing.expectEqualStrings(before_cfg.exclude_prefixes[0], after_cfg.exclude_prefixes[0]);
-    try std.testing.expectEqualStrings(before_cfg.exclude_prefixes[1], after_cfg.exclude_prefixes[1]);
+    try std.testing.expectEqual(before_cfg.exclude_prefixes.len, after_cfg.exclude_prefixes.len);
+    for (before_cfg.exclude_prefixes, after_cfg.exclude_prefixes) |before_prefix, after_prefix| {
+        try std.testing.expectEqualStrings(before_prefix, after_prefix);
+    }
+}
+
+test "project scope deduplicates every built-in prefix" {
+    const args = [_][:0]const u8{ "git-hotspots", "--scope", "project", "--exclude-prefix", ".flow/", "--exclude-prefix", ".zig-cache/", "--exclude-prefix", "zig-out/", "--exclude-prefix", "target/", "--exclude-prefix", "node_modules/", "--exclude-prefix", "dist/", "--exclude-prefix", "build/", "--exclude-prefix", "coverage/" };
+    const mode = try parseArgs(std.testing.allocator, &args);
+    const cfg = mode.analyze;
+    defer freeConfig(std.testing.allocator, cfg);
+    try expectProjectScopePrefixes(cfg.exclude_prefixes);
 }
 
 test "parse repeatable exclude prefixes" {
-    const args = [_][:0]const u8{ "git-hotspots", "--exclude-prefix", "./.flow/", "--exclude-prefix", "vendor/" };
+    const args = [_][:0]const u8{ "git-hotspots", "--scope", "all", "--exclude-prefix", "./.flow/", "--exclude-prefix", "vendor/" };
     const mode = try parseArgs(std.testing.allocator, &args);
     const cfg = mode.analyze;
     defer freeConfig(std.testing.allocator, cfg);
@@ -595,6 +614,14 @@ test "reject invalid include prefixes" {
         var cfg = model.Config{ .repo_path = try std.testing.allocator.dupe(u8, ".") };
         defer freeConfig(std.testing.allocator, cfg);
         try std.testing.expectError(error.InvalidIncludePrefix, appendIncludePrefix(std.testing.allocator, &cfg, value));
+    }
+}
+
+fn expectProjectScopePrefixes(prefixes: []const []const u8) !void {
+    const expected = [_][]const u8{ ".flow/", ".zig-cache/", "zig-out/", "target/", "node_modules/", "dist/", "build/", "coverage/" };
+    try std.testing.expectEqual(expected.len, prefixes.len);
+    for (expected, prefixes) |expected_prefix, actual_prefix| {
+        try std.testing.expectEqualStrings(expected_prefix, actual_prefix);
     }
 }
 

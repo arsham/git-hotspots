@@ -86,34 +86,64 @@ make_edge() {
 make_scope() {
   repo="$FIX/scope"
   rm -rf "$repo"
-  mkdir -p "$repo/src" "$repo/.flow" "$repo/vendor" "$repo/glob" "$repo/weird"
+  mkdir -p "$repo/src" "$repo/.flow" "$repo/.zig-cache" "$repo/zig-out" "$repo/target" "$repo/node_modules/pkg" "$repo/dist" "$repo/build" "$repo/coverage" "$repo/vendor" "$repo/glob" "$repo/weird" "$repo/docs"
   setup_repo "$repo"
 
   printf 'pub fn main() void {}\n' > "$repo/src/app.txt"
   printf 'old name\n' > "$repo/src/old.zig"
   printf 'adapter one\n' > "$repo/src/vendor_adapter.zig"
+  printf 'helper one\n' > "$repo/src/buildtool.zig"
+  printf 'adapter one\n' > "$repo/src/vendoradapter.zig"
+  printf 'included to excluded one\n' > "$repo/src/to-cache.txt"
+  printf 'chain cross one\n' > "$repo/src/chain-start.txt"
+  printf 'coverage docs one\n' > "$repo/docs/coverage.md"
   printf 'vendor one\n' > "$repo/vendor/lib.txt"
   printf 'literal glob\n' > "$repo/glob/[literal]*.txt"
   printf 'tab scoped\n' > "$repo/weird/tab	name.txt"
   printf 'state one\n' > "$repo/.flow/state.yaml"
+  printf 'cache one\n' > "$repo/.zig-cache/file.txt"
+  printf 'zig-out one\n' > "$repo/zig-out/app.bin"
+  printf 'target one\n' > "$repo/target/app.o"
+  printf 'module one\n' > "$repo/node_modules/pkg/index.js"
+  printf 'dist one\n' > "$repo/dist/app.js"
+  printf 'build one\n' > "$repo/build/app.o"
+  printf 'coverage one\n' > "$repo/coverage/report.txt"
   commit_all "$repo" '2026-03-01T00:00:00+0000' 'initial source and workflow files'
 
   git -C "$repo" mv src/old.zig src/new.zig
   printf 'pub fn main() void {\n  // v2\n}\n' > "$repo/src/app.txt"
   printf 'state one\nstate two\n' > "$repo/.flow/state.yaml"
+  printf 'cache one\ncache two\n' > "$repo/.zig-cache/file.txt"
+  printf 'zig-out one\nzig-out two\n' > "$repo/zig-out/app.bin"
+  printf 'target one\ntarget two\n' > "$repo/target/app.o"
+  printf 'excluded to excluded one\n' > "$repo/target/excluded-chain-a.txt"
+  printf 'module one\nmodule two\n' > "$repo/node_modules/pkg/index.js"
+  printf 'dist one\ndist two\n' > "$repo/dist/app.js"
+  printf 'build one\nbuild two\n' > "$repo/build/app.o"
+  printf 'coverage one\ncoverage two\n' > "$repo/coverage/report.txt"
   commit_all "$repo" '2026-03-02T00:00:00+0000' 'change app and workflow state'
 
   printf 'state one\nstate two\nstate three\n' > "$repo/.flow/state.yaml"
   printf 'other workflow\n' > "$repo/.flow/other.yaml"
+  printf 'cache one\ncache two\ncache three\n' > "$repo/.zig-cache/file.txt"
+  printf 'module one\nmodule two\nmodule three\n' > "$repo/node_modules/pkg/index.js"
+  git -C "$repo" mv src/to-cache.txt .zig-cache/from-src.txt
+  git -C "$repo" mv target/excluded-chain-a.txt build/excluded-chain-b.txt
+  git -C "$repo" mv src/chain-start.txt node_modules/pkg/chain-mid.txt
   commit_all "$repo" '2026-03-03T00:00:00+0000' 'workflow-only churn'
 
   printf 'vendor one\nvendor two\n' > "$repo/vendor/lib.txt"
   printf 'adapter one\nadapter two\n' > "$repo/src/vendor_adapter.zig"
+  printf 'helper one\nhelper two\n' > "$repo/src/buildtool.zig"
+  printf 'adapter one\nadapter two\n' > "$repo/src/vendoradapter.zig"
+  printf 'coverage docs one\ncoverage docs two\n' > "$repo/docs/coverage.md"
+  git -C "$repo" mv node_modules/pkg/chain-mid.txt src/chain-final.txt
   commit_all "$repo" '2026-03-04T00:00:00+0000' 'vendor and adapter change'
 
   printf 'pub fn main() void {\n  // v2\n  // v3\n}\n' > "$repo/src/app.txt"
   printf 'state one\nstate two\nstate three\nstate four\n' > "$repo/.flow/state.yaml"
   printf 'adapter one\nadapter two\nadapter three\n' > "$repo/src/vendor_adapter.zig"
+  printf 'module one\nmodule two\nmodule three\nmodule four\n' > "$repo/node_modules/pkg/index.js"
   commit_all "$repo" '2026-03-05T00:00:00+0000' 'mixed source and workflow churn'
 }
 

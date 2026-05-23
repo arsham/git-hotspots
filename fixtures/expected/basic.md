@@ -19,7 +19,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 - Selected scope: project
 - Filters active: true
 - Include prefixes: None
-- Exclude prefixes: .flow/
+- Exclude prefixes: .flow/, .zig\-cache/, zig\-out/, target/, node\_modules/, dist/, build/, coverage/
 - Outside include path count: 0
 - Outside include change count: 0
 - Excluded path count: 0

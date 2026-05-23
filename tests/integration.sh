@@ -77,6 +77,7 @@ assert_progress_stderr() {
 ctrl=$(printf 'bad\001path')
 
 sh tools/setup-fixtures.sh
+PROJECT_EXCLUDE_ARGS="--exclude-prefix .flow/ --exclude-prefix .zig-cache/ --exclude-prefix zig-out/ --exclude-prefix target/ --exclude-prefix node_modules/ --exclude-prefix dist/ --exclude-prefix build/ --exclude-prefix coverage/"
 
 "$EXE" --explain > /tmp/git-hotspots-explain.txt
 diff -u fixtures/expected/explain.txt /tmp/git-hotspots-explain.txt
@@ -157,14 +158,14 @@ diff -u fixtures/expected/basic-inspect.md /tmp/git-hotspots-basic-inspect.md
 "$EXE" --repo fixtures/basic --inspect src/app.txt --format table > /tmp/git-hotspots-basic-inspect.txt
 diff -u fixtures/expected/basic-inspect.txt /tmp/git-hotspots-basic-inspect.txt
 "$EXE" --repo fixtures/scope --format json > /tmp/git-hotspots-scope-unfiltered.json
-"$EXE" --repo fixtures/scope --scope all --format json > /tmp/git-hotspots-scope-all.json
-"$EXE" --repo fixtures/scope --scope all --exclude-prefix .flow/ --format json > /tmp/git-hotspots-scope-filtered.json
+"$EXE" --repo fixtures/scope --scope all --limit 200 --format json > /tmp/git-hotspots-scope-all.json
+"$EXE" --repo fixtures/scope --scope all $PROJECT_EXCLUDE_ARGS --format json > /tmp/git-hotspots-scope-filtered.json
 diff -u fixtures/expected/scope-filtered.json /tmp/git-hotspots-scope-filtered.json
-"$EXE" --repo fixtures/scope --scope all --exclude-prefix .flow/ --format markdown > /tmp/git-hotspots-scope-filtered.md
+"$EXE" --repo fixtures/scope --scope all $PROJECT_EXCLUDE_ARGS --format markdown > /tmp/git-hotspots-scope-filtered.md
 diff -u fixtures/expected/scope-filtered.md /tmp/git-hotspots-scope-filtered.md
-"$EXE" --repo fixtures/scope --scope all --exclude-prefix .flow/ --format markdown > /tmp/git-hotspots-scope-filtered-2.md
+"$EXE" --repo fixtures/scope --scope all $PROJECT_EXCLUDE_ARGS --format markdown > /tmp/git-hotspots-scope-filtered-2.md
 diff -u /tmp/git-hotspots-scope-filtered.md /tmp/git-hotspots-scope-filtered-2.md
-"$EXE" --repo fixtures/scope --scope all --exclude-prefix .flow/ --format table > /tmp/git-hotspots-scope-filtered.txt
+"$EXE" --repo fixtures/scope --scope all $PROJECT_EXCLUDE_ARGS --format table > /tmp/git-hotspots-scope-filtered.txt
 "$EXE" --repo fixtures/scope --scope project --format json > /tmp/git-hotspots-scope-project.json
 diff -u /tmp/git-hotspots-scope-unfiltered.json /tmp/git-hotspots-scope-project.json
 diff -u fixtures/expected/scope-project.json /tmp/git-hotspots-scope-project.json
@@ -180,9 +181,20 @@ diff -u /tmp/git-hotspots-scope-project.md /tmp/git-hotspots-scope-project-2.md
 "$EXE" --repo fixtures/scope --scope project --format table > /tmp/git-hotspots-scope-project.txt
 "$EXE" --repo fixtures/scope --scope project --inspect src/vendor_adapter.zig --format json > /tmp/git-hotspots-scope-project-inspect.json
 "$EXE" --repo fixtures/scope --scope all --inspect .flow/state.yaml --format json > /tmp/git-hotspots-scope-all-inspect-flow.json
+"$EXE" --repo fixtures/scope --scope all --inspect .zig-cache/from-src.txt --format json > /tmp/git-hotspots-scope-all-inspect-included-to-excluded.json
+"$EXE" --repo fixtures/scope --scope all --inspect build/excluded-chain-b.txt --format json > /tmp/git-hotspots-scope-all-inspect-excluded-to-excluded.json
+"$EXE" --repo fixtures/scope --scope all --inspect src/chain-final.txt --format json > /tmp/git-hotspots-scope-all-inspect-chained-cross-prefix.json
 assert_fails_with_stderr inspect-project-excluded-flow "--inspect target has no matching Git-history evidence" "$EXE" --repo fixtures/scope --scope project --inspect .flow/state.yaml --format json
+assert_fails_with_stderr inspect-project-included-to-excluded "--inspect target has no matching Git-history evidence" "$EXE" --repo fixtures/scope --scope project --inspect .zig-cache/from-src.txt --format json
+assert_fails_with_stderr inspect-project-excluded-to-excluded-new "--inspect target has no matching Git-history evidence" "$EXE" --repo fixtures/scope --scope project --inspect build/excluded-chain-b.txt --format json
+assert_fails_with_stderr inspect-project-excluded-to-excluded-old "--inspect target has no matching Git-history evidence" "$EXE" --repo fixtures/scope --scope project --inspect target/excluded-chain-a.txt --format json
+assert_fails_with_stderr inspect-project-chained-excluded-hop "--inspect target has no matching Git-history evidence" "$EXE" --repo fixtures/scope --scope project --inspect node_modules/pkg/chain-mid.txt --format json
+"$EXE" --repo fixtures/scope --scope project --inspect src/to-cache.txt --format json > /tmp/git-hotspots-scope-project-inspect-included-to-excluded-old.json
+"$EXE" --repo fixtures/scope --scope project --inspect src/chain-final.txt --format json > /tmp/git-hotspots-scope-project-inspect-chained-cross-prefix.json
 "$EXE" --repo fixtures/scope --scope project --exclude-prefix .flow/ --format json > /tmp/git-hotspots-scope-project-duplicate-flow.json
 "$EXE" --repo fixtures/scope --scope project --include-prefix .flow/ --format json > /tmp/git-hotspots-scope-project-include-flow.json
+"$EXE" --repo fixtures/scope --scope project --include-prefix node_modules/ --format json > /tmp/git-hotspots-scope-project-include-node-modules.json
+"$EXE" --repo fixtures/scope --scope all --include-prefix node_modules/ --format json > /tmp/git-hotspots-scope-all-include-node-modules.json
 "$EXE" --repo fixtures/scope --scope project --include-prefix src/ --format json > /tmp/git-hotspots-scope-project-include-src.json
 "$EXE" --repo fixtures/scope --include-prefix src/ --format json > /tmp/git-hotspots-scope-src-include.json
 "$EXE" --repo fixtures/scope --include-prefix src/ --format markdown > /tmp/git-hotspots-scope-src-include.md
@@ -198,9 +210,9 @@ assert_fails_with_stderr inspect-project-excluded-flow "--inspect target has no 
 "$EXE" --repo fixtures/scope --include-prefix glob/ --format json > /tmp/git-hotspots-scope-glob-include.json
 "$EXE" --repo fixtures/scope --include-prefix does-not-exist/ --format json > /tmp/git-hotspots-scope-include-empty.json
 "$EXE" --repo fixtures/scope --include-prefix does-not-exist/ --format markdown > /tmp/git-hotspots-scope-include-empty.md
-"$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format json > /tmp/git-hotspots-scope-empty.json
-"$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --format markdown > /tmp/git-hotspots-scope-empty.md
-"$EXE" --repo fixtures/scope --scope all --exclude-prefix .flow/ --inspect src/vendor_adapter.zig --format json > /tmp/git-hotspots-scope-inspect-excluded-flow.json
+"$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --exclude-prefix docs/ --format json > /tmp/git-hotspots-scope-empty.json
+"$EXE" --repo fixtures/scope --exclude-prefix .flow/ --exclude-prefix src/ --exclude-prefix vendor/ --exclude-prefix glob/ --exclude-prefix weird/ --exclude-prefix docs/ --format markdown > /tmp/git-hotspots-scope-empty.md
+"$EXE" --repo fixtures/scope --scope all $PROJECT_EXCLUDE_ARGS --inspect src/vendor_adapter.zig --format json > /tmp/git-hotspots-scope-inspect-excluded-flow.json
 "$EXE" --repo fixtures/scope --include-prefix src/ --inspect src/new.zig --format json > /tmp/git-hotspots-scope-inspect-include-renamed.json
 "$EXE" --repo fixtures/lineage --inspect simple-new.txt --format json > /tmp/git-hotspots-lineage-simple.json
 grep -Fq -- '"lineage": { "aliases": ["simple-old.txt"], "partial": false' /tmp/git-hotspots-lineage-simple.json
@@ -286,11 +298,15 @@ def load(path):
 def by_path(data):
     return {row['path']: row for row in data['results']}
 
+project_prefixes = ['.flow/', '.zig-cache/', 'zig-out/', 'target/', 'node_modules/', 'dist/', 'build/', 'coverage/']
+def starts_project_prefix(path):
+    return any(path.startswith(prefix) for prefix in project_prefixes)
+
 basic = load('/tmp/git-hotspots-basic.json')
 assert basic['analysis']['scope']['selected_scope'] == 'project'
 assert basic['analysis']['scope']['filters_active'] is True
 assert basic['analysis']['scope']['include_prefixes'] == []
-assert basic['analysis']['scope']['exclude_prefixes'] == ['.flow/']
+assert basic['analysis']['scope']['exclude_prefixes'] == project_prefixes
 assert basic['results'][0]['path'] == 'src/app.txt'
 assert all(not row['path'].startswith('/') for row in basic['results'])
 basic_inspect = load('/tmp/git-hotspots-basic-inspect.json')
@@ -302,10 +318,11 @@ assert 'inspect' not in basic
 scope_unfiltered = load('/tmp/git-hotspots-scope-unfiltered.json')
 scope_all = load('/tmp/git-hotspots-scope-all.json')
 assert scope_unfiltered['analysis']['scope']['selected_scope'] == 'project', 'default selected scope changed'
-assert scope_unfiltered['analysis']['scope']['exclude_prefixes'] == ['.flow/'], 'default project prefix missing'
-assert all(not row['path'].startswith('.flow/') for row in scope_unfiltered['results']), 'default leaked .flow path'
+assert scope_unfiltered['analysis']['scope']['exclude_prefixes'] == project_prefixes, 'default project prefix missing'
+assert all(not starts_project_prefix(row['path']) for row in scope_unfiltered['results']), 'default leaked project-prefix path'
 all_paths = [row['path'] for row in scope_all['results']]
 assert any(path.startswith('.flow/') for path in all_paths), '--scope all lost .flow paths'
+assert any(path.startswith('node_modules/') for path in all_paths), '--scope all lost generated/dependency path evidence'
 assert 'src/new.zig' in all_paths, 'braced rename fixture missing new path'
 assert any(path == 'weird/tab\tname.txt' for path in all_paths), 'quoted tab fixture missing unquoted path'
 assert '' not in all_paths, 'empty path leaked from braced rename parsing'
@@ -316,16 +333,19 @@ assert scope_meta == {
     'selected_scope': 'all',
     'filters_active': True,
     'include_prefixes': [],
-    'exclude_prefixes': ['.flow/'],
+    'exclude_prefixes': project_prefixes,
     'outside_include_path_count': 0,
     'outside_include_change_count': 0,
-    'excluded_path_count': 2,
-    'excluded_change_count': 5,
+    'excluded_path_count': 13,
+    'excluded_change_count': 28,
 }, scope_meta
 for row in scope_filtered['results']:
-    assert not row['path'].startswith('.flow/'), row['path']
-    assert all(not cc['path'].startswith('.flow/') for cc in row['cochanges']), row['path']
+    assert not starts_project_prefix(row['path']), row['path']
+    assert all(not starts_project_prefix(cc['path']) for cc in row['cochanges']), row['path']
 assert 'src/vendor_adapter.zig' in by_path(scope_filtered), 'vendor/ prefix semantics fixture missing adapter'
+assert 'src/buildtool.zig' in by_path(scope_filtered), 'near-miss buildtool path was excluded'
+assert 'src/vendoradapter.zig' in by_path(scope_filtered), 'near-miss vendoradapter path was excluded'
+assert 'docs/coverage.md' in by_path(scope_filtered), 'near-miss docs coverage path was excluded'
 
 scope_project = load('/tmp/git-hotspots-scope-project.json')
 project_meta = scope_project['analysis']['scope']
@@ -333,29 +353,38 @@ assert project_meta == {
     'selected_scope': 'project',
     'filters_active': True,
     'include_prefixes': [],
-    'exclude_prefixes': ['.flow/'],
+    'exclude_prefixes': project_prefixes,
     'outside_include_path_count': 0,
     'outside_include_change_count': 0,
-    'excluded_path_count': 2,
-    'excluded_change_count': 5,
+    'excluded_path_count': 13,
+    'excluded_change_count': 28,
 }, project_meta
-assert scope_project['results'] == scope_filtered['results'], 'project preset rows differ from explicit .flow/ exclusion'
+assert scope_project['results'] == scope_filtered['results'], 'project preset rows differ from explicit project-prefix exclusions'
 assert scope_project == scope_unfiltered, 'omitted scope differs from explicit project'
 for row in scope_project['results']:
-    assert not row['path'].startswith('.flow/'), row['path']
-    assert all(not cc['path'].startswith('.flow/') for cc in row['cochanges']), row['path']
+    assert not starts_project_prefix(row['path']), row['path']
+    assert all(not starts_project_prefix(cc['path']) for cc in row['cochanges']), row['path']
 scope_project_duplicate = load('/tmp/git-hotspots-scope-project-duplicate-flow.json')
-assert scope_project_duplicate['analysis']['scope']['exclude_prefixes'] == ['.flow/']
+assert scope_project_duplicate['analysis']['scope']['exclude_prefixes'] == project_prefixes
 assert scope_project_duplicate['results'] == scope_project['results'], 'duplicate project exclude changed rows'
 scope_project_include_flow = load('/tmp/git-hotspots-scope-project-include-flow.json')
 assert scope_project_include_flow['analysis']['scope']['selected_scope'] == 'project'
 assert scope_project_include_flow['analysis']['scope']['include_prefixes'] == ['.flow/']
-assert scope_project_include_flow['analysis']['scope']['exclude_prefixes'] == ['.flow/']
+assert scope_project_include_flow['analysis']['scope']['exclude_prefixes'] == project_prefixes
 assert scope_project_include_flow['results'] == [], 'exclude did not win over include for project .flow/'
+scope_project_include_node = load('/tmp/git-hotspots-scope-project-include-node-modules.json')
+assert scope_project_include_node['analysis']['scope']['include_prefixes'] == ['node_modules/']
+assert scope_project_include_node['analysis']['scope']['exclude_prefixes'] == project_prefixes
+assert scope_project_include_node['results'] == [], 'project built-in exclude did not win over node_modules include'
+scope_all_include_node = load('/tmp/git-hotspots-scope-all-include-node-modules.json')
+assert scope_all_include_node['analysis']['scope']['selected_scope'] == 'all'
+assert scope_all_include_node['analysis']['scope']['include_prefixes'] == ['node_modules/']
+assert scope_all_include_node['analysis']['scope']['exclude_prefixes'] == []
+assert [row['path'] for row in scope_all_include_node['results']] == ['node_modules/pkg/index.js', 'node_modules/pkg/chain-mid.txt']
 scope_project_include_src = load('/tmp/git-hotspots-scope-project-include-src.json')
 assert scope_project_include_src['analysis']['scope']['selected_scope'] == 'project'
 assert scope_project_include_src['analysis']['scope']['include_prefixes'] == ['src/']
-assert scope_project_include_src['analysis']['scope']['exclude_prefixes'] == ['.flow/']
+assert scope_project_include_src['analysis']['scope']['exclude_prefixes'] == project_prefixes
 for row in scope_project_include_src['results']:
     assert row['path'].startswith('src/'), row['path']
     assert all(cc['path'].startswith('src/') for cc in row['cochanges']), row['path']
@@ -366,6 +395,32 @@ scope_all_inspect_flow = load('/tmp/git-hotspots-scope-all-inspect-flow.json')
 assert scope_all_inspect_flow['analysis']['scope']['selected_scope'] == 'all'
 assert len(scope_all_inspect_flow['results']) == 1
 assert scope_all_inspect_flow['results'][0]['path'] == '.flow/state.yaml'
+scope_all_included_to_excluded = load('/tmp/git-hotspots-scope-all-inspect-included-to-excluded.json')
+assert scope_all_included_to_excluded['results'][0]['path'] == '.zig-cache/from-src.txt'
+assert scope_all_included_to_excluded['results'][0]['lineage']['aliases'] == ['src/to-cache.txt']
+assert scope_all_included_to_excluded['results'][0]['lineage']['partial'] is False
+scope_all_excluded_to_excluded = load('/tmp/git-hotspots-scope-all-inspect-excluded-to-excluded.json')
+assert scope_all_excluded_to_excluded['results'][0]['path'] == 'build/excluded-chain-b.txt'
+assert scope_all_excluded_to_excluded['results'][0]['lineage']['aliases'] == ['target/excluded-chain-a.txt']
+assert scope_all_excluded_to_excluded['results'][0]['lineage']['partial'] is False
+scope_all_chained_cross = load('/tmp/git-hotspots-scope-all-inspect-chained-cross-prefix.json')
+assert scope_all_chained_cross['results'][0]['path'] == 'src/chain-final.txt'
+assert scope_all_chained_cross['results'][0]['lineage']['aliases'] == ['node_modules/pkg/chain-mid.txt', 'src/chain-start.txt']
+assert scope_all_chained_cross['results'][0]['lineage']['partial'] is False
+scope_project_included_to_excluded = load('/tmp/git-hotspots-scope-project-inspect-included-to-excluded-old.json')
+assert scope_project_included_to_excluded['results'][0]['path'] == 'src/to-cache.txt'
+assert scope_project_included_to_excluded['results'][0]['lineage']['aliases'] == []
+assert scope_project_included_to_excluded['results'][0]['lineage']['partial'] is False
+assert all(not starts_project_prefix(cc['path']) for cc in scope_project_included_to_excluded['results'][0]['cochanges'])
+scope_project_chained_cross = load('/tmp/git-hotspots-scope-project-inspect-chained-cross-prefix.json')
+assert scope_project_chained_cross['results'][0]['path'] == 'src/chain-final.txt'
+assert scope_project_chained_cross['results'][0]['lineage']['aliases'] == []
+assert scope_project_chained_cross['results'][0]['lineage']['partial'] is True
+assert all(not starts_project_prefix(cc['path']) for cc in scope_project_chained_cross['results'][0]['cochanges'])
+for row in scope_project['results'] + scope_project_included_to_excluded['results'] + scope_project_chained_cross['results']:
+    assert not starts_project_prefix(row['path']), row['path']
+    assert all(not starts_project_prefix(alias) for alias in row['lineage']['aliases']), row['path']
+    assert all(not starts_project_prefix(cc['path']) for cc in row['cochanges']), row['path']
 scope_inspect_excluded_flow = load('/tmp/git-hotspots-scope-inspect-excluded-flow.json')
 assert len(scope_inspect_excluded_flow['results']) == 1
 assert scope_inspect_excluded_flow['results'][0] == by_path(scope_filtered)['src/vendor_adapter.zig']
@@ -396,7 +451,7 @@ src_include_scope = src_include['analysis']['scope']
 assert src_include_scope['selected_scope'] == 'project'
 assert src_include_scope['filters_active'] is True
 assert src_include_scope['include_prefixes'] == ['src/']
-assert src_include_scope['exclude_prefixes'] == ['.flow/']
+assert src_include_scope['exclude_prefixes'] == project_prefixes
 assert src_include_scope['outside_include_path_count'] >= 1
 assert src_include_scope['outside_include_change_count'] >= 1
 for row in src_include['results']:
@@ -417,8 +472,8 @@ for row in src_vendor_include['results']:
 
 include_exclude = load('/tmp/git-hotspots-scope-include-exclude.json')
 assert include_exclude['analysis']['scope']['include_prefixes'] == ['src/']
-assert include_exclude['analysis']['scope']['exclude_prefixes'] == ['.flow/', 'src/vendor_adapter.zig']
-assert include_exclude['analysis']['scope']['excluded_path_count'] == 3
+assert include_exclude['analysis']['scope']['exclude_prefixes'] == project_prefixes + ['src/vendor_adapter.zig']
+assert include_exclude['analysis']['scope']['excluded_path_count'] == 14
 assert 'src/vendor_adapter.zig' not in by_path(include_exclude), 'exclude did not win over include'
 for row in include_exclude['results']:
     assert all(cc['path'] != 'src/vendor_adapter.zig' for cc in row['cochanges']), row['path']
@@ -443,13 +498,13 @@ assert scope_empty['analysis']['scope']['filters_active'] is True
 assert scope_empty['analysis']['scope']['excluded_path_count'] >= 1
 
 table_text = Path('/tmp/git-hotspots-scope-filtered.txt').read_text()
-assert 'scope: selected=all include_prefixes=[] exclude_prefixes=[.flow/]' in table_text
+assert 'scope: selected=all include_prefixes=[] exclude_prefixes=[.flow/,.zig-cache/,zig-out/,target/,node_modules/,dist/,build/,coverage/]' in table_text
 assert '.flow/' not in '\n'.join(line for line in table_text.splitlines() if line[:1].isdigit())
 project_table_text = Path('/tmp/git-hotspots-scope-project.txt').read_text()
-assert 'scope: selected=project include_prefixes=[] exclude_prefixes=[.flow/]' in project_table_text
+assert 'scope: selected=project include_prefixes=[] exclude_prefixes=[.flow/,.zig-cache/,zig-out/,target/,node_modules/,dist/,build/,coverage/]' in project_table_text
 assert '.flow/' not in '\n'.join(line for line in project_table_text.splitlines() if line[:1].isdigit())
 include_table_text = Path('/tmp/git-hotspots-scope-src-include.txt').read_text()
-assert 'scope: selected=project include_prefixes=[src/] exclude_prefixes=[.flow/]' in include_table_text
+assert 'scope: selected=project include_prefixes=[src/] exclude_prefixes=[.flow/,.zig-cache/,zig-out/,target/,node_modules/,dist/,build/,coverage/]' in include_table_text
 for line in include_table_text.splitlines():
     if line[:1].isdigit():
         assert 'src/' in line, line
@@ -505,21 +560,21 @@ scope_md = scope_md_path.read_text()
 assert '- Selected scope: all' in scope_md
 assert '- Filters active: true' in scope_md
 assert '- Include prefixes: None' in scope_md
-assert '- Exclude prefixes: .flow/' in scope_md
+assert r'- Exclude prefixes: .flow/, .zig\-cache/, zig\-out/, target/, node\_modules/, dist/, build/, coverage/' in scope_md
 assert '- Outside include path count: 0' in scope_md
 assert '- Outside include change count: 0' in scope_md
-assert '- Excluded path count: 2' in scope_md
-assert '- Excluded change count: 5' in scope_md
+assert '- Excluded path count: 13' in scope_md
+assert '- Excluded change count: 28' in scope_md
 for line in scope_md.splitlines():
     if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
-        assert '.flow/' not in line, line
+        assert not any(prefix in line for prefix in project_prefixes), line
 
 project_md = project_md_path.read_text()
 assert '- Selected scope: project' in project_md
-assert '- Exclude prefixes: .flow/' in project_md
+assert r'- Exclude prefixes: .flow/, .zig\-cache/, zig\-out/, target/, node\_modules/, dist/, build/, coverage/' in project_md
 for line in project_md.splitlines():
     if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
-        assert '.flow/' not in line, line
+        assert not any(prefix in line for prefix in project_prefixes), line
 
 scope_empty_md = scope_empty_md_path.read_text()
 assert 'No hotspots matched the requested scope.' in scope_empty_md
@@ -529,11 +584,11 @@ for section in ['## Run summary', '## Scope', '## Caveats', '## Top hotspots', '
 
 include_md = include_md_path.read_text()
 assert '- Include prefixes: src/' in include_md
-assert '- Exclude prefixes: .flow/' in include_md
+assert r'- Exclude prefixes: .flow/, .zig\-cache/, zig\-out/, target/, node\_modules/, dist/, build/, coverage/' in include_md
 assert '- Outside include path count:' in include_md
 for line in include_md.splitlines():
     if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
-        assert '.flow/' not in line and 'vendor/' not in line and 'glob/' not in line and 'weird/' not in line, line
+        assert not any(prefix in line for prefix in project_prefixes) and 'vendor/' not in line and 'glob/' not in line and 'weird/' not in line, line
 
 include_empty_md = include_empty_md_path.read_text()
 assert '- Include prefixes: does\\-not\\-exist/' in include_empty_md
