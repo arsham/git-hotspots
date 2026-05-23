@@ -284,16 +284,599 @@ design:
       - code_quality
     verification_required: false
 dispatch:
-  status: stale
-  prepared_at: null
-  assurance: sensitive
+  status: prepared
+  prepared_at: 2026-05-23T23:44:17.118Z
+  assurance_level: sensitive
   control_model: split
   execution_topology: serial_feature
-  review_mode: delegated_reviewer
-  runner_model: Balanced
-  reviewer_model: Strong
+  model_plan:
+    control_plane_model: Balanced
+    runner_model: Balanced
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level sensitive requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0032"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids: []
+    feature:
+      title: Symbol evidence summary and sorting
+      problem: Inspect-only symbol reports can emit many symbols, burying the most
+        useful current-line Git evidence in human table and Markdown output.
+      outcome: Human symbol reports summarize total, shown, and omitted counts and
+        show current-line evidence first in deterministic human output while
+        JSON remains complete.
+      acceptance:
+        - Human table and Markdown symbol sections disclose total, shown,
+          omitted, active limit, and sort basis.
+        - Human symbol rows are ordered by current-line Git evidence fields only
+          when --symbol-line-history is present.
+        - JSON symbols.items remains complete and is not truncated by the
+          default display cap or --symbol-limit.
+        - --symbol-limit N is documented as a human display limit valid only
+          with --inspect PATH --symbols.
+        - Existing non-symbol, plain inspect, and no-provider outputs remain
+          byte-stable when new controls are absent.
+        - Output avoids rank, score, risk, quality, ownership, productivity, bug
+          prediction, symbol history, and symbol lineage claims.
+        - Validation covers over-limit, exact-limit, zero-symbol, unsupported,
+          degraded, tie, unicode, and Markdown-sensitive cases.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Keeps provider evidence opt-in, local-only, deterministic, and
+        carefully caveated; no commercial or hosted scope.
+      checked_at: 2026-05-23T23:45:00.000Z
+    briefs: []
+    prd_path: .flow/features/0032_symbol-evidence-summary-and-sorting/prd.md
+  requirements_contract:
+    source_path: .flow/features/0032_symbol-evidence-summary-and-sorting/prd.md
+    source_digest: ca06ae337bd6c4f878e4d11ebd92472ea9e0bcfc20846978b263b37860171c46
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: Add a human symbol summary layer only for inspect symbol output.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: Apply evidence-based human ordering only when --symbol-line-history is
+          present.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: "Human ordering must use existing fields only:"
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: distinct current-line commit count descending;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: most recent line touched timestamp descending;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: line count descending;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: deterministic symbol name, range, and provider tie-breakers.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: Add a default human display cap for symbol rows, initially 25.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: "Add an opt-in human display cap flag:"
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: "``sh --symbol-limit N ``"
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: --symbol-limit is valid only with --inspect PATH --symbols.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: --symbol-limit affects human table and Markdown symbol row display only.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: JSON must continue to include every symbol in symbols.items, regardless of
+          --symbol-limit.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: JSON may add metadata such as total symbol count, human shown count,
+          omitted count, human default limit, and human sort basis, but must not
+          remove or truncate existing symbols.items fields.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#requirements[15]
+        text: "Human output must disclose:"
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#requirements[16]
+        text: total symbols;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#requirements[17]
+        text: shown symbols;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#requirements[18]
+        text: omitted symbols;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#requirements[19]
+        text: whether a default or explicit human limit was used;
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#requirements[20]
+        text: sort basis.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#requirements[21]
+        text: Use wording such as "shown first by current-line Git evidence summary".
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#requirements[22]
+        text: Avoid wording that implies symbol ranking, scoring, risk, code quality,
+          ownership, productivity, or bug prediction.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#requirements[23]
+        text: Plain --symbols without --symbol-line-history may use existing provider
+          order and should still disclose total/shown/omitted if capped.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#requirements[24]
+        text: Existing non-symbol reports, plain inspect reports, and default reports
+          must remain byte-stable unless the feature explicitly updates relevant
+          goldens.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#non-goals[1]
+        text: No symbol scoring.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-026
+        source_ref: prd.md#non-goals[2]
+        text: No symbol ranking language.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-027
+        source_ref: prd.md#non-goals[3]
+        text: No symbol hotness claim.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-028
+        source_ref: prd.md#non-goals[4]
+        text: No symbol history or lineage claim.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-029
+        source_ref: prd.md#non-goals[5]
+        text: No git log -L.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-030
+        source_ref: prd.md#non-goals[6]
+        text: No author names, emails, commit messages, source snippets, raw blame, raw
+          diffs, remotes, private paths, ownership, or productivity analytics.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-031
+        source_ref: prd.md#non-goals[7]
+        text: No provider execution outside --inspect PATH --symbols.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-032
+        source_ref: prd.md#non-goals[8]
+        text: No default provider execution.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-033
+        source_ref: prd.md#non-goals[9]
+        text: No all-file or repository-wide symbol analysis.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-034
+        source_ref: prd.md#non-goals[10]
+        text: No report changes for non-symbol commands.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-035
+        source_ref: prd.md#non-goals[11]
+        text: No cache, network, telemetry, release, or package work.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-036
+        source_ref: prd.md#edge-cases[1]
+        text: More symbols than the default human display cap.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#edge-cases[2]
+        text: Exactly the default human display cap.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#edge-cases[3]
+        text: Fewer symbols than the cap.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#edge-cases[4]
+        text: Zero symbols.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#edge-cases[5]
+        text: Unsupported non-Zig files.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#edge-cases[6]
+        text: Invalid or partial Zig files.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-042
+        source_ref: prd.md#edge-cases[7]
+        text: Symlink or non-regular .zig paths.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-043
+        source_ref: prd.md#edge-cases[8]
+        text: Symbols with identical evidence counts.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-044
+        source_ref: prd.md#edge-cases[9]
+        text: Multiline symbols.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-045
+        source_ref: prd.md#edge-cases[10]
+        text: Markdown-sensitive and unicode symbol names.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-046
+        source_ref: prd.md#edge-cases[11]
+        text: Symbols with current-line evidence failures or caveats.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-047
+        source_ref: prd.md#edge-cases[12]
+        text: --symbol-limit with JSON output.
+        category: edge_case
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-048
+        source_ref: prd.md#edge-cases[13]
+        text: Invalid --symbol-limit values.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-049
+        source_ref: prd.md#edge-cases[14]
+        text: --symbol-limit without --symbols.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-050
+        source_ref: prd.md#verification[1]
+        text: Add or update unit tests for symbol display metadata, human limit parsing,
+          and deterministic human ordering.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Add or update unit tests for symbol display metadata, human limit
+          parsing, and deterministic human ordering.
+        required_for_close_out: true
+      - id: REQ-051
+        source_ref: prd.md#verification[2]
+        text: Add table and Markdown goldens for symbol summary display with default and
+          explicit human limit behaviour.
+        category: verification
+        packet_refs:
+          - P2
+        verification: Add table and Markdown goldens for symbol summary display with
+          default and explicit human limit behaviour.
+        required_for_close_out: true
+      - id: REQ-052
+        source_ref: prd.md#verification[3]
+        text: Add JSON validation proving symbols.items remains complete when
+          --symbol-limit is supplied.
+        category: verification
+        packet_refs: []
+        verification: Add JSON validation proving symbols.items remains complete when
+          --symbol-limit is supplied.
+        required_for_close_out: true
+      - id: REQ-053
+        source_ref: prd.md#verification[4]
+        text: Add deterministic repeated-output checks for affected commands.
+        category: verification
+        packet_refs: []
+        verification: Add deterministic repeated-output checks for affected commands.
+        required_for_close_out: true
+      - id: REQ-054
+        source_ref: prd.md#verification[5]
+        text: Preserve existing no-provider, default, plain inspect, and plain JSON
+          output behaviour where the new flags are absent.
+        category: verification
+        packet_refs: []
+        verification: Preserve existing no-provider, default, plain inspect, and plain
+          JSON output behaviour where the new flags are absent.
+        required_for_close_out: true
+      - id: REQ-055
+        source_ref: prd.md#verification[6]
+        text: Extend privacy/prohibited-claim scans to new docs and goldens.
+        category: verification
+        packet_refs: []
+        verification: Extend privacy/prohibited-claim scans to new docs and goldens.
+        required_for_close_out: true
+      - id: REQ-056
+        source_ref: prd.md#verification[7]
+        text: "Run:"
+        category: verification
+        packet_refs: []
+        verification: "Run:"
+        required_for_close_out: true
+      - id: REQ-057
+        source_ref: prd.md#verification[8]
+        text: "``sh zig fmt --check build.zig src tests zig build test zig build zig
+          build validate zig build tree-sitter-build-proof zig build
+          tree-sitter-symbol-proof git diff --check zig build validate
+          -Dcloseout=true -Dsmoke-repo=<operator-provided-local-repo>
+          -Dsmoke-label=sibling-local-repo ``"
+        category: verification
+        packet_refs: []
+        verification: "``sh zig fmt --check build.zig src tests zig build test zig build
+          zig build validate zig build tree-sitter-build-proof zig build
+          tree-sitter-symbol-proof git diff --check zig build validate
+          -Dcloseout=true -Dsmoke-repo=<operator-provided-local-repo>
+          -Dsmoke-label=sibling-local-repo ``"
+        required_for_close_out: true
+      - id: REQ-058
+        source_ref: prd.md#verification[9]
+        text: Close-out evidence must use privacy-safe labels and bounded counts only.
+        category: verification
+        packet_refs:
+          - P3
+        verification: Close-out evidence must use privacy-safe labels and bounded counts
+          only.
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: Inspect-only symbol reports are now useful but too verbose for large Zig
+          files. A real repository inspect run produced dozens of symbols, and
+          the high-signal current-line Git evidence was buried in the full
+          current-symbol list.
+      - source_ref: prd.md#problem[2]
+        text: The tool needs a clearer human-readable symbol summary without turning
+          symbols into a new score, rank, risk, quality, ownership, or
+          historical-lineage system.
+      - source_ref: prd.md#outcome[1]
+        text: "Human table and Markdown output for:"
+      - source_ref: prd.md#outcome[2]
+        text: "``sh git-hotspots --inspect PATH --symbols --symbol-line-history ``"
+      - source_ref: prd.md#outcome[3]
+        text: shows a deterministic summary-first symbol view. Human rows are ordered by
+          existing current-line Git evidence fields and capped by a human
+          display limit. The report discloses total, shown, omitted, and the
+          sort basis.
+      - source_ref: prd.md#outcome[4]
+        text: JSON remains complete and deterministic. symbols.items is not truncated by
+          the human display cap or --symbol-limit.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 6 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: Human symbol reports summarize total, shown, and omitted counts and
+      show current-line evidence first in deterministic human output while JSON
+      remains complete.
+    acceptance:
+      - Human table and Markdown symbol sections disclose total, shown, omitted,
+        active limit, and sort basis.
+      - Human symbol rows are ordered by current-line Git evidence fields only
+        when --symbol-line-history is present.
+      - JSON symbols.items remains complete and is not truncated by the default
+        display cap or --symbol-limit.
+      - --symbol-limit N is documented as a human display limit valid only with
+        --inspect PATH --symbols.
+      - Existing non-symbol, plain inspect, and no-provider outputs remain
+        byte-stable when new controls are absent.
+      - Output avoids rank, score, risk, quality, ownership, productivity, bug
+        prediction, symbol history, and symbol lineage claims.
+      - Validation covers over-limit, exact-limit, zero-symbol, unsupported,
+        degraded, tie, unicode, and Markdown-sensitive cases.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands: []
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
 timestamps:
-  updated_at: 2026-05-23T23:37:46.239Z
+  updated_at: 2026-05-23T23:44:17.118Z
 execution:
   blockers: []
   requires_confirmation: true
