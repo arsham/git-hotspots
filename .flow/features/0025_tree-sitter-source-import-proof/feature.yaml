@@ -4,7 +4,7 @@ feature:
   slug: tree-sitter-source-import-proof
   title: Tree-sitter source import proof
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Tree-sitter Zig provider work needs pinned local source inputs, but the
@@ -81,7 +81,7 @@ proposal:
     materialised_at: 2026-05-23T05:41:37.772Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -167,7 +167,7 @@ design:
       goal: Select and record exact source identities, file manifests, excluded
         classes, license/notice targets, and generated parser provenance basis.
       depends_on: []
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: docs/tree-sitter-vendoring-readiness.md;
@@ -199,7 +199,7 @@ design:
         integration.
       depends_on:
         - P1
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: third_party/tree-sitter-core/; third_party/tree-sitter-zig/;
@@ -234,7 +234,7 @@ design:
         output stability, privacy, and local-first boundaries.
       depends_on:
         - P2
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: tools/validate.sh only if extra local validation gates are
@@ -271,15 +271,12 @@ design:
 execution:
   active_run_id: null
   current_packet_id: null
-  next_packet_ids:
-    - P1
-    - P2
-    - P3
+  next_packet_ids: []
   blockers: []
   requires_confirmation: true
 timestamps:
   created_at: 2026-05-23T05:31:06.444Z
-  updated_at: 2026-05-23T05:44:21.497Z
+  updated_at: 2026-05-23T06:14:35.276Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-23T05:44:21.497Z
