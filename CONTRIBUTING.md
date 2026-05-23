@@ -25,6 +25,11 @@ zig build validate
 If a narrower change only needs the fast gate while iterating, `zig build test`
 is useful, but `zig build validate` is the expected pre-PR check.
 
+The public Validation workflow runs `zig build validate` plus Tree-sitter proof
+steps on pushes to `master` and pull requests. Local validation remains the
+source of truth for contributors; treat CI as remote confirmation of the same
+gate.
+
 ## Project boundaries
 
 Runtime defaults must stay local-first: no network access, telemetry, upload,
