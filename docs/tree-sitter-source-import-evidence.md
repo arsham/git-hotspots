@@ -127,8 +127,11 @@ network behavior.
 Proof entry points:
 
 - `zig build tree-sitter-build-proof`
+- `zig build tree-sitter-symbol-proof`
 - `build.zig` step: `tree-sitter-build-proof`
+- `build.zig` step: `tree-sitter-symbol-proof`
 - Zig proof source: `tests/tree_sitter_build_proof.zig`
+- Zig symbol proof source: `tests/tree_sitter_symbol_proof.zig`
 - C inputs:
   - `third_party/tree-sitter-core/v0.26.9/lib/src/lib.c`
   - `third_party/tree-sitter-zig/v1.1.2/src/parser.c`
@@ -168,6 +171,37 @@ Single translation unit compile/link cleanliness proof:
   requires an individual-file compile set, system package, package manager,
   network access, parser generation, or provider runtime semantics, this proof
   must stop for planning rather than broadening locally.
+
+## Test-only Zig current-symbol extraction proof
+
+The dedicated symbol proof remains internal and test-only. It parses in-memory
+Zig source for a repo-relative `.zig` path using only the vendored Tree-sitter
+runtime and Zig grammar listed above, then maps supported nodes into
+`provider.CurrentSymbolEvidence`. It is not wired into the CLI, report schema,
+provider registry, scoring, cache, background analysis, network behavior, or any
+user-facing `--symbols` surface.
+
+Supported subset and range convention:
+
+- Supported symbols: named Tree-sitter `function_declaration` descendants only.
+- Explicitly deferred: container/type declarations and multi-language support.
+- Nested function declarations, if present in the parsed tree, are handled by the
+  same deterministic descendant traversal as top-level functions.
+- Ordering: provider evidence is sorted with the existing provider symbol order
+  (`path`, `name`, `kind`, range, provider name).
+- Ranges: one-based inclusive line ranges derived from Tree-sitter node start and
+  end points.
+
+Failure and unsupported behavior:
+
+- Unsupported non-`.zig` repo-relative paths return provider `unsupported`
+  semantics and are not parsed.
+- Empty `.zig` source returns an empty successful symbol set.
+- Invalid or partial Zig source does not crash; when no supported named function
+  can be emitted, the proof returns provider `failed` semantics.
+- Failure caveats intentionally expose no raw parser diagnostics, source
+  snippets, absolute paths, private repository details, remotes, authors, or
+  commit messages.
 
 Platform caveat:
 

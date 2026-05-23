@@ -84,6 +84,35 @@ pub fn build(b: *std.Build) void {
     const tree_sitter_build_proof_step = b.step("tree-sitter-build-proof", "Compile vendored Tree-sitter sources and run a tiny non-product Zig parse smoke");
     tree_sitter_build_proof_step.dependOn(&run_tree_sitter_build_proof.step);
 
+    const tree_sitter_symbol_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_symbol_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    tree_sitter_symbol_proof_module.addImport("provider", b.createModule(.{
+        .root_source_file = b.path("src/provider.zig"),
+        .target = target,
+        .optimize = optimize,
+    }));
+    tree_sitter_symbol_proof_module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
+    tree_sitter_symbol_proof_module.addIncludePath(b.path("third_party/tree-sitter-zig/v1.1.2/src"));
+    tree_sitter_symbol_proof_module.addCSourceFiles(.{
+        .files = &.{
+            "third_party/tree-sitter-core/v0.26.9/lib/src/lib.c",
+            "third_party/tree-sitter-zig/v1.1.2/src/parser.c",
+        },
+        .flags = &.{},
+    });
+    tree_sitter_symbol_proof_module.link_libc = true;
+
+    const tree_sitter_symbol_proof = b.addTest(.{
+        .root_module = tree_sitter_symbol_proof_module,
+    });
+
+    const run_tree_sitter_symbol_proof = b.addRunArtifact(tree_sitter_symbol_proof);
+    const tree_sitter_symbol_proof_step = b.step("tree-sitter-symbol-proof", "Run test-only Zig current-symbol extraction proof with vendored Tree-sitter sources");
+    tree_sitter_symbol_proof_step.dependOn(&run_tree_sitter_symbol_proof.step);
+
     const run_cmd = b.addRunArtifact(exe);
     if (b.args) |args| run_cmd.addArgs(args);
     const run_step = b.step("run", "Run git-hotspots");
