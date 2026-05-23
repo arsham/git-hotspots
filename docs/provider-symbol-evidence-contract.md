@@ -9,6 +9,12 @@ This document is a design guardrail for future provider work, especially a
 future tree-sitter symbol spike. It does not define a runtime plugin framework
 and does not add provider execution or current symbol evidence in the CLI.
 
+The internal seam in `src/provider.zig` maps this contract to bounded Zig data
+shapes and synthetic tests only. It exists so a later provider can reuse the
+same local-only envelope and current-symbol shape without adding parser
+runtime, CLI flags, report fields, scoring changes, cache, network access, or
+telemetry in this feature.
+
 ## Goals
 
 - Keep file-level Git evidence as the deterministic product truth.
@@ -50,7 +56,10 @@ implemented, but the envelope should contain at least:
 
 Provider evidence should use repo-relative paths and bounded metadata. It must
 not require absolute local paths, remotes, author identities, source snippets,
-raw private reports, or provider network calls.
+raw private reports, or provider network calls. The current internal seam keeps
+that boundary by rejecting unsafe absolute, parent-directory, and control-byte
+paths while accepting ordinary repo-relative metadata such as spaces, unicode,
+escaped tab-like text, markdown metacharacters, and glob-like characters.
 
 ## Provenance and caveats
 
@@ -126,7 +135,9 @@ Minimum future symbol fields should include:
 A first tree-sitter spike should limit itself to current working-tree symbol
 spans for one language. Historical symbol lineage, symbol renames, function
 moves, dependency propagation, and multi-language support should remain separate
-features.
+features. The internal seam deliberately exposes current-range evidence only and
+has no source snippet, author, ownership, lineage, dependency-propagation, or
+file-hotspot scoring fields.
 
 ## Report behaviour
 

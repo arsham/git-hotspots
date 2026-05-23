@@ -4,7 +4,7 @@ feature:
   slug: provider-symbol-evidence-seam
   title: Provider symbol evidence seam
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The provider contract is documented, but the runtime has no minimal
@@ -68,7 +68,7 @@ proposal:
     materialised_at: 2026-05-23T03:00:43.373Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -134,7 +134,7 @@ design:
         synthetic tests without adding provider runtime behaviour.
       owner_phase: runner
       depends_on: []
-      status: planned
+      status: done
       execution_context:
         - "Anchors: src/provider.zig or equivalent new internal module,
           src/main.zig test import seam if needed,
@@ -199,7 +199,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-23T02:52:09.228Z
-  updated_at: 2026-05-23T03:03:31.471Z
+  updated_at: 2026-05-23T03:27:09.185Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-23T03:03:31.471Z

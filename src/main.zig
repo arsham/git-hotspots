@@ -2,6 +2,7 @@ const std = @import("std");
 const model = @import("model.zig");
 const git = @import("git.zig");
 const report = @import("report.zig");
+const provider = @import("provider.zig");
 const explain = @import("explain.zig");
 const version = @import("version.zig");
 const Io = std.Io;
@@ -628,6 +629,7 @@ fn expectProjectScopePrefixes(prefixes: []const []const u8) !void {
 test {
     _ = @import("explain.zig");
     _ = @import("git.zig");
+    _ = provider;
     _ = @import("report.zig");
     _ = @import("scoring.zig");
     _ = @import("version.zig");
