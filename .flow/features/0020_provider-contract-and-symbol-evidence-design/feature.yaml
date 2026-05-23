@@ -185,4 +185,684 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-23T01:42:29.130Z
-  updated_at: 2026-05-23T01:48:11.975Z
+  updated_at: 2026-05-23T02:34:51.733Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-23T02:34:51.733Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0020"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Provider contract and symbol evidence design
+      problem: Provider and symbol evidence boundaries are not durable yet, so a
+        future tree-sitter or LSP feature could accidentally become core runtime
+        truth, harden the wrong abstraction, alter file-level scoring, or imply
+        unsupported symbol-history claims.
+      outcome: Create a design-only provider and symbol evidence contract that
+        preserves file-level Git history as product truth and bounds future
+        provider work before any provider implementation is added.
+      acceptance:
+        - docs/provider-symbol-evidence-contract.md defines provider envelope,
+          provenance, freshness, confidence, failure state, caveats, symbol
+          attachment, report behaviour, and future validation expectations.
+        - The feature makes no runtime provider, registry, CLI, dependency,
+          source, test, fixture, cache, report schema, or scoring change.
+        - Provider evidence is explicitly optional enrichment attached to
+          existing file-level results, not replacement product truth.
+        - Future tree-sitter work is bounded as a spike with one language,
+          current working-tree symbol spans, confidence/caveats, and no
+          historical symbol lineage or scoring change.
+        - Repository artefacts remain OSS/publicity-oriented and contain no
+          hosted, pricing, sales, or commercial strategy.
+    brief_alignment:
+      status: aligned
+      role: primary
+      summary: "Feature 0020 is the primary provider-boundary design slice for B001:
+        it preserves file-level Git evidence as product truth, makes providers
+        optional enrichment, and excludes runtime provider, SaaS, telemetry, and
+        commercial strategy scope."
+      checked_at: 2026-05-23T01:47:04.404Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0020_provider-contract-and-symbol-evidence-design/prd.md
+  requirements_contract:
+    source_path: .flow/features/0020_provider-contract-and-symbol-evidence-design/prd.md
+    source_digest: 33d631e5e0b3f9525e1d41d5e73f1823370de2a31f060f51cd6f6b30788c4f67
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: Add a public design note for provider and symbol evidence contracts.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: "Define provider evidence envelope fields:"
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: provider name;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: provider kind;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: provider version;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: contract version;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: configuration fingerprint where relevant;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: analysed repository HEAD or input digest;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: freshness state;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: confidence;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: failure state;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: caveats;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: local-only provenance.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: Define freshness states such as fresh, stale, partial, and unknown.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#requirements[15]
+        text: Define failure states such as ok, unavailable, unsupported, failed, timed
+          out, and skipped.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#requirements[16]
+        text: Define how symbol evidence attaches to existing file hotspot results.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#requirements[17]
+        text: State that symbol evidence is enrichment, not replacement product truth.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#requirements[18]
+        text: State that provider failure must degrade gracefully and must not hide
+          file-level Git evidence.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#requirements[19]
+        text: "Define a narrow future tree-sitter spike boundary:"
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#requirements[20]
+        text: one language;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#requirements[21]
+        text: current working-tree symbol spans only;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#requirements[22]
+        text: attached to existing file results;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#requirements[23]
+        text: confidence and caveats visible;
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#requirements[24]
+        text: no historical symbol lineage or scoring change.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#requirements[25]
+        text: Keep repository artefacts OSS/publicity-oriented and avoid commercial,
+          hosted, pricing, or sales strategy.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#non-goals[1]
+        text: No tree-sitter implementation.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-027
+        source_ref: prd.md#non-goals[2]
+        text: No LSP, ctags, dependency, blame, test, or coverage provider
+          implementation.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-028
+        source_ref: prd.md#non-goals[3]
+        text: No runtime provider registry or plugin lifecycle.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-029
+        source_ref: prd.md#non-goals[4]
+        text: No provider CLI flags or configuration files.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-030
+        source_ref: prd.md#non-goals[5]
+        text: No dependency additions.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-031
+        source_ref: prd.md#non-goals[6]
+        text: No cache schema or cache coupling.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-032
+        source_ref: prd.md#non-goals[7]
+        text: No report schema changes.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-033
+        source_ref: prd.md#non-goals[8]
+        text: No scoring changes.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-034
+        source_ref: prd.md#non-goals[9]
+        text: No source parsing or provider execution.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-035
+        source_ref: prd.md#non-goals[10]
+        text: No network, telemetry, upload, remote enrichment, or background analysis.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-036
+        source_ref: prd.md#non-goals[11]
+        text: No bug prediction, code-quality scoring, developer ranking, or maintainer
+          judgement claims.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-037
+        source_ref: prd.md#acceptance-criteria[1]
+        text: docs/provider-symbol-evidence-contract.md exists and captures the provider
+          evidence contract, freshness, failure, confidence, symbol attachment,
+          report behaviour, validation expectations, and future tree-sitter
+          spike boundary.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#acceptance-criteria[2]
+        text: "The feature is design-only: no src/, tests/, fixtures/, tools/,
+          build.zig, dependency, CLI, or report output change is made."
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#acceptance-criteria[3]
+        text: Current file-level Git evidence remains documented as the deterministic
+          product truth.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#acceptance-criteria[4]
+        text: Provider output is framed as optional enrichment that can be absent,
+          unavailable, stale, partial, or failed without invalidating file-level
+          reports.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#acceptance-criteria[5]
+        text: The design note does not imply current symbol evidence exists today.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-042
+        source_ref: prd.md#acceptance-criteria[6]
+        text: The design note does not include commercial/SaaS/pricing/sales strategy.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-043
+        source_ref: prd.md#acceptance-criteria[7]
+        text: Validation proves docs-only scope, no prohibited claims, no runtime
+          behaviour drift, and the existing validation gate remains green.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-044
+        source_ref: prd.md#edge-cases-and-risks[1]
+        text: A design note that is too detailed may prematurely harden a provider
+          schema.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-045
+        source_ref: prd.md#edge-cases-and-risks[2]
+        text: A design note that is too vague may fail to protect the tree-sitter spike
+          from becoming hidden product truth.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-046
+        source_ref: prd.md#edge-cases-and-risks[3]
+        text: Provider confidence must not be confused with code quality, risk, or bug
+          likelihood.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-047
+        source_ref: prd.md#edge-cases-and-risks[4]
+        text: Provider failure states must not encourage silent omission of evidence.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-048
+        source_ref: prd.md#edge-cases-and-risks[5]
+        text: Symbol evidence must not imply historical symbol tracking before that
+          exists.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-049
+        source_ref: prd.md#verification[1]
+        text: "Close-out must include:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Close-out must include:"
+        required_for_close_out: true
+      - id: REQ-050
+        source_ref: prd.md#verification[2]
+        text: git diff --check.
+        category: verification
+        packet_refs:
+          - P1
+        verification: git diff --check.
+        required_for_close_out: true
+      - id: REQ-051
+        source_ref: prd.md#verification[3]
+        text: zig build validate.
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig build validate.
+        required_for_close_out: true
+      - id: REQ-052
+        source_ref: prd.md#verification[4]
+        text: A changed-path check proving only Flow metadata and docs/design artefacts
+          changed.
+        category: verification
+        packet_refs:
+          - P1
+        verification: A changed-path check proving only Flow metadata and docs/design
+          artefacts changed.
+        required_for_close_out: true
+      - id: REQ-053
+        source_ref: prd.md#verification[5]
+        text: A scan proving no src/, tests/, fixtures/, tools/, build.zig, dependency,
+          CLI, or report output files changed.
+        category: verification
+        packet_refs:
+          - P1
+        verification: A scan proving no src/, tests/, fixtures/, tools/, build.zig,
+          dependency, CLI, or report output files changed.
+        required_for_close_out: true
+      - id: REQ-054
+        source_ref: prd.md#verification[6]
+        text: A content scan for prohibited commercial/SaaS/pricing/sales strategy.
+        category: verification
+        packet_refs:
+          - P1
+        verification: A content scan for prohibited commercial/SaaS/pricing/sales strategy.
+        required_for_close_out: true
+      - id: REQ-055
+        source_ref: prd.md#verification[7]
+        text: A content scan for bug prediction, quality scoring, developer ranking, and
+          maintainer-judgement claims outside explicit non-goals.
+        category: verification
+        packet_refs:
+          - P1
+        verification: A content scan for bug prediction, quality scoring, developer
+          ranking, and maintainer-judgement claims outside explicit non-goals.
+        required_for_close_out: true
+      - id: REQ-056
+        source_ref: prd.md#verification[8]
+        text: Reviewer confirmation that the design note is provider-neutral and does
+          not implement or imply current provider runtime behaviour.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Reviewer confirmation that the design note is provider-neutral and
+          does not implement or imply current provider runtime behaviour.
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: The project is approaching language-aware hotspot work, but provider
+          boundaries are not yet durable. Without a provider-neutral contract,
+          the first tree-sitter or LSP feature could accidentally become core
+          runtime truth, harden the wrong abstraction, alter file-level scoring,
+          or imply unsupported symbol-history claims.
+      - source_ref: prd.md#outcome[1]
+        text: Create a design-only provider and symbol evidence contract that future
+          provider features can use. The contract must preserve deterministic
+          file-level Git history as product truth, define minimum provider
+          metadata and degradation semantics, and bound the next tree-sitter
+          spike before any provider code is implemented.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 2 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: Create a design-only provider and symbol evidence contract that
+      preserves file-level Git history as product truth and bounds future
+      provider work before any provider implementation is added.
+    acceptance:
+      - docs/provider-symbol-evidence-contract.md defines provider envelope,
+        provenance, freshness, confidence, failure state, caveats, symbol
+        attachment, report behaviour, and future validation expectations.
+      - The feature makes no runtime provider, registry, CLI, dependency,
+        source, test, fixture, cache, report schema, or scoring change.
+      - Provider evidence is explicitly optional enrichment attached to existing
+        file-level results, not replacement product truth.
+      - Future tree-sitter work is bounded as a spike with one language, current
+        working-tree symbol spans, confidence/caveats, and no historical symbol
+        lineage or scoring change.
+      - Repository artefacts remain OSS/publicity-oriented and contain no
+        hosted, pricing, sales, or commercial strategy.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands: []
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
