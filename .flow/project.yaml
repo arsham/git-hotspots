@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0021"
   active_run_id: null
   last_completed_feature_id: "0020"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 21
+  next_id: 22
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -109,6 +109,10 @@ features:
       slug: provider-contract-and-symbol-evidence-design
       path: .flow/features/0020_provider-contract-and-symbol-evidence-design
       created_at: 2026-05-23T01:42:29.130Z
+    - id: "0021"
+      slug: provider-symbol-evidence-seam
+      path: .flow/features/0021_provider-symbol-evidence-seam
+      created_at: 2026-05-23T02:52:09.228Z
 intake:
   mode: roadmap
   summary: null

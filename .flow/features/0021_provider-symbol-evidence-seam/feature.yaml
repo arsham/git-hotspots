@@ -1,0 +1,202 @@
+schema: flow-feature.v1
+feature:
+  id: "0021"
+  slug: provider-symbol-evidence-seam
+  title: Provider symbol evidence seam
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: The provider contract is documented, but the runtime has no minimal
+    internal seam for optional provider evidence. Jumping directly to
+    tree-sitter would combine dependency, report-shape, symbol modelling, and
+    parser correctness risk in one feature.
+  outcome: Add a minimal provider and current-symbol evidence seam that future
+    providers can use, while keeping current file-level CLI reports unchanged
+    when no provider evidence exists.
+  acceptance:
+    - Minimal internal provider evidence model represents provider name, kind,
+      version, contract version, config fingerprint, input identity, freshness,
+      failure state, confidence, caveats, and local-only provenance.
+    - Minimal current-symbol evidence model represents repo-relative path,
+      symbol name, kind, current range, provider association, confidence, and
+      caveats without implying historical symbol lineage.
+    - Synthetic unit tests cover deterministic ordering, state values, unsafe
+      path rejection, caveat behaviour, current-only semantics, and absence of
+      source snippets or private machine paths.
+    - No tree-sitter dependency, grammar source, provider registry, CLI flag,
+      report schema change, cache, scoring change, ranking change, network
+      access, telemetry, or background analysis is added.
+    - Existing no-provider table, JSON, and Markdown outputs remain unchanged
+      and `zig build validate` passes.
+    - Provider documentation is updated only as needed to map the contract to
+      the internal seam and keep future tree-sitter Zig work bounded.
+planning:
+  state: ready
+  summary: Reshaped from immediate tree-sitter integration to a prerequisite
+    provider/symbol evidence seam. Implement minimal internal Zig model
+    primitives and synthetic tests only; defer tree-sitter Zig parsing to a
+    later feature.
+  brief_sync:
+    status: updated
+    reason: B001 establishes deterministic local-first file-level Git evidence and
+      providers as optional later enrichers. Feature 0021 creates the small
+      runtime seam needed before a real tree-sitter provider.
+    checked_at: 2026-05-23T02:58:45.166Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Feature 0021 follows the provider contract from Feature 0020 by adding
+      only an internal provider/symbol seam while preserving file-level Git
+      evidence as product truth and excluding runtime tree-sitter work.
+    checked_at: 2026-05-23T02:58:45.166Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-23T03:00:43.373Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-23T03:00:43.373Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-23T03:00:43.373Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-23T03:00:43.373Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: No active/candidate roadmap work existed. Operator asked to
+    continue after discussing when tree-sitter should be implemented; judge
+    review found a provider seam should precede real tree-sitter integration.
+  depends_on_feature_ids:
+    - "0020"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add a small internal Zig module for provider envelopes, provider states,
+      confidence, caveats, and current-symbol evidence.
+    - Import the module only enough for unit tests/build coverage; do not
+      execute providers from the CLI.
+    - Add synthetic unit tests for path safety, deterministic ordering, and
+      provider state modelling.
+    - Update docs/provider-symbol-evidence-contract.md with a short
+      implementation-seam note and defer real tree-sitter Zig parsing to the
+      next feature.
+  packets:
+    - id: P1
+      title: Provider and symbol evidence seam
+      goal: Add minimal internal provider and current-symbol evidence primitives plus
+        synthetic tests without adding provider runtime behaviour.
+      owner_phase: runner
+      depends_on: []
+      status: planned
+      execution_context:
+        - "Anchors: src/provider.zig or equivalent new internal module,
+          src/main.zig test import seam if needed,
+          docs/provider-symbol-evidence-contract.md, build.zig,
+          tests/integration.sh, tools/validate.sh."
+        - "In scope: internal Zig types/helpers for provider envelope,
+          freshness, failure state, confidence, caveats, local provenance,
+          current symbol range evidence, deterministic ordering, and path safety
+          tests."
+        - "Out of scope: tree-sitter dependency, Zig grammar, parser runtime,
+          provider registry, plugin lifecycle, CLI flags, config, report schema
+          changes, cache, scoring/ranking changes, network, telemetry, source
+          snippets, author metrics, and historical symbol lineage."
+        - "Protected: existing CLI behaviour and no-provider table/JSON/Markdown
+          outputs must remain unchanged; file-level Git evidence remains product
+          truth."
+        - "Dependencies: Feature 0020 provider contract and B001 local-first OSS
+          constraints."
+        - "Validation/evidence: git diff --check; zig build test; zig build
+          validate; checks proving no build dependency, CLI flag, report schema,
+          scoring, cache, network, telemetry, or runtime provider execution was
+          added; close-out smoke with sibling-local-repo when available."
+        - "Review focus: seam is useful for a later tree-sitter Zig provider but
+          does not harden a broad framework or imply symbol evidence exists in
+          reports today."
+        - "Escalate if: implementation needs real parser integration,
+          C/linker/dependency work, schema changes, scoring changes, source
+          snippets, provider execution from CLI, or any hidden default provider
+          behaviour."
+        - "Done boundary: internal seam, synthetic tests, docs mapping, and
+          validation evidence are complete; tree-sitter implementation remains a
+          separate future feature."
+      verification_commands:
+        - git diff --check
+        - zig build test
+        - zig build validate
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-23T02:52:09.228Z
+  updated_at: 2026-05-23T03:00:43.373Z
