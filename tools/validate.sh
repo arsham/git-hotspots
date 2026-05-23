@@ -531,6 +531,7 @@ explain_output_checks() {
   grep -q -- '--scope VALUE' "$help_out" || return 1
   grep -q -- 'project (default) or all' "$help_out" || return 1
   grep -q -- '--progress' "$help_out" || return 1
+  grep -q -- '--symbols' "$help_out" || return 1
   "$EXE" --progress --help > "$ARTIFACT_DIR/help-progress.txt" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
   grep -q -- '--progress' "$ARTIFACT_DIR/help-progress.txt" || return 1
@@ -555,7 +556,8 @@ explain_output_checks() {
     '--include-prefix src/' \
     '--exclude-prefix .flow/' \
     '--inspect src/app.txt' \
-    '--progress'
+    '--progress' \
+    '--symbols'
   do
     # shellcheck disable=SC2086
     if "$EXE" --explain $args > "$ARTIFACT_DIR/explain-invalid.out" 2> "$explain_err"; then
@@ -574,7 +576,8 @@ explain_output_checks() {
     '--exclude-prefix .flow/' \
     '--inspect src/app.txt' \
     '--explain' \
-    '--progress'
+    '--progress' \
+    '--symbols'
   do
     # shellcheck disable=SC2086
     if "$EXE" --version $args > "$ARTIFACT_DIR/version-invalid.out" 2> "$explain_err"; then
@@ -586,7 +589,7 @@ explain_output_checks() {
 
 prohibited_claim_scan() {
   have_python || return 1
-  python3 - fixtures/expected/explain.txt README.md CONTRIBUTING.md <<'PY'
+  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt README.md CONTRIBUTING.md <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -603,6 +606,10 @@ patterns = [
     re.compile(r'\bhosted product\b'),
     re.compile(r'\bpricing\b'),
     re.compile(r'\bsales strategy\b'),
+    re.compile(r'\bsymbol (history|lineage)\b'),
+    re.compile(r'\bdependency propagation\b'),
+    re.compile(r'\bprovider evidence (replaces|replacing|supersedes|overrides)\b'),
+    re.compile(r'\bprovider (truth|score|ranking)\b'),
 ]
 allowed_markers = (
     ' not ',
@@ -753,6 +760,38 @@ fixture_json_checks() {
   diff -u fixtures/expected/basic-inspect.md "$BASIC_INSPECT_MD" >/dev/null || return 1
   "$EXE" --repo fixtures/basic --inspect src/app.txt --format table > "$BASIC_INSPECT_TABLE" || return 1
   diff -u fixtures/expected/basic-inspect.txt "$BASIC_INSPECT_TABLE" >/dev/null || return 1
+  "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --format json > "$SYMBOLS_JSON" || return 1
+  diff -u fixtures/expected/symbols-inspect-symbols.json "$SYMBOLS_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --format markdown > "$SYMBOLS_MD" || return 1
+  diff -u fixtures/expected/symbols-inspect-symbols.md "$SYMBOLS_MD" >/dev/null || return 1
+  "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --format table > "$SYMBOLS_TABLE" || return 1
+  diff -u fixtures/expected/symbols-inspect-symbols.txt "$SYMBOLS_TABLE" >/dev/null || return 1
+  "$EXE" --repo fixtures/symbols --inspect src/readme.txt --symbols --format json > "$SYMBOLS_UNSUPPORTED_JSON" || return 1
+  diff -u fixtures/expected/symbols-unsupported.json "$SYMBOLS_UNSUPPORTED_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/symbols --inspect src/link.zig --symbols --format json > "$SYMBOLS_SYMLINK_JSON" || return 1
+  diff -u fixtures/expected/symbols-symlink-unavailable.json "$SYMBOLS_SYMLINK_JSON" >/dev/null || return 1
+  have_python || return 1
+  python3 - "$SYMBOLS_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" <<'PY'
+import json, sys
+success, unsupported, symlink = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+for data in (success, unsupported, symlink):
+    symbols = data['symbols']
+    assert symbols['current_only'] is True, 'symbols current_only missing'
+    assert 'items' in symbols and 'rows' not in symbols, 'symbols items schema mismatch'
+    provider = symbols['provider']
+    assert provider['provenance']['local_only'] is True, 'local provenance missing'
+    assert provider['provenance']['input'].startswith('working-tree:'), 'provider input provenance mismatch'
+    assert 'provider_name' not in provider['provenance'] and 'input_identity' not in provider['provenance'], 'old provenance keys leaked'
+for row in success['symbols']['items']:
+    assert row['provider'] == 'tree-sitter-zig', 'symbol row provider missing'
+assert success['symbols']['provider']['failure'] == 'ok', 'success provider failure changed'
+assert unsupported['symbols']['provider']['failure'] == 'unsupported', 'unsupported provider failure changed'
+assert symlink['symbols']['provider']['failure'] == 'unavailable', 'symlink should not parse as ok'
+assert symlink['symbols']['items'] == [], 'symlink leaked parsed symbols'
+assert symlink['results'], 'symlink did not preserve file evidence'
+PY
+  if "$EXE" --symbols > "$ARTIFACT_DIR/symbols-alone.out" 2> "$ARTIFACT_DIR/symbols-alone.err"; then return 1; fi
+  grep -q -- '--symbols can only be combined with --inspect PATH' "$ARTIFACT_DIR/symbols-alone.err" || return 1
   if "$EXE" --repo fixtures/basic --inspect src/app.txt --limit 1 >/dev/null 2> "$ARTIFACT_DIR/inspect-limit.err"; then return 1; fi
   grep -q -- '--limit cannot be combined with --inspect' "$ARTIFACT_DIR/inspect-limit.err" || return 1
   if "$EXE" --repo fixtures/basic --inspect missing.txt >/dev/null 2> "$ARTIFACT_DIR/inspect-missing.err"; then return 1; fi
@@ -941,6 +980,11 @@ BASIC_PROGRESS_TABLE=$ARTIFACT_DIR/basic-progress.txt
 BASIC_PROGRESS_TABLE_ERR=$ARTIFACT_DIR/basic-progress-table.err
 BASIC_INSPECT_MD=$ARTIFACT_DIR/basic-inspect.md
 BASIC_INSPECT_TABLE=$ARTIFACT_DIR/basic-inspect.txt
+SYMBOLS_JSON=$ARTIFACT_DIR/symbols.json
+SYMBOLS_MD=$ARTIFACT_DIR/symbols.md
+SYMBOLS_TABLE=$ARTIFACT_DIR/symbols.txt
+SYMBOLS_UNSUPPORTED_JSON=$ARTIFACT_DIR/symbols-unsupported.json
+SYMBOLS_SYMLINK_JSON=$ARTIFACT_DIR/symbols-symlink.json
 SCOPE_UNFILTERED_JSON=$ARTIFACT_DIR/scope-unfiltered.json
 SCOPE_ALL_JSON=$ARTIFACT_DIR/scope-all.json
 SCOPE_FILTERED_JSON=$ARTIFACT_DIR/scope-filtered.json
@@ -1026,7 +1070,7 @@ else
 fi
 
 printf 'validate: RUN JSON validity\n'
-json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_PROGRESS_JSON" "$BASIC_INSPECT_JSON" "$BASIC_INSPECT_PROGRESS_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" "$SCOPE_PROJECT_PROGRESS_JSON" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_NODE_JSON" "$SCOPE_ALL_INCLUDE_NODE_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_PROJECT_INSPECT_PROGRESS_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_ALL_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_EXCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_PROJECT_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_PROJECT_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
+json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_PROGRESS_JSON" "$BASIC_INSPECT_JSON" "$BASIC_INSPECT_PROGRESS_JSON" "$SYMBOLS_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" "$SCOPE_PROJECT_PROGRESS_JSON" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_NODE_JSON" "$SCOPE_ALL_INCLUDE_NODE_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_PROJECT_INSPECT_PROGRESS_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_ALL_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_EXCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_PROJECT_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_PROJECT_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
 
 printf 'validate: RUN shallow, partial, and privacy assertions\n'
 if semantic_assertions; then
@@ -1097,7 +1141,7 @@ else
   printf '  - none\n'
 fi
 printf 'privacy: summary uses labels and bounded counts only; raw reports and absolute private paths are not printed.\n'
-printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, provider runtime, cache requirement, packaging, or release automation.\n'
+printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, packaging, or release automation; opt-in inspect-only Tree-sitter Zig symbols are local current-file enrichment.\n'
 
 if [ "$FAILURES" -ne 0 ]; then
   printf 'validate: %d rung(s) failed\n' "$FAILURES" >&2

@@ -1,5 +1,18 @@
 const std = @import("std");
 
+fn addTreeSitterZig(b: *std.Build, module: *std.Build.Module) void {
+    module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
+    module.addIncludePath(b.path("third_party/tree-sitter-zig/v1.1.2/src"));
+    module.addCSourceFiles(.{
+        .files = &.{
+            "third_party/tree-sitter-core/v0.26.9/lib/src/lib.c",
+            "third_party/tree-sitter-zig/v1.1.2/src/parser.c",
+        },
+        .flags = &.{},
+    });
+    module.link_libc = true;
+}
+
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -8,25 +21,29 @@ pub fn build(b: *std.Build) void {
     const validate_smoke_label = b.option([]const u8, "smoke-label", "Privacy-safe label for the sibling smoke repo");
     const validate_smoke_skip_reason = b.option([]const u8, "smoke-skip-reason", "Privacy-safe reason for skipping sibling smoke validation");
 
+    const exe_module = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    addTreeSitterZig(b, exe_module);
     const exe = b.addExecutable(.{
         .name = "git-hotspots",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/main.zig"),
-            .target = target,
-            .optimize = optimize,
-        }),
+        .root_module = exe_module,
     });
     const setup_fixtures = b.addSystemCommand(&.{ "sh", "tools/setup-fixtures.sh" });
     b.getInstallStep().dependOn(&setup_fixtures.step);
 
     b.installArtifact(exe);
 
+    const unit_test_module = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    addTreeSitterZig(b, unit_test_module);
     const unit_tests = b.addTest(.{
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/main.zig"),
-            .target = target,
-            .optimize = optimize,
-        }),
+        .root_module = unit_test_module,
     });
 
     const run_unit_tests = b.addRunArtifact(unit_tests);
@@ -64,16 +81,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    tree_sitter_build_proof_module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
-    tree_sitter_build_proof_module.addIncludePath(b.path("third_party/tree-sitter-zig/v1.1.2/src"));
-    tree_sitter_build_proof_module.addCSourceFiles(.{
-        .files = &.{
-            "third_party/tree-sitter-core/v0.26.9/lib/src/lib.c",
-            "third_party/tree-sitter-zig/v1.1.2/src/parser.c",
-        },
-        .flags = &.{},
-    });
-    tree_sitter_build_proof_module.link_libc = true;
+    addTreeSitterZig(b, tree_sitter_build_proof_module);
 
     const tree_sitter_build_proof = b.addExecutable(.{
         .name = "tree-sitter-build-proof",
@@ -94,16 +102,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     }));
-    tree_sitter_symbol_proof_module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
-    tree_sitter_symbol_proof_module.addIncludePath(b.path("third_party/tree-sitter-zig/v1.1.2/src"));
-    tree_sitter_symbol_proof_module.addCSourceFiles(.{
-        .files = &.{
-            "third_party/tree-sitter-core/v0.26.9/lib/src/lib.c",
-            "third_party/tree-sitter-zig/v1.1.2/src/parser.c",
-        },
-        .flags = &.{},
-    });
-    tree_sitter_symbol_proof_module.link_libc = true;
+    addTreeSitterZig(b, tree_sitter_symbol_proof_module);
 
     const tree_sitter_symbol_proof = b.addTest(.{
         .root_module = tree_sitter_symbol_proof_module,

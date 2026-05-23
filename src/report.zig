@@ -1,6 +1,9 @@
 const std = @import("std");
 const model = @import("model.zig");
+const provider = @import("provider.zig");
 const version = @import("version.zig");
+
+const LineDisplayRange = struct { start: u32, end: u32 };
 
 pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("git-hotspots: file-level Git-history investigation prompts\n", .{});
@@ -23,9 +26,24 @@ pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
     if (analysis.inspect) |inspect| {
         try writer.print("inspect: requested={s} matched={s} rank={d}\n", .{ inspect.requested_path, inspect.matched_path, inspect.rank });
     }
+    if (analysis.symbol_report) |symbols| {
+        try writer.print("symbols: provider={s} state=current-only freshness={s} failure={s} confidence={s} count={d}\n", .{ symbols.provider.name, @tagName(symbols.provider.freshness), @tagName(symbols.provider.failure), @tagName(symbols.provider.confidence), symbols.symbols.len });
+        try writer.print("symbols caveat: current working-tree enrichment only; file-level Git evidence, score, rank, lineage, and confidence are unchanged\n", .{});
+    }
     try writer.print("\n{s:<5} {s:<7} {s:<7} {s:<7} {s:<10} {s:<7} {s}\n", .{ "rank", "score", "changes", "churn", "confidence", "lineage", "path" });
     for (analysis.results, 0..) |row, i| {
         try writer.print("{d:<5} {d:<7.1} {d:<7} {d:<7} {s:<10} {s:<7} {s}\n", .{ i + 1, row.score.total, row.change_count, row.churn, row.confidence, lineageIndicator(row), row.path });
+    }
+    if (analysis.symbol_report) |symbols| {
+        try writer.print("\ncurrent Zig symbols (do not affect ranking):\n", .{});
+        if (symbols.symbols.len == 0) {
+            try writer.print("  none\n", .{});
+        } else {
+            for (symbols.symbols) |symbol| {
+                const range = displayLineRange(symbol.current_range);
+                try writer.print("  function {s} lines {d}-{d} confidence={s}\n", .{ symbol.name, range.start, range.end, @tagName(symbol.confidence) });
+            }
+        }
     }
     try writer.print("\nScores are deterministic prompts for investigation, not bug predictions or code-quality ratings.\n", .{});
 }
@@ -52,6 +70,10 @@ pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
     try stringArray(writer, analysis.caveats);
     try writer.print("\n", .{});
     try writer.print("  }},\n", .{});
+    if (analysis.symbol_report) |symbols| {
+        try renderSymbolReportJson(writer, symbols);
+        try writer.print(",\n", .{});
+    }
     if (analysis.inspect) |inspect| {
         try writer.print("  \"inspect\": {{ \"requested_path\": ", .{});
         try jsonString(writer, inspect.requested_path);
@@ -168,6 +190,10 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
         try writer.print("- Rank in scoped evidence universe: {d}\n\n", .{inspect.rank});
     }
 
+    if (analysis.symbol_report) |symbols| {
+        try renderSymbolReportMarkdown(writer, symbols);
+    }
+
     try writer.writeAll("## Caveats\n\n");
     try renderMarkdownStringList(writer, analysis.caveats);
 
@@ -264,6 +290,86 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
             }
         }
     }
+}
+
+fn displayLineRange(range: provider.CurrentRange) LineDisplayRange {
+    return switch (range) {
+        .lines => |lines| .{ .start = lines.start, .end = lines.end },
+        .bytes => .{ .start = 0, .end = 0 },
+    };
+}
+
+fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport) !void {
+    try writer.print("  \"symbols\": {{\n", .{});
+    try writer.print("    \"current_only\": true,\n", .{});
+    try writer.print("    \"provider\": {{ \"name\": ", .{});
+    try jsonString(writer, symbols.provider.name);
+    try writer.print(", \"kind\": ", .{});
+    try jsonString(writer, @tagName(symbols.provider.kind));
+    try writer.print(", \"version\": ", .{});
+    try jsonString(writer, symbols.provider.version);
+    try writer.print(", \"contract_version\": ", .{});
+    try jsonString(writer, symbols.provider.contract_version);
+    try writer.print(", \"freshness\": ", .{});
+    try jsonString(writer, @tagName(symbols.provider.freshness));
+    try writer.print(", \"failure\": ", .{});
+    try jsonString(writer, @tagName(symbols.provider.failure));
+    try writer.print(", \"confidence\": ", .{});
+    try jsonString(writer, @tagName(symbols.provider.confidence));
+    try writer.print(", \"caveats\": ", .{});
+    try stringArray(writer, symbols.provider.caveats);
+    try writer.print(", \"provenance\": {{ \"input\": ", .{});
+    try jsonString(writer, symbols.provider.input.identity);
+    try writer.print(", \"local_only\": true }} }},\n", .{});
+    try writer.print("    \"items\": [\n", .{});
+    for (symbols.symbols, 0..) |symbol, i| {
+        const range = displayLineRange(symbol.current_range);
+        try writer.print("      {{ \"path\": ", .{});
+        try jsonString(writer, symbol.path);
+        try writer.print(", \"name\": ", .{});
+        try jsonString(writer, symbol.name);
+        try writer.print(", \"kind\": ", .{});
+        try jsonString(writer, @tagName(symbol.kind));
+        try writer.print(", \"range\": {{ \"type\": \"lines\", \"start\": {d}, \"end\": {d} }}, \"provider\": ", .{ range.start, range.end });
+        try jsonString(writer, symbol.provider_name);
+        try writer.print(", \"confidence\": ", .{});
+        try jsonString(writer, @tagName(symbol.confidence));
+        try writer.print(", \"caveats\": ", .{});
+        try stringArray(writer, symbol.caveats);
+        try writer.print(" }}{s}\n", .{if (i + 1 == symbols.symbols.len) "" else ","});
+    }
+    try writer.print("    ]\n  }}", .{});
+}
+
+fn renderSymbolReportMarkdown(writer: anytype, symbols: model.SymbolReport) !void {
+    try writer.writeAll("## Symbols\n\n");
+    try writer.writeAll("Symbols are opt-in current working-tree enrichment only. They do not change score, rank, lineage, confidence, or file-level Git evidence.\n\n");
+    try writer.writeAll("- Provider: ");
+    try markdownText(writer, symbols.provider.name);
+    try writer.writeByte('\n');
+    try writer.print("- State: current-only\n- Freshness: {s}\n- Failure: {s}\n- Confidence: {s}\n", .{ @tagName(symbols.provider.freshness), @tagName(symbols.provider.failure), @tagName(symbols.provider.confidence) });
+    try writer.writeAll("- Caveats:\n");
+    if (symbols.provider.caveats.len == 0) {
+        try writer.writeAll("  - None\n");
+    } else {
+        for (symbols.provider.caveats) |caveat| {
+            try writer.writeAll("  - ");
+            try markdownText(writer, caveat);
+            try writer.writeByte('\n');
+        }
+    }
+    try writer.writeAll("\n| Name | Kind | Lines | Confidence |\n| --- | --- | ---: | --- |\n");
+    if (symbols.symbols.len == 0) {
+        try writer.writeAll("| None | - | - | - |\n\n");
+        return;
+    }
+    for (symbols.symbols) |symbol| {
+        const range = displayLineRange(symbol.current_range);
+        try writer.writeAll("| ");
+        try markdownText(writer, symbol.name);
+        try writer.print(" | {s} | {d}-{d} | {s} |\n", .{ @tagName(symbol.kind), range.start, range.end, @tagName(symbol.confidence) });
+    }
+    try writer.writeByte('\n');
 }
 
 fn stringArray(writer: anytype, values: []const []const u8) !void {

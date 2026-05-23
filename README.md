@@ -65,23 +65,27 @@ The project should preserve trust by default:
 - treat author identity and ownership metrics as sensitive;
 - report shallow or partial history honestly instead of silently fetching more.
 
-## Future provider direction
+## Provider direction
 
-Language and dependency insight should arrive through optional providers rather
-than become the foundation of the project.
+The alpha includes one narrow opt-in provider path: `--symbols` with
+`--inspect PATH` can add current working-tree Tree-sitter Zig function symbols
+for the inspected file. File-level Git evidence remains the core product truth;
+provider output is optional current-only enrichment.
 
-Possible future providers include:
+Broader language and dependency insight should arrive through optional
+providers rather than become the foundation of the project. Possible future
+provider areas include:
 
-- tree-sitter for current symbol spans;
+- broader tree-sitter symbol spans;
 - LSP data for richer language-aware relationships;
 - ctags for broad symbol discovery;
 - dependency graph data;
 - blame or history enrichers;
 - test and coverage evidence.
 
-Provider output should be enrichment, not hidden truth. Future providers should
-expose source, version, freshness, confidence, and failure state so reports can
-degrade gracefully when a provider is unavailable or uncertain.
+Provider output should be enrichment, not hidden truth. Providers should expose
+source, version, freshness, confidence, and failure state so reports can degrade
+gracefully when a provider is unavailable or uncertain.
 
 ## Agent-ready, not agent-dependent
 
@@ -137,6 +141,7 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --include-prefix src/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --exclude-prefix .flow/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --progress --format json
 ./zig-out/bin/git-hotspots --explain
 ./zig-out/bin/git-hotspots --version
@@ -144,8 +149,8 @@ zig build
 
 Supported options are `--repo`, `--limit`, `--format table|json|markdown`,
 `--since`, `--scope all|project`, repeatable `--include-prefix`, repeatable
-`--exclude-prefix`, `--inspect`, `--progress`, `--explain`, `--version`, and
-`--help`.
+`--exclude-prefix`, `--inspect`, `--symbols`, `--progress`, `--explain`,
+`--version`, and `--help`.
 During the alpha, omitted `--scope` defaults to `--scope project`, which
 expands to the root literal exclude prefixes `.flow/`, `.zig-cache/`,
 `zig-out/`, `target/`, `node_modules/`, `dist/`, `build/`, and `coverage/`, in
@@ -168,6 +173,16 @@ bounded counts for paths and changes omitted by include or exclude filters.
 Markdown output is a deterministic stdout report with run summary, scope,
 caveats, ranked hotspots, and per-result evidence. `--version` is standalone
 and prints the alpha version without requiring a Git repository.
+
+`--symbols` is opt-in and works only with `--inspect PATH`. It adds current
+working-tree Tree-sitter Zig function symbols for the matched in-scope `.zig`
+file, with provider freshness, failure, confidence, caveats, and local
+provenance in the report. Symbol evidence is current-only enrichment: it does
+not change file score, rank, confidence, co-change evidence, Git rename
+lineage, scope, or inclusion/exclusion decisions. Unsupported or unavailable
+current files preserve the inspected file evidence and report provider caveats
+without parser diagnostics, source snippets, absolute paths, remotes, author
+identities, or commit messages.
 
 Git-detected file renames are folded conservatively when both the old and new
 paths are in scope. This is file-path lineage from local Git history only, not
@@ -242,7 +257,9 @@ runs the fuller local ladder and prints a privacy-safe evidence summary.
 
 - This alpha is source-buildable, not packaged.
 - Report truth is deterministic file-level Git-history evidence.
-- Provider, cache, dependency, test, and coverage enrichers are future work.
+- Broad provider, cache, dependency, test, and coverage enrichers are future
+  work; the current provider path is limited to opt-in inspect-only
+  Tree-sitter Zig function symbols.
 - Runtime defaults remain local-only and do not perform network access.
 
 ## Contributing

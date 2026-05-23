@@ -3,6 +3,7 @@ const model = @import("model.zig");
 const git = @import("git.zig");
 const report = @import("report.zig");
 const provider = @import("provider.zig");
+const tree_sitter_zig = @import("tree_sitter_zig.zig");
 const explain = @import("explain.zig");
 const version = @import("version.zig");
 const Io = std.Io;
@@ -11,7 +12,7 @@ const usage =
     \\git-hotspots: deterministic file-level Git-history hotspot prompts
     \\
     \\Usage:
-    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--scope all|project] [--include-prefix PATH]... [--exclude-prefix PATH]... [--inspect PATH] [--progress]
+    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--scope all|project] [--include-prefix PATH]... [--exclude-prefix PATH]... [--inspect PATH] [--symbols] [--progress]
     \\  git-hotspots --explain
     \\  git-hotspots --version
     \\  git-hotspots --help
@@ -36,6 +37,9 @@ const usage =
     \\                    scoring and ranking, before normal --limit truncation;
     \\                    accepted in-scope Git rename aliases may resolve to the
     \\                    canonical path; use \\t to target a tab in a Git path
+    \\  --symbols         With --inspect PATH only, add opt-in current working-tree
+    \\                    Tree-sitter Zig function symbols; does not affect score,
+    \\                    rank, lineage, confidence, or file-level evidence
     \\  --progress        Write opt-in coarse analysis progress to stderr for long runs
     \\  --explain         Explain current scoring semantics without analysing a repo
     \\  --version         Show the git-hotspots version without analysing a repo
@@ -88,8 +92,9 @@ pub fn main(init: std.process.Init.Minimal) !void {
             error.InvalidInspectPath => try stderr.print("error: --inspect must be a non-empty exact repo-relative Git path without absolute roots, '..' segments, or control characters\n", .{}),
             error.InvalidScope => try stderr.print("error: --scope accepts one lowercase value: all or project\n", .{}),
             error.InvalidInspectLimitCombination => try stderr.print("error: --limit cannot be combined with --inspect; inspect selects from the full scoped evidence universe\n", .{}),
-            error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect, --progress)\n", .{}),
-            error.InvalidVersionCombination => try stderr.print("error: --version cannot be combined with --explain or analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect, --progress)\n", .{}),
+            error.InvalidSymbolsCombination => try stderr.print("error: --symbols can only be combined with --inspect PATH\n", .{}),
+            error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect, --symbols, --progress)\n", .{}),
+            error.InvalidVersionCombination => try stderr.print("error: --version cannot be combined with --explain or analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect, --symbols, --progress)\n", .{}),
             error.InvalidArguments => try stderr.print("error: invalid arguments\n\n{s}", .{usage}),
             else => try stderr.print("error: {s}\n", .{@errorName(err)}),
         }
@@ -127,6 +132,11 @@ pub fn main(init: std.process.Init.Minimal) !void {
     };
     defer analysis.deinit();
 
+    if (cfg.symbols) {
+        const symbol_report = try tree_sitter_zig.extractPath(allocator, io, analysis.repo_root, analysis.inspect.?.matched_path);
+        analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
+    }
+
     try writeProgress(progress, "rendering report");
 
     switch (cfg.format) {
@@ -154,7 +164,7 @@ const CliMode = union(enum) {
     version,
 };
 
-const CliError = error{ HelpRequested, InvalidArguments, InvalidExplainCombination, InvalidVersionCombination, InvalidIncludePrefix, InvalidExcludePrefix, InvalidInspectPath, InvalidInspectLimitCombination, InvalidScope } || std.mem.Allocator.Error;
+const CliError = error{ HelpRequested, InvalidArguments, InvalidExplainCombination, InvalidVersionCombination, InvalidIncludePrefix, InvalidExcludePrefix, InvalidInspectPath, InvalidInspectLimitCombination, InvalidSymbolsCombination, InvalidScope } || std.mem.Allocator.Error;
 
 fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!CliMode {
     var cfg = model.Config{ .repo_path = try allocator.dupe(u8, ".") };
@@ -184,6 +194,13 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
             if (explain_requested) return error.InvalidExplainCombination;
             if (version_requested) return error.InvalidVersionCombination;
             cfg.progress = true;
+            continue;
+        }
+        if (std.mem.eql(u8, arg, "--symbols")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
+            cfg.symbols = true;
             continue;
         }
         if (std.mem.eql(u8, arg, "--repo")) {
@@ -270,6 +287,7 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
     }
     if (cfg.limit == 0) return error.InvalidArguments;
     if (cfg.inspect_path != null and limit_seen) return error.InvalidInspectLimitCombination;
+    if (cfg.symbols and cfg.inspect_path == null) return error.InvalidSymbolsCombination;
     try applyScopePreset(allocator, &cfg);
     return .{ .analyze = cfg };
 }
@@ -411,6 +429,7 @@ test "parse defaults are documented through config shape" {
     try std.testing.expectEqual(model.Format.table, cfg.format);
     try std.testing.expectEqual(model.ScopePreset.project, cfg.scope);
     try std.testing.expect(!cfg.progress);
+    try std.testing.expect(!cfg.symbols);
 }
 
 test "parse omitted scope defaults to project preset" {
@@ -465,6 +484,8 @@ test "reject explain combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--explain" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--progress" },
         &[_][:0]const u8{ "git-hotspots", "--progress", "--explain" },
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--symbols" },
+        &[_][:0]const u8{ "git-hotspots", "--symbols", "--explain" },
     };
     for (cases) |args| try std.testing.expectError(error.InvalidExplainCombination, parseArgs(std.testing.allocator, args));
 }
@@ -484,6 +505,8 @@ test "reject version combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--version" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--progress" },
         &[_][:0]const u8{ "git-hotspots", "--progress", "--version" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--symbols" },
+        &[_][:0]const u8{ "git-hotspots", "--symbols", "--version" },
     };
     for (cases) |args| try std.testing.expectError(error.InvalidVersionCombination, parseArgs(std.testing.allocator, args));
 }
@@ -583,6 +606,16 @@ test "parse inspect path decodes git-style tab escape" {
     const cfg = mode.analyze;
     defer freeConfig(std.testing.allocator, cfg);
     try std.testing.expectEqualStrings("weird/tab\tname.txt", cfg.inspect_path.?);
+}
+
+test "parse symbols requires inspect" {
+    const args = [_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbols" };
+    const mode = try parseArgs(std.testing.allocator, &args);
+    const cfg = mode.analyze;
+    defer freeConfig(std.testing.allocator, cfg);
+    try std.testing.expect(cfg.symbols);
+    try std.testing.expectEqualStrings("src/app.zig", cfg.inspect_path.?);
+    try std.testing.expectError(error.InvalidSymbolsCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--symbols" }));
 }
 
 test "reject invalid inspect paths and limit combination" {

@@ -68,6 +68,18 @@ pub const text =
     \\function lineage, semantic ownership, bug prediction, quality scoring, or
     \\developer ranking.
     \\
+    \\## Inspect symbols
+    \\
+    \\The --symbols flag is opt-in and valid only with --inspect PATH. It adds
+    \\current working-tree Tree-sitter Zig function symbols for the matched
+    \\in-scope .zig file. Provider output is current-only enrichment with
+    \\freshness, failure, confidence, caveats, and local provenance.
+    \\
+    \\Symbol evidence does not change file score, rank, confidence, co-change
+    \\evidence, Git rename lineage, scope, or inclusion/exclusion decisions.
+    \\Unsupported or unavailable current files preserve inspected file evidence
+    \\and report provider caveats without parser diagnostics or source snippets.
+    \\
     \\## Limitations and non-claims
     \\
     \\Scores are not bug predictions, objective code-quality ratings, maintainer
@@ -106,6 +118,8 @@ test "explanation includes confidence and non-claim boundaries" {
         "semantic ownership",
         "productivity analytics",
         "AI/LLM judgement",
+        "--symbols flag is opt-in and valid only with --inspect PATH",
+        "Symbol evidence does not change file score",
     }) |snippet| {
         try std.testing.expect(std.mem.indexOf(u8, text, snippet) != null);
     }

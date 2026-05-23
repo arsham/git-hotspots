@@ -1,4 +1,5 @@
 const std = @import("std");
+const provider = @import("provider.zig");
 
 pub const Format = enum { table, json, markdown };
 
@@ -13,6 +14,7 @@ pub const Config = struct {
     limit: usize = 10,
     format: Format = .table,
     progress: bool = false,
+    symbols: bool = false,
     since: ?[]const u8 = null,
     inspect_path: ?[]const u8 = null,
     scope: ScopePreset = .project,
@@ -86,12 +88,18 @@ pub const Result = struct {
     evidence: []Evidence,
 };
 
+pub const SymbolReport = struct {
+    provider: provider.ProviderEvidence,
+    symbols: []provider.CurrentSymbolEvidence,
+};
+
 pub const Analysis = struct {
     allocator: std.mem.Allocator,
     repo_root: []const u8,
     history: History,
     scope: Scope,
     inspect: ?Inspect = null,
+    symbol_report: ?SymbolReport = null,
     results: []Result,
     caveats: [][]const u8,
 
@@ -109,6 +117,14 @@ pub const Analysis = struct {
             self.allocator.free(row.evidence);
         }
         self.allocator.free(self.results);
+        if (self.symbol_report) |symbols| {
+            self.allocator.free(symbols.provider.input.identity);
+            for (symbols.symbols) |symbol| {
+                self.allocator.free(symbol.path);
+                self.allocator.free(symbol.name);
+            }
+            self.allocator.free(symbols.symbols);
+        }
         if (self.inspect) |inspect| {
             self.allocator.free(inspect.requested_path);
             self.allocator.free(inspect.matched_path);

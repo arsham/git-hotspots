@@ -187,10 +187,40 @@ make_lineage() {
   commit_all "$repo" '2026-04-04T00:00:00+0000' 'chained rename delete and cochange after rename'
 }
 
+
+make_symbols() {
+  repo="$FIX/symbols"
+  rm -rf "$repo"
+  mkdir -p "$repo/src"
+  setup_repo "$repo"
+
+  cat > "$repo/src/example.zig" <<'EOF'
+pub fn zebra() void {}
+
+fn alpha() void {}
+EOF
+  printf 'not zig\n' > "$repo/src/readme.txt"
+  cat > "$repo/src/target.zig" <<'EOF'
+pub fn target() void {}
+EOF
+  ln -s target.zig "$repo/src/link.zig"
+  commit_all "$repo" '2026-05-01T00:00:00+0000' 'initial symbol files'
+
+  cat > "$repo/src/example.zig" <<'EOF'
+pub fn zebra() void {
+    return;
+}
+
+fn alpha() void {}
+EOF
+  commit_all "$repo" '2026-05-02T00:00:00+0000' 'expand zig function'
+}
+
 make_basic
 make_edge
 make_scope
 make_lineage
+make_symbols
 rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked"
 git clone -q --depth 1 "file://$FIX/basic" "$FIX/shallow"
 git clone -q "$FIX/basic" "$FIX/medium"

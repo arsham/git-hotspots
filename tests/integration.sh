@@ -90,6 +90,7 @@ grep -q -- "--inspect PATH" /tmp/git-hotspots-help.txt
 grep -q -- "--scope VALUE" /tmp/git-hotspots-help.txt
 grep -q -- "project (default) or all" /tmp/git-hotspots-help.txt
 grep -q -- "--progress" /tmp/git-hotspots-help.txt
+grep -q -- "--symbols" /tmp/git-hotspots-help.txt
 "$EXE" --progress --help > /tmp/git-hotspots-progress-help.txt 2> /tmp/git-hotspots-progress-help.err
 grep -q -- "--progress" /tmp/git-hotspots-progress-help.txt
 test ! -s /tmp/git-hotspots-progress-help.err
@@ -126,6 +127,9 @@ assert_fails_with_stderr version-inspect "--version cannot be combined" "$EXE" -
 assert_fails_with_stderr version-progress "--version cannot be combined" "$EXE" --version --progress
 assert_fails_with_stderr progress-version "--version cannot be combined" "$EXE" --progress --version
 assert_fails_with_stderr version-progress "--version cannot be combined" "$EXE" --version --progress
+assert_fails_with_stderr symbols-alone "--symbols can only be combined with --inspect PATH" "$EXE" --symbols
+assert_fails_with_stderr symbols-explain "--explain cannot be combined" "$EXE" --symbols --explain
+assert_fails_with_stderr symbols-version "--version cannot be combined" "$EXE" --symbols --version
 
 "$EXE" --repo fixtures/basic --format json > /tmp/git-hotspots-basic.json 2> /tmp/git-hotspots-basic.err
 test ! -s /tmp/git-hotspots-basic.err
@@ -157,6 +161,16 @@ diff -u /tmp/git-hotspots-basic-inspect.json /tmp/git-hotspots-basic-inspect-2.j
 diff -u fixtures/expected/basic-inspect.md /tmp/git-hotspots-basic-inspect.md
 "$EXE" --repo fixtures/basic --inspect src/app.txt --format table > /tmp/git-hotspots-basic-inspect.txt
 diff -u fixtures/expected/basic-inspect.txt /tmp/git-hotspots-basic-inspect.txt
+"$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --format json > /tmp/git-hotspots-symbols-inspect-symbols.json
+diff -u fixtures/expected/symbols-inspect-symbols.json /tmp/git-hotspots-symbols-inspect-symbols.json
+"$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --format markdown > /tmp/git-hotspots-symbols-inspect-symbols.md
+diff -u fixtures/expected/symbols-inspect-symbols.md /tmp/git-hotspots-symbols-inspect-symbols.md
+"$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --format table > /tmp/git-hotspots-symbols-inspect-symbols.txt
+diff -u fixtures/expected/symbols-inspect-symbols.txt /tmp/git-hotspots-symbols-inspect-symbols.txt
+"$EXE" --repo fixtures/symbols --inspect src/readme.txt --symbols --format json > /tmp/git-hotspots-symbols-unsupported.json
+diff -u fixtures/expected/symbols-unsupported.json /tmp/git-hotspots-symbols-unsupported.json
+"$EXE" --repo fixtures/symbols --inspect src/link.zig --symbols --format json > /tmp/git-hotspots-symbols-symlink-unavailable.json
+diff -u fixtures/expected/symbols-symlink-unavailable.json /tmp/git-hotspots-symbols-symlink-unavailable.json
 "$EXE" --repo fixtures/scope --format json > /tmp/git-hotspots-scope-unfiltered.json
 "$EXE" --repo fixtures/scope --scope all --limit 200 --format json > /tmp/git-hotspots-scope-all.json
 "$EXE" --repo fixtures/scope --scope all $PROJECT_EXCLUDE_ARGS --format json > /tmp/git-hotspots-scope-filtered.json
