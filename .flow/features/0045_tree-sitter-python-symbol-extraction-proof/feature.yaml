@@ -4,7 +4,7 @@ feature:
   slug: tree-sitter-python-symbol-extraction-proof
   title: Tree-sitter Python symbol extraction proof
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Python build and query contract proofs do not yet prove extraction into
@@ -50,7 +50,7 @@ proposal:
     materialised_at: 2026-05-24T19:58:54.249Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -105,7 +105,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Python symbol extraction proof
       goal: Prove Python symbol extraction semantics internally without user-facing
         provider output.
@@ -152,7 +152,7 @@ links:
   brief_ids: []
 timestamps:
   created_at: 2026-05-24T19:52:58.073Z
-  updated_at: 2026-05-24T20:04:50.386Z
+  updated_at: 2026-05-24T21:42:28.018Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-24T20:04:50.386Z
