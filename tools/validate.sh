@@ -414,11 +414,11 @@ PY
 
 markdown_assertions() {
   have_python || return 1
-  python3 - "$BASIC_MD_A" "$BASIC_MD_B" "$BASIC_INSPECT_MD" "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" "$SCOPE_PROJECT_MD" "$SCOPE_PROJECT_MD_B" "$SCOPE_EMPTY_MD" "$EDGE_MD" "$EDGE_INSPECT_MD" "$SELF_MARKDOWN" "$SELF_SCOPED_MARKDOWN" "$SCOPE_SRC_INCLUDE_MD" "$SCOPE_INCLUDE_EMPTY_MD" <<'PY'
+  python3 - "$BASIC_MD_A" "$BASIC_MD_B" "$BASIC_INSPECT_MD" "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" "$SCOPE_PROJECT_MD" "$SCOPE_PROJECT_MD_B" "$SCOPE_EMPTY_MD" "$EDGE_MD" "$EDGE_INSPECT_MD" "$SELF_MARKDOWN" "$SELF_SCOPED_MARKDOWN" "$SCOPE_SRC_INCLUDE_MD" "$SCOPE_INCLUDE_EMPTY_MD" "$SYMBOLS_MD" "$SYMBOLS_LIMIT_MD" <<'PY'
 import os, re, sys
 from pathlib import Path
 
-basic_a, basic_b, basic_inspect, scope_filtered, scope_filtered_b, scope_project, scope_project_b, scope_empty, edge, edge_inspect, self_md, self_scoped, scope_src_include_md, scope_include_empty_md = [Path(p) for p in sys.argv[1:]]
+basic_a, basic_b, basic_inspect, scope_filtered, scope_filtered_b, scope_project, scope_project_b, scope_empty, edge, edge_inspect, self_md, self_scoped, scope_src_include_md, scope_include_empty_md, symbols_md, symbols_limit_md = [Path(p) for p in sys.argv[1:]]
 
 def read(path):
     return path.read_text(encoding='utf-8')
@@ -497,7 +497,15 @@ for line in self_scoped_text.splitlines():
     if line.startswith('| ') or line.startswith('### ') or line.startswith('  - '):
         assert '.flow/' not in line, 'self scoped markdown leaked .flow path: %r' % line
 
-for text in [basic, basic_inspect_text, scope, project, empty, edge_text, edge_inspect_text, read(self_md), self_scoped_text, include_text, include_empty]:
+symbols_text = read(symbols_md)
+symbols_limit_text = read(symbols_limit_md)
+assert '- Total symbols: 2' in symbols_text, 'symbol markdown total missing'
+assert '- Total symbols: 2' in symbols_limit_text, 'limited symbol markdown total missing'
+assert '- Shown symbols: 1' in symbols_limit_text, 'limited symbol markdown shown count missing'
+assert '- Omitted symbols: 1' in symbols_limit_text, 'limited symbol markdown omitted count missing'
+assert 'zebra' not in symbols_limit_text, 'omitted symbol leaked into limited markdown'
+
+for text in [basic, basic_inspect_text, scope, project, empty, edge_text, edge_inspect_text, read(self_md), self_scoped_text, include_text, include_empty, symbols_text, symbols_limit_text]:
     assert '\t' not in text, 'raw tab leaked in markdown'
     assert 'Fixture Author' not in text, 'fixture author name leaked'
     assert 'fixture@example.invalid' not in text, 'fixture author email leaked'
@@ -589,7 +597,7 @@ explain_output_checks() {
 
 prohibited_claim_scan() {
   have_python || return 1
-  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt README.md CONTRIBUTING.md <<'PY'
+  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt README.md CONTRIBUTING.md <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -766,15 +774,24 @@ fixture_json_checks() {
   diff -u fixtures/expected/symbols-inspect-symbols.md "$SYMBOLS_MD" >/dev/null || return 1
   "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --format table > "$SYMBOLS_TABLE" || return 1
   diff -u fixtures/expected/symbols-inspect-symbols.txt "$SYMBOLS_TABLE" >/dev/null || return 1
+  "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-limit 1 --format json > "$SYMBOLS_LIMIT_JSON" || return 1
+  "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-limit 1 --format markdown > "$SYMBOLS_LIMIT_MD" || return 1
+  "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-limit 1 --format markdown > "$SYMBOLS_LIMIT_MD_B" || return 1
+  diff -u fixtures/expected/symbols-limit.md "$SYMBOLS_LIMIT_MD" >/dev/null || return 1
+  diff -u "$SYMBOLS_LIMIT_MD" "$SYMBOLS_LIMIT_MD_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-limit 1 --format table > "$SYMBOLS_LIMIT_TABLE" || return 1
+  "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-limit 1 --format table > "$SYMBOLS_LIMIT_TABLE_B" || return 1
+  diff -u fixtures/expected/symbols-limit.txt "$SYMBOLS_LIMIT_TABLE" >/dev/null || return 1
+  diff -u "$SYMBOLS_LIMIT_TABLE" "$SYMBOLS_LIMIT_TABLE_B" >/dev/null || return 1
   "$EXE" --repo fixtures/symbols --inspect src/readme.txt --symbols --format json > "$SYMBOLS_UNSUPPORTED_JSON" || return 1
   diff -u fixtures/expected/symbols-unsupported.json "$SYMBOLS_UNSUPPORTED_JSON" >/dev/null || return 1
   "$EXE" --repo fixtures/symbols --inspect src/link.zig --symbols --format json > "$SYMBOLS_SYMLINK_JSON" || return 1
   diff -u fixtures/expected/symbols-symlink-unavailable.json "$SYMBOLS_SYMLINK_JSON" >/dev/null || return 1
   have_python || return 1
-  python3 - "$SYMBOLS_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" <<'PY'
+  python3 - "$SYMBOLS_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$SYMBOLS_LIMIT_JSON" <<'PY'
 import json, sys
-success, unsupported, symlink = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
-for data in (success, unsupported, symlink):
+success, unsupported, symlink, limited = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+for data in (success, unsupported, symlink, limited):
     symbols = data['symbols']
     assert symbols['current_only'] is True, 'symbols current_only missing'
     assert 'items' in symbols and 'rows' not in symbols, 'symbols items schema mismatch'
@@ -785,6 +802,11 @@ for data in (success, unsupported, symlink):
 for row in success['symbols']['items']:
     assert row['provider'] == 'tree-sitter-zig', 'symbol row provider missing'
 assert success['symbols']['provider']['failure'] == 'ok', 'success provider failure changed'
+assert len(limited['symbols']['items']) == len(success['symbols']['items']), 'symbol limit truncated JSON items'
+assert limited['symbols']['human_display']['shown_count'] == 1, 'symbol limit shown count changed'
+assert limited['symbols']['human_display']['omitted_count'] == 1, 'symbol limit omitted count changed'
+assert limited['symbols']['human_display']['active_limit'] == 1, 'symbol limit metadata changed'
+assert limited['symbols']['human_display']['limit_source'] == 'explicit', 'symbol limit source changed'
 assert unsupported['symbols']['provider']['failure'] == 'unsupported', 'unsupported provider failure changed'
 assert symlink['symbols']['provider']['failure'] == 'unavailable', 'symlink should not parse as ok'
 assert symlink['symbols']['items'] == [], 'symlink leaked parsed symbols'
@@ -983,6 +1005,11 @@ BASIC_INSPECT_TABLE=$ARTIFACT_DIR/basic-inspect.txt
 SYMBOLS_JSON=$ARTIFACT_DIR/symbols.json
 SYMBOLS_MD=$ARTIFACT_DIR/symbols.md
 SYMBOLS_TABLE=$ARTIFACT_DIR/symbols.txt
+SYMBOLS_LIMIT_JSON=$ARTIFACT_DIR/symbols-limit.json
+SYMBOLS_LIMIT_MD=$ARTIFACT_DIR/symbols-limit.md
+SYMBOLS_LIMIT_MD_B=$ARTIFACT_DIR/symbols-limit-b.md
+SYMBOLS_LIMIT_TABLE=$ARTIFACT_DIR/symbols-limit.txt
+SYMBOLS_LIMIT_TABLE_B=$ARTIFACT_DIR/symbols-limit-b.txt
 SYMBOLS_UNSUPPORTED_JSON=$ARTIFACT_DIR/symbols-unsupported.json
 SYMBOLS_SYMLINK_JSON=$ARTIFACT_DIR/symbols-symlink.json
 SCOPE_UNFILTERED_JSON=$ARTIFACT_DIR/scope-unfiltered.json
@@ -1070,7 +1097,7 @@ else
 fi
 
 printf 'validate: RUN JSON validity\n'
-json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_PROGRESS_JSON" "$BASIC_INSPECT_JSON" "$BASIC_INSPECT_PROGRESS_JSON" "$SYMBOLS_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" "$SCOPE_PROJECT_PROGRESS_JSON" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_NODE_JSON" "$SCOPE_ALL_INCLUDE_NODE_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_PROJECT_INSPECT_PROGRESS_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_ALL_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_EXCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_PROJECT_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_PROJECT_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
+json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_PROGRESS_JSON" "$BASIC_INSPECT_JSON" "$BASIC_INSPECT_PROGRESS_JSON" "$SYMBOLS_JSON" "$SYMBOLS_LIMIT_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" "$SCOPE_PROJECT_PROGRESS_JSON" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_NODE_JSON" "$SCOPE_ALL_INCLUDE_NODE_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_PROJECT_INSPECT_PROGRESS_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_ALL_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_EXCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_PROJECT_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_PROJECT_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
 
 printf 'validate: RUN shallow, partial, and privacy assertions\n'
 if semantic_assertions; then

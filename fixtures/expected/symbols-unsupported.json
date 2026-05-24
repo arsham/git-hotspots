@@ -8,6 +8,7 @@
   },
   "symbols": {
     "current_only": true,
+    "human_display": { "total_count": 0, "shown_count": 0, "omitted_count": 0, "default_limit": 25, "active_limit": 25, "limit_source": "default", "sort_basis": "provider order" },
     "provider": { "name": "tree-sitter-zig", "kind": "symbol", "version": "tree-sitter-core@v0.26.9/tree-sitter-zig@v1.1.2", "contract_version": "provider-symbol-evidence-v1", "freshness": "unknown", "failure": "unsupported", "confidence": "unknown", "caveats": ["provider unsupported: only repo-relative .zig files are parsed", "no parser diagnostics or source snippets exposed"], "provenance": { "input": "working-tree:src/readme.txt", "local_only": true } },
     "items": [
     ]

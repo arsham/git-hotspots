@@ -12,6 +12,7 @@ pub fn scopePresetName(scope: ScopePreset) []const u8 {
 pub const Config = struct {
     repo_path: []const u8,
     limit: usize = 10,
+    symbol_limit: ?usize = null,
     format: Format = .table,
     progress: bool = false,
     symbols: bool = false,
@@ -94,6 +95,13 @@ pub const SymbolReport = struct {
     symbols: []provider.CurrentSymbolEvidence,
 };
 
+pub const default_symbol_display_limit: usize = 25;
+
+pub const SymbolDisplay = struct {
+    limit: usize = default_symbol_display_limit,
+    explicit_limit: bool = false,
+};
+
 pub const Analysis = struct {
     allocator: std.mem.Allocator,
     repo_root: []const u8,
@@ -101,6 +109,7 @@ pub const Analysis = struct {
     scope: Scope,
     inspect: ?Inspect = null,
     symbol_report: ?SymbolReport = null,
+    symbol_display: SymbolDisplay = .{},
     results: []Result,
     caveats: [][]const u8,
 

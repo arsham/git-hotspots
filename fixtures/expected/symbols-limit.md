@@ -41,9 +41,9 @@ Symbols are opt-in current working-tree enrichment only. They do not change scor
 - Failure: ok
 - Confidence: high
 - Total symbols: 2
-- Shown symbols: 2
-- Omitted symbols: 0
-- Human display limit: 25 (default)
+- Shown symbols: 1
+- Omitted symbols: 1
+- Human display limit: 1 (explicit)
 - Sort basis: shown first by provider order
 - Caveats:
   - current working\-tree enrichment only; file\-level Git evidence remains product truth
@@ -53,7 +53,6 @@ Symbols are opt-in current working-tree enrichment only. They do not change scor
 | Name | Kind | Lines | Confidence |
 | --- | --- | ---: | --- |
 | alpha | function | 5-5 | high |
-| zebra | function | 1-3 | high |
 
 ## Caveats
 

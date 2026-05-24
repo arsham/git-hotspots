@@ -33,13 +33,18 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 
 ## Symbols
 
-Symbols are opt-in current working-tree enrichment only. They do not change score, rank, lineage, confidence, or file-level Git evidence.
+Symbols are opt-in current working-tree enrichment only. They do not change score, file order, lineage, confidence, or file-level Git evidence.
 
 - Provider: tree\-sitter\-zig
 - State: current-only
 - Freshness: fresh
 - Failure: ok
 - Confidence: high
+- Total symbols: 3
+- Shown symbols: 3
+- Omitted symbols: 0
+- Human display limit: 25 (default)
+- Sort basis: shown first by current-line Git evidence summary
 - Caveats:
   - current working\-tree enrichment only; file\-level Git evidence remains product truth
   - supported subset: named Zig function declarations only
@@ -47,8 +52,8 @@ Symbols are opt-in current working-tree enrichment only. They do not change scor
 
 | Name | Kind | Lines | Confidence | Current-line Git evidence |
 | --- | --- | ---: | --- | --- |
-| alpha | function | 2-5 | high | Current-line Git evidence: commits=1; lines=4; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
 | beta | function | 7-9 | high | Current-line Git evidence: commits=1; lines=3; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
+| alpha | function | 2-5 | high | Current-line Git evidence: commits=1; lines=4; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
 | gamma | function | 11-11 | high | Current-line Git evidence: commits=1; lines=1; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
 
 ## Caveats

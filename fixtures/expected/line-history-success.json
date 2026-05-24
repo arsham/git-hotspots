@@ -8,6 +8,7 @@
   },
   "symbols": {
     "current_only": true,
+    "human_display": { "total_count": 3, "shown_count": 3, "omitted_count": 0, "default_limit": 25, "active_limit": 25, "limit_source": "default", "sort_basis": "current-line Git evidence summary" },
     "provider": { "name": "tree-sitter-zig", "kind": "symbol", "version": "tree-sitter-core@v0.26.9/tree-sitter-zig@v1.1.2", "contract_version": "provider-symbol-evidence-v1", "freshness": "fresh", "failure": "ok", "confidence": "high", "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"], "provenance": { "input": "working-tree:src/current.zig", "local_only": true } },
     "items": [
       { "path": "src/current.zig", "name": "alpha", "kind": "function", "range": { "type": "lines", "start": 2, "end": 5 }, "provider": "tree-sitter-zig", "confidence": "high", "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"], "current_line_history": { "basis": "current-line-range-at-head", "current_only": true, "line_count": 4, "distinct_last_touch_commit_count": 1, "most_recent_line_touched_timestamp": 1780358400, "uncommitted_or_unblamable_line_count": 0, "sample_commits": ["924ba585871e"], "freshness": "fresh", "failure": "ok", "confidence": "high", "caveats": [] } },

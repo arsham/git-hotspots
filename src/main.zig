@@ -12,7 +12,7 @@ const usage =
     \\git-hotspots: deterministic file-level Git-history hotspot prompts
     \\
     \\Usage:
-    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--scope all|project] [--include-prefix PATH]... [--exclude-prefix PATH]... [--inspect PATH] [--symbols] [--symbol-line-history] [--progress]
+    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--scope all|project] [--include-prefix PATH]... [--exclude-prefix PATH]... [--inspect PATH] [--symbols] [--symbol-line-history] [--symbol-limit N] [--progress]
     \\  git-hotspots --explain
     \\  git-hotspots --version
     \\  git-hotspots --help
@@ -44,6 +44,9 @@ const usage =
     \\                    With --inspect PATH --symbols only, add opt-in current-line
     \\                    Git evidence for current Zig function line ranges; not
     \\                    symbol history, lineage, scoring, or ownership
+    \\  --symbol-limit N  With --inspect PATH --symbols only, limit human table and
+    \\                    Markdown symbol rows (default: 25); JSON symbols.items
+    \\                    remains complete
     \\  --progress        Write opt-in coarse analysis progress to stderr for long runs
     \\  --explain         Explain current scoring semantics without analysing a repo
     \\  --version         Show the git-hotspots version without analysing a repo
@@ -98,8 +101,10 @@ pub fn main(init: std.process.Init.Minimal) !void {
             error.InvalidInspectLimitCombination => try stderr.print("error: --limit cannot be combined with --inspect; inspect selects from the full scoped evidence universe\n", .{}),
             error.InvalidSymbolsCombination => try stderr.print("error: --symbols can only be combined with --inspect PATH\n", .{}),
             error.InvalidSymbolLineHistoryCombination => try stderr.print("error: --symbol-line-history can only be combined with --inspect PATH --symbols\n", .{}),
-            error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect, --symbols, --symbol-line-history, --progress)\n", .{}),
-            error.InvalidVersionCombination => try stderr.print("error: --version cannot be combined with --explain or analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect, --symbols, --symbol-line-history, --progress)\n", .{}),
+            error.InvalidSymbolLimitCombination => try stderr.print("error: --symbol-limit can only be combined with --inspect PATH --symbols\n", .{}),
+            error.InvalidSymbolLimit => try stderr.print("error: --symbol-limit must be a positive integer\n", .{}),
+            error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect, --symbols, --symbol-line-history, --symbol-limit, --progress)\n", .{}),
+            error.InvalidVersionCombination => try stderr.print("error: --version cannot be combined with --explain or analysis flags (--repo, --limit, --format, --since, --scope, --include-prefix, --exclude-prefix, --inspect, --symbols, --symbol-line-history, --symbol-limit, --progress)\n", .{}),
             error.InvalidArguments => try stderr.print("error: invalid arguments\n\n{s}", .{usage}),
             else => try stderr.print("error: {s}\n", .{@errorName(err)}),
         }
@@ -140,6 +145,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
     if (cfg.symbols) {
         const symbol_report = try tree_sitter_zig.extractPath(allocator, io, analysis.repo_root, analysis.inspect.?.matched_path);
         analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
+        analysis.symbol_display = .{ .limit = cfg.symbol_limit orelse model.default_symbol_display_limit, .explicit_limit = cfg.symbol_limit != null };
         if (cfg.symbol_line_history) try git.attachCurrentLineHistory(allocator, io, &analysis);
     }
 
@@ -170,7 +176,7 @@ const CliMode = union(enum) {
     version,
 };
 
-const CliError = error{ HelpRequested, InvalidArguments, InvalidExplainCombination, InvalidVersionCombination, InvalidIncludePrefix, InvalidExcludePrefix, InvalidInspectPath, InvalidInspectLimitCombination, InvalidSymbolsCombination, InvalidSymbolLineHistoryCombination, InvalidScope } || std.mem.Allocator.Error;
+const CliError = error{ HelpRequested, InvalidArguments, InvalidExplainCombination, InvalidVersionCombination, InvalidIncludePrefix, InvalidExcludePrefix, InvalidInspectPath, InvalidInspectLimitCombination, InvalidSymbolsCombination, InvalidSymbolLineHistoryCombination, InvalidSymbolLimitCombination, InvalidSymbolLimit, InvalidScope } || std.mem.Allocator.Error;
 
 fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!CliMode {
     var cfg = model.Config{ .repo_path = try allocator.dupe(u8, ".") };
@@ -214,6 +220,16 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
             if (explain_requested) return error.InvalidExplainCombination;
             if (version_requested) return error.InvalidVersionCombination;
             cfg.symbol_line_history = true;
+            continue;
+        }
+        if (std.mem.eql(u8, arg, "--symbol-limit")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
+            i += 1;
+            if (i >= args.len) return error.InvalidSymbolLimit;
+            cfg.symbol_limit = std.fmt.parseInt(usize, args[i], 10) catch return error.InvalidSymbolLimit;
+            if (cfg.symbol_limit.? == 0) return error.InvalidSymbolLimit;
             continue;
         }
         if (std.mem.eql(u8, arg, "--repo")) {
@@ -302,6 +318,7 @@ fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!
     if (cfg.inspect_path != null and limit_seen) return error.InvalidInspectLimitCombination;
     if (cfg.symbols and cfg.inspect_path == null) return error.InvalidSymbolsCombination;
     if (cfg.symbol_line_history and (cfg.inspect_path == null or !cfg.symbols)) return error.InvalidSymbolLineHistoryCombination;
+    if (cfg.symbol_limit != null and (cfg.inspect_path == null or !cfg.symbols)) return error.InvalidSymbolLimitCombination;
     try applyScopePreset(allocator, &cfg);
     return .{ .analyze = cfg };
 }
@@ -445,6 +462,7 @@ test "parse defaults are documented through config shape" {
     try std.testing.expect(!cfg.progress);
     try std.testing.expect(!cfg.symbols);
     try std.testing.expect(!cfg.symbol_line_history);
+    try std.testing.expectEqual(@as(?usize, null), cfg.symbol_limit);
 }
 
 test "parse omitted scope defaults to project preset" {
@@ -501,6 +519,8 @@ test "reject explain combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--progress", "--explain" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--symbols" },
         &[_][:0]const u8{ "git-hotspots", "--symbols", "--explain" },
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--symbol-limit", "1" },
+        &[_][:0]const u8{ "git-hotspots", "--symbol-limit", "1", "--explain" },
     };
     for (cases) |args| try std.testing.expectError(error.InvalidExplainCombination, parseArgs(std.testing.allocator, args));
 }
@@ -522,6 +542,8 @@ test "reject version combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--progress", "--version" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--symbols" },
         &[_][:0]const u8{ "git-hotspots", "--symbols", "--version" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--symbol-limit", "1" },
+        &[_][:0]const u8{ "git-hotspots", "--symbol-limit", "1", "--version" },
     };
     for (cases) |args| try std.testing.expectError(error.InvalidVersionCombination, parseArgs(std.testing.allocator, args));
 }
@@ -643,6 +665,21 @@ test "parse symbol line history requires inspect and symbols" {
     try std.testing.expectEqualStrings("src/app.zig", cfg.inspect_path.?);
     try std.testing.expectError(error.InvalidSymbolLineHistoryCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--symbol-line-history" }));
     try std.testing.expectError(error.InvalidSymbolLineHistoryCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbol-line-history" }));
+}
+
+test "parse symbol limit is human display only with inspect symbols" {
+    const args = [_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbols", "--symbol-limit", "7" };
+    const mode = try parseArgs(std.testing.allocator, &args);
+    const cfg = mode.analyze;
+    defer freeConfig(std.testing.allocator, cfg);
+    try std.testing.expect(cfg.symbols);
+    try std.testing.expectEqualStrings("src/app.zig", cfg.inspect_path.?);
+    try std.testing.expectEqual(@as(?usize, 7), cfg.symbol_limit);
+
+    try std.testing.expectError(error.InvalidSymbolLimitCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--symbol-limit", "7" }));
+    try std.testing.expectError(error.InvalidSymbolLimitCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbol-limit", "7" }));
+    try std.testing.expectError(error.InvalidSymbolLimit, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbols", "--symbol-limit", "0" }));
+    try std.testing.expectError(error.InvalidSymbolLimit, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbols", "--symbol-limit", "nope" }));
 }
 
 test "reject invalid inspect paths and limit combination" {
