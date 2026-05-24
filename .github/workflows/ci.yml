@@ -36,3 +36,6 @@ jobs:
 
       - name: Run Tree-sitter Go symbol proof
         run: zig build tree-sitter-go-symbol-proof
+
+      - name: Run Tree-sitter Python build proof
+        run: zig build tree-sitter-python-build-proof

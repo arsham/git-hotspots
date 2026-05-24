@@ -18,6 +18,13 @@ fn addTreeSitterGoGrammar(b: *std.Build, module: *std.Build.Module) void {
     module.link_libc = true;
 }
 
+fn addTreeSitterPythonGrammar(b: *std.Build, module: *std.Build.Module) void {
+    module.addIncludePath(b.path("third_party/tree-sitter-python/v0.25.0/src"));
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-python/v0.25.0/src/parser.c"), .flags = &.{} });
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-python/v0.25.0/src/scanner.c"), .flags = &.{} });
+    module.link_libc = true;
+}
+
 fn addTreeSitterZig(b: *std.Build, module: *std.Build.Module) void {
     addTreeSitterCore(b, module);
     addTreeSitterZigGrammar(b, module);
@@ -26,6 +33,11 @@ fn addTreeSitterZig(b: *std.Build, module: *std.Build.Module) void {
 fn addTreeSitterGo(b: *std.Build, module: *std.Build.Module) void {
     addTreeSitterCore(b, module);
     addTreeSitterGoGrammar(b, module);
+}
+
+fn addTreeSitterPython(b: *std.Build, module: *std.Build.Module) void {
+    addTreeSitterCore(b, module);
+    addTreeSitterPythonGrammar(b, module);
 }
 
 fn addTreeSitterProviders(b: *std.Build, module: *std.Build.Module) void {
@@ -168,6 +180,22 @@ pub fn build(b: *std.Build) void {
     const run_tree_sitter_go_symbol_proof = b.addRunArtifact(tree_sitter_go_symbol_proof);
     const tree_sitter_go_symbol_proof_step = b.step("tree-sitter-go-symbol-proof", "Run test-only Go current-symbol extraction proof with vendored Tree-sitter sources");
     tree_sitter_go_symbol_proof_step.dependOn(&run_tree_sitter_go_symbol_proof.step);
+
+    const tree_sitter_python_build_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_python_build_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    addTreeSitterPython(b, tree_sitter_python_build_proof_module);
+
+    const tree_sitter_python_build_proof = b.addExecutable(.{
+        .name = "tree-sitter-python-build-proof",
+        .root_module = tree_sitter_python_build_proof_module,
+    });
+
+    const run_tree_sitter_python_build_proof = b.addRunArtifact(tree_sitter_python_build_proof);
+    const tree_sitter_python_build_proof_step = b.step("tree-sitter-python-build-proof", "Compile vendored Tree-sitter Python sources and run a tiny non-product Python parse smoke");
+    tree_sitter_python_build_proof_step.dependOn(&run_tree_sitter_python_build_proof.step);
 
     const run_cmd = b.addRunArtifact(exe);
     if (b.args) |args| run_cmd.addArgs(args);

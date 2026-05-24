@@ -4,7 +4,7 @@ feature:
   slug: tree-sitter-python-offline-build-proof
   title: Tree-sitter Python offline build proof
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Python grammar source is imported, but its parser and scanner have not
@@ -50,7 +50,7 @@ proposal:
     materialised_at: 2026-05-24T19:58:54.228Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -105,7 +105,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Python offline build proof
       goal: Add and document the isolated Python parser/scanner build proof without
         runtime provider behaviour.
@@ -159,7 +159,7 @@ links:
   brief_ids: []
 timestamps:
   created_at: 2026-05-24T19:52:51.682Z
-  updated_at: 2026-05-24T19:59:22.208Z
+  updated_at: 2026-05-24T20:40:23.208Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-24T19:59:22.208Z
