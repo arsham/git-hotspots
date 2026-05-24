@@ -1,0 +1,347 @@
+schema: flow-feature.v1
+feature:
+  id: "0039"
+  slug: inspect-only-go-symbol-output
+  title: Inspect-only Go symbol output
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Go parser source import, offline build proof, and internal Go symbol
+    extraction proof are complete, but users inspecting a hot Go file cannot yet
+    request current Go symbols through the CLI.
+  outcome: Add narrow inspect-only Go symbol output through the existing
+    `--inspect PATH --symbols` flow while preserving file-level Git evidence as
+    product truth and avoiding repo-wide provider execution.
+  acceptance:
+    - "`git-hotspots --inspect path.go --symbols` emits current working-tree Go
+      symbols for the resolved inspected Go file only."
+    - Go provider output uses the existing `symbols` envelope in table, JSON,
+      and Markdown.
+    - The implementation adds a reusable runtime Go extraction module with owned
+      symbol data and deinitialisation parity with the Zig provider.
+    - The product build avoids duplicate Tree-sitter core linkage while
+      supporting Zig and Go symbol providers.
+    - Supported Go subset covers package clauses, top-level functions, methods,
+      struct/interface type specs, top-level const names, and top-level var
+      names with documented caveats.
+    - Go line-history, symbol history, symbol lineage, scoring, ranking, package
+      analysis, build-tag evaluation, cgo analysis, dependency graph, LSP,
+      custom queries, cache, network, and telemetry remain out of scope.
+    - No-provider outputs and existing Zig symbol outputs remain stable except
+      for approved language-neutral wording that does not change schema or
+      semantics.
+    - Human output names the actual symbol kind and does not hardcode
+      Zig/function wording for Go symbols.
+    - README, help, and explain text accurately describe inspect-only Zig and Go
+      symbol support without overclaiming.
+    - Validation covers Go success, unsupported, empty, invalid, unavailable,
+      generated/build-tag/cgo caveat, rename-alias, two-file inspect-only,
+      privacy, and real-repo smoke cases.
+planning:
+  state: ready
+  summary: Expose Go symbols as a bounded opt-in inspect enrichment now that Go
+    source import, build proof, and internal extraction proof are complete.
+    Include a hidden runtime/build-safety packet before user-facing output.
+  brief_sync:
+    status: updated
+    reason: Supports B001 provider-as-optional-enricher direction while preserving
+      deterministic file-level Git evidence as product truth.
+    checked_at: 2026-05-24T16:55:00.000Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Follow-up provider implementation slice for B001. It adds opt-in
+      current Go symbol enrichment only for inspected files.
+    checked_at: 2026-05-24T16:55:00.000Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - packet_verification_commands_missing
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-24T16:10:44.183Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-24T16:10:44.183Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-24T16:10:44.183Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-24T16:10:44.183Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Follow-up to Feature 0038, which proved internal Go symbol
+    extraction while explicitly deferring user-facing Go symbol output.
+  depends_on_feature_ids:
+    - "0038"
+  blocked_by: []
+  linked_brief_ids:
+    - B001
+design:
+  rough_shape:
+    - Add a reusable runtime `tree_sitter_go` extraction module.
+    - Refactor build helper wiring as needed to avoid duplicate Tree-sitter core
+      linkage.
+    - Dispatch `--inspect PATH --symbols` by resolved inspected file extension
+      for `.zig` and `.go`.
+    - Generalise human symbol labels and row kind rendering for non-Zig symbols.
+    - Add Go symbol table/JSON/Markdown goldens and degraded-state coverage.
+    - Preserve no-provider and existing Zig output stability.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+  packets:
+    - id: P1
+      title: Go runtime module and build safety
+      goal: Promote the internal Go extractor into a reusable runtime module and prove
+        product build/link safety before exposing user-facing Go output.
+      owner_phase: runner
+      depends_on: []
+      status: pending
+      execution_context:
+        - "Anchors: build.zig, src/tree_sitter_go.zig, src/tree_sitter_zig.zig,
+          src/provider.zig, tests/tree_sitter_go_symbol_proof.zig"
+        - "In scope: add runtime Go extractor with owned data and deinit;
+          dispatch-safe path/file validation; refactor Tree-sitter build helpers
+          to avoid duplicate core linkage; preserve existing proof targets"
+        - "Out of scope: CLI Go output, report rendering changes beyond
+          build-safe plumbing, Go line-history, package/build-tag/cgo
+          evaluation, provider registry, cache, network, telemetry"
+        - "Protected: no-provider outputs, Zig symbol outputs, product
+          scoring/ranking/lineage/confidence, existing proof targets"
+        - "Dependencies: Feature 0038 internal Go symbol extraction proof"
+        - "Validation/evidence: zig fmt --check build.zig src tests; zig build
+          test; zig build; zig build validate; all Tree-sitter proof targets;
+          git diff --check"
+        - "Review focus: owned memory/deinit parity; no duplicate Tree-sitter
+          core linkage; no user-facing Go output yet; no runtime default
+          provider execution"
+        - "Escalate if: build helper refactor requires broad build architecture
+          changes, provider enum expansion, parser generation, package-manager
+          input, or output schema changes"
+        - "Done boundary: reusable Go extraction module exists, build safety is
+          proven, and existing outputs/proofs remain stable"
+      anchors:
+        - build.zig
+        - src/tree_sitter_go.zig
+        - src/tree_sitter_zig.zig
+        - src/provider.zig
+        - tests/tree_sitter_go_symbol_proof.zig
+      in_scope:
+        - Runtime Go extraction module.
+        - Build helper safety for Zig and Go parsers in the product build.
+        - Existing proof target preservation.
+      out_of_scope:
+        - User-facing Go output in this packet.
+        - Go line-history, provider registry, package analysis, build-tag
+          evaluation, cgo analysis, cache, network, telemetry, parser
+          generation.
+      protected_surfaces:
+        - No-provider output goldens.
+        - Existing Zig symbol output goldens.
+        - File-level scoring, ranking, lineage, co-change, and confidence.
+      validation_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build
+        - zig build validate
+        - zig build tree-sitter-build-proof
+        - zig build tree-sitter-symbol-proof
+        - zig build tree-sitter-go-build-proof
+        - zig build tree-sitter-go-symbol-proof
+        - git diff --check
+      review_focus:
+        - Runtime extractor owns memory safely.
+        - Product build links Tree-sitter core once.
+        - Existing Zig/no-provider behaviour is stable.
+      escalation_triggers:
+        - Build safety requires broad architecture changes.
+        - Go extraction requires query framework or provider enum expansion.
+        - Product output changes before P2.
+      done_boundary: Go runtime extractor and build safety are proven without
+        user-facing Go output or existing output drift.
+    - id: P2
+      title: Inspect-only Go symbol output
+      goal: Expose Go symbols through the existing `--inspect PATH --symbols` flow
+        using the current matched Go file only.
+      owner_phase: runner
+      depends_on:
+        - P1
+      status: pending
+      execution_context:
+        - "Anchors: src/main.zig, src/report.zig, src/model.zig,
+          src/tree_sitter_go.zig, README.md, src/explain.zig or equivalent,
+          fixtures/expected"
+        - "In scope: extension dispatch for `.go`; reuse symbols envelope;
+          table/JSON/Markdown Go output; language-neutral human labels; actual
+          symbol kind rendering; docs/help/explain wording"
+        - "Out of scope: Go `--symbol-line-history`, symbol scoring/ranking,
+          repo-wide scan, package/module loading, build-tag evaluation, cgo
+          analysis, dependency graph, LSP, custom queries, cache"
+        - "Protected: no-provider outputs; existing Zig symbols; JSON schema
+          compatibility except Go provider values inside existing symbols
+          envelope"
+        - "Dependencies: P1 build/runtime safety"
+        - "Validation/evidence: Go symbol goldens for table/JSON/Markdown;
+          unsupported/empty/invalid/unavailable/generated/build-tag/cgo/rename-\
+          alias/two-file cases; stability checks"
+        - "Review focus: provider parses matched path only; no raw
+          diagnostics/source/private data; output caveats are honest; Go
+          line-history is not claimed"
+        - "Escalate if: report schema expansion is needed, Go line-history
+          becomes coupled, or package/build context is required"
+        - "Done boundary: `--inspect path.go --symbols` works for supported Go
+          files and degrades safely otherwise"
+      anchors:
+        - src/main.zig
+        - src/report.zig
+        - src/model.zig
+        - src/tree_sitter_go.zig
+        - README.md
+        - src/explain.zig
+        - fixtures/expected/
+      in_scope:
+        - Inspect-only Go symbols.
+        - Existing symbols envelope reuse.
+        - Human label/kind generalisation.
+        - Go-specific documentation and caveats.
+      out_of_scope:
+        - Go line-history and all broader provider/runtime behaviours.
+      protected_surfaces:
+        - JSON schema compatibility.
+        - Existing no-provider and Zig symbol output bytes.
+        - File-level Git evidence truth.
+      validation_commands:
+        - zig build validate
+        - zig build tree-sitter-go-symbol-proof
+        - git diff --check
+      review_focus:
+        - Go output is current-only and inspect-only.
+        - Symbol kinds/caveats match the 0038 proof contract.
+        - Human output does not hardcode Zig/function wording.
+      escalation_triggers:
+        - Existing Zig outputs change unexpectedly.
+        - Go symbol output requires schema expansion or line-history coupling.
+        - Diagnostics expose unsafe data.
+      done_boundary: Go symbol output is implemented with goldens and docs while
+        preserving no-provider and Zig output stability.
+    - id: P3
+      title: Validation docs and close-out evidence
+      goal: Complete the close-out evidence ladder, privacy/prohibited scans, and
+        real-repo smoke for inspect-only Go symbols.
+      owner_phase: runner
+      depends_on:
+        - P1
+        - P2
+      status: pending
+      execution_context:
+        - "Anchors: tools/validate.sh, .github/workflows/ci.yml, docs,
+          fixtures/expected, generated fixture ignore rules if needed"
+        - "In scope: extend validation for Go symbol outputs; ensure CI/proof
+          targets remain present; record privacy-safe close-out evidence; update
+          docs only as needed"
+        - "Out of scope: release automation, package publishing, CI matrix,
+          cache, coverage, badges, LSP, runtime network behaviour"
+        - "Protected: OSS/publicity framing; no private sibling paths/output; no
+          quality/risk/developer-ranking claims"
+        - "Dependencies: P1 and P2 complete"
+        - "Validation/evidence: full required ladder plus close-out smoke with
+          `sibling-local-repo` label"
+        - "Review focus: every edge case and stability claim is independently
+          repeatable; scans cover new Go outputs"
+        - "Escalate if: close-out smoke lacks a Go file, generated fixtures leak
+          into git status, or validation requires private raw output"
+        - "Done boundary: all close-out rows are proven and repo is clean"
+      anchors:
+        - tools/validate.sh
+        - .github/workflows/ci.yml
+        - fixtures/expected/
+        - README.md
+      in_scope:
+        - Validation ladder and CI/proof preservation.
+        - Go output privacy/prohibited scans.
+        - Close-out evidence summaries.
+      out_of_scope:
+        - New product features beyond Go symbol output.
+      protected_surfaces:
+        - Privacy-safe evidence only.
+        - Local-first defaults.
+        - No unsupported public claims.
+      validation_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build
+        - zig build validate
+        - zig build tree-sitter-build-proof
+        - zig build tree-sitter-symbol-proof
+        - zig build tree-sitter-go-build-proof
+        - zig build tree-sitter-go-symbol-proof
+        - git diff --check
+        - zig build validate -Dcloseout=true -Dsmoke-repo=<local-sibling-repo>
+          -Dsmoke-label=sibling-local-repo
+      review_focus:
+        - Complete close-out evidence and real-repo smoke.
+        - No private output or overclaiming.
+        - Repo clean after validation.
+      escalation_triggers:
+        - Real repo smoke cannot exercise a Go file safely.
+        - Validation reveals no-provider or Zig output drift.
+        - Privacy/prohibited scans fail.
+      done_boundary: Full validation, close-out smoke, delegated review, and clean
+        repo state are achieved.
+dispatch:
+  status: stale
+execution:
+  requires_confirmation: true
+  blockers: []
+timestamps:
+  created_at: 2026-05-24T16:00:52.605Z
+  updated_at: 2026-05-24T16:10:44.183Z
