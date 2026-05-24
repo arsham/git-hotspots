@@ -208,4 +208,457 @@ links:
   brief_ids: []
 timestamps:
   created_at: 2026-05-24T02:15:31.107Z
-  updated_at: 2026-05-24T02:24:21.149Z
+  updated_at: 2026-05-24T02:26:02.194Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-24T02:26:02.194Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0035"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids: []
+    feature:
+      title: Tree-sitter Go grammar admission review
+      problem: The multi-language strategy names Go as the preferred first non-Zig
+        Tree-sitter language, but the repository has no Go grammar admission
+        record proving upstream identity, license, generated-source provenance,
+        compatibility, source-size, or query readiness.
+      outcome: A documentation-only Go grammar admission review records the gates and
+        decision state required before any future tree-sitter-go source import
+        or runtime provider work.
+      acceptance:
+        - Add docs/tree-sitter-go-grammar-admission.md as the single public
+          admission review artefact.
+        - The document records candidate upstream identity, immutable revision
+          or blocker, checksum requirement, proposed vendored path, BOM
+          expectations, excluded file classes, and Tree-sitter core
+          compatibility requirements.
+        - The document records license/notice, generated parser provenance,
+          local-first build supply-chain, source-size, build-impact, query,
+          fixture, and no-provider stability gates for future Go work.
+        - The document states that Go runtime support is not implemented and
+          current runtime Tree-sitter support remains Zig-only.
+        - The document preserves file-level Git evidence as product truth and
+          frames future Go symbols as optional, current-only, inspect-oriented,
+          additive, caveated provider evidence.
+        - The document ends with an explicit decision state and named blockers
+          for a later Go source-import feature.
+        - No third_party, source, test, fixture, build, CI, CLI, report schema,
+          scoring, cache, provider runtime, provider registry, release, package,
+          or network behaviour changes are made.
+    brief_alignment:
+      status: null
+      role: null
+      summary: null
+      checked_at: null
+    briefs: []
+    prd_path: .flow/features/0035_tree-sitter-go-grammar-admission-review/prd.md
+  requirements_contract:
+    source_path: .flow/features/0035_tree-sitter-go-grammar-admission-review/prd.md
+    source_digest: 3b93e483e6ac9e549085914e9912e95cdfd8dac7c9ac7be483ed86b7ef7da972
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#r1-documentation-only-scope[1]
+        text: "Add one documentation artefact:
+          docs/tree-sitter-go-grammar-admission.md."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#r1-documentation-only-scope[2]
+        text: The feature may update Flow planning state only in addition to that
+          document.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#r1-documentation-only-scope[3]
+        text: Do not change third_party/, src/, tests/, fixtures/, build.zig,
+          build.zig.zon, .github/, tools/validate.sh, CLI flags, report schemas,
+          scoring, cache, provider runtime, provider registry, CI, release, or
+          package behaviour.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#r4-tree-sitter-core-compatibility[1]
+        text: State that Tree-sitter core is already vendored/proven for the current Zig
+          provider path.
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#r4-tree-sitter-core-compatibility[2]
+        text: Require a future Go import to prove compatibility with the existing
+          vendored core ABI/language-version.
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#r4-tree-sitter-core-compatibility[3]
+        text: State that a Tree-sitter core update requires a separate shaped feature
+          unless explicitly included in a later import feature.
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#r10-future-sequencing-decision[1]
+        text: The document must end with a decision state such as conditionalgo,
+          readyforimport, or blocked, plus named blockers. For this feature, the
+          default expected result is conditionalgo unless evidence proves
+          otherwise.
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#r10-future-sequencing-decision[2]
+        text: "The document must explicitly defer:"
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#r10-future-sequencing-decision[3]
+        text: Go source import;
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#r10-future-sequencing-decision[4]
+        text: Go offline build proof;
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#r10-future-sequencing-decision[5]
+        text: Go extraction proof;
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#r10-future-sequencing-decision[6]
+        text: inspect-only Go symbol output;
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#r10-future-sequencing-decision[7]
+        text: custom user query execution;
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#r10-future-sequencing-decision[8]
+        text: LSP integration.
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#acceptance-criteria[1]
+        text: docs/tree-sitter-go-grammar-admission.md exists and is the only non-Flow
+          artefact added or changed.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#acceptance-criteria[2]
+        text: The document records the Go admission gates listed in Requirements R2-R10.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#acceptance-criteria[3]
+        text: The document does not claim Go runtime support exists.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#acceptance-criteria[4]
+        text: The document does not change or imply changes to CLI, report schemas,
+          scoring, provider runtime, registry, cache, build, CI, or third-party
+          source state.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#acceptance-criteria[5]
+        text: The document uses repo-relative paths and public upstream identifiers
+          only.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#acceptance-criteria[6]
+        text: The document contains no private paths, private repo names, raw parser
+          stderr, source snippets, remotes, author identities, raw private
+          reports, commercial strategy, bug prediction, code-quality scoring,
+          developer ranking, or maintainer judgement.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#edge-cases[1]
+        text: If upstream Go grammar identity cannot be selected, record blocked or a
+          named blocker rather than inventing a candidate.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#edge-cases[2]
+        text: If generated parser provenance cannot be reproduced or reviewed, record it
+          as a future import blocker.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#edge-cases[3]
+        text: If the Go grammar requires a newer Tree-sitter core than the vendored
+          core, require a separate core-update feature before import.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#edge-cases[4]
+        text: If Go query semantics require custom user queries to be useful, defer
+          custom query execution to a separate safety-contract feature.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#verification[1]
+        text: "Close-out must prove:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Close-out must prove:"
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#verification[2]
+        text: "``sh git diff --check zig build validate ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh git diff --check zig build validate ``"
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#verification[3]
+        text: "Optional CI-parity proof may also run:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Optional CI-parity proof may also run:"
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#verification[4]
+        text: "``sh zig build tree-sitter-build-proof zig build tree-sitter-symbol-proof
+          ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh zig build tree-sitter-build-proof zig build
+          tree-sitter-symbol-proof ``"
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#verification[5]
+        text: "Close-out scans must prove:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Close-out scans must prove:"
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#verification[6]
+        text: changed paths are limited to docs and Flow state;
+        category: verification
+        packet_refs:
+          - P1
+        verification: changed paths are limited to docs and Flow state;
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#verification[7]
+        text: no tree-sitter-go source is added under third_party/;
+        category: verification
+        packet_refs:
+          - P1
+        verification: no tree-sitter-go source is added under third_party/;
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#verification[8]
+        text: no runtime, build, provider registry, CLI, schema, scoring, cache, CI, or
+          release behaviour changes;
+        category: verification
+        packet_refs:
+          - P1
+        verification: no runtime, build, provider registry, CLI, schema, scoring, cache,
+          CI, or release behaviour changes;
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#verification[9]
+        text: no network, telemetry, upload, remote enrichment, package-manager, global
+          parser, or background provider behaviour is introduced;
+        category: verification
+        packet_refs:
+          - P1
+        verification: no network, telemetry, upload, remote enrichment, package-manager,
+          global parser, or background provider behaviour is introduced;
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#verification[10]
+        text: public docs do not overclaim Go support or make prohibited claims.
+        category: verification
+        packet_refs:
+          - P1
+        verification: public docs do not overclaim Go support or make prohibited claims.
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: The multi-language strategy identifies Go as the preferred first non-Zig
+          Tree-sitter language, but the repository has no Go grammar provenance,
+          license review, generated-source basis, vendoring plan, source-size
+          measurement, build compatibility proof, or Go query fixture plan.
+          Importing or running Go support without that admission evidence would
+          weaken the local-first supply-chain and public-claim boundary.
+      - source_ref: prd.md#outcome[1]
+        text: A public, repo-safe Go admission document records the candidate grammar
+          facts, blockers, future import gates, and decision state for
+          tree-sitter-go. Future source-import or runtime Go provider features
+          can proceed only from this durable admission record.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 2 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: A documentation-only Go grammar admission review records the gates and
+      decision state required before any future tree-sitter-go source import or
+      runtime provider work.
+    acceptance:
+      - Add docs/tree-sitter-go-grammar-admission.md as the single public
+        admission review artefact.
+      - The document records candidate upstream identity, immutable revision or
+        blocker, checksum requirement, proposed vendored path, BOM expectations,
+        excluded file classes, and Tree-sitter core compatibility requirements.
+      - The document records license/notice, generated parser provenance,
+        local-first build supply-chain, source-size, build-impact, query,
+        fixture, and no-provider stability gates for future Go work.
+      - The document states that Go runtime support is not implemented and
+        current runtime Tree-sitter support remains Zig-only.
+      - The document preserves file-level Git evidence as product truth and
+        frames future Go symbols as optional, current-only, inspect-oriented,
+        additive, caveated provider evidence.
+      - The document ends with an explicit decision state and named blockers for
+        a later Go source-import feature.
+      - No third_party, source, test, fixture, build, CI, CLI, report schema,
+        scoring, cache, provider runtime, provider registry, release, package,
+        or network behaviour changes are made.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands: []
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
