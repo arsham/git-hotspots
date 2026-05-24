@@ -4,7 +4,7 @@ feature:
   slug: symbol-evidence-summary-and-sorting
   title: Symbol evidence summary and sorting
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Inspect-only symbol reports can emit many symbols, burying the most
@@ -62,7 +62,7 @@ proposal:
     materialised_at: 2026-05-23T23:37:46.239Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -124,7 +124,7 @@ design:
         deterministic human sort key, and unit tests.
       owner_phase: runner
       depends_on: []
-      status: planned
+      status: done
       execution_context:
         - "Anchors: src/model.zig, src/provider.zig, src/main.zig,
           src/report.zig."
@@ -178,7 +178,7 @@ design:
       owner_phase: runner
       depends_on:
         - P1
-      status: planned
+      status: done
       execution_context:
         - "Anchors: src/report.zig, fixtures/expected, tests/integration.sh,
           tools/validate.sh."
@@ -229,7 +229,7 @@ design:
       depends_on:
         - P1
         - P2
-      status: planned
+      status: done
       execution_context:
         - "Anchors: tools/validate.sh, README.md if help/docs need tiny
           clarification, real-repo smoke evidence."
@@ -876,7 +876,10 @@ dispatch:
   fallback_path: deferred_reconcile_decision
   notes: null
 timestamps:
-  updated_at: 2026-05-23T23:44:17.118Z
+  updated_at: 2026-05-24T00:34:57.704Z
 execution:
   blockers: []
   requires_confirmation: true
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
