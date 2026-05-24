@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0036"
   active_run_id: null
   last_completed_feature_id: "0035"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 36
+  next_id: 37
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -169,6 +169,10 @@ features:
       slug: tree-sitter-go-grammar-admission-review
       path: .flow/features/0035_tree-sitter-go-grammar-admission-review
       created_at: 2026-05-24T02:15:31.107Z
+    - id: "0036"
+      slug: tree-sitter-go-source-import-proof
+      path: .flow/features/0036_tree-sitter-go-source-import-proof
+      created_at: 2026-05-24T02:48:00.614Z
 intake:
   mode: roadmap
   summary: null

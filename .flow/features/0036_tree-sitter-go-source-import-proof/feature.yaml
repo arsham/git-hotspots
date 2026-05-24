@@ -1,0 +1,281 @@
+schema: flow-feature.v1
+feature:
+  id: "0036"
+  slug: tree-sitter-go-source-import-proof
+  title: Tree-sitter Go source import proof
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Feature 0035 admitted tree-sitter-go only conditionally; the repository
+    still lacks pinned Go grammar source, license/notice proof, generated parser
+    provenance, BOM, size, compatibility, and no-provider stability evidence.
+  outcome: A narrow pinned tree-sitter-go source import is committed with
+    provenance, notices, source-size evidence, and no-provider stability proof,
+    while Go build/runtime/provider behaviour remains deferred.
+  acceptance:
+    - Import a narrow pinned tree-sitter-go source set under
+      third_party/tree-sitter-go/<revision>/.
+    - Record exact upstream source identity, selected immutable revision,
+      archive or checkout basis, checksum or per-file manifest evidence, and
+      vendored path.
+    - Preserve upstream license/notice text and update THIRD_PARTY_NOTICES.md
+      with public repo-relative attribution.
+    - Add PROVENANCE.md, IMPORTED_FILES.tsv, and a source-import evidence
+      document covering generated parser/scanner provenance, BOM/exclusions,
+      Tree-sitter core compatibility, source-size measurements, offline
+      validation, and no-provider output stability.
+    - Stop as blocked rather than closing if immutable revision, license/notice,
+      generated parser provenance, core compatibility, BOM narrowness, or
+      no-provider stability cannot be proven.
+    - Do not add Go build/link proof, runtime provider behaviour, provider
+      registry entries, CLI flags, report schema fields, scoring changes, cache
+      changes, test fixtures, CI changes, release or package work.
+planning:
+  state: ready
+  summary: Shape a narrow tree-sitter-go source import and provenance proof,
+    following the Zig source-import precedent while explicitly deferring Go
+    build/runtime/provider work.
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - packet_verification_commands_missing
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-24T02:55:08.866Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-24T02:55:08.866Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-24T02:55:08.866Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-24T02:55:08.866Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Follow-up to Feature 0035, which kept Go grammar admission at
+    conditionalgo until source-import blockers were resolved.
+  depends_on_feature_ids:
+    - "0025"
+    - "0035"
+  blocked_by: []
+design:
+  rough_shape:
+    - Select and import a pinned tree-sitter-go source set under
+      third_party/tree-sitter-go/<revision>/.
+    - Add provenance, license/notice, imported manifest, and source-import
+      evidence artefacts.
+    - Prove offline/local validation and no-provider output stability.
+    - Explicitly defer Go build proof, extraction proof, queries, provider
+      runtime, CLI/report/schema, scoring, cache, and CI changes.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+  packets:
+    - id: P1
+      title: Go source identity and provenance import
+      goal: Select the immutable tree-sitter-go source identity, import a narrow
+        vendored file set, and add provenance, manifest, license, and notice
+        artefacts.
+      owner_phase: runner
+      depends_on: []
+      status: pending
+      execution_context:
+        - "Anchors: third_party/tree-sitter-go/<revision>/,
+          THIRD_PARTY_NOTICES.md, docs/tree-sitter-go-grammar-admission.md,
+          docs/tree-sitter-vendoring-readiness.md."
+        - "In scope: select immutable tree-sitter-go tag/full commit, copy a
+          narrow source set, copy license/notice, add PROVENANCE.md, add
+          IMPORTED_FILES.tsv, and update THIRD_PARTY_NOTICES.md."
+        - "In scope: record generated parser/scanner provenance using either
+          reproducible pinned inputs or verified pinned upstream artefact
+          basis."
+        - "Out of scope: build.zig, build.zig.zon, parser compile/link proof, Go
+          runtime provider, provider registry, CLI/report/schema/scoring/cache
+          changes, query fixtures, CI/release/package changes."
+        - "Protected: existing Zig Tree-sitter provider behaviour, no-provider
+          report bytes, local-first/no-network build path, OSS/publicity
+          boundary, privacy-safe evidence."
+        - "Dependencies: Feature 0035 admission review is complete; Tree-sitter
+          core v0.26.9 is already vendored from Feature 0025."
+        - "Validation/evidence: changed-path scan; license/notice copy proof;
+          provenance identity proof; generated parser/scanner provenance proof;
+          BOM narrowness proof."
+        - "Review focus: source import is narrow, reviewable, pinned,
+          license-safe, local-only, and does not imply Go runtime support."
+        - "Escalate if: immutable revision/checksum cannot be selected, license
+          is unclear, generated parser provenance cannot be proven, BOM expands
+          into bindings/package-manager artefacts, or a core update is
+          required."
+        - "Done boundary: vendored source tree and provenance/notice artefacts
+          exist, with no build/runtime/provider changes."
+      anchors:
+        - third_party/tree-sitter-go/<revision>/
+        - THIRD_PARTY_NOTICES.md
+        - docs/tree-sitter-go-grammar-admission.md
+        - docs/tree-sitter-vendoring-readiness.md
+      in_scope:
+        - Pinned tree-sitter-go source import.
+        - License, notice, provenance, and imported-file manifest artefacts.
+        - Generated parser/scanner provenance record.
+      out_of_scope:
+        - Go parser compile/link proof.
+        - Build graph or runtime provider changes.
+        - CLI, report schema, scoring, cache, CI, release, package, or query
+          fixture changes.
+      protected_surfaces:
+        - src/**
+        - tests/**
+        - fixtures/**
+        - build.zig
+        - build.zig.zon
+        - .github/**
+        - tools/validate.sh
+        - Runtime CLI/report/scoring/cache/provider behaviour
+      validation_commands:
+        - git diff --check
+        - changed-path scan for source-import-only scope
+        - provenance/license/BOM scan
+        - generated parser/scanner provenance check
+      review_focus:
+        - Import source identity is exact and immutable.
+        - License and notices are preserved.
+        - Generated parser/scanner provenance is reviewable.
+        - Protected runtime/build surfaces are untouched.
+      escalation_triggers:
+        - Source identity or checksum cannot be proven.
+        - Generated parser provenance remains unresolved.
+        - Imported BOM includes unapproved bindings, package-manager files, CI,
+          release, wasm, prebuilds, playgrounds, examples, or runtime wiring.
+        - Go grammar requires a Tree-sitter core update.
+      done_boundary: Pinned tree-sitter-go source and provenance artefacts are
+        committed with no runtime/build behaviour.
+    - id: P2
+      title: Source-size offline validation and no-provider stability proof
+      goal: Record source-size/build-impact evidence and prove offline validation plus
+        no-provider output stability after the Go source import.
+      owner_phase: runner
+      depends_on:
+        - P1
+      status: pending
+      execution_context:
+        - "Anchors: docs/tree-sitter-go-source-import-evidence.md, existing
+          validation outputs, fixture expected outputs,
+          third_party/tree-sitter-go/<revision>/."
+        - "In scope: source-size measurements, largest-file list, repo-size
+          before/after, validation timing summaries, Tree-sitter core ABI
+          compatibility note, no-provider output stability proof."
+        - "In scope: run git diff --check, zig build validate, tree-sitter Zig
+          proof targets, and close-out validation with sibling-local-repo."
+        - "Out of scope: adding Go compile proof target, Go query fixtures, Go
+          symbol output, CI workflow changes, or validation script changes
+          unless a direct source-import bug requires replanning."
+        - "Protected: no raw sibling output, no absolute private paths, no
+          private remotes, no author identities, no parser stderr dumps, no bug
+          prediction or code-quality claims."
+        - "Dependencies: P1 source import and provenance artefacts exist."
+        - "Validation/evidence: git diff --check; zig build validate; zig build
+          tree-sitter-build-proof; zig build tree-sitter-symbol-proof; close-out
+          validation with sibling-local-repo; no-provider parity evidence for
+          table, JSON, Markdown, and inspect."
+        - "Review focus: Go source import does not change existing user-visible
+          no-provider behaviour and remains local-only/offline."
+        - "Escalate if: validation needs network/package-manager/global CLI,
+          no-provider output changes, source size materially exceeds plan, or
+          close-out smoke cannot stay privacy-safe."
+        - "Done boundary: evidence document proves validation, size,
+          compatibility, and stability, or records an explicit blocked state."
+      anchors:
+        - docs/tree-sitter-go-source-import-evidence.md
+        - third_party/tree-sitter-go/<revision>/
+        - fixtures/expected/**
+      in_scope:
+        - Source-size and repository-size measurements.
+        - Offline validation proof.
+        - No-provider table/JSON/Markdown/inspect output stability evidence.
+        - Privacy-safe close-out smoke summary.
+      out_of_scope:
+        - Go build/link proof.
+        - Runtime provider or query support.
+        - Changes to validation scripts, CI, or report schema.
+      protected_surfaces:
+        - Existing no-provider output contracts.
+        - Existing Zig provider proof targets.
+        - Local-first and privacy boundaries.
+      validation_commands:
+        - git diff --check
+        - zig build validate
+        - zig build tree-sitter-build-proof
+        - zig build tree-sitter-symbol-proof
+        - zig build validate -Dcloseout=true -Dsmoke-repo <local-sibling-path>
+          -Dsmoke-label sibling-local-repo
+      review_focus:
+        - Evidence document is complete and repo-relative.
+        - No-provider output is byte-stable.
+        - Close-out evidence is privacy-safe and local-only.
+      escalation_triggers:
+        - No-provider output changes.
+        - Validation requires unapproved network or package-manager activity.
+        - Source-size or timing evidence triggers planner-review threshold.
+      done_boundary: All validation commands pass and the import evidence document is
+        independently reviewable.
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids: []
+timestamps:
+  created_at: 2026-05-24T02:48:00.614Z
+  updated_at: 2026-05-24T02:55:08.866Z
