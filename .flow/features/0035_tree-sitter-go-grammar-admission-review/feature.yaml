@@ -4,7 +4,7 @@ feature:
   slug: tree-sitter-go-grammar-admission-review
   title: Tree-sitter Go grammar admission review
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The multi-language strategy names Go as the preferred first non-Zig
@@ -57,7 +57,7 @@ proposal:
     materialised_at: 2026-05-24T02:24:21.149Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -126,7 +126,7 @@ design:
         validation gates before source import.
       owner_phase: runner
       depends_on: []
-      status: planned
+      status: done
       execution_context:
         - "Anchors: docs/tree-sitter-go-grammar-admission.md,
           docs/tree-sitter-multi-language-query-strategy.md,
@@ -208,7 +208,7 @@ links:
   brief_ids: []
 timestamps:
   created_at: 2026-05-24T02:15:31.107Z
-  updated_at: 2026-05-24T02:26:02.194Z
+  updated_at: 2026-05-24T02:42:02.306Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-24T02:26:02.194Z
