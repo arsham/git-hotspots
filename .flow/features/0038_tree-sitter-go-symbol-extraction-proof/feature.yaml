@@ -1,0 +1,291 @@
+schema: flow-feature.v1
+feature:
+  id: "0038"
+  slug: tree-sitter-go-symbol-extraction-proof
+  title: Tree-sitter Go symbol extraction proof
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: The Go parser now compiles and parses through an isolated proof, but Go
+    symbol extraction semantics, ranges, ordering, mapping, and degraded states
+    are not yet proven.
+  outcome: Add an internal non-product Tree-sitter Go symbol extraction proof that
+    maps a bounded Go symbol subset into the existing provider symbol evidence
+    shape while preserving all current CLI and report behaviour.
+  acceptance:
+    - Dedicated command `zig build tree-sitter-go-symbol-proof` exists and
+      passes.
+    - The proof uses vendored local Tree-sitter core and tree-sitter-go parser
+      sources only.
+    - The proof uses direct AST traversal first; no Tree-sitter query files or
+      custom query execution are added.
+    - The proof extracts package, top-level functions, methods, struct and
+      interface type specs, and top-level const/var names when feasible.
+    - Symbol ranges use deterministic one-based inclusive line ranges from the
+      enclosing Go declaration node.
+    - Symbol ordering is deterministic and source-order based for the proof.
+    - Symbol kind mapping stays within the existing provider model and uses
+      caveats for structs, interfaces, and constants where needed.
+    - Empty, invalid, unsupported, unsafe-path, generated-file, build-tag, and
+      cgo-adjacent cases are covered or caveated without raw diagnostics.
+    - Existing Zig and Go build proof targets still pass.
+    - No user-facing Go symbols, provider registry, CLI/report/schema/scoring,
+      cache, network, telemetry, or parser-generation behaviour is added.
+    - No-provider outputs and existing Zig symbol outputs remain stable.
+    - Public evidence documents supported subset, range/order semantics,
+      validation, and that Go runtime symbol output is not implemented yet.
+planning:
+  state: ready
+  summary: Prove Go symbol extraction semantics internally before exposing Go
+    symbols to users. This mirrors the Zig sequence of source import, build
+    proof, internal extraction proof, then user-facing inspect output.
+  brief_sync:
+    status: updated
+    reason: Supports B001 provider-as-optional-enricher direction while keeping
+      file-level Git evidence as product truth.
+    checked_at: 2026-05-24T15:30:00.000Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: This is a prerequisite provider implementation slice for the B001
+      local-first hotspot intelligence capability; it adds no product-facing Go
+      output.
+    checked_at: 2026-05-24T15:30:00.000Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - packet_verification_commands_missing
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-24T15:23:40.102Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-24T15:23:40.102Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-24T15:23:40.102Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-24T15:23:40.102Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Follow-up to Feature 0037, which proved tree-sitter-go compile,
+    link, and parse behaviour while explicitly deferring Go symbol extraction
+    and user-facing provider output.
+  depends_on_feature_ids:
+    - "0037"
+  blocked_by: []
+  linked_brief_ids:
+    - B001
+design:
+  rough_shape:
+    - Add an isolated `zig build tree-sitter-go-symbol-proof` target.
+    - Use direct AST traversal over in-memory Go fixtures.
+    - Extract a bounded top-level symbol subset into provider-compatible
+      current-symbol evidence.
+    - Prove deterministic range, order, caveat, and failure semantics.
+    - Preserve no-provider output stability and existing Zig symbol behaviour.
+    - Explicitly defer Go user-facing symbol output to a later feature.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+  packets:
+    - id: P1
+      title: Internal Go extraction proof
+      goal: Add a non-product Go symbol extraction proof target that extracts a
+        bounded Go symbol subset from in-memory fixtures using vendored local
+        Tree-sitter sources and direct AST traversal.
+      owner_phase: runner
+      depends_on: []
+      status: planned
+      execution_context:
+        - "Anchors: build.zig, tests/tree_sitter_go_symbol_proof.zig or
+          equivalent, src/provider.zig, third_party/tree-sitter-go/v0.25.0,
+          third_party/tree-sitter-core/v0.26.9"
+        - "In scope: add `zig build tree-sitter-go-symbol-proof`; compile/link
+          local core lib.c and Go parser.c for proof; extract package, top-level
+          functions, methods, struct/interface type specs, top-level const/var
+          names when feasible; use provider-compatible current-symbol evidence"
+        - "Out of scope: user-facing Go `--symbols`,
+          CLI/report/schema/scoring/cache changes, provider registry, Go
+          package/module analysis, custom queries, LSP, parser generation,
+          network/package-manager/global Tree-sitter input"
+        - "Protected: installed product CLI runtime, existing no-provider
+          outputs, existing Zig symbol outputs, provider public semantics,
+          file-level Git evidence as product truth"
+        - "Dependencies: Feature 0037 Go offline build proof and existing
+          provider.CurrentSymbolEvidence seam"
+        - "Validation/evidence: zig fmt --check build.zig src tests; zig build
+          test; zig build; zig build validate; zig build
+          tree-sitter-build-proof; zig build tree-sitter-symbol-proof; zig build
+          tree-sitter-go-build-proof; zig build tree-sitter-go-symbol-proof; git
+          diff --check"
+        - "Review focus: proof remains internal/non-product; direct traversal
+          semantics are explicit; mapping/range/order/caveats are deterministic;
+          no runtime/report drift"
+        - "Escalate if: Go symbol subset requires provider enum expansion,
+          receiver-qualified naming contract, query framework, parser
+          generation, package-manager input, or user-facing output"
+        - "Done boundary: proof target passes; supported subset and edge cases
+          are tested; no-provider and Zig symbol outputs remain stable"
+      anchors:
+        - build.zig
+        - tests/tree_sitter_go_symbol_proof.zig
+        - src/provider.zig
+        - third_party/tree-sitter-go/v0.25.0/
+        - third_party/tree-sitter-core/v0.26.9/
+      in_scope:
+        - Dedicated internal Go symbol proof target.
+        - Direct AST traversal over in-memory Go fixtures.
+        - Provider-compatible current-symbol evidence.
+        - Deterministic range and order semantics.
+      out_of_scope:
+        - User-facing Go symbols.
+        - CLI, report, schema, scoring, cache, runtime provider, registry, CI
+          release, package, LSP, or parser-generation changes.
+      protected_surfaces:
+        - src/main.zig user-facing routes
+        - src/report.zig report schema and renderers except tests if needed
+        - fixtures/expected/**
+        - product CLI/report/scoring/cache behaviour
+      validation_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build
+        - zig build validate
+        - zig build tree-sitter-build-proof
+        - zig build tree-sitter-symbol-proof
+        - zig build tree-sitter-go-build-proof
+        - zig build tree-sitter-go-symbol-proof
+        - git diff --check
+      review_focus:
+        - Go extraction semantics are deterministic and bounded.
+        - Existing provider shape is used honestly.
+        - No user-facing Go output or report drift was introduced.
+      escalation_triggers:
+        - Required symbol kinds cannot be represented without changing the
+          provider enum.
+        - Method receiver naming requires a new public contract.
+        - Direct traversal cannot prove deterministic semantics.
+        - Proof requires network, package manager, global Tree-sitter, or parser
+          generation.
+      done_boundary: Internal Go symbol proof passes and existing validation remains
+        green with no runtime/provider/report drift.
+    - id: P2
+      title: Evidence docs and close-out proof
+      goal: Record public, privacy-safe evidence for the Go extraction proof,
+        supported subset, range/order semantics, validation commands, and the
+        explicit non-runtime boundary.
+      owner_phase: runner
+      depends_on:
+        - P1
+      status: planned
+      execution_context:
+        - "Anchors: docs/tree-sitter-go-symbol-extraction-proof.md, build.zig,
+          tests/tree_sitter_go_symbol_proof.zig"
+        - "In scope: record supported subset, direct traversal boundary,
+          range/order semantics, symbol-kind mapping, caveats, validation
+          commands, local/offline proof, and no-runtime Go support statement"
+        - "Out of scope: raw sibling paths/output, private repo details, parser
+          stderr dumps, source snippets from private repos, Go runtime support
+          claims"
+        - "Protected: OSS/publicity framing, local-first defaults, no bug
+          prediction/code-quality/developer-ranking claims"
+        - "Dependencies: P1 proof target must pass before evidence is final"
+        - "Validation/evidence: changed-path scan; prohibited dependency scan;
+          privacy/prohibited-claim scan; close-out smoke with sibling-local-repo
+          label; Flow validation"
+        - "Review focus: evidence is concise, public-safe, repo-relative, and
+          does not imply Go user-facing provider support is implemented"
+        - "Escalate if: evidence needs private data, no-provider output drift
+          appears, or docs imply Go symbols are available in CLI output"
+        - "Done boundary: evidence doc complete; close-out rows are
+          independently reviewable; feature ready for delegated review"
+      anchors:
+        - docs/tree-sitter-go-symbol-extraction-proof.md
+        - build.zig
+        - tests/tree_sitter_go_symbol_proof.zig
+      in_scope:
+        - Public proof evidence document.
+        - Privacy-safe validation and close-out summaries.
+        - Explicit deferral of user-facing Go symbols.
+      out_of_scope:
+        - Raw private output or paths.
+        - Runtime Go support claims.
+      protected_surfaces:
+        - README public claims unless a narrow correction is required.
+        - CONTRIBUTING and CI behaviour unless proof target is intentionally
+          added.
+      validation_commands:
+        - git diff --check
+        - zig build validate
+        - zig build tree-sitter-go-symbol-proof
+        - zig build validate -Dcloseout=true -Dsmoke-repo=<local-sibling-path>
+          -Dsmoke-label=sibling-local-repo
+      review_focus:
+        - Evidence proves the internal proof and does not overclaim product
+          support.
+        - Sibling evidence is label-only.
+      escalation_triggers:
+        - Docs need to claim Go CLI support.
+        - Evidence requires private or raw parser output.
+        - CI inclusion decision changes validation cost materially.
+      done_boundary: Evidence and close-out validation are complete, public-safe, and
+        independently reviewable.
+links:
+  brief_ids:
+    - B001
+execution:
+  requires_confirmation: true
+  blockers: []
+timestamps:
+  created_at: 2026-05-24T15:17:08.305Z
+  updated_at: 2026-05-24T15:23:40.102Z
