@@ -4,42 +4,164 @@ feature:
   slug: tree-sitter-python-grammar-admission-review
   title: Tree-sitter Python grammar admission review
   lane: standard
-  status: shaping
+  status: ready
   autonomy_default: ask
 intent:
-  problem: ""
-  outcome: ""
-  acceptance: []
+  problem: Python is the next Tree-sitter language candidate after Go, but the repository has no Python grammar admission record proving upstream identity, license, generated parser or scanner provenance, compatibility, source-size, or query readiness.
+  outcome: Add a documentation-only Python grammar admission review that records the gates and decision state required before any future tree-sitter-python source import or runtime provider work.
+  acceptance:
+    - "Add `docs/tree-sitter-python-grammar-admission.md` as the single public admission review artefact."
+    - "The document records candidate upstream identity, immutable revision or blocker, checksum requirement, proposed vendored path, BOM expectations, excluded file classes, and Tree-sitter core compatibility requirements."
+    - "The document records license/notice, generated parser and scanner provenance, local-first build supply-chain, source-size, build-impact, query, fixture, and no-provider stability gates for future Python work."
+    - "The document states that Python runtime support is not implemented and current runtime Tree-sitter support remains Zig and Go only."
+    - "The document preserves file-level Git evidence as product truth and frames future Python symbols as optional, current-only, inspect-oriented, additive, caveated provider evidence."
+    - "The document defines Python-specific query and fixture expectations for modules, classes, functions, methods, constants, decorators, nested definitions, indentation errors, dynamic assignments, generated files, empty files, invalid files, and unsupported paths."
+    - "The document records monorepo behaviour as inspect-path-only and extension-based; it must not imply package, venv, workspace, pyproject, dependency graph, import resolution, notebook, or repo-wide scanning."
+    - "No third_party, source, test, fixture, build, CI, CLI, report schema, scoring, cache, provider runtime, provider registry, release, package, network, telemetry, or background behaviour changes are made."
 planning:
-  state: shaped
-  summary: Review tree-sitter-python provenance, licensing, grammar scope, query
-    expectations, monorepo implications, and source-import gates before any
-    Python parser source import or runtime support.
+  state: ready
+  summary: Shape a docs-only Python grammar admission review before any tree-sitter-python source import, build proof, extraction proof, or runtime support.
+  brief_sync:
+    status: updated
+    reason: Supports B001 provider expansion while preserving local-first deterministic file-level Git evidence as product truth.
+    checked_at: 2026-05-24T17:44:00.000Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Follow-up provider planning slice for B001. It admits Python only as a future candidate and explicitly defers implementation.
+    checked_at: 2026-05-24T17:44:00.000Z
 proposal:
   lifecycle_state: shaping
   outcome_contract_ref: null
-  risk_assessment: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - public_api_or_platform_risk_keywords
+      - third_party_dependency_planning
+      - provider_language_admission
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-24T17:44:00.000Z
   quality_plan: null
 project_feature:
-  lifecycle_state: null
-  outcome_contract_ref: null
-  quality_plan: null
-  authority_refinement: null
-verification_independence_requirement: null
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-24T17:44:00.000Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-24T17:44:00.000Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-24T17:44:00.000Z
+verification_independence_requirement: continuity_safe_delegated
 readiness:
   requirements_ready: true
-  acceptance_ready: false
-  packet_plan_ready: false
+  acceptance_ready: true
+  packet_plan_ready: true
   dependencies_ready: true
-  implementation_ready: false
+  implementation_ready: true
 context:
   roadmap_item_id: null
-  detached_reason: null
-  depends_on_feature_ids: []
+  detached_reason: Follow-up to the Tree-sitter multi-language strategy, which identifies Python as the next candidate after Go subject to admission gates.
+  depends_on_feature_ids:
+    - "0034"
   blocked_by: []
+  linked_brief_ids:
+    - B001
 design:
-  rough_shape: []
-  packets: []
+  rough_shape:
+    - Add one Python grammar admission review document.
+    - Keep the feature documentation-only and use it to gate later tree-sitter-python source import.
+    - Explicitly defer Python source import, build proof, extraction proof, runtime provider output, custom queries, LSP, and package/import analysis.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+  packets:
+    - id: P1
+      title: Python grammar admission review document
+      goal: Add one docs-only admission review for tree-sitter-python that records upstream identity, provenance, license, compatibility, scanner, query, monorepo, and future validation gates before source import.
+      owner_phase: runner
+      depends_on: []
+      status: pending
+      execution_context:
+        - "Anchors: docs/tree-sitter-python-grammar-admission.md, docs/tree-sitter-multi-language-query-strategy.md, docs/tree-sitter-go-grammar-admission.md, docs/tree-sitter-go-source-import-evidence.md"
+        - "In scope: one documentation-only Python grammar admission review with candidate identity, immutable revision/checksum gates, license/notice, generated parser/scanner provenance, core ABI compatibility, BOM/excluded file classes, source-size/build-impact, query fixture gates, monorepo path behaviour, and decision state"
+        - "Out of scope: third_party/tree-sitter-python import, source/build/test/fixture changes, build.zig.zon, CI changes, provider registry, CLI flags, report schema changes, scoring, cache, runtime Python provider behaviour, custom user queries, LSP, release/package work"
+        - "Protected: local-first behaviour, no network/telemetry/upload/remote enrichment, no background provider execution, no bug prediction/code-quality scoring/developer ranking/maintainer judgement, existing Zig and Go provider behaviour"
+        - "Dependencies: Feature 0034 language strategy is complete and identifies Python as the next candidate after Go subject to admission gates"
+        - "Validation/evidence: git diff --check; zig build validate; docs-only changed-path scan; no tree-sitter-python source import scan; prohibited-claim/privacy/local-first scan over changed docs"
+        - "Review focus: admission gates are concrete enough to shape the next Python source-import feature without overclaiming Python runtime support"
+        - "Escalate if: implementation requires source import, build/runtime changes, provider registry, CLI/report schema changes, custom query execution, package/import analysis, LSP integration, notebook support, or unsupported public Python support claims"
+        - "Done boundary: admission document exists, no protected surfaces changed, validation passes, and future import/runtime sequencing is explicit"
+      anchors:
+        - docs/tree-sitter-python-grammar-admission.md
+        - docs/tree-sitter-multi-language-query-strategy.md
+        - docs/tree-sitter-go-grammar-admission.md
+        - docs/tree-sitter-go-source-import-evidence.md
+      in_scope:
+        - One docs-only Python grammar admission review document.
+        - Future Python source-import and provider validation gates.
+        - Explicit Python runtime deferral and decision state.
+      out_of_scope:
+        - Python grammar import or vendored source changes.
+        - Runtime Python provider, CLI, report schema, scoring, cache, CI, release, or package changes.
+        - Custom query execution, LSP, notebook handling, or import resolution.
+      protected_surfaces:
+        - Runtime CLI behaviour and report schema.
+        - File-level Git evidence truth.
+        - Local-first and privacy boundaries.
+        - Existing Zig and Go provider behaviour.
+        - Third-party vendored source state.
+      validation_commands:
+        - git diff --check
+        - zig build validate
+        - changed-path scan for docs-only scope
+        - no tree-sitter-python source import scan
+        - prohibited-claim and privacy scan over changed docs
+      review_focus:
+        - Python admission gates are concrete.
+        - No runtime support is claimed.
+        - Future sequencing is explicit.
+        - Public repo boundaries are preserved.
+      escalation_triggers:
+        - Source import or build changes are needed.
+        - Runtime Python provider behaviour is needed.
+        - Public docs imply Python support exists.
+        - Admission facts cannot be stated without unsupported guesses.
+      done_boundary: One docs-only Python admission artefact is committed and independently reviewable.
 execution:
   active_run_id: null
   current_packet_id: null
@@ -48,7 +170,8 @@ execution:
   requires_confirmation: true
 links:
   epic_todo_id: null
-  brief_ids: []
+  brief_ids:
+    - B001
 timestamps:
   created_at: 2026-05-24T17:31:54.418Z
-  updated_at: 2026-05-24T17:31:54.418Z
+  updated_at: 2026-05-24T17:44:00.000Z
