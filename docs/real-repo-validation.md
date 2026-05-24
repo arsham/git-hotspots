@@ -114,6 +114,34 @@ Observed validation status:
 - `git diff --check` passed with this document included in the diff.
 - Prohibited-claim and privacy scans passed for this document.
 
+## Python current-line history execution evidence
+
+Fresh local validation on 2026-05-25 exercised the Python opt-in
+`--symbol-line-history` path without committing raw private report output.
+
+Command shapes exercised:
+
+```sh
+zig build tree-sitter-python-symbol-proof
+zig build validate
+zig build validate -Dcloseout=true -Dsmoke-repo=<operator-provided-local-repo> -Dsmoke-label=sibling-local-repo
+git diff --check
+```
+
+Privacy-safe close-out smoke summary:
+
+| Label | Python symbols | Python line history | Results | Caveats | Dirty | Scope active | All elapsed | Analysed commits | Tracked files | Tracked Python files |
+| --- | --- | --- | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: |
+| `sibling-local-repo` | pass | pass | 10 | 2 | true | false | 60s | 1521 | 2840 | 4 |
+
+Additional privacy-safe observations:
+
+- The sibling smoke found a tracked Python file suitable for current-line
+  history validation and reported `python_line_history=pass` by label only.
+- Close-out validation also passed the project-scope sibling smoke; the summary
+  recorded bounded counts and did not print sibling paths, remotes, authors,
+  emails, commit messages, source snippets, or raw JSON/Markdown/table output.
+
 ## Candidate next seams from evidence
 
 These are candidate product seams, not roadmap commitments:

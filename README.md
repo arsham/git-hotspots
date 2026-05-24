@@ -193,10 +193,9 @@ virtual environments, dependency graphs, generated-source policy, scoring,
 ownership, or semantic moves.
 
 `--symbol-line-history` is a second opt-in layer that works only with
-`--inspect PATH --symbols`. It adds current-line Git evidence for the current
-Zig or Go symbol line ranges using one local blame process only when symbol
-ranges are valid and the inspected file is clean. Python line-history is not
-implemented in this alpha. Output is summary-only:
+`--inspect PATH --symbols`. It adds current-line Git evidence for current Zig,
+Go, or Python symbol line ranges using one local blame process only when symbol
+ranges are valid and the inspected file is clean. Output is summary-only:
 commit counts, bounded sample commit ids, timestamps, confidence, freshness,
 failure state, and caveats. It does not emit author identities, commit
 messages, source snippets, remotes, private repo names, or absolute paths, and

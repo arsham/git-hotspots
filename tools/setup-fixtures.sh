@@ -479,7 +479,7 @@ make_symbols
 make_go_symbols
 make_python_symbols
 make_symbol_line_history
-rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked" "$FIX/symbol-line-history-shallow" "$FIX/symbol-line-history-partial" "$FIX/go-symbols-shallow" "$FIX/go-symbols-partial"
+rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked" "$FIX/symbol-line-history-shallow" "$FIX/symbol-line-history-partial" "$FIX/go-symbols-shallow" "$FIX/go-symbols-partial" "$FIX/python-symbols-shallow" "$FIX/python-symbols-partial"
 git clone -q --depth 1 "file://$FIX/basic" "$FIX/shallow"
 git clone -q "$FIX/basic" "$FIX/medium"
 printf 'local dirty note\n' >> "$FIX/medium/docs/guide.md"
@@ -494,3 +494,6 @@ git -C "$FIX/symbol-line-history-partial" config remote.origin.promisor true
 git clone -q --depth 1 "file://$FIX/go-symbols" "$FIX/go-symbols-shallow"
 git clone -q "$FIX/go-symbols" "$FIX/go-symbols-partial"
 git -C "$FIX/go-symbols-partial" config remote.origin.promisor true
+git clone -q --depth 1 "file://$FIX/python-symbols" "$FIX/python-symbols-shallow"
+git clone -q "$FIX/python-symbols" "$FIX/python-symbols-partial"
+git -C "$FIX/python-symbols-partial" config remote.origin.promisor true

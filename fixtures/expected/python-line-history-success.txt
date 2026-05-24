@@ -1,0 +1,37 @@
+git-hotspots: file-level Git-history investigation prompts
+commits=2 shallow=false partial=false dirty=false auto_fetch=false
+scope: selected=project include_prefixes=[] exclude_prefixes=[.flow/,.zig-cache/,zig-out/,target/,node_modules/,dist/,build/,coverage/] outside_include_paths=0 outside_include_changes=0 excluded_paths=0 excluded_changes=0
+caveats: Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked
+inspect: requested=src/example.py matched=src/example.py rank=1
+symbols: provider=tree-sitter-python state=current-only freshness=fresh failure=ok confidence=high total=11 shown=11 omitted=0 limit=25 limit_source=default sort_basis="current-line Git evidence summary"
+symbols caveat: current working-tree enrichment only; file-level Git evidence, score, file order, lineage, and confidence are unchanged
+
+rank  score   changes churn   confidence lineage path
+1     53.4    2       34      medium     yes     src/example.py
+
+current symbols (shown first by current-line Git evidence summary):
+  summary: total=11 shown=11 omitted=0 limit=25 limit_source=default sort_basis="current-line Git evidence summary"
+  module src/example.py lines 1-35 confidence=high
+    Current-line Git evidence: commits=1 lines=35 unblamable=1 freshness=partial failure=ok confidence=medium caveats=current-line Git evidence has unblamable lines in this symbol range
+  function top_function lines 10-20 confidence=high
+    Current-line Git evidence: commits=1 lines=11 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+  class Outer lines 22-31 confidence=high
+    Current-line Git evidence: commits=1 lines=10 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+  method method lines 27-31 confidence=high
+    Current-line Git evidence: commits=1 lines=5 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+  class InnerClass lines 17-18 confidence=high
+    Current-line Git evidence: commits=1 lines=2 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+  class Nested lines 24-25 confidence=high
+    Current-line Git evidence: commits=1 lines=2 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+  function café lines 33-34 confidence=high
+    Current-line Git evidence: commits=1 lines=2 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+  function inner_function lines 14-15 confidence=high
+    Current-line Git evidence: commits=1 lines=2 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+  function method_inner lines 29-30 confidence=high
+    Current-line Git evidence: commits=1 lines=2 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+  other CONSTANT lines 5-5 confidence=high
+    Current-line Git evidence: commits=1 lines=1 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+  variable mutable_value lines 6-6 confidence=high
+    Current-line Git evidence: commits=1 lines=1 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none
+
+Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.

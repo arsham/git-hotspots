@@ -44,9 +44,9 @@ const usage =
     \\                    affect score, rank, lineage, confidence, or file-level evidence
     \\  --symbol-line-history
     \\                    With --inspect PATH --symbols only, add opt-in current-line
-    \\                    Git evidence for current Zig or Go symbol line ranges;
-    \\                    Python line history is not implemented; not symbol
-    \\                    history, lineage, scoring, or ownership
+    \\                    Git evidence for current Zig, Go, or Python symbol line
+    \\                    ranges; not symbol history, lineage, scoring, or
+    \\                    ownership
     \\  --symbol-limit N  With --inspect PATH --symbols only, limit human table and
     \\                    Markdown symbol rows (default: 25); JSON symbols.items
     \\                    remains complete
@@ -157,7 +157,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
             const symbol_report = try tree_sitter_zig.extractPath(allocator, io, analysis.repo_root, matched_path);
             analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
         }
-        if (cfg.symbol_line_history and !std.mem.endsWith(u8, matched_path, ".py")) try git.attachCurrentLineHistory(allocator, io, &analysis);
+        if (cfg.symbol_line_history) try git.attachCurrentLineHistory(allocator, io, &analysis);
         analysis.symbol_display = .{ .limit = cfg.symbol_limit orelse model.default_symbol_display_limit, .explicit_limit = cfg.symbol_limit != null };
     }
 

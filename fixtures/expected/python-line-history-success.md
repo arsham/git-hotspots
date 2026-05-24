@@ -41,10 +41,10 @@ Symbols are opt-in current working-tree enrichment only. They do not change scor
 - Failure: ok
 - Confidence: high
 - Total symbols: 11
-- Shown symbols: 3
-- Omitted symbols: 8
-- Human display limit: 3 (explicit)
-- Sort basis: shown first by provider order
+- Shown symbols: 11
+- Omitted symbols: 0
+- Human display limit: 25 (default)
+- Sort basis: shown first by current-line Git evidence summary
 - Caveats:
   - current working\-tree enrichment only; file\-level Git evidence remains product truth
   - supported subset: module roots, class and function definitions, direct class methods, nested definitions, and module\-level simple assignments
@@ -53,11 +53,19 @@ Symbols are opt-in current working-tree enrichment only. They do not change scor
   - module names are repo\-relative .py paths; qualified Python names, imports, package discovery, virtualenvs, notebooks, and LSP analysis are out of scope
   - dynamic assignments, tuple/list destructuring, dependency graphs, generated\-source policy, scoring, and symbol or function moves are out of scope
 
-| Name | Kind | Lines | Confidence |
-| --- | --- | ---: | --- |
-| src/example.py | module | 1-35 | high |
-| CONSTANT | other | 5-5 | high |
-| mutable\_value | variable | 6-6 | high |
+| Name | Kind | Lines | Confidence | Current-line Git evidence |
+| --- | --- | ---: | --- | --- |
+| src/example.py | module | 1-35 | high | Current-line Git evidence: commits=1; lines=35; unblamable=1; freshness=partial; failure=ok; confidence=medium; caveats=current\-line Git evidence has unblamable lines in this symbol range |
+| top\_function | function | 10-20 | high | Current-line Git evidence: commits=1; lines=11; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
+| Outer | class | 22-31 | high | Current-line Git evidence: commits=1; lines=10; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
+| method | method | 27-31 | high | Current-line Git evidence: commits=1; lines=5; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
+| InnerClass | class | 17-18 | high | Current-line Git evidence: commits=1; lines=2; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
+| Nested | class | 24-25 | high | Current-line Git evidence: commits=1; lines=2; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
+| café | function | 33-34 | high | Current-line Git evidence: commits=1; lines=2; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
+| inner\_function | function | 14-15 | high | Current-line Git evidence: commits=1; lines=2; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
+| method\_inner | function | 29-30 | high | Current-line Git evidence: commits=1; lines=2; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
+| CONSTANT | other | 5-5 | high | Current-line Git evidence: commits=1; lines=1; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
+| mutable\_value | variable | 6-6 | high | Current-line Git evidence: commits=1; lines=1; unblamable=0; freshness=fresh; failure=ok; confidence=high; caveats=none |
 
 ## Caveats
 

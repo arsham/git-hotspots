@@ -18,7 +18,7 @@ const ok_caveats = [_][]const u8{
     "range convention: one-based inclusive lines; decorated definitions include decorators",
     "provider order: module symbol first, then deterministic source order by symbol node start byte",
     "module names are repo-relative .py paths; qualified Python names, imports, package discovery, virtualenvs, notebooks, and LSP analysis are out of scope",
-    "dynamic assignments, tuple/list destructuring, dependency graphs, generated-source policy, Python line history, scoring, ownership, and symbol or function moves are out of scope",
+    "dynamic assignments, tuple/list destructuring, dependency graphs, generated-source policy, scoring, and symbol or function moves are out of scope",
 };
 const unsupported_caveats = [_][]const u8{
     "provider unsupported: only repo-relative .py files are parsed",

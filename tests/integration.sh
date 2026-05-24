@@ -370,11 +370,44 @@ diff -u fixtures/expected/python-symbols-rename-alias.json /tmp/git-hotspots-pyt
 ! grep -Fq -- 'top_function' /tmp/git-hotspots-python-symbols-other.json
 "$EXE" --repo fixtures/python-symbols --inspect 'src/markdown|path.py' --symbols --format markdown > /tmp/git-hotspots-python-symbols-markdown-path.md
 grep -Fq -- 'markdown\|path.py' /tmp/git-hotspots-python-symbols-markdown-path.md
-"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-symbols-line-history-deferred.json
-diff -u /tmp/git-hotspots-python-symbols.json /tmp/git-hotspots-python-symbols-line-history-deferred.json
-python3 - /tmp/git-hotspots-python-symbols.json /tmp/git-hotspots-python-symbols-limit.json /tmp/git-hotspots-python-symbols-empty.json /tmp/git-hotspots-python-symbols-invalid.json /tmp/git-hotspots-python-symbols-generated.json /tmp/git-hotspots-python-symbols-symlink-unavailable.json /tmp/git-hotspots-python-symbols-large-unavailable.json /tmp/git-hotspots-python-symbols-missing-unavailable.json /tmp/git-hotspots-python-symbols-rename-alias.json /tmp/git-hotspots-python-symbols-other.json <<'PY'
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-line-history-success.json
+diff -u fixtures/expected/python-line-history-success.json /tmp/git-hotspots-python-line-history-success.json
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-line-history-success-2.json
+diff -u /tmp/git-hotspots-python-line-history-success.json /tmp/git-hotspots-python-line-history-success-2.json
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-line-history --format markdown > /tmp/git-hotspots-python-line-history-success.md
+diff -u fixtures/expected/python-line-history-success.md /tmp/git-hotspots-python-line-history-success.md
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-line-history --format table > /tmp/git-hotspots-python-line-history-success.txt
+diff -u fixtures/expected/python-line-history-success.txt /tmp/git-hotspots-python-line-history-success.txt
+"$EXE" --repo fixtures/python-symbols-shallow --inspect src/example.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-line-history-shallow.json
+grep -Fq -- 'current-line Git evidence may be incomplete: repository history is shallow; auto_fetch is false' /tmp/git-hotspots-python-line-history-shallow.json
+"$EXE" --repo fixtures/python-symbols-partial --inspect src/example.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-line-history-partial.json
+grep -Fq -- 'current-line Git evidence may be incomplete: repository history may be partial/promisor; auto_fetch is false' /tmp/git-hotspots-python-line-history-partial.json
+"$EXE" --repo fixtures/python-symbols --inspect src/empty.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-line-history-empty.json
+grep -Fq -- 'current_line_history' /tmp/git-hotspots-python-line-history-empty.json
+grep -Fq -- 'current-line Git evidence has unblamable lines in this symbol range' /tmp/git-hotspots-python-line-history-empty.json
+"$EXE" --repo fixtures/python-symbols --inspect src/invalid_partial.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-line-history-invalid.json
+grep -Fq -- '"failure": "failed"' /tmp/git-hotspots-python-line-history-invalid.json
+! grep -Fq -- 'current_line_history' /tmp/git-hotspots-python-line-history-invalid.json
+"$EXE" --repo fixtures/python-symbols --inspect src/link.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-line-history-symlink-unavailable.json
+grep -Fq -- '"failure": "unavailable"' /tmp/git-hotspots-python-line-history-symlink-unavailable.json
+! grep -Fq -- 'current_line_history' /tmp/git-hotspots-python-line-history-symlink-unavailable.json
+"$EXE" --repo fixtures/python-symbols --inspect src/large.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-line-history-large-unavailable.json
+grep -Fq -- '"failure": "unavailable"' /tmp/git-hotspots-python-line-history-large-unavailable.json
+! grep -Fq -- 'current_line_history' /tmp/git-hotspots-python-line-history-large-unavailable.json
+"$EXE" --repo fixtures/python-symbols --inspect src/missing.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-line-history-missing-unavailable.json
+grep -Fq -- '"failure": "unavailable"' /tmp/git-hotspots-python-line-history-missing-unavailable.json
+! grep -Fq -- 'current_line_history' /tmp/git-hotspots-python-line-history-missing-unavailable.json
+printf '# dirty inspected\n' >> fixtures/python-symbols/src/example.py
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-line-history-dirty-inspected.json
+grep -Fq -- 'current-line Git evidence skipped: inspected file has staged or unstaged content changes' /tmp/git-hotspots-python-line-history-dirty-inspected.json
+git -C fixtures/python-symbols checkout -q -- src/example.py
+printf '# dirty unrelated\n' >> fixtures/python-symbols/src/other.py
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-line-history-dirty-unrelated.json
+grep -Fq -- '"failure": "ok"' /tmp/git-hotspots-python-line-history-dirty-unrelated.json
+git -C fixtures/python-symbols checkout -q -- src/other.py
+python3 - /tmp/git-hotspots-python-symbols.json /tmp/git-hotspots-python-symbols-limit.json /tmp/git-hotspots-python-symbols-empty.json /tmp/git-hotspots-python-symbols-invalid.json /tmp/git-hotspots-python-symbols-generated.json /tmp/git-hotspots-python-symbols-symlink-unavailable.json /tmp/git-hotspots-python-symbols-large-unavailable.json /tmp/git-hotspots-python-symbols-missing-unavailable.json /tmp/git-hotspots-python-symbols-rename-alias.json /tmp/git-hotspots-python-symbols-other.json /tmp/git-hotspots-python-line-history-success.json /tmp/git-hotspots-python-line-history-shallow.json /tmp/git-hotspots-python-line-history-partial.json /tmp/git-hotspots-python-line-history-empty.json /tmp/git-hotspots-python-line-history-dirty-inspected.json /tmp/git-hotspots-python-line-history-dirty-unrelated.json <<'PY'
 import json, sys
-success, limited, empty, invalid, generated, symlink, large, missing, alias, other = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+success, limited, empty, invalid, generated, symlink, large, missing, alias, other, line, line_shallow, line_partial, line_empty, line_dirty, line_unrelated = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
 assert success['symbols']['provider']['name'] == 'tree-sitter-python'
 assert success['symbols']['provider']['failure'] == 'ok'
 assert [row['name'] for row in success['symbols']['items']] == ['src/example.py', 'CONSTANT', 'mutable_value', 'top_function', 'inner_function', 'InnerClass', 'Outer', 'Nested', 'method', 'method_inner', 'café']
@@ -393,13 +426,25 @@ assert missing['symbols']['provider']['failure'] == 'unavailable' and missing['s
 assert alias['inspect']['requested_path'] == 'src/old_example.py' and alias['inspect']['matched_path'] == 'src/example.py'
 assert all(row['path'] == 'src/example.py' for row in alias['symbols']['items'])
 assert [row['name'] for row in other['symbols']['items']] == ['src/other.py', 'OtherOnly']
+assert all('current_line_history' in row for row in line['symbols']['items']), 'Python current-line evidence missing'
+assert all(row['current_line_history']['basis'] == 'current-line-range-at-head' for row in line['symbols']['items'])
+assert any(row['current_line_history']['most_recent_line_touched_timestamp'] == 1777593600 for row in line['symbols']['items'])
+assert any('shallow' in ' '.join(row['current_line_history']['caveats']) for row in line_shallow['symbols']['items'])
+assert any('partial/promisor' in ' '.join(row['current_line_history']['caveats']) for row in line_partial['symbols']['items'])
+assert any(row['current_line_history']['uncommitted_or_unblamable_line_count'] > 0 for row in line_empty['symbols']['items'])
+assert all(row['current_line_history']['failure'] == 'skipped' for row in line_dirty['symbols']['items'])
+assert all(row['current_line_history']['failure'] == 'ok' for row in line_unrelated['symbols']['items'])
 for data in (success, limited, empty, invalid, generated, symlink, large, missing, alias, other):
     text = json.dumps(data, ensure_ascii=False)
     assert 'current_line_history' not in text
     for forbidden in ('Fixture Author', 'fixture@example', 'source line'):
         assert forbidden not in text
+for data in (line, line_shallow, line_partial, line_empty, line_dirty, line_unrelated):
+    text = json.dumps(data, ensure_ascii=False)
+    for forbidden in ('Fixture Author', 'fixture@example', 'source line', 'ownership', 'productivity'):
+        assert forbidden not in text
 PY
-! grep -Eiq -- 'Fixture Author|fixture@example|fixture function|private|file://|raw blame|source line|previous filename|ownership|productivity|developer ranking' /tmp/git-hotspots-go-line-history-success.json /tmp/git-hotspots-go-line-history-success.md /tmp/git-hotspots-go-line-history-success.txt /tmp/git-hotspots-go-line-history-shallow.json /tmp/git-hotspots-go-line-history-partial.json /tmp/git-hotspots-go-line-history-empty.json /tmp/git-hotspots-go-line-history-invalid.json /tmp/git-hotspots-go-line-history-symlink-unavailable.json /tmp/git-hotspots-go-line-history-large-unavailable.json /tmp/git-hotspots-go-line-history-missing-unavailable.json /tmp/git-hotspots-go-line-history-rename-alias.json /tmp/git-hotspots-go-line-history-dirty-inspected.json /tmp/git-hotspots-go-line-history-dirty-unrelated.json fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt
+! grep -Eiq -- 'Fixture Author|fixture@example|fixture function|private|file://|raw blame|source line|previous filename|ownership|productivity|developer ranking' /tmp/git-hotspots-go-line-history-success.json /tmp/git-hotspots-go-line-history-success.md /tmp/git-hotspots-go-line-history-success.txt /tmp/git-hotspots-go-line-history-shallow.json /tmp/git-hotspots-go-line-history-partial.json /tmp/git-hotspots-go-line-history-empty.json /tmp/git-hotspots-go-line-history-invalid.json /tmp/git-hotspots-go-line-history-symlink-unavailable.json /tmp/git-hotspots-go-line-history-large-unavailable.json /tmp/git-hotspots-go-line-history-missing-unavailable.json /tmp/git-hotspots-go-line-history-rename-alias.json /tmp/git-hotspots-go-line-history-dirty-inspected.json /tmp/git-hotspots-go-line-history-dirty-unrelated.json /tmp/git-hotspots-python-line-history-success.json /tmp/git-hotspots-python-line-history-success.md /tmp/git-hotspots-python-line-history-success.txt /tmp/git-hotspots-python-line-history-shallow.json /tmp/git-hotspots-python-line-history-partial.json /tmp/git-hotspots-python-line-history-empty.json /tmp/git-hotspots-python-line-history-invalid.json /tmp/git-hotspots-python-line-history-symlink-unavailable.json /tmp/git-hotspots-python-line-history-large-unavailable.json /tmp/git-hotspots-python-line-history-missing-unavailable.json /tmp/git-hotspots-python-line-history-dirty-inspected.json /tmp/git-hotspots-python-line-history-dirty-unrelated.json fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt fixtures/expected/python-line-history-success.json fixtures/expected/python-line-history-success.md fixtures/expected/python-line-history-success.txt
 "$EXE" --repo fixtures/scope --format json > /tmp/git-hotspots-scope-unfiltered.json
 "$EXE" --repo fixtures/scope --scope all --limit 200 --format json > /tmp/git-hotspots-scope-all.json
 "$EXE" --repo fixtures/scope --scope all $PROJECT_EXCLUDE_ARGS --format json > /tmp/git-hotspots-scope-filtered.json
