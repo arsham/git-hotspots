@@ -1,0 +1,10 @@
+bytes	sha256	upstream_git_blob_sha1	vendored_path	upstream_path	copy_note
+1080	d724405ce238a22c0d35769c5a36b386ad5958192efe8bbb304fb2896254575f	ff8ed93cb0dd57d68feeefe4829dbc9083584b5e	third_party/tree-sitter-python/v0.25.0/LICENSE	LICENSE	byte-for-byte
+26723	aeebc33e1e396b8d115baeaa9a833608955c7469eebcd959fc6d390a1bfcef1a	2bbe35c9e696e97744f74e01daca698a0b0c8e7c	third_party/tree-sitter-python/v0.25.0/grammar.js	grammar.js	author-comment-line-redacted
+145051	2adc15e78f4dae293e85de1517c45bcee2f8b075fa30a083c658925b944afec4	fa1ff576bccf2e8eba42bc99613e38e576bfed92	third_party/tree-sitter-python/v0.25.0/src/grammar.json	src/grammar.json	byte-for-byte
+64995	a2456847bea3adff5b2222b2f7b03a870159470d8908622204e6eb29ee2fe45e	e97333cd9aa9f86a9b56c367b742a96b9c1c9990	third_party/tree-sitter-python/v0.25.0/src/node-types.json	src/node-types.json	byte-for-byte
+3439646	a895f10b3cf7b2608f3283b43cd5cfed70971c7ee4a0136abbaaccbc4a7a25e0	c7ca6bf7cb920fc90c1de0234ba5d5b9433ba317	third_party/tree-sitter-python/v0.25.0/src/parser.c	src/parser.c	byte-for-byte
+15470	6db82134ac2d4c90a1a1475487a625cface02662ebda9b7478cad9c7147e9afe	1fc77cdbdee6c7d33c183dc8c2bc3b64c9b0a410	third_party/tree-sitter-python/v0.25.0/src/scanner.c	src/scanner.c	byte-for-byte
+985	b29c1c9fb7cc82f58c84b376df1297d6e2737a1d655fd356db0859e3c29c2fea	1abdd1201578605b8d05a3001f01ebc0d58826d9	third_party/tree-sitter-python/v0.25.0/src/tree_sitter/alloc.h	src/tree_sitter/alloc.h	byte-for-byte
+10431	5bdf6ed1a78e3409fd443e085ca967a64c188a5d082aaf7f819bccd53a471c94	a17a574f04e0c20c38463149640badc5126063f8	third_party/tree-sitter-python/v0.25.0/src/tree_sitter/array.h	src/tree_sitter/array.h	byte-for-byte
+7624	180b893c8734778fd32f372dfbc27bd6ad1cd2221f26150b31256ff6716320d2	858107deb9e4a1ffcd2ed5e6ffe98a5fcab3e1f6	third_party/tree-sitter-python/v0.25.0/src/tree_sitter/parser.h	src/tree_sitter/parser.h	byte-for-byte

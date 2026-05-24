@@ -38,6 +38,17 @@ vendored paths only.
   `third_party/tree-sitter-go/v0.25.0/LICENSE`.
 - Provenance: `third_party/tree-sitter-go/v0.25.0/PROVENANCE.md`
 
+## tree-sitter-python
+
+- Upstream: `https://github.com/tree-sitter/tree-sitter-python`
+- Selected revision: tag `v0.25.0`, commit
+  `293fdc02038ee2bf0e2e206711b69c90ac0d413f`
+- Vendored path: `third_party/tree-sitter-python/v0.25.0`
+- License: MIT
+- Notice: preserve the upstream MIT license text and copyright notice copied in
+  `third_party/tree-sitter-python/v0.25.0/LICENSE`.
+- Provenance: `third_party/tree-sitter-python/v0.25.0/PROVENANCE.md`
+
 ## Generated-source note
 
 `third_party/tree-sitter-zig/v1.1.2/src/parser.c` is accepted in Feature 0025
@@ -51,3 +62,11 @@ Git blob `e3567a9519739c92ae776060dc8d3b4968bc465f`, with byte size
 `1572685`. No local parser generator, package-manager fetch, build path, link
 path, parser runtime, provider behavior, or Go query support is added by this
 import.
+
+`third_party/tree-sitter-python/v0.25.0/src/parser.c` and
+`third_party/tree-sitter-python/v0.25.0/src/scanner.c` are accepted in Feature
+0042 as pinned upstream generated/scanner artefacts copied from the selected
+Git commit, with Git blobs recorded in
+`third_party/tree-sitter-python/v0.25.0/IMPORTED_FILES.tsv`. No local parser
+generator, package-manager fetch, build path, link path, parser runtime,
+provider behavior, or Python query support is added by this import.
