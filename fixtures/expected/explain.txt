@@ -77,11 +77,11 @@ evidence, Git rename lineage, scope, or inclusion/exclusion decisions.
 Unsupported or unavailable current files preserve inspected file evidence
 and report provider caveats without parser diagnostics or source snippets.
 Go support is inspect-only and does not evaluate packages, build tags,
-cgo, dependency graphs, symbol lineage, scoring, or line history.
+cgo, dependency graphs, symbol lineage, scoring, or true symbol history.
 
 --symbol-line-history is opt-in and valid only with --inspect PATH
---symbols. It adds current-line Git blame evidence for the current symbol
-line ranges using one local blame process only when current symbol ranges
+--symbols. It adds current-line Git blame evidence for current Zig or Go
+symbol line ranges using one local blame process only when current ranges
 are valid and the inspected file is clean. It reports commit-count and
 timestamp summaries without author identities, commit messages, source
 snippets, remotes, or absolute paths. This is not symbol lineage,

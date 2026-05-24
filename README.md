@@ -186,16 +186,17 @@ current files preserve the inspected file evidence and report provider caveats
 without parser diagnostics, source snippets, absolute paths, remotes, author
 identities, or commit messages. Go support is inspect-only for the matched file
 and does not evaluate packages, build tags, cgo, dependency graphs, symbol
-lineage, scoring, ranking, or line history.
+lineage, scoring, ranking, or true symbol history.
 
 `--symbol-line-history` is a second opt-in layer that works only with
 `--inspect PATH --symbols`. It adds current-line Git evidence for the current
-symbol line ranges using one local blame process only when symbol ranges are
-valid and the inspected file is clean. Output is summary-only: commit counts,
-bounded sample commit ids, timestamps, confidence, freshness, failure state,
-and caveats. It does not emit author identities, commit messages, source
-snippets, remotes, private repo names, or absolute paths, and it does not
-change file score, rank, confidence, co-change evidence, scope, or lineage.
+Zig or Go symbol line ranges using one local blame process only when symbol
+ranges are valid and the inspected file is clean. Output is summary-only:
+commit counts, bounded sample commit ids, timestamps, confidence, freshness,
+failure state, and caveats. It does not emit author identities, commit
+messages, source snippets, remotes, private repo names, or absolute paths, and
+it does not change file score, rank, confidence, co-change evidence, scope, or
+lineage.
 
 Git-detected file renames are folded conservatively when both the old and new
 paths are in scope. This is file-path lineage from local Git history only, not

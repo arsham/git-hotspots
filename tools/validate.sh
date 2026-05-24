@@ -597,7 +597,7 @@ explain_output_checks() {
 
 prohibited_claim_scan() {
   have_python || return 1
-  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt README.md CONTRIBUTING.md <<'PY'
+  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt README.md CONTRIBUTING.md <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -688,6 +688,8 @@ allowed = (
     'git clone -q "$FIX/basic"',
     'git clone -q --depth 1 "file://$FIX/symbol-line-history"',
     'git clone -q "$FIX/symbol-line-history"',
+    'git clone -q --depth 1 "file://$FIX/go-symbols"',
+    'git clone -q "$FIX/go-symbols"',
     'https?://|ssh://|git@',
     "('network command', re.compile",
     "('git network command', re.compile",
@@ -847,9 +849,15 @@ fixture_json_checks() {
   GO_SYMBOLS_MISSING_JSON=$ARTIFACT_DIR/go-symbols-missing.json
   GO_SYMBOLS_ALIAS_JSON=$ARTIFACT_DIR/go-symbols-alias.json
   GO_SYMBOLS_OTHER_JSON=$ARTIFACT_DIR/go-symbols-other.json
-  GO_SYMBOLS_NO_HISTORY_JSON=$ARTIFACT_DIR/go-symbols-no-history.json
+  GO_LINE_HISTORY_JSON=$ARTIFACT_DIR/go-line-history.json
+  GO_LINE_HISTORY_JSON_B=$ARTIFACT_DIR/go-line-history-b.json
+  GO_LINE_HISTORY_MD=$ARTIFACT_DIR/go-line-history.md
+  GO_LINE_HISTORY_TABLE=$ARTIFACT_DIR/go-line-history.txt
+  GO_LINE_HISTORY_SHALLOW_JSON=$ARTIFACT_DIR/go-line-history-shallow.json
+  GO_LINE_HISTORY_PARTIAL_JSON=$ARTIFACT_DIR/go-line-history-partial.json
   "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format json > "$GO_SYMBOLS_JSON" || return 1
   diff -u fixtures/expected/go-symbols.json "$GO_SYMBOLS_JSON" >/dev/null || return 1
+  ! grep -Fq -- 'current_line_history' "$GO_SYMBOLS_JSON" || return 1
   "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format markdown > "$GO_SYMBOLS_MD" || return 1
   diff -u fixtures/expected/go-symbols.md "$GO_SYMBOLS_MD" >/dev/null || return 1
   "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format table > "$GO_SYMBOLS_TABLE" || return 1
@@ -876,12 +884,22 @@ fixture_json_checks() {
   diff -u fixtures/expected/go-symbols-rename-alias.json "$GO_SYMBOLS_ALIAS_JSON" >/dev/null || return 1
   "$EXE" --repo fixtures/go-symbols --inspect src/other.go --symbols --format json > "$GO_SYMBOLS_OTHER_JSON" || return 1
   ! grep -Fq -- 'Zebra' "$GO_SYMBOLS_OTHER_JSON" || return 1
-  "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format json > "$GO_SYMBOLS_NO_HISTORY_JSON" || return 1
-  ! grep -Fq -- 'current_line_history' "$GO_SYMBOLS_NO_HISTORY_JSON" || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format json > "$GO_LINE_HISTORY_JSON" || return 1
+  diff -u fixtures/expected/go-line-history-success.json "$GO_LINE_HISTORY_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format json > "$GO_LINE_HISTORY_JSON_B" || return 1
+  diff -u "$GO_LINE_HISTORY_JSON" "$GO_LINE_HISTORY_JSON_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format markdown > "$GO_LINE_HISTORY_MD" || return 1
+  diff -u fixtures/expected/go-line-history-success.md "$GO_LINE_HISTORY_MD" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format table > "$GO_LINE_HISTORY_TABLE" || return 1
+  diff -u fixtures/expected/go-line-history-success.txt "$GO_LINE_HISTORY_TABLE" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols-shallow --inspect src/example.go --symbols --symbol-line-history --format json > "$GO_LINE_HISTORY_SHALLOW_JSON" || return 1
+  grep -Fq -- 'current-line Git evidence may be incomplete: repository history is shallow; auto_fetch is false' "$GO_LINE_HISTORY_SHALLOW_JSON" || return 1
+  "$EXE" --repo fixtures/go-symbols-partial --inspect src/example.go --symbols --symbol-line-history --format json > "$GO_LINE_HISTORY_PARTIAL_JSON" || return 1
+  grep -Fq -- 'current-line Git evidence may be incomplete: repository history may be partial/promisor; auto_fetch is false' "$GO_LINE_HISTORY_PARTIAL_JSON" || return 1
   have_python || return 1
-  python3 - "$SYMBOLS_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$SYMBOLS_LIMIT_JSON" "$GO_SYMBOLS_JSON" "$GO_SYMBOLS_LIMIT_JSON" "$GO_SYMBOLS_EMPTY_JSON" "$GO_SYMBOLS_INVALID_JSON" "$GO_SYMBOLS_CAVEATED_JSON" "$GO_SYMBOLS_SYMLINK_JSON" "$GO_SYMBOLS_LARGE_JSON" "$GO_SYMBOLS_MISSING_JSON" "$GO_SYMBOLS_ALIAS_JSON" "$GO_SYMBOLS_OTHER_JSON" <<'PY'
+  python3 - "$SYMBOLS_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$SYMBOLS_LIMIT_JSON" "$GO_SYMBOLS_JSON" "$GO_SYMBOLS_LIMIT_JSON" "$GO_SYMBOLS_EMPTY_JSON" "$GO_SYMBOLS_INVALID_JSON" "$GO_SYMBOLS_CAVEATED_JSON" "$GO_SYMBOLS_SYMLINK_JSON" "$GO_SYMBOLS_LARGE_JSON" "$GO_SYMBOLS_MISSING_JSON" "$GO_SYMBOLS_ALIAS_JSON" "$GO_SYMBOLS_OTHER_JSON" "$GO_LINE_HISTORY_JSON" "$GO_LINE_HISTORY_SHALLOW_JSON" "$GO_LINE_HISTORY_PARTIAL_JSON" <<'PY'
 import json, sys
-success, unsupported, symlink, limited, go_success, go_limited, go_empty, go_invalid, go_caveated, go_symlink, go_large, go_missing, go_alias, go_other = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+success, unsupported, symlink, limited, go_success, go_limited, go_empty, go_invalid, go_caveated, go_symlink, go_large, go_missing, go_alias, go_other, go_line, go_line_shallow, go_line_partial = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
 for data in (success, unsupported, symlink, limited):
     symbols = data['symbols']
     assert symbols['current_only'] is True, 'symbols current_only missing'
@@ -917,6 +935,10 @@ assert go_alias['inspect']['requested_path'] == 'src/old-example.go' and go_alia
 assert all(row['path'] == 'src/example.go' for row in go_alias['symbols']['items']), 'Go alias parsed requested alias'
 assert any('build tags' in caveat and 'cgo' in caveat for caveat in go_caveated['symbols']['provider']['caveats']), 'Go caveat missing'
 assert [row['name'] for row in go_other['symbols']['items']] == ['OtherOnly', 'symbols'], 'two-file inspect-only changed'
+assert all('current_line_history' in row for row in go_line['symbols']['items']), 'Go current-line evidence missing'
+assert any(row['current_line_history']['most_recent_line_touched_timestamp'] == 1777680000 for row in go_line['symbols']['items']), 'Go current-line timestamp evidence changed'
+assert any('shallow' in ' '.join(row['current_line_history']['caveats']) for row in go_line_shallow['symbols']['items']), 'Go shallow caveat missing'
+assert any('partial/promisor' in ' '.join(row['current_line_history']['caveats']) for row in go_line_partial['symbols']['items']), 'Go partial caveat missing'
 PY
   if "$EXE" --symbols > "$ARTIFACT_DIR/symbols-alone.out" 2> "$ARTIFACT_DIR/symbols-alone.err"; then return 1; fi
   grep -q -- '--symbols can only be combined with --inspect PATH' "$ARTIFACT_DIR/symbols-alone.err" || return 1

@@ -4,7 +4,7 @@ feature:
   slug: inspect-only-go-symbol-line-history-evidence
   title: Inspect-only Go symbol line-history evidence
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Go inspect-only symbol output works, and the current-line Git evidence
@@ -78,7 +78,7 @@ proposal:
     materialised_at: 2026-05-24T17:44:00.000Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -149,7 +149,7 @@ design:
         the user-visible path.
       owner_phase: runner
       depends_on: []
-      status: pending
+      status: done
       execution_context:
         - "Anchors: src/main.zig, src/git.zig, src/tree_sitter_go.zig,
           src/provider.zig, tools/setup-fixtures.sh, tests/integration.sh,
@@ -224,7 +224,7 @@ design:
       owner_phase: runner
       depends_on:
         - P1
-      status: pending
+      status: done
       execution_context:
         - "Anchors: src/main.zig, src/report.zig, src/explain.zig, README.md,
           tests/integration.sh, fixtures/expected"
@@ -302,7 +302,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-24T17:31:43.549Z
-  updated_at: 2026-05-24T17:48:52.510Z
+  updated_at: 2026-05-24T18:21:32.706Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-24T17:48:52.510Z

@@ -247,6 +247,7 @@ diff -u fixtures/expected/symbols-unsupported.json /tmp/git-hotspots-symbols-uns
 diff -u fixtures/expected/symbols-symlink-unavailable.json /tmp/git-hotspots-symbols-symlink-unavailable.json
 "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format json > /tmp/git-hotspots-go-symbols.json
 diff -u fixtures/expected/go-symbols.json /tmp/git-hotspots-go-symbols.json
+! grep -Fq -- 'current_line_history' /tmp/git-hotspots-go-symbols.json
 "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format markdown > /tmp/git-hotspots-go-symbols.md
 diff -u fixtures/expected/go-symbols.md /tmp/git-hotspots-go-symbols.md
 "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format table > /tmp/git-hotspots-go-symbols.txt
@@ -281,8 +282,38 @@ diff -u fixtures/expected/go-symbols-missing-unavailable.json /tmp/git-hotspots-
 diff -u fixtures/expected/go-symbols-rename-alias.json /tmp/git-hotspots-go-symbols-rename-alias.json
 "$EXE" --repo fixtures/go-symbols --inspect src/other.go --symbols --format json > /tmp/git-hotspots-go-symbols-other.json
 ! grep -Fq -- 'Zebra' /tmp/git-hotspots-go-symbols-other.json
-"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-symbols-no-line-history.json
-! grep -Fq -- 'current_line_history' /tmp/git-hotspots-go-symbols-no-line-history.json
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-line-history-success.json
+diff -u fixtures/expected/go-line-history-success.json /tmp/git-hotspots-go-line-history-success.json
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-line-history-success-2.json
+diff -u /tmp/git-hotspots-go-line-history-success.json /tmp/git-hotspots-go-line-history-success-2.json
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format markdown > /tmp/git-hotspots-go-line-history-success.md
+diff -u fixtures/expected/go-line-history-success.md /tmp/git-hotspots-go-line-history-success.md
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format table > /tmp/git-hotspots-go-line-history-success.txt
+diff -u fixtures/expected/go-line-history-success.txt /tmp/git-hotspots-go-line-history-success.txt
+"$EXE" --repo fixtures/go-symbols-shallow --inspect src/example.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-line-history-shallow.json
+grep -Fq -- 'current-line Git evidence may be incomplete: repository history is shallow; auto_fetch is false' /tmp/git-hotspots-go-line-history-shallow.json
+"$EXE" --repo fixtures/go-symbols-partial --inspect src/example.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-line-history-partial.json
+grep -Fq -- 'current-line Git evidence may be incomplete: repository history may be partial/promisor; auto_fetch is false' /tmp/git-hotspots-go-line-history-partial.json
+"$EXE" --repo fixtures/go-symbols --inspect src/empty.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-line-history-empty.json
+! grep -Fq -- 'current_line_history' /tmp/git-hotspots-go-line-history-empty.json
+"$EXE" --repo fixtures/go-symbols --inspect src/broken.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-line-history-invalid.json
+grep -Fq -- '"failure": "failed"' /tmp/git-hotspots-go-line-history-invalid.json
+"$EXE" --repo fixtures/go-symbols --inspect src/link.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-line-history-symlink-unavailable.json
+grep -Fq -- '"failure": "unavailable"' /tmp/git-hotspots-go-line-history-symlink-unavailable.json
+"$EXE" --repo fixtures/go-symbols --inspect src/large.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-line-history-large-unavailable.json
+grep -Fq -- '"failure": "unavailable"' /tmp/git-hotspots-go-line-history-large-unavailable.json
+"$EXE" --repo fixtures/go-symbols --inspect src/missing.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-line-history-missing-unavailable.json
+grep -Fq -- '"failure": "unavailable"' /tmp/git-hotspots-go-line-history-missing-unavailable.json
+"$EXE" --repo fixtures/go-symbols --inspect src/old-example.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-line-history-rename-alias.json
+grep -Fq -- '"matched_path": "src/example.go"' /tmp/git-hotspots-go-line-history-rename-alias.json
+printf '// dirty inspected\n' >> fixtures/go-symbols/src/example.go
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-line-history-dirty-inspected.json
+grep -Fq -- 'current-line Git evidence skipped: inspected file has staged or unstaged content changes' /tmp/git-hotspots-go-line-history-dirty-inspected.json
+git -C fixtures/go-symbols checkout -q -- src/example.go
+printf '// dirty unrelated\n' >> fixtures/go-symbols/src/other.go
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-line-history-dirty-unrelated.json
+grep -Fq -- '"failure": "ok"' /tmp/git-hotspots-go-line-history-dirty-unrelated.json
+git -C fixtures/go-symbols checkout -q -- src/other.go
 python3 - /tmp/git-hotspots-go-symbols.json /tmp/git-hotspots-go-symbols-limit.json /tmp/git-hotspots-go-symbols-empty.json /tmp/git-hotspots-go-symbols-invalid.json /tmp/git-hotspots-go-symbols-caveated.json /tmp/git-hotspots-go-symbols-symlink-unavailable.json /tmp/git-hotspots-go-symbols-large-unavailable.json /tmp/git-hotspots-go-symbols-missing-unavailable.json /tmp/git-hotspots-go-symbols-rename-alias.json /tmp/git-hotspots-go-symbols-other.json <<'PY'
 import json, sys
 success, limited, empty, invalid, caveated, symlink, large, missing, alias, other = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
@@ -308,6 +339,7 @@ for data in (success, limited, empty, invalid, caveated, symlink, large, missing
     for forbidden in ('Fixture Author', 'fixture@example', 'source line'):
         assert forbidden not in text
 PY
+! grep -Eiq -- 'Fixture Author|fixture@example|fixture function|private|file://|raw blame|source line|previous filename|ownership|productivity|developer ranking' /tmp/git-hotspots-go-line-history-success.json /tmp/git-hotspots-go-line-history-success.md /tmp/git-hotspots-go-line-history-success.txt /tmp/git-hotspots-go-line-history-shallow.json /tmp/git-hotspots-go-line-history-partial.json /tmp/git-hotspots-go-line-history-empty.json /tmp/git-hotspots-go-line-history-invalid.json /tmp/git-hotspots-go-line-history-symlink-unavailable.json /tmp/git-hotspots-go-line-history-large-unavailable.json /tmp/git-hotspots-go-line-history-missing-unavailable.json /tmp/git-hotspots-go-line-history-rename-alias.json /tmp/git-hotspots-go-line-history-dirty-inspected.json /tmp/git-hotspots-go-line-history-dirty-unrelated.json fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt
 "$EXE" --repo fixtures/scope --format json > /tmp/git-hotspots-scope-unfiltered.json
 "$EXE" --repo fixtures/scope --scope all --limit 200 --format json > /tmp/git-hotspots-scope-all.json
 "$EXE" --repo fixtures/scope --scope all $PROJECT_EXCLUDE_ARGS --format json > /tmp/git-hotspots-scope-filtered.json

@@ -14,3 +14,5 @@
 /fixtures/symbol-line-history-shallow/
 /fixtures/symbol-line-history-partial/
 /fixtures/go-symbols/
+/fixtures/go-symbols-shallow/
+/fixtures/go-symbols-partial/
