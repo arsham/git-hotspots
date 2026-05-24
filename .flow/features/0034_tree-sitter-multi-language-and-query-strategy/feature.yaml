@@ -202,4 +202,713 @@ links:
   brief_ids: []
 timestamps:
   created_at: 2026-05-24T01:41:45.922Z
-  updated_at: 2026-05-24T01:46:45.934Z
+  updated_at: 2026-05-24T01:49:36.114Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-24T01:49:36.114Z
+  assurance_level: sensitive
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Balanced
+    runner_model: Balanced
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level sensitive requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0034"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids: []
+    feature:
+      title: Tree-sitter multi-language and query strategy
+      problem: The project now has an opt-in Zig Tree-sitter provider, but adding more
+        languages or custom queries without a shared strategy would multiply
+        vendoring, query, validation, privacy, and monorepo support risks.
+      outcome: A design-only strategy document defines how future Tree-sitter
+        languages and query support may be admitted without changing runtime
+        behaviour in this feature.
+      acceptance:
+        - Add one strategy document for Tree-sitter multi-language and query
+          support.
+        - The document covers Go, Python, Lua, JavaScript, TypeScript, Rust,
+          Node as JavaScript or TypeScript runtime context, monorepos, and
+          future grammars.
+        - The document defines language admission criteria, query ownership,
+          built-in query requirements, deterministic language detection,
+          provider failure states, validation gates, and future sequencing.
+        - Custom user query execution is explicitly deferred unless a later
+          feature accepts a safe local-only contract.
+        - The strategy preserves inspect-only provider execution by default and
+          does not introduce repo-wide provider scanning.
+        - The strategy preserves file-level Git evidence as product truth and
+          keeps provider evidence additive, current-only, caveated, and
+          optional.
+        - No runtime, source, test, fixture, build, third-party, CLI, report
+          schema, scoring, cache, CI, release, or package behaviour changes are
+          made.
+    brief_alignment:
+      status: null
+      role: null
+      summary: null
+      checked_at: null
+    briefs: []
+    prd_path: .flow/features/0034_tree-sitter-multi-language-and-query-strategy/prd.md
+  requirements_contract:
+    source_path: .flow/features/0034_tree-sitter-multi-language-and-query-strategy/prd.md
+    source_digest: f9ca039262edcd9dbe0207146183ff8d9f380d519a595df4f18cc8724714cb87
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: Add one strategy document at
+          docs/tree-sitter-multi-language-query-strategy.md.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: The document must state that current runtime Tree-sitter support remains
+          Zig-only unless later features implement and validate more languages.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: The document must state that file-level Git evidence remains product truth
+          and provider evidence is optional, additive, current-only, and
+          caveated.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: "The document must cover the requested language set: Go, Python, Lua,
+          JavaScript, TypeScript, Rust, and Node as JavaScript or TypeScript
+          runtime context."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: The document must define language admission criteria before a language can
+          be implemented.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: Language admission criteria must include pinned local grammar sources,
+          license and notice review, provenance, offline build proof,
+          source-size and build-impact evidence, query fixtures, and no-provider
+          output stability.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: The document must define a static built-in language registry concept
+          without implementing one.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: The registry concept must include language id, file extensions, special
+          file names when needed, grammar component identity, parser symbol,
+          built-in query version, supported symbol kinds, caveats, and
+          validation status.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: Language detection must be deterministic for the requested inspect path
+          and must not imply repo-wide package or workspace discovery.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: Monorepo guidance must remain inspect-only and path-based by default.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: Monorepo examples must use project-relative paths and existing supported
+          options such as --include-prefix, --scope project, --scope all,
+          --inspect, --symbols, and --symbol-line-history.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: Monorepo guidance must not imply hidden workspace auto-discovery,
+          package-manager analysis, dependency graph inference, or repo-wide
+          provider scanning.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: Built-in symbol queries must be project-owned curated queries rather than
+          blindly imported highlight queries.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: Built-in queries must define capture names, symbol-kind mapping, range
+          semantics, deterministic ordering, versioning, and fixture coverage.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#requirements[15]
+        text: The document must define common symbol kinds across languages while
+          allowing language-specific caveats.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#requirements[16]
+        text: The document must define provider failure states for unsupported language,
+          unavailable grammar, query compile failure, parse failure, partial
+          parse, timeout or limit exceeded, zero symbols, and skipped provider
+          execution.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#requirements[17]
+        text: Failure states must preserve file-level hotspot output and appear as
+          visible provider caveats when provider output is requested.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#requirements[18]
+        text: Custom user query execution must be explicitly deferred.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#requirements[19]
+        text: The document must define the minimum future safety contract for custom
+          queries if a later feature accepts them.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#requirements[20]
+        text: The future custom-query safety contract must include explicit opt-in,
+          local repo-relative query file paths, size and time limits, accepted
+          capture names only, sanitized diagnostics, deterministic failure
+          states, no raw source output, and a provider configuration
+          fingerprint.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#requirements[21]
+        text: The document must recommend a future sequencing path that adds one
+          language at a time.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#requirements[22]
+        text: The recommended first non-Zig language should be justified. Go or Python
+          may be recommended, but the reason must be explicit.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#requirements[23]
+        text: JavaScript and TypeScript strategy must treat Node as runtime context, not
+          a separate language provider.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#requirements[24]
+        text: The document must defer LSP integration and explain that LSP is a later
+          provider class, not part of Tree-sitter language expansion.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#requirements[25]
+        text: The document must not claim runtime support for languages that are not yet
+          implemented.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#requirements[26]
+        text: The document must not add or require network, telemetry, upload, remote
+          enrichment, auto-fetch, background provider execution, package-manager
+          calls, or global parser tooling.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#requirements[27]
+        text: The document must not contain commercial, SaaS, pricing, sales, or hosted
+          product strategy.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#requirements[28]
+        text: The document must not contain positive claims that hotspots or provider
+          symbols predict bugs, rate code quality, score risk, rank developers,
+          judge maintainers, assess ownership, or measure productivity.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#requirements[29]
+        text: The feature must not change src/, tests/, fixtures/, third_party/,
+          build.zig, build.zig.zon, .github/, report schemas, CLI flags,
+          scoring, cache, runtime provider behaviour, or release/package
+          artefacts.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#requirements[30]
+        text: The feature must preserve the current Zig inspect-only provider behaviour.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#acceptance[1]
+        text: docs/tree-sitter-multi-language-query-strategy.md exists and is
+          public-facing.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#acceptance[2]
+        text: The document is concrete enough to shape the next one-language provider
+          feature without relying on this conversation.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#acceptance[3]
+        text: The document clearly says multi-language support and custom query
+          execution are future work until implemented and validated by separate
+          features.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#acceptance[4]
+        text: The language sequencing, language admission criteria, built-in query
+          contract, custom-query deferral, monorepo guidance, failure states,
+          and validation gates are all present.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#acceptance[5]
+        text: Changed paths are limited to the strategy document and Flow planning or
+          lifecycle artefacts.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#acceptance[6]
+        text: git diff --check passes.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#acceptance[7]
+        text: zig build validate passes.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#acceptance[8]
+        text: Content scans find no private paths, raw private reports, remotes, author
+          identities, source snippets, parser stderr, commercial strategy, or
+          prohibited positive quality/risk/people claims.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#edge-cases[1]
+        text: If the strategy needs a parser import or build change to be credible, stop
+          and reshape. Do not add runtime sources in this feature.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#edge-cases[2]
+        text: If language sequencing depends on unresolved legal or provenance facts,
+          record those as future admission gates rather than guessing.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#edge-cases[3]
+        text: If custom queries appear necessary for the next language, defer custom
+          query execution and shape a future query-safety feature first.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-042
+        source_ref: prd.md#edge-cases[4]
+        text: If monorepo examples need package-manager, workspace, or dependency
+          analysis, stop and keep them out of this feature.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-043
+        source_ref: prd.md#edge-cases[5]
+        text: If the document mentions a language that is not implemented, it must use
+          future-tense strategy language and not claim support.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-044
+        source_ref: prd.md#edge-cases[6]
+        text: If reviewer evidence finds a public claim that implies bug prediction,
+          code-quality scoring, risk scoring, developer ranking, ownership, or
+          productivity analysis, fix the wording before close-out.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-045
+        source_ref: prd.md#verification[1]
+        text: "Run the normal validation gate:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Run the normal validation gate:"
+        required_for_close_out: true
+      - id: REQ-046
+        source_ref: prd.md#verification[2]
+        text: "``sh zig build validate ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh zig build validate ``"
+        required_for_close_out: true
+      - id: REQ-047
+        source_ref: prd.md#verification[3]
+        text: "Run whitespace validation:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Run whitespace validation:"
+        required_for_close_out: true
+      - id: REQ-048
+        source_ref: prd.md#verification[4]
+        text: "``sh git diff --check ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh git diff --check ``"
+        required_for_close_out: true
+      - id: REQ-049
+        source_ref: prd.md#verification[5]
+        text: "Verify changed-path scope. The delivery commit should change only:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Verify changed-path scope. The delivery commit should change only:"
+        required_for_close_out: true
+      - id: REQ-050
+        source_ref: prd.md#verification[6]
+        text: "``text docs/tree-sitter-multi-language-query-strategy.md ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``text docs/tree-sitter-multi-language-query-strategy.md ``"
+        required_for_close_out: true
+      - id: REQ-051
+        source_ref: prd.md#verification[7]
+        text: plus Flow lifecycle metadata when closing the feature. It must not change
+          runtime, source, tests, fixtures, third-party sources, build files,
+          workflow files, report schemas, CLI flags, scoring, cache, provider
+          runtime, or release artefacts.
+        category: verification
+        packet_refs:
+          - P1
+        verification: plus Flow lifecycle metadata when closing the feature. It must not
+          change runtime, source, tests, fixtures, third-party sources, build
+          files, workflow files, report schemas, CLI flags, scoring, cache,
+          provider runtime, or release artefacts.
+        required_for_close_out: true
+      - id: REQ-052
+        source_ref: prd.md#verification[8]
+        text: "Run a docs content scan over the changed strategy document. It must
+          prove:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Run a docs content scan over the changed strategy document. It
+          must prove:"
+        required_for_close_out: true
+      - id: REQ-053
+        source_ref: prd.md#verification[9]
+        text: the current runtime language remains Zig-only;
+        category: verification
+        packet_refs:
+          - P1
+        verification: the current runtime language remains Zig-only;
+        required_for_close_out: true
+      - id: REQ-054
+        source_ref: prd.md#verification[10]
+        text: Go, Python, Lua, JavaScript, TypeScript, Rust, and Node-as-runtime-context
+          are covered;
+        category: verification
+        packet_refs:
+          - P1
+        verification: Go, Python, Lua, JavaScript, TypeScript, Rust, and
+          Node-as-runtime-context are covered;
+        required_for_close_out: true
+      - id: REQ-055
+        source_ref: prd.md#verification[11]
+        text: custom query execution is deferred;
+        category: verification
+        packet_refs:
+          - P1
+        verification: custom query execution is deferred;
+        required_for_close_out: true
+      - id: REQ-056
+        source_ref: prd.md#verification[12]
+        text: future custom-query safety contract terms are present;
+        category: verification
+        packet_refs:
+          - P1
+        verification: future custom-query safety contract terms are present;
+        required_for_close_out: true
+      - id: REQ-057
+        source_ref: prd.md#verification[13]
+        text: monorepo examples use project-relative paths and existing supported
+          options;
+        category: verification
+        packet_refs:
+          - P1
+        verification: monorepo examples use project-relative paths and existing
+          supported options;
+        required_for_close_out: true
+      - id: REQ-058
+        source_ref: prd.md#verification[14]
+        text: no unsupported language support claims appear;
+        category: verification
+        packet_refs:
+          - P1
+        verification: no unsupported language support claims appear;
+        required_for_close_out: true
+      - id: REQ-059
+        source_ref: prd.md#verification[15]
+        text: no network, telemetry, upload, remote enrichment, auto-fetch, global
+          parser tooling, package-manager execution, or background provider
+          behaviour is introduced;
+        category: verification
+        packet_refs:
+          - P1
+        verification: no network, telemetry, upload, remote enrichment, auto-fetch,
+          global parser tooling, package-manager execution, or background
+          provider behaviour is introduced;
+        required_for_close_out: true
+      - id: REQ-060
+        source_ref: prd.md#verification[16]
+        text: no absolute local paths, remotes, source snippets, parser stderr, raw
+          private reports, author identities, private repo names,
+          commercial/SaaS/pricing/sales strategy, or prohibited positive
+          bug/quality/risk/people claims appear.
+        category: verification
+        packet_refs:
+          - P1
+        verification: no absolute local paths, remotes, source snippets, parser stderr,
+          raw private reports, author identities, private repo names,
+          commercial/SaaS/pricing/sales strategy, or prohibited positive
+          bug/quality/risk/people claims appear.
+        required_for_close_out: true
+      - id: REQ-061
+        source_ref: prd.md#verification[17]
+        text: Close-out evidence should record command exits, changed-path scope, scan
+          summary, and clean post-commit status. It must not commit or print
+          private raw report output.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Close-out evidence should record command exits, changed-path
+          scope, scan summary, and clean post-commit status. It must not commit
+          or print private raw report output.
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: A design-only strategy document defines how future Tree-sitter
+      languages and query support may be admitted without changing runtime
+      behaviour in this feature.
+    acceptance:
+      - Add one strategy document for Tree-sitter multi-language and query
+        support.
+      - The document covers Go, Python, Lua, JavaScript, TypeScript, Rust, Node
+        as JavaScript or TypeScript runtime context, monorepos, and future
+        grammars.
+      - The document defines language admission criteria, query ownership,
+        built-in query requirements, deterministic language detection, provider
+        failure states, validation gates, and future sequencing.
+      - Custom user query execution is explicitly deferred unless a later
+        feature accepts a safe local-only contract.
+      - The strategy preserves inspect-only provider execution by default and
+        does not introduce repo-wide provider scanning.
+      - The strategy preserves file-level Git evidence as product truth and
+        keeps provider evidence additive, current-only, caveated, and optional.
+      - No runtime, source, test, fixture, build, third-party, CLI, report
+        schema, scoring, cache, CI, release, or package behaviour changes are
+        made.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands: []
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
