@@ -141,6 +141,26 @@ pub fn build(b: *std.Build) void {
     const tree_sitter_go_build_proof_step = b.step("tree-sitter-go-build-proof", "Compile vendored Tree-sitter Go sources and run a tiny non-product Go parse smoke");
     tree_sitter_go_build_proof_step.dependOn(&run_tree_sitter_go_build_proof.step);
 
+    const tree_sitter_go_symbol_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_go_symbol_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    tree_sitter_go_symbol_proof_module.addImport("provider", b.createModule(.{
+        .root_source_file = b.path("src/provider.zig"),
+        .target = target,
+        .optimize = optimize,
+    }));
+    addTreeSitterGo(b, tree_sitter_go_symbol_proof_module);
+
+    const tree_sitter_go_symbol_proof = b.addTest(.{
+        .root_module = tree_sitter_go_symbol_proof_module,
+    });
+
+    const run_tree_sitter_go_symbol_proof = b.addRunArtifact(tree_sitter_go_symbol_proof);
+    const tree_sitter_go_symbol_proof_step = b.step("tree-sitter-go-symbol-proof", "Run test-only Go current-symbol extraction proof with vendored Tree-sitter sources");
+    tree_sitter_go_symbol_proof_step.dependOn(&run_tree_sitter_go_symbol_proof.step);
+
     const run_cmd = b.addRunArtifact(exe);
     if (b.args) |args| run_cmd.addArgs(args);
     const run_step = b.step("run", "Run git-hotspots");

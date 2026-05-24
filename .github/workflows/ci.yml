@@ -33,3 +33,6 @@ jobs:
 
       - name: Run Tree-sitter Go build proof
         run: zig build tree-sitter-go-build-proof
+
+      - name: Run Tree-sitter Go symbol proof
+        run: zig build tree-sitter-go-symbol-proof
