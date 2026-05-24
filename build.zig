@@ -13,6 +13,19 @@ fn addTreeSitterZig(b: *std.Build, module: *std.Build.Module) void {
     module.link_libc = true;
 }
 
+fn addTreeSitterGo(b: *std.Build, module: *std.Build.Module) void {
+    module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
+    module.addIncludePath(b.path("third_party/tree-sitter-go/v0.25.0/src"));
+    module.addCSourceFiles(.{
+        .files = &.{
+            "third_party/tree-sitter-core/v0.26.9/lib/src/lib.c",
+            "third_party/tree-sitter-go/v0.25.0/src/parser.c",
+        },
+        .flags = &.{},
+    });
+    module.link_libc = true;
+}
+
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -111,6 +124,22 @@ pub fn build(b: *std.Build) void {
     const run_tree_sitter_symbol_proof = b.addRunArtifact(tree_sitter_symbol_proof);
     const tree_sitter_symbol_proof_step = b.step("tree-sitter-symbol-proof", "Run test-only Zig current-symbol extraction proof with vendored Tree-sitter sources");
     tree_sitter_symbol_proof_step.dependOn(&run_tree_sitter_symbol_proof.step);
+
+    const tree_sitter_go_build_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_go_build_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    addTreeSitterGo(b, tree_sitter_go_build_proof_module);
+
+    const tree_sitter_go_build_proof = b.addExecutable(.{
+        .name = "tree-sitter-go-build-proof",
+        .root_module = tree_sitter_go_build_proof_module,
+    });
+
+    const run_tree_sitter_go_build_proof = b.addRunArtifact(tree_sitter_go_build_proof);
+    const tree_sitter_go_build_proof_step = b.step("tree-sitter-go-build-proof", "Compile vendored Tree-sitter Go sources and run a tiny non-product Go parse smoke");
+    tree_sitter_go_build_proof_step.dependOn(&run_tree_sitter_go_build_proof.step);
 
     const run_cmd = b.addRunArtifact(exe);
     if (b.args) |args| run_cmd.addArgs(args);

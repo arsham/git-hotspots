@@ -4,7 +4,7 @@ feature:
   slug: tree-sitter-go-offline-build-proof
   title: Tree-sitter Go offline build proof
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The tree-sitter-go source import is proven by provenance, but we have
@@ -63,7 +63,7 @@ proposal:
     materialised_at: 2026-05-24T04:25:54.712Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -132,7 +132,7 @@ design:
         parses one tiny in-memory Go snippet.
       owner_phase: runner
       depends_on: []
-      status: planned
+      status: done
       execution_context:
         - "Anchors: build.zig, tests/tree_sitter_go_build_proof.zig or
           equivalent, third_party/tree-sitter-go/v0.25.0,
@@ -210,7 +210,7 @@ design:
       owner_phase: runner
       depends_on:
         - P1
-      status: planned
+      status: done
       execution_context:
         - "Anchors: docs/tree-sitter-go-offline-build-proof.md, build.zig,
           tests/tree_sitter_go_build_proof.zig, CI workflow only if Go proof is
@@ -280,7 +280,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-24T04:17:09.853Z
-  updated_at: 2026-05-24T05:17:01.260Z
+  updated_at: 2026-05-24T05:48:13.787Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-24T05:17:01.260Z
