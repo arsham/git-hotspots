@@ -64,7 +64,7 @@ pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
     }
     if (analysis.symbol_report) |symbols| {
         const summary = symbolDisplaySummary(symbols, analysis.symbol_display);
-        try writer.print("\ncurrent Zig symbols (shown first by {s}):\n", .{symbolSortBasis(symbols)});
+        try writer.print("\ncurrent symbols (shown first by {s}):\n", .{symbolSortBasis(symbols)});
         try writer.print("  summary: total={d} shown={d} omitted={d} limit={d} limit_source={s} sort_basis=\"{s}\"\n", .{ summary.total, summary.shown, summary.omitted, summary.limit, summary.limitSource(), symbolSortBasis(symbols) });
         if (symbols.symbols.len == 0) {
             try writer.print("  none\n", .{});
@@ -82,7 +82,7 @@ fn renderTableSymbolRows(writer: anytype, symbols: model.SymbolReport, display: 
     for (indexes[0..shown]) |index| {
         const symbol = symbols.symbols[index];
         const range = displayLineRange(symbol.current_range);
-        try writer.print("  function {s} lines {d}-{d} confidence={s}\n", .{ symbol.name, range.start, range.end, @tagName(symbol.confidence) });
+        try writer.print("  {s} {s} lines {d}-{d} confidence={s}\n", .{ @tagName(symbol.kind), symbol.name, range.start, range.end, @tagName(symbol.confidence) });
         if (symbol.current_line_history) |line_history| {
             try writer.print("    Current-line Git evidence: commits={d} lines={d} unblamable={d} freshness={s} failure={s} confidence={s} caveats=", .{ line_history.distinct_last_touch_commit_count, line_history.line_count, line_history.uncommitted_or_unblamable_line_count, @tagName(line_history.freshness), @tagName(line_history.failure), @tagName(line_history.confidence) });
             try renderCaveatInline(writer, line_history.caveats);

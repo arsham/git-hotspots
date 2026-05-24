@@ -1,29 +1,37 @@
 const std = @import("std");
 
-fn addTreeSitterZig(b: *std.Build, module: *std.Build.Module) void {
+fn addTreeSitterCore(b: *std.Build, module: *std.Build.Module) void {
     module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
-    module.addIncludePath(b.path("third_party/tree-sitter-zig/v1.1.2/src"));
-    module.addCSourceFiles(.{
-        .files = &.{
-            "third_party/tree-sitter-core/v0.26.9/lib/src/lib.c",
-            "third_party/tree-sitter-zig/v1.1.2/src/parser.c",
-        },
-        .flags = &.{},
-    });
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-core/v0.26.9/lib/src/lib.c"), .flags = &.{} });
     module.link_libc = true;
 }
 
-fn addTreeSitterGo(b: *std.Build, module: *std.Build.Module) void {
-    module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
-    module.addIncludePath(b.path("third_party/tree-sitter-go/v0.25.0/src"));
-    module.addCSourceFiles(.{
-        .files = &.{
-            "third_party/tree-sitter-core/v0.26.9/lib/src/lib.c",
-            "third_party/tree-sitter-go/v0.25.0/src/parser.c",
-        },
-        .flags = &.{},
-    });
+fn addTreeSitterZigGrammar(b: *std.Build, module: *std.Build.Module) void {
+    module.addIncludePath(b.path("third_party/tree-sitter-zig/v1.1.2/src"));
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-zig/v1.1.2/src/parser.c"), .flags = &.{} });
     module.link_libc = true;
+}
+
+fn addTreeSitterGoGrammar(b: *std.Build, module: *std.Build.Module) void {
+    module.addIncludePath(b.path("third_party/tree-sitter-go/v0.25.0/src"));
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-go/v0.25.0/src/parser.c"), .flags = &.{} });
+    module.link_libc = true;
+}
+
+fn addTreeSitterZig(b: *std.Build, module: *std.Build.Module) void {
+    addTreeSitterCore(b, module);
+    addTreeSitterZigGrammar(b, module);
+}
+
+fn addTreeSitterGo(b: *std.Build, module: *std.Build.Module) void {
+    addTreeSitterCore(b, module);
+    addTreeSitterGoGrammar(b, module);
+}
+
+fn addTreeSitterProviders(b: *std.Build, module: *std.Build.Module) void {
+    addTreeSitterCore(b, module);
+    addTreeSitterZigGrammar(b, module);
+    addTreeSitterGoGrammar(b, module);
 }
 
 pub fn build(b: *std.Build) void {
@@ -39,7 +47,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    addTreeSitterZig(b, exe_module);
+    addTreeSitterProviders(b, exe_module);
     const exe = b.addExecutable(.{
         .name = "git-hotspots",
         .root_module = exe_module,
@@ -54,7 +62,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    addTreeSitterZig(b, unit_test_module);
+    addTreeSitterProviders(b, unit_test_module);
     const unit_tests = b.addTest(.{
         .root_module = unit_test_module,
     });

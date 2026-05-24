@@ -1,15 +1,17 @@
 git-hotspots: file-level Git-history investigation prompts
 commits=2 shallow=false partial=false dirty=false auto_fetch=false
 scope: selected=project include_prefixes=[] exclude_prefixes=[.flow/,.zig-cache/,zig-out/,target/,node_modules/,dist/,build/,coverage/] outside_include_paths=0 outside_include_changes=0 excluded_paths=0 excluded_changes=0
-inspect: requested=src/example.zig matched=src/example.zig rank=1
-symbols: provider=tree-sitter-zig state=current-only freshness=fresh failure=ok confidence=high total=2 shown=1 omitted=1 limit=1 limit_source=explicit sort_basis="provider order"
+caveats: Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked
+inspect: requested=src/example.go matched=src/example.go rank=1
+symbols: provider=tree-sitter-go state=current-only freshness=fresh failure=ok confidence=high total=8 shown=2 omitted=6 limit=2 limit_source=explicit sort_basis="provider order"
 symbols caveat: current working-tree enrichment only; file-level Git evidence, score, file order, lineage, and confidence are unchanged
 
 rank  score   changes churn   confidence lineage path
-1     46.3    2       7       medium     no      src/example.zig
+1     52.8    2       19      medium     yes     src/example.go
 
 current symbols (shown first by provider order):
-  summary: total=2 shown=1 omitted=1 limit=1 limit_source=explicit sort_basis="provider order"
-  function alpha lines 5-5 confidence=high
+  summary: total=8 shown=2 omitted=6 limit=2 limit_source=explicit sort_basis="provider order"
+  other Alpha lines 3-6 confidence=high
+  other Beta lines 3-6 confidence=high
 
 Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.

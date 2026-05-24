@@ -8,7 +8,7 @@ symbols caveat: current working-tree enrichment only; file-level Git evidence, s
 rank  score   changes churn   confidence lineage path
 1     46.3    2       7       medium     no      src/example.zig
 
-current Zig symbols (shown first by provider order):
+current symbols (shown first by provider order):
   summary: total=2 shown=2 omitted=0 limit=25 limit_source=default sort_basis="provider order"
   function alpha lines 5-5 confidence=high
   function zebra lines 1-3 confidence=high

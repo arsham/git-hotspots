@@ -1,0 +1,23 @@
+git-hotspots: file-level Git-history investigation prompts
+commits=2 shallow=false partial=false dirty=false auto_fetch=false
+scope: selected=project include_prefixes=[] exclude_prefixes=[.flow/,.zig-cache/,zig-out/,target/,node_modules/,dist/,build/,coverage/] outside_include_paths=0 outside_include_changes=0 excluded_paths=0 excluded_changes=0
+caveats: Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked
+inspect: requested=src/example.go matched=src/example.go rank=1
+symbols: provider=tree-sitter-go state=current-only freshness=fresh failure=ok confidence=high total=8 shown=8 omitted=0 limit=25 limit_source=default sort_basis="provider order"
+symbols caveat: current working-tree enrichment only; file-level Git evidence, score, file order, lineage, and confidence are unchanged
+
+rank  score   changes churn   confidence lineage path
+1     52.8    2       19      medium     yes     src/example.go
+
+current symbols (shown first by provider order):
+  summary: total=8 shown=8 omitted=0 limit=25 limit_source=default sort_basis="provider order"
+  other Alpha lines 3-6 confidence=high
+  other Beta lines 3-6 confidence=high
+  variable Gamma lines 8-8 confidence=high
+  method Method lines 17-17 confidence=high
+  type Runner lines 15-15 confidence=high
+  type Service lines 14-14 confidence=high
+  function Zebra lines 10-12 confidence=high
+  module symbols lines 1-1 confidence=high
+
+Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.

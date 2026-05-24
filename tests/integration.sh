@@ -245,6 +245,69 @@ assert_fails_with_stderr symbol-line-history-no-symbols "--symbol-line-history c
 diff -u fixtures/expected/symbols-unsupported.json /tmp/git-hotspots-symbols-unsupported.json
 "$EXE" --repo fixtures/symbols --inspect src/link.zig --symbols --format json > /tmp/git-hotspots-symbols-symlink-unavailable.json
 diff -u fixtures/expected/symbols-symlink-unavailable.json /tmp/git-hotspots-symbols-symlink-unavailable.json
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format json > /tmp/git-hotspots-go-symbols.json
+diff -u fixtures/expected/go-symbols.json /tmp/git-hotspots-go-symbols.json
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format markdown > /tmp/git-hotspots-go-symbols.md
+diff -u fixtures/expected/go-symbols.md /tmp/git-hotspots-go-symbols.md
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format table > /tmp/git-hotspots-go-symbols.txt
+diff -u fixtures/expected/go-symbols.txt /tmp/git-hotspots-go-symbols.txt
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format json > /tmp/git-hotspots-go-symbols-2.json
+diff -u /tmp/git-hotspots-go-symbols.json /tmp/git-hotspots-go-symbols-2.json
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format markdown > /tmp/git-hotspots-go-symbols-2.md
+diff -u /tmp/git-hotspots-go-symbols.md /tmp/git-hotspots-go-symbols-2.md
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format table > /tmp/git-hotspots-go-symbols-2.txt
+diff -u /tmp/git-hotspots-go-symbols.txt /tmp/git-hotspots-go-symbols-2.txt
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-limit 2 --format json > /tmp/git-hotspots-go-symbols-limit.json
+diff -u fixtures/expected/go-symbols-limit.json /tmp/git-hotspots-go-symbols-limit.json
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-limit 2 --format markdown > /tmp/git-hotspots-go-symbols-limit.md
+diff -u fixtures/expected/go-symbols-limit.md /tmp/git-hotspots-go-symbols-limit.md
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-limit 2 --format table > /tmp/git-hotspots-go-symbols-limit.txt
+diff -u fixtures/expected/go-symbols-limit.txt /tmp/git-hotspots-go-symbols-limit.txt
+"$EXE" --repo fixtures/symbols --inspect src/readme.txt --symbols --format json > /tmp/git-hotspots-go-symbols-unsupported.json
+diff -u fixtures/expected/symbols-unsupported.json /tmp/git-hotspots-go-symbols-unsupported.json
+"$EXE" --repo fixtures/go-symbols --inspect src/empty.go --symbols --format json > /tmp/git-hotspots-go-symbols-empty.json
+diff -u fixtures/expected/go-symbols-empty.json /tmp/git-hotspots-go-symbols-empty.json
+"$EXE" --repo fixtures/go-symbols --inspect src/broken.go --symbols --format json > /tmp/git-hotspots-go-symbols-invalid.json
+diff -u fixtures/expected/go-symbols-invalid.json /tmp/git-hotspots-go-symbols-invalid.json
+"$EXE" --repo fixtures/go-symbols --inspect src/caveated.go --symbols --format json > /tmp/git-hotspots-go-symbols-caveated.json
+diff -u fixtures/expected/go-symbols-caveated.json /tmp/git-hotspots-go-symbols-caveated.json
+"$EXE" --repo fixtures/go-symbols --inspect src/link.go --symbols --format json > /tmp/git-hotspots-go-symbols-symlink-unavailable.json
+diff -u fixtures/expected/go-symbols-symlink-unavailable.json /tmp/git-hotspots-go-symbols-symlink-unavailable.json
+"$EXE" --repo fixtures/go-symbols --inspect src/large.go --symbols --format json > /tmp/git-hotspots-go-symbols-large-unavailable.json
+diff -u fixtures/expected/go-symbols-large-unavailable.json /tmp/git-hotspots-go-symbols-large-unavailable.json
+"$EXE" --repo fixtures/go-symbols --inspect src/missing.go --symbols --format json > /tmp/git-hotspots-go-symbols-missing-unavailable.json
+diff -u fixtures/expected/go-symbols-missing-unavailable.json /tmp/git-hotspots-go-symbols-missing-unavailable.json
+"$EXE" --repo fixtures/go-symbols --inspect src/old-example.go --symbols --format json > /tmp/git-hotspots-go-symbols-rename-alias.json
+diff -u fixtures/expected/go-symbols-rename-alias.json /tmp/git-hotspots-go-symbols-rename-alias.json
+"$EXE" --repo fixtures/go-symbols --inspect src/other.go --symbols --format json > /tmp/git-hotspots-go-symbols-other.json
+! grep -Fq -- 'Zebra' /tmp/git-hotspots-go-symbols-other.json
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format json > /tmp/git-hotspots-go-symbols-no-line-history.json
+! grep -Fq -- 'current_line_history' /tmp/git-hotspots-go-symbols-no-line-history.json
+python3 - /tmp/git-hotspots-go-symbols.json /tmp/git-hotspots-go-symbols-limit.json /tmp/git-hotspots-go-symbols-empty.json /tmp/git-hotspots-go-symbols-invalid.json /tmp/git-hotspots-go-symbols-caveated.json /tmp/git-hotspots-go-symbols-symlink-unavailable.json /tmp/git-hotspots-go-symbols-large-unavailable.json /tmp/git-hotspots-go-symbols-missing-unavailable.json /tmp/git-hotspots-go-symbols-rename-alias.json /tmp/git-hotspots-go-symbols-other.json <<'PY'
+import json, sys
+success, limited, empty, invalid, caveated, symlink, large, missing, alias, other = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+assert success['symbols']['provider']['name'] == 'tree-sitter-go'
+assert success['symbols']['provider']['failure'] == 'ok'
+assert [row['kind'] for row in success['symbols']['items']] == ['other', 'other', 'variable', 'method', 'type', 'type', 'function', 'module']
+assert all(row['path'] == 'src/example.go' for row in success['symbols']['items'])
+assert len(limited['symbols']['items']) == len(success['symbols']['items'])
+assert limited['symbols']['human_display']['shown_count'] == 2
+assert limited['symbols']['human_display']['omitted_count'] == 6
+assert empty['symbols']['provider']['failure'] == 'ok' and empty['symbols']['items'] == []
+assert invalid['symbols']['provider']['failure'] == 'failed' and invalid['symbols']['items'] == []
+assert symlink['symbols']['provider']['failure'] == 'unavailable' and symlink['symbols']['items'] == []
+assert large['symbols']['provider']['failure'] == 'unavailable' and large['symbols']['items'] == []
+assert missing['symbols']['provider']['failure'] == 'unavailable' and missing['symbols']['items'] == []
+assert alias['inspect']['requested_path'] == 'src/old-example.go'
+assert alias['inspect']['matched_path'] == 'src/example.go'
+assert all(row['path'] == 'src/example.go' for row in alias['symbols']['items'])
+assert any('build tags' in caveat and 'cgo' in caveat for caveat in caveated['symbols']['provider']['caveats'])
+assert [row['name'] for row in other['symbols']['items']] == ['OtherOnly', 'symbols']
+for data in (success, limited, empty, invalid, caveated, symlink, large, missing, alias, other):
+    text = json.dumps(data, ensure_ascii=False)
+    for forbidden in ('Fixture Author', 'fixture@example', 'source line'):
+        assert forbidden not in text
+PY
 "$EXE" --repo fixtures/scope --format json > /tmp/git-hotspots-scope-unfiltered.json
 "$EXE" --repo fixtures/scope --scope all --limit 200 --format json > /tmp/git-hotspots-scope-all.json
 "$EXE" --repo fixtures/scope --scope all $PROJECT_EXCLUDE_ARGS --format json > /tmp/git-hotspots-scope-filtered.json

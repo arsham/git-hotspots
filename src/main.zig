@@ -4,6 +4,7 @@ const git = @import("git.zig");
 const report = @import("report.zig");
 const provider = @import("provider.zig");
 const tree_sitter_zig = @import("tree_sitter_zig.zig");
+const tree_sitter_go = @import("tree_sitter_go.zig");
 const explain = @import("explain.zig");
 const version = @import("version.zig");
 const Io = std.Io;
@@ -38,8 +39,8 @@ const usage =
     \\                    accepted in-scope Git rename aliases may resolve to the
     \\                    canonical path; use \\t to target a tab in a Git path
     \\  --symbols         With --inspect PATH only, add opt-in current working-tree
-    \\                    Tree-sitter Zig function symbols; does not affect score,
-    \\                    rank, lineage, confidence, or file-level evidence
+    \\                    Tree-sitter Zig or Go symbols for that file; does not
+    \\                    affect score, rank, lineage, confidence, or file-level evidence
     \\  --symbol-line-history
     \\                    With --inspect PATH --symbols only, add opt-in current-line
     \\                    Git evidence for current Zig function line ranges; not
@@ -143,10 +144,16 @@ pub fn main(init: std.process.Init.Minimal) !void {
     defer analysis.deinit();
 
     if (cfg.symbols) {
-        const symbol_report = try tree_sitter_zig.extractPath(allocator, io, analysis.repo_root, analysis.inspect.?.matched_path);
-        analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
+        const matched_path = analysis.inspect.?.matched_path;
+        if (std.mem.endsWith(u8, matched_path, ".go")) {
+            const symbol_report = try tree_sitter_go.extractPath(allocator, io, analysis.repo_root, matched_path);
+            analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
+        } else {
+            const symbol_report = try tree_sitter_zig.extractPath(allocator, io, analysis.repo_root, matched_path);
+            analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
+            if (cfg.symbol_line_history) try git.attachCurrentLineHistory(allocator, io, &analysis);
+        }
         analysis.symbol_display = .{ .limit = cfg.symbol_limit orelse model.default_symbol_display_limit, .explicit_limit = cfg.symbol_limit != null };
-        if (cfg.symbol_line_history) try git.attachCurrentLineHistory(allocator, io, &analysis);
     }
 
     try writeProgress(progress, "rendering report");
@@ -728,6 +735,7 @@ test {
     _ = @import("git.zig");
     _ = provider;
     _ = @import("report.zig");
+    _ = tree_sitter_go;
     _ = @import("scoring.zig");
     _ = @import("version.zig");
 }

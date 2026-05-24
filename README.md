@@ -68,8 +68,8 @@ The project should preserve trust by default:
 ## Provider direction
 
 The alpha includes one narrow opt-in provider path: `--symbols` with
-`--inspect PATH` can add current working-tree Tree-sitter Zig function symbols
-for the inspected file. File-level Git evidence remains the core product truth;
+`--inspect PATH` can add current working-tree Tree-sitter Zig or Go symbols for
+the inspected file. File-level Git evidence remains the core product truth;
 provider output is optional current-only enrichment.
 
 Broader language and dependency insight should arrive through optional
@@ -142,6 +142,7 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --exclude-prefix .flow/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.go --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
 ./zig-out/bin/git-hotspots --repo . --progress --format json
 ./zig-out/bin/git-hotspots --explain
@@ -176,14 +177,16 @@ caveats, ranked hotspots, and per-result evidence. `--version` is standalone
 and prints the alpha version without requiring a Git repository.
 
 `--symbols` is opt-in and works only with `--inspect PATH`. It adds current
-working-tree Tree-sitter Zig function symbols for the matched in-scope `.zig`
-file, with provider freshness, failure, confidence, caveats, and local
+working-tree Tree-sitter Zig or Go symbols for the matched in-scope `.zig` or
+`.go` file, with provider freshness, failure, confidence, caveats, and local
 provenance in the report. Symbol evidence is current-only enrichment: it does
 not change file score, rank, confidence, co-change evidence, Git rename
 lineage, scope, or inclusion/exclusion decisions. Unsupported or unavailable
 current files preserve the inspected file evidence and report provider caveats
 without parser diagnostics, source snippets, absolute paths, remotes, author
-identities, or commit messages.
+identities, or commit messages. Go support is inspect-only for the matched file
+and does not evaluate packages, build tags, cgo, dependency graphs, symbol
+lineage, scoring, ranking, or line history.
 
 `--symbol-line-history` is a second opt-in layer that works only with
 `--inspect PATH --symbols`. It adds current-line Git evidence for the current
@@ -269,7 +272,7 @@ runs the fuller local ladder and prints a privacy-safe evidence summary.
 - Report truth is deterministic file-level Git-history evidence.
 - Broad provider, cache, dependency, test, and coverage enrichers are future
   work; the current provider path is limited to opt-in inspect-only
-  Tree-sitter Zig function symbols.
+  Tree-sitter Zig or Go symbols.
 - Runtime defaults remain local-only and do not perform network access.
 
 ## Contributing

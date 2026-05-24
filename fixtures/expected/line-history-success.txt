@@ -8,7 +8,7 @@ symbols caveat: current working-tree enrichment only; file-level Git evidence, s
 rank  score   changes churn   confidence lineage path
 1     60.6    3       15      high       no      src/current.zig
 
-current Zig symbols (shown first by current-line Git evidence summary):
+current symbols (shown first by current-line Git evidence summary):
   summary: total=3 shown=3 omitted=0 limit=25 limit_source=default sort_basis="current-line Git evidence summary"
   function beta lines 7-9 confidence=high
     Current-line Git evidence: commits=1 lines=3 unblamable=0 freshness=fresh failure=ok confidence=high caveats=none

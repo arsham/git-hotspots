@@ -597,7 +597,7 @@ explain_output_checks() {
 
 prohibited_claim_scan() {
   have_python || return 1
-  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt README.md CONTRIBUTING.md <<'PY'
+  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt README.md CONTRIBUTING.md <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -663,6 +663,52 @@ license_version_checks() {
   grep -q 'public alpha' CONTRIBUTING.md || return 1
   [ "$("$EXE" --version)" = 'git-hotspots 0.1.0-alpha.1' ] || return 1
   ! grep -R '0\.0\.0-spike' README.md CONTRIBUTING.md src fixtures/expected tests tools build.zig >/dev/null 2>&1 || return 1
+}
+
+runtime_dependency_scan() {
+  have_python || return 1
+  python3 - <<'PY'
+import re
+from pathlib import Path
+
+files = [Path('build.zig')]
+for root in ('src', 'tests', 'tools'):
+    files.extend(Path(root).glob('**/*'))
+files = [p for p in files if p.is_file() and p.suffix in {'.zig', '.sh'}]
+
+forbidden = [
+    ('network command', re.compile(r'\b(curl|wget|nc|netcat|ssh|scp|rsync)\b')),
+    ('git network command', re.compile(r'\bgit\s+[^\n]*(fetch|pull|push|ls-remote)\b')),
+    ('go toolchain command', re.compile(r'(^|[;&|`$()\s])go(fmt|\s+(test|list|env|build|run|version|mod|work)\b)')),
+    ('global tree-sitter cli', re.compile(r'(^|[;&|`$()\s])tree-sitter\b')),
+]
+
+allowed = (
+    'git clone -q --depth 1 "file://$FIX/basic"',
+    'git clone -q "$FIX/basic"',
+    'git clone -q --depth 1 "file://$FIX/symbol-line-history"',
+    'git clone -q "$FIX/symbol-line-history"',
+    'https?://|ssh://|git@',
+    "('network command', re.compile",
+    "('git network command', re.compile",
+    "('go toolchain command', re.compile",
+    "('global tree-sitter cli', re.compile",
+    'runtime dependency scan: python3 source scan',
+)
+
+failures = []
+for path in files:
+    text = path.read_text(encoding='utf-8')
+    for line_no, line in enumerate(text.splitlines(), 1):
+        if any(marker in line for marker in allowed):
+            continue
+        for label, pattern in forbidden:
+            if pattern.search(line):
+                failures.append(f'{path}:{line_no}: {label}: {line.strip()}')
+
+if failures:
+    raise SystemExit('\n'.join(failures))
+PY
 }
 
 source_install_smoke() {
@@ -787,10 +833,55 @@ fixture_json_checks() {
   diff -u fixtures/expected/symbols-unsupported.json "$SYMBOLS_UNSUPPORTED_JSON" >/dev/null || return 1
   "$EXE" --repo fixtures/symbols --inspect src/link.zig --symbols --format json > "$SYMBOLS_SYMLINK_JSON" || return 1
   diff -u fixtures/expected/symbols-symlink-unavailable.json "$SYMBOLS_SYMLINK_JSON" >/dev/null || return 1
+  GO_SYMBOLS_JSON=$ARTIFACT_DIR/go-symbols.json
+  GO_SYMBOLS_MD=$ARTIFACT_DIR/go-symbols.md
+  GO_SYMBOLS_TABLE=$ARTIFACT_DIR/go-symbols.txt
+  GO_SYMBOLS_LIMIT_JSON=$ARTIFACT_DIR/go-symbols-limit.json
+  GO_SYMBOLS_LIMIT_MD=$ARTIFACT_DIR/go-symbols-limit.md
+  GO_SYMBOLS_LIMIT_TABLE=$ARTIFACT_DIR/go-symbols-limit.txt
+  GO_SYMBOLS_EMPTY_JSON=$ARTIFACT_DIR/go-symbols-empty.json
+  GO_SYMBOLS_INVALID_JSON=$ARTIFACT_DIR/go-symbols-invalid.json
+  GO_SYMBOLS_CAVEATED_JSON=$ARTIFACT_DIR/go-symbols-caveated.json
+  GO_SYMBOLS_SYMLINK_JSON=$ARTIFACT_DIR/go-symbols-symlink.json
+  GO_SYMBOLS_LARGE_JSON=$ARTIFACT_DIR/go-symbols-large.json
+  GO_SYMBOLS_MISSING_JSON=$ARTIFACT_DIR/go-symbols-missing.json
+  GO_SYMBOLS_ALIAS_JSON=$ARTIFACT_DIR/go-symbols-alias.json
+  GO_SYMBOLS_OTHER_JSON=$ARTIFACT_DIR/go-symbols-other.json
+  GO_SYMBOLS_NO_HISTORY_JSON=$ARTIFACT_DIR/go-symbols-no-history.json
+  "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format json > "$GO_SYMBOLS_JSON" || return 1
+  diff -u fixtures/expected/go-symbols.json "$GO_SYMBOLS_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format markdown > "$GO_SYMBOLS_MD" || return 1
+  diff -u fixtures/expected/go-symbols.md "$GO_SYMBOLS_MD" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --format table > "$GO_SYMBOLS_TABLE" || return 1
+  diff -u fixtures/expected/go-symbols.txt "$GO_SYMBOLS_TABLE" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-limit 2 --format json > "$GO_SYMBOLS_LIMIT_JSON" || return 1
+  diff -u fixtures/expected/go-symbols-limit.json "$GO_SYMBOLS_LIMIT_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-limit 2 --format markdown > "$GO_SYMBOLS_LIMIT_MD" || return 1
+  diff -u fixtures/expected/go-symbols-limit.md "$GO_SYMBOLS_LIMIT_MD" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-limit 2 --format table > "$GO_SYMBOLS_LIMIT_TABLE" || return 1
+  diff -u fixtures/expected/go-symbols-limit.txt "$GO_SYMBOLS_LIMIT_TABLE" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/empty.go --symbols --format json > "$GO_SYMBOLS_EMPTY_JSON" || return 1
+  diff -u fixtures/expected/go-symbols-empty.json "$GO_SYMBOLS_EMPTY_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/broken.go --symbols --format json > "$GO_SYMBOLS_INVALID_JSON" || return 1
+  diff -u fixtures/expected/go-symbols-invalid.json "$GO_SYMBOLS_INVALID_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/caveated.go --symbols --format json > "$GO_SYMBOLS_CAVEATED_JSON" || return 1
+  diff -u fixtures/expected/go-symbols-caveated.json "$GO_SYMBOLS_CAVEATED_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/link.go --symbols --format json > "$GO_SYMBOLS_SYMLINK_JSON" || return 1
+  diff -u fixtures/expected/go-symbols-symlink-unavailable.json "$GO_SYMBOLS_SYMLINK_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/large.go --symbols --format json > "$GO_SYMBOLS_LARGE_JSON" || return 1
+  diff -u fixtures/expected/go-symbols-large-unavailable.json "$GO_SYMBOLS_LARGE_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/missing.go --symbols --format json > "$GO_SYMBOLS_MISSING_JSON" || return 1
+  diff -u fixtures/expected/go-symbols-missing-unavailable.json "$GO_SYMBOLS_MISSING_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/old-example.go --symbols --format json > "$GO_SYMBOLS_ALIAS_JSON" || return 1
+  diff -u fixtures/expected/go-symbols-rename-alias.json "$GO_SYMBOLS_ALIAS_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/other.go --symbols --format json > "$GO_SYMBOLS_OTHER_JSON" || return 1
+  ! grep -Fq -- 'Zebra' "$GO_SYMBOLS_OTHER_JSON" || return 1
+  "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format json > "$GO_SYMBOLS_NO_HISTORY_JSON" || return 1
+  ! grep -Fq -- 'current_line_history' "$GO_SYMBOLS_NO_HISTORY_JSON" || return 1
   have_python || return 1
-  python3 - "$SYMBOLS_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$SYMBOLS_LIMIT_JSON" <<'PY'
+  python3 - "$SYMBOLS_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$SYMBOLS_LIMIT_JSON" "$GO_SYMBOLS_JSON" "$GO_SYMBOLS_LIMIT_JSON" "$GO_SYMBOLS_EMPTY_JSON" "$GO_SYMBOLS_INVALID_JSON" "$GO_SYMBOLS_CAVEATED_JSON" "$GO_SYMBOLS_SYMLINK_JSON" "$GO_SYMBOLS_LARGE_JSON" "$GO_SYMBOLS_MISSING_JSON" "$GO_SYMBOLS_ALIAS_JSON" "$GO_SYMBOLS_OTHER_JSON" <<'PY'
 import json, sys
-success, unsupported, symlink, limited = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+success, unsupported, symlink, limited, go_success, go_limited, go_empty, go_invalid, go_caveated, go_symlink, go_large, go_missing, go_alias, go_other = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
 for data in (success, unsupported, symlink, limited):
     symbols = data['symbols']
     assert symbols['current_only'] is True, 'symbols current_only missing'
@@ -811,6 +902,21 @@ assert unsupported['symbols']['provider']['failure'] == 'unsupported', 'unsuppor
 assert symlink['symbols']['provider']['failure'] == 'unavailable', 'symlink should not parse as ok'
 assert symlink['symbols']['items'] == [], 'symlink leaked parsed symbols'
 assert symlink['results'], 'symlink did not preserve file evidence'
+assert go_success['symbols']['provider']['name'] == 'tree-sitter-go', 'Go provider missing'
+assert go_success['symbols']['provider']['failure'] == 'ok', 'Go provider failure changed'
+assert [row['kind'] for row in go_success['symbols']['items']] == ['other', 'other', 'variable', 'method', 'type', 'type', 'function', 'module'], 'Go kinds changed'
+assert len(go_limited['symbols']['items']) == len(go_success['symbols']['items']), 'Go limit truncated JSON'
+assert go_limited['symbols']['human_display']['shown_count'] == 2, 'Go limit shown changed'
+assert go_limited['symbols']['human_display']['omitted_count'] == 6, 'Go limit omitted changed'
+assert go_empty['symbols']['provider']['failure'] == 'ok' and go_empty['symbols']['items'] == [], 'empty Go changed'
+assert go_invalid['symbols']['provider']['failure'] == 'failed' and go_invalid['symbols']['items'] == [], 'invalid Go changed'
+assert go_symlink['symbols']['provider']['failure'] == 'unavailable' and go_symlink['symbols']['items'] == [], 'Go symlink changed'
+assert go_large['symbols']['provider']['failure'] == 'unavailable' and go_large['symbols']['items'] == [], 'Go too-large changed'
+assert go_missing['symbols']['provider']['failure'] == 'unavailable' and go_missing['symbols']['items'] == [], 'Go missing current file changed'
+assert go_alias['inspect']['requested_path'] == 'src/old-example.go' and go_alias['inspect']['matched_path'] == 'src/example.go', 'Go rename alias changed'
+assert all(row['path'] == 'src/example.go' for row in go_alias['symbols']['items']), 'Go alias parsed requested alias'
+assert any('build tags' in caveat and 'cgo' in caveat for caveat in go_caveated['symbols']['provider']['caveats']), 'Go caveat missing'
+assert [row['name'] for row in go_other['symbols']['items']] == ['OtherOnly', 'symbols'], 'two-file inspect-only changed'
 PY
   if "$EXE" --symbols > "$ARTIFACT_DIR/symbols-alone.out" 2> "$ARTIFACT_DIR/symbols-alone.err"; then return 1; fi
   grep -q -- '--symbols can only be combined with --inspect PATH' "$ARTIFACT_DIR/symbols-alone.err" || return 1
@@ -928,6 +1034,7 @@ real_repo_smoke() {
   timing_file=$(mktemp "$ARTIFACT_DIR/real-time.XXXXXX")
   commit_count=$(git -C "$repo" rev-list --count HEAD 2>/dev/null || printf 'unknown')
   tracked_file_count=$(git -C "$repo" ls-files 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
+  tracked_go_count=$(git -C "$repo" ls-files '*.go' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
 
   if "$EXE" --repo "$repo" --scope all --format table > "$table_out" 2> "$timing_file"; then
     table_status=pass
@@ -971,12 +1078,23 @@ real_repo_smoke() {
     progress_status=fail
   fi
 
+  first_go_path=$(git -C "$repo" ls-files '*.go' 2>/dev/null | LC_ALL=C sort | head -n 1 || true)
+  go_symbol_status=skip-no-tracked-go-file
+  if [ -n "$first_go_path" ]; then
+    go_symbol_out=$(mktemp "$ARTIFACT_DIR/real-go-symbol.XXXXXX.json")
+    if "$EXE" --repo "$repo" --inspect "$first_go_path" --symbols --format json > "$go_symbol_out" 2> "$timing_file" && python3 -m json.tool "$go_symbol_out" >/dev/null 2>&1; then
+      go_symbol_status=pass
+    else
+      go_symbol_status=fail
+    fi
+  fi
+
   if [ "$table_status" = pass ] && [ "$json_status" = pass ] && [ "$markdown_status" = pass ] && [ "$project_table_status" = pass ] && [ "$project_json_status" = pass ] && [ "$project_markdown_status" = pass ] && [ "$progress_status" = pass ]; then
     summary=$(json_count_summary "$json_out") || summary='results=unknown caveats=unknown dirty=unknown'
     project_summary=$(json_count_summary "$project_json_out") || project_summary='results=unknown caveats=unknown dirty=unknown'
     elapsed=${timing#*|}
     project_elapsed=${project_timing#*|}
-    printf 'real-repo label=%s commits=%s tracked_files=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
+    printf 'real-repo label=%s commits=%s tracked_files=%s tracked_go_files=%s go_symbol=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$tracked_go_count" "$go_symbol_status" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
     pass_rung "real repo smoke $label"
     return 0
   fi
@@ -1088,6 +1206,13 @@ else
 fi
 run_quiet "git diff whitespace check" git diff --check
 run_quiet "shell syntax checks" sh -c "for file in tools/*.sh tests/*.sh; do sh -n \"\$file\" || exit 1; done"
+printf 'validate: RUN runtime dependency scan\n'
+if runtime_dependency_scan; then
+  note_fallback "runtime dependency scan: python3 source scan for no network, Go toolchain, or global tree-sitter CLI commands"
+  pass_rung "runtime dependency scan"
+else
+  fail_rung "runtime dependency scan" "forbidden runtime dependency command detected or python3 unavailable"
+fi
 
 printf 'validate: RUN deterministic fixture JSON and Markdown\n'
 if fixture_json_checks; then
@@ -1168,7 +1293,7 @@ else
   printf '  - none\n'
 fi
 printf 'privacy: summary uses labels and bounded counts only; raw reports and absolute private paths are not printed.\n'
-printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, packaging, or release automation; opt-in inspect-only Tree-sitter Zig symbols are local current-file enrichment.\n'
+printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, packaging, or release automation; opt-in inspect-only Tree-sitter Zig or Go symbols are local current-file enrichment.\n'
 
 if [ "$FAILURES" -ne 0 ]; then
   printf 'validate: %d rung(s) failed\n' "$FAILURES" >&2
