@@ -1,0 +1,283 @@
+schema: flow-feature.v1
+feature:
+  id: "0037"
+  slug: tree-sitter-go-offline-build-proof
+  title: Tree-sitter Go offline build proof
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: The tree-sitter-go source import is proven by provenance, but we have
+    not yet proven that the imported parser compiles, links, and parses with the
+    existing vendored Tree-sitter core in this Zig build.
+  outcome: Add an isolated non-product Go Tree-sitter build proof that compiles
+    the vendored Go parser with the existing vendored core, parses a tiny
+    in-memory Go snippet, and records local/offline evidence without adding Go
+    provider runtime behaviour.
+  acceptance:
+    - Dedicated command `zig build tree-sitter-go-build-proof` exists and passes.
+    - The proof compiles repo-local Tree-sitter core and tree-sitter-go parser
+      sources only.
+    - The proof parses a tiny in-memory Go snippet and verifies a stable root
+      kind without source snippets from private repos.
+    - Existing Zig proof commands still pass.
+    - No Go provider runtime, CLI/report/schema/scoring/cache behaviour is added.
+    - No-provider table, JSON, Markdown, and inspect outputs remain byte-stable.
+    - Public evidence documents local/offline build proof, CI decision,
+      no-provider stability, and privacy-safe close-out smoke.
+planning:
+  state: ready
+  summary: Add a non-product offline build proof for tree-sitter-go using the
+    existing vendored Tree-sitter core. The feature stops before Go symbol
+    extraction, provider runtime, CLI/report/schema changes, or cache/scoring
+    work.
+  brief_sync:
+    status: updated
+    reason: Supports the provider-as-optional-enricher direction while preserving
+      deterministic file-level Git evidence as product truth.
+    checked_at: 2026-05-24T04:24:00.000Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: This is a prerequisite provider implementation slice for the B001
+      local-first hotspot intelligence capability; it does not alter core
+      file-level evidence.
+    checked_at: 2026-05-24T04:24:00.000Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - packet_verification_commands_missing
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-24T04:25:54.712Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-24T04:25:54.712Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-24T04:25:54.712Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-24T04:25:54.712Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Follow-up to Feature 0036, which imported tree-sitter-go source
+    while explicitly deferring Go compile/link and runtime provider work.
+  depends_on_feature_ids:
+    - "0036"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add an isolated `zig build tree-sitter-go-build-proof` target.
+    - Compile local Tree-sitter core `lib.c` and tree-sitter-go `parser.c` only.
+    - Parse a tiny in-memory Go snippet and assert a stable root kind.
+    - Record offline/local, CI, no-provider stability, and close-out evidence.
+    - Explicitly defer Go symbol extraction, query fixtures, provider runtime,
+      CLI/report/schema/scoring/cache changes, and parser generation.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+  packets:
+    - id: P1
+      title: Go parser build and parse proof
+      goal: Add a dedicated non-product build proof target that compiles and links the
+        vendored Go parser with the existing vendored Tree-sitter core and
+        parses one tiny in-memory Go snippet.
+      owner_phase: runner
+      depends_on: []
+      status: planned
+      execution_context:
+        - "Anchors: build.zig, tests/tree_sitter_go_build_proof.zig or
+          equivalent, third_party/tree-sitter-go/v0.25.0,
+          third_party/tree-sitter-core/v0.26.9"
+        - "In scope: add isolated `zig build tree-sitter-go-build-proof`;
+          compile/link local core lib.c and Go parser.c; parse a tiny in-memory
+          Go snippet; preserve existing Zig proof targets"
+        - "Out of scope: Go symbol extraction, queries, provider runtime,
+          provider registry, CLI/report/schema/scoring/cache changes, parser
+          generation, source import changes, build.zig.zon, .gitmodules"
+        - "Protected: installed product CLI runtime, no-provider outputs,
+          existing expected fixtures, src runtime modules, provider runtime
+          semantics, CI behaviour unless explicitly adding the proof step"
+        - "Dependencies: Feature 0036 source import and existing Tree-sitter
+          core v0.26.9 compatibility"
+        - "Validation/evidence: zig fmt --check build.zig src tests; zig build
+          test; zig build; zig build validate; zig build
+          tree-sitter-build-proof; zig build tree-sitter-symbol-proof; zig build
+          tree-sitter-go-build-proof; git diff --check; close-out smoke with
+          sibling-local-repo label"
+        - "Review focus: proof remains isolated/non-product; uses only
+          repo-local sources; no provider/runtime/schema drift; tiny parse smoke
+          proves language assignment and root kind"
+        - "Escalate if: Go compile/link requires core update, external scanner,
+          system package, generator, package manager, network access, product
+          runtime wiring, no-provider output drift, or material CI overhead"
+        - "Done boundary: proof command passes; existing validations pass;
+          evidence doc records offline/local proof and non-runtime boundary;
+          repo is clean"
+      anchors:
+        - build.zig
+        - tests/tree_sitter_go_build_proof.zig
+        - third_party/tree-sitter-go/v0.25.0/
+        - third_party/tree-sitter-core/v0.26.9/
+      in_scope:
+        - Dedicated Go build proof target.
+        - Tiny in-memory Go parse smoke.
+        - Existing Zig proof target preservation.
+      out_of_scope:
+        - Go symbol extraction and query fixtures.
+        - Go provider runtime, registry, CLI, report, schema, scoring, cache, CI
+          release, or package changes unless explicitly shaped.
+      protected_surfaces:
+        - src/** runtime modules
+        - fixtures/expected/**
+        - product CLI/report/scoring/cache/provider behaviour
+        - build.zig.zon
+        - .gitmodules
+      validation_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build
+        - zig build validate
+        - zig build tree-sitter-build-proof
+        - zig build tree-sitter-symbol-proof
+        - zig build tree-sitter-go-build-proof
+        - git diff --check
+      review_focus:
+        - Proof target is isolated and non-product.
+        - Only repo-local vendored sources are compiled.
+        - Tiny Go parse smoke proves language assignment and root kind.
+        - No runtime or report contract changes were introduced.
+      escalation_triggers:
+        - Go parser needs core update or external scanner.
+        - Proof requires network, package manager, global Tree-sitter, or system
+          package input.
+        - No-provider output changes.
+        - Go parser is linked into installed product runtime.
+      done_boundary: Dedicated Go proof target passes and existing validation remains
+        green with no runtime/provider/report drift.
+    - id: P2
+      title: Evidence docs and close-out proof
+      goal: Record public, privacy-safe evidence for the Go build proof, local-only
+        validation, CI decision, no-provider stability, and close-out smoke.
+      owner_phase: runner
+      depends_on:
+        - P1
+      status: planned
+      execution_context:
+        - "Anchors: docs/tree-sitter-go-offline-build-proof.md, build.zig,
+          tests/tree_sitter_go_build_proof.zig, CI workflow only if Go proof is
+          intentionally added"
+        - "In scope: record Zig version, target, source files, include paths,
+          timing/size observations, CI decision, output stability, prohibited
+          dependency scans, and privacy-safe close-out smoke"
+        - "Out of scope: raw sibling paths or output, private repo details, raw
+          parser stderr dumps, source snippets from private repos, Go runtime
+          support claims"
+        - "Protected: OSS/publicity framing, local-first defaults, no bug
+          prediction/code-quality/developer-ranking claims"
+        - "Dependencies: P1 proof target must pass before evidence is final"
+        - "Validation/evidence: changed-path scan; no-provider byte-stability
+          proof; prohibited dependency scan; privacy/prohibited-claim scan; Flow
+          validation"
+        - "Review focus: evidence is concise, public-safe, repo-relative, and
+          does not imply Go provider support is implemented"
+        - "Escalate if: evidence needs private data, output drift appears, or Go
+          proof must be excluded from CI without a clear decision"
+        - "Done boundary: evidence doc complete; close-out rows are
+          independently reviewable; feature ready for delegated review"
+      anchors:
+        - docs/tree-sitter-go-offline-build-proof.md
+        - build.zig
+        - tests/tree_sitter_go_build_proof.zig
+      in_scope:
+        - Public evidence document.
+        - CI inclusion or explicit CI-defer decision.
+        - Privacy-safe close-out smoke summary.
+      out_of_scope:
+        - Private paths, raw sibling output, raw parser stderr dumps, and Go
+          runtime support claims.
+      protected_surfaces:
+        - OSS/publicity framing.
+        - Local-first defaults.
+        - No bug prediction, quality scoring, or developer ranking claims.
+      validation_commands:
+        - git diff --check
+        - zig build validate
+        - close-out validation with sibling-local-repo label only
+        - privacy/prohibited-claim scans over new evidence
+      review_focus:
+        - Evidence is public-safe and does not overclaim Go support.
+        - Close-out smoke uses labels only.
+      escalation_triggers:
+        - Evidence requires private local paths or raw private output.
+        - Validation needs unapproved network/package-manager/global tool access.
+      done_boundary: Evidence document and validation proof are complete and
+        independently reviewable.
+  protected_surfaces:
+    - src runtime modules
+    - report schemas and renderers
+    - scoring and ranking
+    - provider runtime registry
+    - cache and telemetry behaviour
+    - build.zig.zon and .gitmodules
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-24T04:17:09.853Z
+  updated_at: 2026-05-24T04:25:54.712Z
