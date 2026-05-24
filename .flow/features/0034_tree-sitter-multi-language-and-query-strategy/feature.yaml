@@ -4,7 +4,7 @@ feature:
   slug: tree-sitter-multi-language-and-query-strategy
   title: Tree-sitter multi-language and query strategy
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The project now has an opt-in Zig Tree-sitter provider, but adding more
@@ -51,7 +51,7 @@ proposal:
     materialised_at: 2026-05-24T01:46:45.934Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -122,7 +122,7 @@ design:
         custom query support.
       owner_phase: runner
       depends_on: []
-      status: planned
+      status: done
       execution_context:
         - "Anchors: docs/tree-sitter-multi-language-query-strategy.md,
           docs/provider-symbol-evidence-contract.md,
@@ -202,7 +202,7 @@ links:
   brief_ids: []
 timestamps:
   created_at: 2026-05-24T01:41:45.922Z
-  updated_at: 2026-05-24T01:49:36.114Z
+  updated_at: 2026-05-24T02:09:39.881Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-24T01:49:36.114Z
