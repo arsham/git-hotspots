@@ -1,0 +1,211 @@
+schema: flow-feature.v1
+feature:
+  id: "0035"
+  slug: tree-sitter-go-grammar-admission-review
+  title: Tree-sitter Go grammar admission review
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: The multi-language strategy names Go as the preferred first non-Zig
+    Tree-sitter language, but the repository has no Go grammar admission record
+    proving upstream identity, license, generated-source provenance,
+    compatibility, source-size, or query readiness.
+  outcome: A documentation-only Go grammar admission review records the gates and
+    decision state required before any future tree-sitter-go source import or
+    runtime provider work.
+  acceptance:
+    - Add docs/tree-sitter-go-grammar-admission.md as the single public
+      admission review artefact.
+    - The document records candidate upstream identity, immutable revision or
+      blocker, checksum requirement, proposed vendored path, BOM expectations,
+      excluded file classes, and Tree-sitter core compatibility requirements.
+    - The document records license/notice, generated parser provenance,
+      local-first build supply-chain, source-size, build-impact, query, fixture,
+      and no-provider stability gates for future Go work.
+    - The document states that Go runtime support is not implemented and current
+      runtime Tree-sitter support remains Zig-only.
+    - The document preserves file-level Git evidence as product truth and frames
+      future Go symbols as optional, current-only, inspect-oriented, additive,
+      caveated provider evidence.
+    - The document ends with an explicit decision state and named blockers for a
+      later Go source-import feature.
+    - No third_party, source, test, fixture, build, CI, CLI, report schema,
+      scoring, cache, provider runtime, provider registry, release, package, or
+      network behaviour changes are made.
+planning:
+  state: ready
+  summary: Shape a documentation-only Go grammar admission review before any
+    tree-sitter-go source import, build proof, or provider runtime work.
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - packet_verification_commands_missing
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-24T02:24:21.149Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-24T02:24:21.149Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-24T02:24:21.149Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-24T02:24:21.149Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Follow-up to the Tree-sitter multi-language strategy, which
+    identifies Go as the first non-Zig language candidate but requires language
+    admission gates before implementation.
+  depends_on_feature_ids:
+    - "0034"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add one Go grammar admission review document.
+    - Keep the feature documentation-only and use it to gate a later
+      tree-sitter-go source-import feature.
+    - Explicitly defer Go source import, build proof, extraction proof, runtime
+      provider output, custom queries, and LSP.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+  packets:
+    - id: P1
+      title: Go grammar admission review document
+      goal: Add one docs-only admission review for tree-sitter-go that records
+        upstream identity, provenance, license, compatibility, query, and future
+        validation gates before source import.
+      owner_phase: runner
+      depends_on: []
+      status: planned
+      execution_context:
+        - "Anchors: docs/tree-sitter-go-grammar-admission.md,
+          docs/tree-sitter-multi-language-query-strategy.md,
+          docs/tree-sitter-dependency-vendoring-plan.md,
+          docs/tree-sitter-vendoring-readiness.md."
+        - "In scope: one documentation-only Go grammar admission review with
+          candidate identity, license/notice, generated parser provenance,
+          compatibility, BOM, excluded file classes, source-size/build-impact,
+          query fixture gates, and decision state."
+        - "In scope: explicit statements that Go runtime support is not
+          implemented and current runtime Tree-sitter support remains Zig-only."
+        - "Out of scope: third_party source import, source/build/test/fixture
+          changes, build.zig.zon, CI changes, provider registry, CLI flags,
+          report schema changes, scoring, cache, runtime Go provider behaviour,
+          custom user queries, LSP, release or package work."
+        - "Protected: local-first behaviour, no network/telemetry/upload/remote
+          enrichment, no background provider execution, no bug prediction,
+          code-quality scoring, developer ranking, maintainer judgement, or
+          commercial strategy."
+        - "Dependencies: Feature 0034 language strategy is complete and names Go
+          as the first non-Zig language candidate subject to admission gates."
+        - "Validation/evidence: git diff --check; zig build validate; docs-only
+          changed-path scan; no tree-sitter-go source import scan;
+          prohibited-claim/privacy/local-first scan over changed docs."
+        - "Review focus: admission gates are concrete enough to shape the next
+          Go source-import feature without overclaiming Go runtime support."
+        - "Escalate if: implementation requires source import, build/runtime
+          changes, provider registry, CLI/report schema changes, custom query
+          execution, LSP integration, or unsupported public Go support claims."
+        - "Done boundary: admission document exists, no protected surfaces
+          changed, validation passes, and future import/runtime sequencing is
+          explicit."
+      anchors:
+        - docs/tree-sitter-go-grammar-admission.md
+        - docs/tree-sitter-multi-language-query-strategy.md
+        - docs/tree-sitter-dependency-vendoring-plan.md
+        - docs/tree-sitter-vendoring-readiness.md
+      in_scope:
+        - One docs-only Go grammar admission review document.
+        - Future Go source-import and provider validation gates.
+        - Explicit Go runtime deferral and decision state.
+      out_of_scope:
+        - Go grammar import or vendored source changes.
+        - Runtime Go provider, CLI, report schema, scoring, cache, CI, release,
+          or package changes.
+        - Custom query execution or LSP integration.
+      protected_surfaces:
+        - Runtime CLI behaviour and report schema.
+        - File-level Git evidence truth.
+        - Local-first and privacy boundaries.
+        - Existing Zig provider behaviour.
+        - Third-party vendored source state.
+      validation_commands:
+        - git diff --check
+        - zig build validate
+        - changed-path scan for docs-only scope
+        - no tree-sitter-go source import scan
+        - prohibited-claim and privacy scan over changed docs
+      review_focus:
+        - Go admission gates are concrete.
+        - No runtime support is claimed.
+        - Future sequencing is explicit.
+        - Public repo boundaries are preserved.
+      escalation_triggers:
+        - Source import or build changes are needed.
+        - Runtime Go provider behaviour is needed.
+        - Public docs imply Go support exists.
+        - Admission facts cannot be stated without unsupported guesses.
+      done_boundary: One docs-only Go admission artefact is committed and
+        independently reviewable.
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids: []
+timestamps:
+  created_at: 2026-05-24T02:15:31.107Z
+  updated_at: 2026-05-24T02:24:21.149Z
