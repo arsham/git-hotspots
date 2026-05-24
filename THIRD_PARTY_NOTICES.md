@@ -27,11 +27,27 @@ vendored paths only.
   `third_party/tree-sitter-zig/v1.1.2/LICENSE`.
 - Provenance: `third_party/tree-sitter-zig/v1.1.2/PROVENANCE.md`
 
+## tree-sitter-go
+
+- Upstream: `https://github.com/tree-sitter/tree-sitter-go`
+- Selected revision: tag `v0.25.0`, commit
+  `1547678a9da59885853f5f5cc8a99cc203fa2e2c`
+- Vendored path: `third_party/tree-sitter-go/v0.25.0`
+- License: MIT
+- Notice: preserve the upstream MIT license text and copyright notice copied in
+  `third_party/tree-sitter-go/v0.25.0/LICENSE`.
+- Provenance: `third_party/tree-sitter-go/v0.25.0/PROVENANCE.md`
+
 ## Generated-source note
 
-`third_party/tree-sitter-zig/v1.1.2/src/parser.c` is accepted in this feature as
-a pinned upstream generated artefact. The selected Git commit and release asset
-contain identical parser content, Git blob
-`cb09604e5dac45c2bd599e3bdc509411ea6ed2a1`, with byte size `5843608`. No local
-parser generator, package-manager fetch, build path, link path, parser runtime,
-or provider behavior is added by this import.
+`third_party/tree-sitter-zig/v1.1.2/src/parser.c` is accepted in Feature 0025
+as a pinned upstream generated artefact. The selected Git commit and release
+asset contain identical parser content, Git blob
+`cb09604e5dac45c2bd599e3bdc509411ea6ed2a1`, with byte size `5843608`.
+
+`third_party/tree-sitter-go/v0.25.0/src/parser.c` is accepted in Feature 0036
+as a pinned upstream generated artefact copied from the selected Git commit,
+Git blob `e3567a9519739c92ae776060dc8d3b4968bc465f`, with byte size
+`1572685`. No local parser generator, package-manager fetch, build path, link
+path, parser runtime, provider behavior, or Go query support is added by this
+import.
