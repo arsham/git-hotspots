@@ -339,6 +339,66 @@ for data in (success, limited, empty, invalid, caveated, symlink, large, missing
     for forbidden in ('Fixture Author', 'fixture@example', 'source line'):
         assert forbidden not in text
 PY
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --format json > /tmp/git-hotspots-python-symbols.json
+diff -u fixtures/expected/python-symbols.json /tmp/git-hotspots-python-symbols.json
+! grep -Fq -- 'current_line_history' /tmp/git-hotspots-python-symbols.json
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --format markdown > /tmp/git-hotspots-python-symbols.md
+diff -u fixtures/expected/python-symbols.md /tmp/git-hotspots-python-symbols.md
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --format table > /tmp/git-hotspots-python-symbols.txt
+diff -u fixtures/expected/python-symbols.txt /tmp/git-hotspots-python-symbols.txt
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-limit 3 --format json > /tmp/git-hotspots-python-symbols-limit.json
+diff -u fixtures/expected/python-symbols-limit.json /tmp/git-hotspots-python-symbols-limit.json
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-limit 3 --format markdown > /tmp/git-hotspots-python-symbols-limit.md
+diff -u fixtures/expected/python-symbols-limit.md /tmp/git-hotspots-python-symbols-limit.md
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-limit 3 --format table > /tmp/git-hotspots-python-symbols-limit.txt
+diff -u fixtures/expected/python-symbols-limit.txt /tmp/git-hotspots-python-symbols-limit.txt
+"$EXE" --repo fixtures/python-symbols --inspect src/empty.py --symbols --format json > /tmp/git-hotspots-python-symbols-empty.json
+diff -u fixtures/expected/python-symbols-empty.json /tmp/git-hotspots-python-symbols-empty.json
+"$EXE" --repo fixtures/python-symbols --inspect src/invalid_partial.py --symbols --format json > /tmp/git-hotspots-python-symbols-invalid.json
+diff -u fixtures/expected/python-symbols-invalid.json /tmp/git-hotspots-python-symbols-invalid.json
+"$EXE" --repo fixtures/python-symbols --inspect src/generated.py --symbols --format json > /tmp/git-hotspots-python-symbols-generated.json
+diff -u fixtures/expected/python-symbols-generated.json /tmp/git-hotspots-python-symbols-generated.json
+"$EXE" --repo fixtures/python-symbols --inspect src/link.py --symbols --format json > /tmp/git-hotspots-python-symbols-symlink-unavailable.json
+diff -u fixtures/expected/python-symbols-symlink-unavailable.json /tmp/git-hotspots-python-symbols-symlink-unavailable.json
+"$EXE" --repo fixtures/python-symbols --inspect src/large.py --symbols --format json > /tmp/git-hotspots-python-symbols-large-unavailable.json
+diff -u fixtures/expected/python-symbols-large-unavailable.json /tmp/git-hotspots-python-symbols-large-unavailable.json
+"$EXE" --repo fixtures/python-symbols --inspect src/missing.py --symbols --format json > /tmp/git-hotspots-python-symbols-missing-unavailable.json
+diff -u fixtures/expected/python-symbols-missing-unavailable.json /tmp/git-hotspots-python-symbols-missing-unavailable.json
+"$EXE" --repo fixtures/python-symbols --inspect src/old_example.py --symbols --format json > /tmp/git-hotspots-python-symbols-rename-alias.json
+diff -u fixtures/expected/python-symbols-rename-alias.json /tmp/git-hotspots-python-symbols-rename-alias.json
+"$EXE" --repo fixtures/python-symbols --inspect src/other.py --symbols --format json > /tmp/git-hotspots-python-symbols-other.json
+! grep -Fq -- 'top_function' /tmp/git-hotspots-python-symbols-other.json
+"$EXE" --repo fixtures/python-symbols --inspect 'src/markdown|path.py' --symbols --format markdown > /tmp/git-hotspots-python-symbols-markdown-path.md
+grep -Fq -- 'markdown\|path.py' /tmp/git-hotspots-python-symbols-markdown-path.md
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-line-history --format json > /tmp/git-hotspots-python-symbols-line-history-deferred.json
+diff -u /tmp/git-hotspots-python-symbols.json /tmp/git-hotspots-python-symbols-line-history-deferred.json
+python3 - /tmp/git-hotspots-python-symbols.json /tmp/git-hotspots-python-symbols-limit.json /tmp/git-hotspots-python-symbols-empty.json /tmp/git-hotspots-python-symbols-invalid.json /tmp/git-hotspots-python-symbols-generated.json /tmp/git-hotspots-python-symbols-symlink-unavailable.json /tmp/git-hotspots-python-symbols-large-unavailable.json /tmp/git-hotspots-python-symbols-missing-unavailable.json /tmp/git-hotspots-python-symbols-rename-alias.json /tmp/git-hotspots-python-symbols-other.json <<'PY'
+import json, sys
+success, limited, empty, invalid, generated, symlink, large, missing, alias, other = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+assert success['symbols']['provider']['name'] == 'tree-sitter-python'
+assert success['symbols']['provider']['failure'] == 'ok'
+assert [row['name'] for row in success['symbols']['items']] == ['src/example.py', 'CONSTANT', 'mutable_value', 'top_function', 'inner_function', 'InnerClass', 'Outer', 'Nested', 'method', 'method_inner', 'café']
+assert [row['kind'] for row in success['symbols']['items']] == ['module', 'other', 'variable', 'function', 'function', 'class', 'class', 'class', 'method', 'function', 'function']
+assert all(row['path'] == 'src/example.py' for row in success['symbols']['items'])
+assert 'FIRST' not in json.dumps(success) and 'DYNAMIC' not in json.dumps(success)
+assert len(limited['symbols']['items']) == len(success['symbols']['items'])
+assert limited['symbols']['human_display']['shown_count'] == 3
+assert limited['symbols']['human_display']['omitted_count'] == 8
+assert empty['symbols']['provider']['failure'] == 'ok' and [row['name'] for row in empty['symbols']['items']] == ['src/empty.py']
+assert invalid['symbols']['provider']['failure'] == 'failed' and invalid['symbols']['items'] == []
+assert generated['symbols']['provider']['failure'] == 'ok' and any('generated-file markers' in caveat for caveat in generated['symbols']['provider']['caveats'])
+assert symlink['symbols']['provider']['failure'] == 'unavailable' and symlink['symbols']['items'] == []
+assert large['symbols']['provider']['failure'] == 'unavailable' and large['symbols']['items'] == []
+assert missing['symbols']['provider']['failure'] == 'unavailable' and missing['symbols']['items'] == []
+assert alias['inspect']['requested_path'] == 'src/old_example.py' and alias['inspect']['matched_path'] == 'src/example.py'
+assert all(row['path'] == 'src/example.py' for row in alias['symbols']['items'])
+assert [row['name'] for row in other['symbols']['items']] == ['src/other.py', 'OtherOnly']
+for data in (success, limited, empty, invalid, generated, symlink, large, missing, alias, other):
+    text = json.dumps(data, ensure_ascii=False)
+    assert 'current_line_history' not in text
+    for forbidden in ('Fixture Author', 'fixture@example', 'source line'):
+        assert forbidden not in text
+PY
 ! grep -Eiq -- 'Fixture Author|fixture@example|fixture function|private|file://|raw blame|source line|previous filename|ownership|productivity|developer ranking' /tmp/git-hotspots-go-line-history-success.json /tmp/git-hotspots-go-line-history-success.md /tmp/git-hotspots-go-line-history-success.txt /tmp/git-hotspots-go-line-history-shallow.json /tmp/git-hotspots-go-line-history-partial.json /tmp/git-hotspots-go-line-history-empty.json /tmp/git-hotspots-go-line-history-invalid.json /tmp/git-hotspots-go-line-history-symlink-unavailable.json /tmp/git-hotspots-go-line-history-large-unavailable.json /tmp/git-hotspots-go-line-history-missing-unavailable.json /tmp/git-hotspots-go-line-history-rename-alias.json /tmp/git-hotspots-go-line-history-dirty-inspected.json /tmp/git-hotspots-go-line-history-dirty-unrelated.json fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt
 "$EXE" --repo fixtures/scope --format json > /tmp/git-hotspots-scope-unfiltered.json
 "$EXE" --repo fixtures/scope --scope all --limit 200 --format json > /tmp/git-hotspots-scope-all.json

@@ -1,10 +1,9 @@
 //! Dedicated build target source for the internal Python symbol extraction
-//! proof. Importing the query-contract proof runs its fixture tests under the
-//! Python symbol proof target without adding runtime provider wiring or
-//! user-facing Python symbol output.
+//! proof. Importing the runtime provider runs its in-memory fixture tests under
+//! the Python symbol proof target without relying on the CLI runtime.
 
-const python_query_proof = @import("tree_sitter_python_query_proof.zig");
+const tree_sitter_python = @import("tree_sitter_python");
 
-test "Python symbol proof executes the query-backed extraction fixture suite" {
-    _ = python_query_proof;
+test "Python symbol proof executes the runtime extraction fixture suite" {
+    _ = tree_sitter_python;
 }

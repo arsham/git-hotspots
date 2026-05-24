@@ -25,6 +25,12 @@ fn addTreeSitterPythonGrammar(b: *std.Build, module: *std.Build.Module) void {
     module.link_libc = true;
 }
 
+fn addTreeSitterPythonHeaders(b: *std.Build, module: *std.Build.Module) void {
+    module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
+    module.addIncludePath(b.path("third_party/tree-sitter-python/v0.25.0/src"));
+    module.link_libc = true;
+}
+
 fn addTreeSitterZig(b: *std.Build, module: *std.Build.Module) void {
     addTreeSitterCore(b, module);
     addTreeSitterZigGrammar(b, module);
@@ -44,6 +50,7 @@ fn addTreeSitterProviders(b: *std.Build, module: *std.Build.Module) void {
     addTreeSitterCore(b, module);
     addTreeSitterZigGrammar(b, module);
     addTreeSitterGoGrammar(b, module);
+    addTreeSitterPythonGrammar(b, module);
 }
 
 pub fn build(b: *std.Build) void {
@@ -222,11 +229,13 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    tree_sitter_python_symbol_proof_module.addImport("provider", b.createModule(.{
-        .root_source_file = b.path("src/provider.zig"),
+    const tree_sitter_python_provider_module = b.createModule(.{
+        .root_source_file = b.path("src/tree_sitter_python.zig"),
         .target = target,
         .optimize = optimize,
-    }));
+    });
+    addTreeSitterPythonHeaders(b, tree_sitter_python_provider_module);
+    tree_sitter_python_symbol_proof_module.addImport("tree_sitter_python", tree_sitter_python_provider_module);
     addTreeSitterPython(b, tree_sitter_python_symbol_proof_module);
 
     const tree_sitter_python_symbol_proof = b.addTest(.{

@@ -414,11 +414,11 @@ PY
 
 markdown_assertions() {
   have_python || return 1
-  python3 - "$BASIC_MD_A" "$BASIC_MD_B" "$BASIC_INSPECT_MD" "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" "$SCOPE_PROJECT_MD" "$SCOPE_PROJECT_MD_B" "$SCOPE_EMPTY_MD" "$EDGE_MD" "$EDGE_INSPECT_MD" "$SELF_MARKDOWN" "$SELF_SCOPED_MARKDOWN" "$SCOPE_SRC_INCLUDE_MD" "$SCOPE_INCLUDE_EMPTY_MD" "$SYMBOLS_MD" "$SYMBOLS_LIMIT_MD" <<'PY'
+  python3 - "$BASIC_MD_A" "$BASIC_MD_B" "$BASIC_INSPECT_MD" "$SCOPE_FILTERED_MD" "$SCOPE_FILTERED_MD_B" "$SCOPE_PROJECT_MD" "$SCOPE_PROJECT_MD_B" "$SCOPE_EMPTY_MD" "$EDGE_MD" "$EDGE_INSPECT_MD" "$SELF_MARKDOWN" "$SELF_SCOPED_MARKDOWN" "$SCOPE_SRC_INCLUDE_MD" "$SCOPE_INCLUDE_EMPTY_MD" "$SYMBOLS_MD" "$SYMBOLS_LIMIT_MD" "$PY_SYMBOLS_MD" "$PY_SYMBOLS_LIMIT_MD" "$PY_SYMBOLS_MARKDOWN_PATH_MD" <<'PY'
 import os, re, sys
 from pathlib import Path
 
-basic_a, basic_b, basic_inspect, scope_filtered, scope_filtered_b, scope_project, scope_project_b, scope_empty, edge, edge_inspect, self_md, self_scoped, scope_src_include_md, scope_include_empty_md, symbols_md, symbols_limit_md = [Path(p) for p in sys.argv[1:]]
+basic_a, basic_b, basic_inspect, scope_filtered, scope_filtered_b, scope_project, scope_project_b, scope_empty, edge, edge_inspect, self_md, self_scoped, scope_src_include_md, scope_include_empty_md, symbols_md, symbols_limit_md, py_symbols_md, py_symbols_limit_md, py_symbols_markdown_path_md = [Path(p) for p in sys.argv[1:]]
 
 def read(path):
     return path.read_text(encoding='utf-8')
@@ -504,8 +504,19 @@ assert '- Total symbols: 2' in symbols_limit_text, 'limited symbol markdown tota
 assert '- Shown symbols: 1' in symbols_limit_text, 'limited symbol markdown shown count missing'
 assert '- Omitted symbols: 1' in symbols_limit_text, 'limited symbol markdown omitted count missing'
 assert 'zebra' not in symbols_limit_text, 'omitted symbol leaked into limited markdown'
+py_symbols_text = read(py_symbols_md)
+py_symbols_limit_text = read(py_symbols_limit_md)
+py_symbols_path_text = read(py_symbols_markdown_path_md)
+assert r'- Provider: tree\-sitter\-python' in py_symbols_text, 'Python provider markdown missing'
+assert '- Total symbols: 11' in py_symbols_text, 'Python symbol markdown total missing'
+assert 'café' in py_symbols_text, 'Unicode Python symbol missing from markdown'
+assert '- Total symbols: 11' in py_symbols_limit_text, 'limited Python symbol markdown total missing'
+assert '- Shown symbols: 3' in py_symbols_limit_text, 'limited Python symbol markdown shown count missing'
+assert '- Omitted symbols: 8' in py_symbols_limit_text, 'limited Python symbol markdown omitted count missing'
+assert r'top\_function' not in py_symbols_limit_text, 'omitted Python symbol leaked into limited markdown'
+assert r'markdown\|path.py' in py_symbols_path_text, 'Markdown-sensitive Python path not escaped'
 
-for text in [basic, basic_inspect_text, scope, project, empty, edge_text, edge_inspect_text, read(self_md), self_scoped_text, include_text, include_empty, symbols_text, symbols_limit_text]:
+for text in [basic, basic_inspect_text, scope, project, empty, edge_text, edge_inspect_text, read(self_md), self_scoped_text, include_text, include_empty, symbols_text, symbols_limit_text, py_symbols_text, py_symbols_limit_text, py_symbols_path_text]:
     assert '\t' not in text, 'raw tab leaked in markdown'
     assert 'Fixture Author' not in text, 'fixture author name leaked'
     assert 'fixture@example.invalid' not in text, 'fixture author email leaked'
@@ -597,7 +608,7 @@ explain_output_checks() {
 
 prohibited_claim_scan() {
   have_python || return 1
-  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt README.md CONTRIBUTING.md <<'PY'
+  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/python-symbols.json fixtures/expected/python-symbols.md fixtures/expected/python-symbols.txt fixtures/expected/python-symbols-limit.json fixtures/expected/python-symbols-limit.md fixtures/expected/python-symbols-limit.txt fixtures/expected/python-symbols-empty.json fixtures/expected/python-symbols-invalid.json fixtures/expected/python-symbols-generated.json fixtures/expected/python-symbols-symlink-unavailable.json fixtures/expected/python-symbols-large-unavailable.json fixtures/expected/python-symbols-missing-unavailable.json fixtures/expected/python-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt README.md CONTRIBUTING.md <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -896,10 +907,62 @@ fixture_json_checks() {
   grep -Fq -- 'current-line Git evidence may be incomplete: repository history is shallow; auto_fetch is false' "$GO_LINE_HISTORY_SHALLOW_JSON" || return 1
   "$EXE" --repo fixtures/go-symbols-partial --inspect src/example.go --symbols --symbol-line-history --format json > "$GO_LINE_HISTORY_PARTIAL_JSON" || return 1
   grep -Fq -- 'current-line Git evidence may be incomplete: repository history may be partial/promisor; auto_fetch is false' "$GO_LINE_HISTORY_PARTIAL_JSON" || return 1
+  PY_SYMBOLS_JSON=$ARTIFACT_DIR/python-symbols.json
+  PY_SYMBOLS_JSON_B=$ARTIFACT_DIR/python-symbols-b.json
+  PY_SYMBOLS_MD=$ARTIFACT_DIR/python-symbols.md
+  PY_SYMBOLS_TABLE=$ARTIFACT_DIR/python-symbols.txt
+  PY_SYMBOLS_LIMIT_JSON=$ARTIFACT_DIR/python-symbols-limit.json
+  PY_SYMBOLS_LIMIT_MD=$ARTIFACT_DIR/python-symbols-limit.md
+  PY_SYMBOLS_LIMIT_TABLE=$ARTIFACT_DIR/python-symbols-limit.txt
+  PY_SYMBOLS_EMPTY_JSON=$ARTIFACT_DIR/python-symbols-empty.json
+  PY_SYMBOLS_INVALID_JSON=$ARTIFACT_DIR/python-symbols-invalid.json
+  PY_SYMBOLS_GENERATED_JSON=$ARTIFACT_DIR/python-symbols-generated.json
+  PY_SYMBOLS_SYMLINK_JSON=$ARTIFACT_DIR/python-symbols-symlink.json
+  PY_SYMBOLS_LARGE_JSON=$ARTIFACT_DIR/python-symbols-large.json
+  PY_SYMBOLS_MISSING_JSON=$ARTIFACT_DIR/python-symbols-missing.json
+  PY_SYMBOLS_ALIAS_JSON=$ARTIFACT_DIR/python-symbols-alias.json
+  PY_SYMBOLS_OTHER_JSON=$ARTIFACT_DIR/python-symbols-other.json
+  PY_SYMBOLS_MARKDOWN_PATH_MD=$ARTIFACT_DIR/python-symbols-markdown-path.md
+  PY_SYMBOLS_LINE_HISTORY_JSON=$ARTIFACT_DIR/python-symbols-line-history-deferred.json
+  "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --format json > "$PY_SYMBOLS_JSON" || return 1
+  diff -u fixtures/expected/python-symbols.json "$PY_SYMBOLS_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --format json > "$PY_SYMBOLS_JSON_B" || return 1
+  diff -u "$PY_SYMBOLS_JSON" "$PY_SYMBOLS_JSON_B" >/dev/null || return 1
+  ! grep -Fq -- 'current_line_history' "$PY_SYMBOLS_JSON" || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --format markdown > "$PY_SYMBOLS_MD" || return 1
+  diff -u fixtures/expected/python-symbols.md "$PY_SYMBOLS_MD" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --format table > "$PY_SYMBOLS_TABLE" || return 1
+  diff -u fixtures/expected/python-symbols.txt "$PY_SYMBOLS_TABLE" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-limit 3 --format json > "$PY_SYMBOLS_LIMIT_JSON" || return 1
+  diff -u fixtures/expected/python-symbols-limit.json "$PY_SYMBOLS_LIMIT_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-limit 3 --format markdown > "$PY_SYMBOLS_LIMIT_MD" || return 1
+  diff -u fixtures/expected/python-symbols-limit.md "$PY_SYMBOLS_LIMIT_MD" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-limit 3 --format table > "$PY_SYMBOLS_LIMIT_TABLE" || return 1
+  diff -u fixtures/expected/python-symbols-limit.txt "$PY_SYMBOLS_LIMIT_TABLE" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/empty.py --symbols --format json > "$PY_SYMBOLS_EMPTY_JSON" || return 1
+  diff -u fixtures/expected/python-symbols-empty.json "$PY_SYMBOLS_EMPTY_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/invalid_partial.py --symbols --format json > "$PY_SYMBOLS_INVALID_JSON" || return 1
+  diff -u fixtures/expected/python-symbols-invalid.json "$PY_SYMBOLS_INVALID_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/generated.py --symbols --format json > "$PY_SYMBOLS_GENERATED_JSON" || return 1
+  diff -u fixtures/expected/python-symbols-generated.json "$PY_SYMBOLS_GENERATED_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/link.py --symbols --format json > "$PY_SYMBOLS_SYMLINK_JSON" || return 1
+  diff -u fixtures/expected/python-symbols-symlink-unavailable.json "$PY_SYMBOLS_SYMLINK_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/large.py --symbols --format json > "$PY_SYMBOLS_LARGE_JSON" || return 1
+  diff -u fixtures/expected/python-symbols-large-unavailable.json "$PY_SYMBOLS_LARGE_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/missing.py --symbols --format json > "$PY_SYMBOLS_MISSING_JSON" || return 1
+  diff -u fixtures/expected/python-symbols-missing-unavailable.json "$PY_SYMBOLS_MISSING_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/old_example.py --symbols --format json > "$PY_SYMBOLS_ALIAS_JSON" || return 1
+  diff -u fixtures/expected/python-symbols-rename-alias.json "$PY_SYMBOLS_ALIAS_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/other.py --symbols --format json > "$PY_SYMBOLS_OTHER_JSON" || return 1
+  ! grep -Fq -- 'top_function' "$PY_SYMBOLS_OTHER_JSON" || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect 'src/markdown|path.py' --symbols --format markdown > "$PY_SYMBOLS_MARKDOWN_PATH_MD" || return 1
+  grep -Fq -- 'markdown\|path.py' "$PY_SYMBOLS_MARKDOWN_PATH_MD" || return 1
+  "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-line-history --format json > "$PY_SYMBOLS_LINE_HISTORY_JSON" || return 1
+  diff -u "$PY_SYMBOLS_JSON" "$PY_SYMBOLS_LINE_HISTORY_JSON" >/dev/null || return 1
   have_python || return 1
-  python3 - "$SYMBOLS_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$SYMBOLS_LIMIT_JSON" "$GO_SYMBOLS_JSON" "$GO_SYMBOLS_LIMIT_JSON" "$GO_SYMBOLS_EMPTY_JSON" "$GO_SYMBOLS_INVALID_JSON" "$GO_SYMBOLS_CAVEATED_JSON" "$GO_SYMBOLS_SYMLINK_JSON" "$GO_SYMBOLS_LARGE_JSON" "$GO_SYMBOLS_MISSING_JSON" "$GO_SYMBOLS_ALIAS_JSON" "$GO_SYMBOLS_OTHER_JSON" "$GO_LINE_HISTORY_JSON" "$GO_LINE_HISTORY_SHALLOW_JSON" "$GO_LINE_HISTORY_PARTIAL_JSON" <<'PY'
+  python3 - "$SYMBOLS_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$SYMBOLS_LIMIT_JSON" "$GO_SYMBOLS_JSON" "$GO_SYMBOLS_LIMIT_JSON" "$GO_SYMBOLS_EMPTY_JSON" "$GO_SYMBOLS_INVALID_JSON" "$GO_SYMBOLS_CAVEATED_JSON" "$GO_SYMBOLS_SYMLINK_JSON" "$GO_SYMBOLS_LARGE_JSON" "$GO_SYMBOLS_MISSING_JSON" "$GO_SYMBOLS_ALIAS_JSON" "$GO_SYMBOLS_OTHER_JSON" "$GO_LINE_HISTORY_JSON" "$GO_LINE_HISTORY_SHALLOW_JSON" "$GO_LINE_HISTORY_PARTIAL_JSON" "$PY_SYMBOLS_JSON" "$PY_SYMBOLS_LIMIT_JSON" "$PY_SYMBOLS_EMPTY_JSON" "$PY_SYMBOLS_INVALID_JSON" "$PY_SYMBOLS_GENERATED_JSON" "$PY_SYMBOLS_SYMLINK_JSON" "$PY_SYMBOLS_LARGE_JSON" "$PY_SYMBOLS_MISSING_JSON" "$PY_SYMBOLS_ALIAS_JSON" "$PY_SYMBOLS_OTHER_JSON" <<'PY'
 import json, sys
-success, unsupported, symlink, limited, go_success, go_limited, go_empty, go_invalid, go_caveated, go_symlink, go_large, go_missing, go_alias, go_other, go_line, go_line_shallow, go_line_partial = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+success, unsupported, symlink, limited, go_success, go_limited, go_empty, go_invalid, go_caveated, go_symlink, go_large, go_missing, go_alias, go_other, go_line, go_line_shallow, go_line_partial, py_success, py_limited, py_empty, py_invalid, py_generated, py_symlink, py_large, py_missing, py_alias, py_other = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
 for data in (success, unsupported, symlink, limited):
     symbols = data['symbols']
     assert symbols['current_only'] is True, 'symbols current_only missing'
@@ -939,6 +1002,29 @@ assert all('current_line_history' in row for row in go_line['symbols']['items'])
 assert any(row['current_line_history']['most_recent_line_touched_timestamp'] == 1777680000 for row in go_line['symbols']['items']), 'Go current-line timestamp evidence changed'
 assert any('shallow' in ' '.join(row['current_line_history']['caveats']) for row in go_line_shallow['symbols']['items']), 'Go shallow caveat missing'
 assert any('partial/promisor' in ' '.join(row['current_line_history']['caveats']) for row in go_line_partial['symbols']['items']), 'Go partial caveat missing'
+assert py_success['symbols']['provider']['name'] == 'tree-sitter-python', 'Python provider missing'
+assert py_success['symbols']['provider']['failure'] == 'ok', 'Python provider failure changed'
+assert [row['name'] for row in py_success['symbols']['items']] == ['src/example.py', 'CONSTANT', 'mutable_value', 'top_function', 'inner_function', 'InnerClass', 'Outer', 'Nested', 'method', 'method_inner', 'café'], 'Python source order changed'
+assert [row['kind'] for row in py_success['symbols']['items']] == ['module', 'other', 'variable', 'function', 'function', 'class', 'class', 'class', 'method', 'function', 'function'], 'Python kinds changed'
+assert all(row['path'] == 'src/example.py' for row in py_success['symbols']['items']), 'Python path changed'
+assert 'FIRST' not in json.dumps(py_success) and 'DYNAMIC' not in json.dumps(py_success), 'Python out-of-scope assignment leaked'
+assert len(py_limited['symbols']['items']) == len(py_success['symbols']['items']), 'Python limit truncated JSON'
+assert py_limited['symbols']['human_display']['shown_count'] == 3, 'Python limit shown changed'
+assert py_limited['symbols']['human_display']['omitted_count'] == 8, 'Python limit omitted changed'
+assert py_empty['symbols']['provider']['failure'] == 'ok' and [row['name'] for row in py_empty['symbols']['items']] == ['src/empty.py'], 'empty Python changed'
+assert py_invalid['symbols']['provider']['failure'] == 'failed' and py_invalid['symbols']['items'] == [], 'invalid Python changed'
+assert any('generated-file markers' in caveat for caveat in py_generated['symbols']['provider']['caveats']), 'Python generated caveat missing'
+assert py_symlink['symbols']['provider']['failure'] == 'unavailable' and py_symlink['symbols']['items'] == [], 'Python symlink changed'
+assert py_large['symbols']['provider']['failure'] == 'unavailable' and py_large['symbols']['items'] == [], 'Python too-large changed'
+assert py_missing['symbols']['provider']['failure'] == 'unavailable' and py_missing['symbols']['items'] == [], 'Python missing current file changed'
+assert py_alias['inspect']['requested_path'] == 'src/old_example.py' and py_alias['inspect']['matched_path'] == 'src/example.py', 'Python rename alias changed'
+assert all(row['path'] == 'src/example.py' for row in py_alias['symbols']['items']), 'Python alias parsed requested alias'
+assert [row['name'] for row in py_other['symbols']['items']] == ['src/other.py', 'OtherOnly'], 'two-file Python inspect changed'
+for data in (py_success, py_limited, py_empty, py_invalid, py_generated, py_symlink, py_large, py_missing, py_alias, py_other):
+    text = json.dumps(data, ensure_ascii=False)
+    assert 'current_line_history' not in text, 'Python line history unexpectedly emitted'
+    for forbidden in ('Fixture Author', 'fixture@example', 'source line'):
+        assert forbidden not in text, 'Python private detail leaked'
 PY
   if "$EXE" --symbols > "$ARTIFACT_DIR/symbols-alone.out" 2> "$ARTIFACT_DIR/symbols-alone.err"; then return 1; fi
   grep -q -- '--symbols can only be combined with --inspect PATH' "$ARTIFACT_DIR/symbols-alone.err" || return 1
@@ -1057,6 +1143,7 @@ real_repo_smoke() {
   commit_count=$(git -C "$repo" rev-list --count HEAD 2>/dev/null || printf 'unknown')
   tracked_file_count=$(git -C "$repo" ls-files 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
   tracked_go_count=$(git -C "$repo" ls-files '*.go' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
+  tracked_python_count=$(git -C "$repo" ls-files '*.py' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
 
   if "$EXE" --repo "$repo" --scope all --format table > "$table_out" 2> "$timing_file"; then
     table_status=pass
@@ -1111,12 +1198,23 @@ real_repo_smoke() {
     fi
   fi
 
+  first_python_path=$(git -C "$repo" ls-files '*.py' 2>/dev/null | LC_ALL=C sort | head -n 1 || true)
+  python_symbol_status=skip-no-tracked-python-file
+  if [ -n "$first_python_path" ]; then
+    python_symbol_out=$(mktemp "$ARTIFACT_DIR/real-python-symbol.XXXXXX.json")
+    if "$EXE" --repo "$repo" --inspect "$first_python_path" --symbols --format json > "$python_symbol_out" 2> "$timing_file" && python3 -m json.tool "$python_symbol_out" >/dev/null 2>&1; then
+      python_symbol_status=pass
+    else
+      python_symbol_status=fail
+    fi
+  fi
+
   if [ "$table_status" = pass ] && [ "$json_status" = pass ] && [ "$markdown_status" = pass ] && [ "$project_table_status" = pass ] && [ "$project_json_status" = pass ] && [ "$project_markdown_status" = pass ] && [ "$progress_status" = pass ]; then
     summary=$(json_count_summary "$json_out") || summary='results=unknown caveats=unknown dirty=unknown'
     project_summary=$(json_count_summary "$project_json_out") || project_summary='results=unknown caveats=unknown dirty=unknown'
     elapsed=${timing#*|}
     project_elapsed=${project_timing#*|}
-    printf 'real-repo label=%s commits=%s tracked_files=%s tracked_go_files=%s go_symbol=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$tracked_go_count" "$go_symbol_status" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
+    printf 'real-repo label=%s commits=%s tracked_files=%s tracked_go_files=%s tracked_python_files=%s go_symbol=%s python_symbol=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$tracked_go_count" "$tracked_python_count" "$go_symbol_status" "$python_symbol_status" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
     pass_rung "real repo smoke $label"
     return 0
   fi
@@ -1152,6 +1250,23 @@ SYMBOLS_LIMIT_TABLE=$ARTIFACT_DIR/symbols-limit.txt
 SYMBOLS_LIMIT_TABLE_B=$ARTIFACT_DIR/symbols-limit-b.txt
 SYMBOLS_UNSUPPORTED_JSON=$ARTIFACT_DIR/symbols-unsupported.json
 SYMBOLS_SYMLINK_JSON=$ARTIFACT_DIR/symbols-symlink.json
+PY_SYMBOLS_JSON=$ARTIFACT_DIR/python-symbols.json
+PY_SYMBOLS_JSON_B=$ARTIFACT_DIR/python-symbols-b.json
+PY_SYMBOLS_MD=$ARTIFACT_DIR/python-symbols.md
+PY_SYMBOLS_TABLE=$ARTIFACT_DIR/python-symbols.txt
+PY_SYMBOLS_LIMIT_JSON=$ARTIFACT_DIR/python-symbols-limit.json
+PY_SYMBOLS_LIMIT_MD=$ARTIFACT_DIR/python-symbols-limit.md
+PY_SYMBOLS_LIMIT_TABLE=$ARTIFACT_DIR/python-symbols-limit.txt
+PY_SYMBOLS_EMPTY_JSON=$ARTIFACT_DIR/python-symbols-empty.json
+PY_SYMBOLS_INVALID_JSON=$ARTIFACT_DIR/python-symbols-invalid.json
+PY_SYMBOLS_GENERATED_JSON=$ARTIFACT_DIR/python-symbols-generated.json
+PY_SYMBOLS_SYMLINK_JSON=$ARTIFACT_DIR/python-symbols-symlink.json
+PY_SYMBOLS_LARGE_JSON=$ARTIFACT_DIR/python-symbols-large.json
+PY_SYMBOLS_MISSING_JSON=$ARTIFACT_DIR/python-symbols-missing.json
+PY_SYMBOLS_ALIAS_JSON=$ARTIFACT_DIR/python-symbols-alias.json
+PY_SYMBOLS_OTHER_JSON=$ARTIFACT_DIR/python-symbols-other.json
+PY_SYMBOLS_MARKDOWN_PATH_MD=$ARTIFACT_DIR/python-symbols-markdown-path.md
+PY_SYMBOLS_LINE_HISTORY_JSON=$ARTIFACT_DIR/python-symbols-line-history-deferred.json
 SCOPE_UNFILTERED_JSON=$ARTIFACT_DIR/scope-unfiltered.json
 SCOPE_ALL_JSON=$ARTIFACT_DIR/scope-all.json
 SCOPE_FILTERED_JSON=$ARTIFACT_DIR/scope-filtered.json
@@ -1244,7 +1359,7 @@ else
 fi
 
 printf 'validate: RUN JSON validity\n'
-json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_PROGRESS_JSON" "$BASIC_INSPECT_JSON" "$BASIC_INSPECT_PROGRESS_JSON" "$SYMBOLS_JSON" "$SYMBOLS_LIMIT_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" "$SCOPE_PROJECT_PROGRESS_JSON" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_NODE_JSON" "$SCOPE_ALL_INCLUDE_NODE_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_PROJECT_INSPECT_PROGRESS_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_ALL_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_EXCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_PROJECT_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_PROJECT_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
+json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_PROGRESS_JSON" "$BASIC_INSPECT_JSON" "$BASIC_INSPECT_PROGRESS_JSON" "$SYMBOLS_JSON" "$SYMBOLS_LIMIT_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$PY_SYMBOLS_JSON" "$PY_SYMBOLS_JSON_B" "$PY_SYMBOLS_LIMIT_JSON" "$PY_SYMBOLS_EMPTY_JSON" "$PY_SYMBOLS_INVALID_JSON" "$PY_SYMBOLS_GENERATED_JSON" "$PY_SYMBOLS_SYMLINK_JSON" "$PY_SYMBOLS_LARGE_JSON" "$PY_SYMBOLS_MISSING_JSON" "$PY_SYMBOLS_ALIAS_JSON" "$PY_SYMBOLS_OTHER_JSON" "$PY_SYMBOLS_LINE_HISTORY_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" "$SCOPE_PROJECT_PROGRESS_JSON" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_NODE_JSON" "$SCOPE_ALL_INCLUDE_NODE_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_PROJECT_INSPECT_PROGRESS_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_ALL_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_EXCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_PROJECT_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_PROJECT_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
 
 printf 'validate: RUN shallow, partial, and privacy assertions\n'
 if semantic_assertions; then
@@ -1315,7 +1430,7 @@ else
   printf '  - none\n'
 fi
 printf 'privacy: summary uses labels and bounded counts only; raw reports and absolute private paths are not printed.\n'
-printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, packaging, or release automation; opt-in inspect-only Tree-sitter Zig or Go symbols are local current-file enrichment.\n'
+printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, packaging, or release automation; opt-in inspect-only Tree-sitter Zig, Go, or Python symbols are local current-file enrichment.\n'
 
 if [ "$FAILURES" -ne 0 ]; then
   printf 'validate: %d rung(s) failed\n' "$FAILURES" >&2

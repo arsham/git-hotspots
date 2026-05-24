@@ -71,8 +71,8 @@ pub const text =
     \\## Inspect symbols
     \\
     \\The --symbols flag is opt-in and valid only with --inspect PATH. It adds
-    \\current working-tree Tree-sitter Zig or Go symbols for the matched
-    \\in-scope .zig or .go file. Provider output is current-only enrichment with
+    \\current working-tree Tree-sitter Zig, Go, or Python symbols for the matched
+    \\in-scope .zig, .go, or .py file. Provider output is current-only enrichment with
     \\freshness, failure, confidence, caveats, and local provenance.
     \\
     \\Symbol evidence does not change file score, rank, confidence, co-change
@@ -81,13 +81,17 @@ pub const text =
     \\and report provider caveats without parser diagnostics or source snippets.
     \\Go support is inspect-only and does not evaluate packages, build tags,
     \\cgo, dependency graphs, symbol lineage, scoring, or true symbol history.
+    \\Python support is inspect-only and does not evaluate imports, packages,
+    \\virtual environments, generated-source policy, dependency graphs,
+    \\line-history, scoring, ownership, or semantic moves.
     \\
     \\--symbol-line-history is opt-in and valid only with --inspect PATH
     \\--symbols. It adds current-line Git blame evidence for current Zig or Go
     \\symbol line ranges using one local blame process only when current ranges
     \\are valid and the inspected file is clean. It reports commit-count and
     \\timestamp summaries without author identities, commit messages, source
-    \\snippets, remotes, or absolute paths. This is not symbol lineage,
+    \\snippets, remotes, or absolute paths. Python line-history is not
+    \\implemented in this alpha. This is not symbol lineage,
     \\ownership, scoring input, or semantic history.
     \\
     \\## Limitations and non-claims
@@ -130,7 +134,7 @@ test "explanation includes confidence and non-claim boundaries" {
         "AI/LLM judgement",
         "--symbols flag is opt-in and valid only with --inspect PATH",
         "--symbol-line-history is opt-in and valid only with --inspect PATH",
-        "Tree-sitter Zig or Go symbols",
+        "Tree-sitter Zig, Go, or Python symbols",
         "Symbol evidence does not change file score",
     }) |snippet| {
         try std.testing.expect(std.mem.indexOf(u8, text, snippet) != null);

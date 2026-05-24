@@ -1,0 +1,31 @@
+{
+  "schema_version": "1",
+  "tool": { "name": "git-hotspots", "version": "0.1.0-alpha.1" },
+  "analysis": {
+    "history": { "head": "cfc3a2ced6a5cdb7e9ca4d67902844a29dd39128", "head_timestamp": 1777680000, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 2 },
+    "scope": { "selected_scope": "project", "filters_active": true, "include_prefixes": [], "exclude_prefixes": [".flow/", ".zig-cache/", "zig-out/", "target/", "node_modules/", "dist/", "build/", "coverage/"], "outside_include_path_count": 0, "outside_include_change_count": 0, "excluded_path_count": 0, "excluded_change_count": 0 },
+    "caveats": ["Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked"]
+  },
+  "symbols": {
+    "current_only": true,
+    "human_display": { "total_count": 0, "shown_count": 0, "omitted_count": 0, "default_limit": 25, "active_limit": 25, "limit_source": "default", "sort_basis": "provider order" },
+    "provider": { "name": "tree-sitter-python", "kind": "symbol", "version": "tree-sitter-core@v0.26.9/tree-sitter-python@v0.25.0/python-symbol-query-v1", "contract_version": "provider-symbol-evidence-v1", "freshness": "unknown", "failure": "failed", "confidence": "low", "caveats": ["provider failed to parse supported Python symbol evidence", "invalid or partial Python source failed closed without parser diagnostics or source snippets"], "provenance": { "input": "working-tree:src/invalid_partial.py", "local_only": true } },
+    "items": [
+    ]
+  },
+  "inspect": { "requested_path": "src/invalid_partial.py", "matched_path": "src/invalid_partial.py", "rank": 5 },
+  "results": [
+    {
+      "path": "src/invalid_partial.py",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
+      "score": { "total": 39.080, "frequency": 10.000, "churn": 0.080, "recency": 19.000, "cochange": 10.000 },
+      "change_count": 1, "additions": 2, "deletions": 0, "churn": 2,
+      "recency": { "last_changed_timestamp": 1777593600, "last_changed_commit": "36220374db4b" },
+      "current_size": 22,
+      "cochanges": [{ "path": "src/empty.py", "count": 1 }, { "path": "src/example.py", "count": 1 }, { "path": "src/generated.py", "count": 1 }, { "path": "src/large.py", "count": 1 }, { "path": "src/link.py", "count": 1 }],
+      "confidence": "low",
+      "caveats": [],
+      "evidence": [{ "commit": "36220374db4b", "timestamp": 1777593600, "additions": 2, "deletions": 0 }]
+    }
+  ]
+}
