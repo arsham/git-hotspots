@@ -1,0 +1,205 @@
+schema: flow-feature.v1
+feature:
+  id: "0034"
+  slug: tree-sitter-multi-language-and-query-strategy
+  title: Tree-sitter multi-language and query strategy
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: The project now has an opt-in Zig Tree-sitter provider, but adding more
+    languages or custom queries without a shared strategy would multiply
+    vendoring, query, validation, privacy, and monorepo support risks.
+  outcome: A design-only strategy document defines how future Tree-sitter
+    languages and query support may be admitted without changing runtime
+    behaviour in this feature.
+  acceptance:
+    - Add one strategy document for Tree-sitter multi-language and query support.
+    - The document covers Go, Python, Lua, JavaScript, TypeScript, Rust, Node as
+      JavaScript or TypeScript runtime context, monorepos, and future grammars.
+    - The document defines language admission criteria, query ownership,
+      built-in query requirements, deterministic language detection, provider
+      failure states, validation gates, and future sequencing.
+    - Custom user query execution is explicitly deferred unless a later feature
+      accepts a safe local-only contract.
+    - The strategy preserves inspect-only provider execution by default and does
+      not introduce repo-wide provider scanning.
+    - The strategy preserves file-level Git evidence as product truth and keeps
+      provider evidence additive, current-only, caveated, and optional.
+    - No runtime, source, test, fixture, build, third-party, CLI, report schema,
+      scoring, cache, CI, release, or package behaviour changes are made.
+planning:
+  state: ready
+  summary: Shape a design-only language and query strategy before importing more
+    Tree-sitter grammars or exposing user custom queries.
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - packet_verification_commands_missing
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-24T01:46:45.934Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-24T01:46:45.934Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-24T01:46:45.934Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-24T01:46:45.934Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Tree-sitter and provider follow-up after Zig-only inspect
+    symbol output, line-history evidence, and public demo snapshot.
+  depends_on_feature_ids:
+    - "0020"
+    - "0028"
+    - "0032"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add docs/tree-sitter-multi-language-query-strategy.md as a strategy and
+      admission contract.
+    - Keep the feature docs-only and use it to sequence future one-language
+      provider spikes.
+    - Defer custom query execution while defining the safe contract it would
+      need.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+  packets:
+    - id: P1
+      title: Multi-language and query strategy document
+      goal: Add one docs-only strategy artefact for future Tree-sitter language
+        admission, built-in query ownership, monorepo behaviour, and deferred
+        custom query support.
+      owner_phase: runner
+      depends_on: []
+      status: planned
+      execution_context:
+        - "Anchors: docs/tree-sitter-multi-language-query-strategy.md,
+          docs/provider-symbol-evidence-contract.md,
+          docs/tree-sitter-zig-provider-spike.md."
+        - "In scope: define language admission criteria, language priority,
+          deterministic path-based detection, built-in query ownership, capture
+          schema, symbol-kind mapping, failure states, validation gates,
+          monorepo inspect-only behaviour, and custom-query deferral contract."
+        - "In scope: cover Go, Python, Lua, JavaScript, TypeScript, Rust, and
+          Node as JavaScript or TypeScript runtime context, without claiming
+          runtime support exists yet."
+        - "Out of scope: new grammar imports, source/build/test/runtime changes,
+          provider registry, CLI flags, report schema changes, repo-wide
+          parsing, cache, LSP, custom query execution, scoring changes, or
+          release work."
+        - "Protected: file-level Git evidence remains product truth; providers
+          remain optional additive current-only enrichers; no network,
+          telemetry, upload, remote enrichment, or background provider
+          execution."
+        - "Dependencies: existing provider contract and Zig inspect-only symbol
+          provider are complete."
+        - "Validation/evidence: git diff --check; zig build validate; docs-only
+          changed-path scan; prohibited-claim/privacy/local-first scan over
+          changed docs."
+        - "Review focus: the strategy is concrete enough to shape one-language
+          future provider spikes and cautious enough not to overpromise
+          multi-language or custom-query support."
+        - "Escalate if: implementation requires parser/runtime/build changes,
+          custom query execution, provider registry design, repo-wide scan
+          semantics, or LSP integration."
+        - "Done boundary: strategy document exists, no protected surfaces
+          changed, validation passes, and future sequencing is explicit."
+      anchors:
+        - docs/tree-sitter-multi-language-query-strategy.md
+        - docs/provider-symbol-evidence-contract.md
+        - docs/tree-sitter-zig-provider-spike.md
+      in_scope:
+        - One docs-only Tree-sitter language/query strategy document.
+        - Future language admission and sequencing rules.
+        - Monorepo inspect-only behaviour guidance.
+        - Custom-query deferral and future safe-contract requirements.
+      out_of_scope:
+        - New language parser implementation.
+        - Custom user query execution.
+        - Provider registry, repo-wide parsing, cache, LSP, CI, release, or
+          report schema changes.
+      protected_surfaces:
+        - Runtime CLI behaviour and report schema.
+        - File-level Git evidence truth.
+        - Local-first and privacy boundaries.
+        - Existing Zig provider behaviour.
+      validation_commands:
+        - git diff --check
+        - zig build validate
+        - changed-path scan for docs-only scope
+        - prohibited-claim and privacy scan over changed docs
+      review_focus:
+        - concrete language admission criteria
+        - custom query support safely deferred
+        - no unsupported runtime claims
+        - monorepo behaviour remains inspect-only and path-based
+      escalation_triggers:
+        - Strategy requires runtime/parser/build changes.
+        - Strategy implies repo-wide provider scanning by default.
+        - Strategy claims support for languages not implemented yet.
+        - Strategy enables arbitrary user queries without a later safety feature.
+      done_boundary: One docs-only strategy artefact is committed and independently
+        reviewable.
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids: []
+timestamps:
+  created_at: 2026-05-24T01:41:45.922Z
+  updated_at: 2026-05-24T01:46:45.934Z
