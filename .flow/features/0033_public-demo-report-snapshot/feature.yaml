@@ -199,4 +199,561 @@ links:
   brief_ids: []
 timestamps:
   created_at: 2026-05-24T00:47:20.414Z
-  updated_at: 2026-05-24T00:55:32.797Z
+  updated_at: 2026-05-24T01:06:04.733Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-24T01:06:04.733Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0033"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids: []
+    feature:
+      title: Public demo report snapshot
+      problem: Visitors cannot yet see a polished, committed example of git-hotspots
+        output without installing and running the tool.
+      outcome: A privacy-safe public Markdown demo snapshot from this repository shows
+        project-scope hotspot evidence with careful investigation-prompt
+        framing.
+      acceptance:
+        - Commit one public demo snapshot document generated from this
+          repository only.
+        - The snapshot source command is recorded and uses project scope,
+          Markdown output, and repo-relative paths.
+        - The generated report is captured from a clean detached source commit
+          so the snapshot does not carry dirty-worktree caveats caused by Flow
+          shaping state.
+        - The document frames hotspots as local Git-history investigation
+          prompts, not bug predictions, quality scores, risk labels, maintainer
+          judgement, developer ranking, ownership, or productivity analysis.
+        - The snapshot contains no private/sibling/third-party raw output,
+          absolute paths, remotes, author identities, emails, commit messages,
+          source snippets, private labels, or commercial/SaaS/pricing/sales
+          content.
+        - Project-scope excluded prefixes may appear only in scope metadata or
+          explanatory text, not as result paths, evidence headings, co-change
+          paths, or inspected paths.
+        - No runtime, source, fixture, build, provider, scoring, cache, CI,
+          release, or package behaviour changes are made.
+    brief_alignment:
+      status: null
+      role: null
+      summary: null
+      checked_at: null
+    briefs: []
+    prd_path: .flow/features/0033_public-demo-report-snapshot/prd.md
+  requirements_contract:
+    source_path: .flow/features/0033_public-demo-report-snapshot/prd.md
+    source_digest: 63064e7d9457df977147f06632d58a15594942c700d8ff07c3fba9d6590e8bda
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: Add one static public demo document at docs/demo-report.md.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: Use this repository only as the demo subject.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: Generate or capture the snapshot from a clean detached source commit so
+          the report does not include dirty-worktree caveats caused by Flow
+          shaping or execution state.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: Record the exact command shape used for the snapshot.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: "The primary generated report command must use project scope, Markdown
+          output, and repo-relative paths: ./zig-out/bin/git-hotspots --repo .
+          --scope project --limit 10 --format markdown."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: The document must clearly state that rows are investigation prompts from
+          local Git history.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: The document must not claim that hotspots are bug predictions, objective
+          code quality ratings, risk scores, maintainer judgement, developer
+          ranking, ownership analysis, productivity analysis, or source-health
+          diagnosis.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: The snapshot must not include private/sibling/third-party raw report
+          output.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: The snapshot must not include absolute local paths, remote URLs, author
+          identities, emails, commit messages, source snippets, raw diffs,
+          private repo names, or private labels.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: Project-scope excluded prefixes may appear in the scope metadata or
+          explanatory text, but not as result paths, evidence headings,
+          co-change paths, or inspected paths.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: The document may include a short "how to read this" note and a short "not
+          shown" note.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: README may receive at most a small discoverability link to the demo if it
+          improves public navigation.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: Do not change runtime behaviour, CLI flags, report schema, source files,
+          tests, fixtures, build logic, scoring, provider behaviour, cache
+          behaviour, CI, release packaging, or generated parser sources.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#acceptance[1]
+        text: docs/demo-report.md exists and is public-facing.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#acceptance[2]
+        text: The snapshot source command and source commit are recorded in or beside
+          the document.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#acceptance[3]
+        text: "The generated report section is deterministic: regenerating from a clean
+          detached clone at the recorded source commit produces byte-identical
+          output for the generated section or full snapshot, depending on the
+          chosen document structure."
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#acceptance[4]
+        text: "The demo report contains the expected generated sections: Run summary,
+          Scope, Caveats, Top hotspots, and Evidence."
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#acceptance[5]
+        text: "The generated output reports Dirty worktree: false, Auto fetch: false,
+          Paths: repo-relative, and Selected scope: project."
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#acceptance[6]
+        text: Result paths, evidence headings, co-change paths, and inspect paths do not
+          leak .flow/, .zig-cache/, zig-out/, target/, node_modules/, dist/,
+          build/, or coverage/ entries.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#acceptance[7]
+        text: Changed docs contain no commercial/SaaS/pricing/sales strategy.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#acceptance[8]
+        text: Changed docs contain no positive bug-prediction, objective quality-score,
+          maintainer-judgement, developer-ranking, ownership, productivity, or
+          risk claims.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#acceptance[9]
+        text: No source, test, fixture, build, runtime, provider, cache, CI, release, or
+          packaging files are changed.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#edge-cases[1]
+        text: If the worktree is dirty, the runner must not capture the public snapshot
+          from the dirty worktree. Use a clean committed source commit or clean
+          detached clone instead.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#edge-cases[2]
+        text: If the generated output changes while implementing the feature, record the
+          exact source commit used and validate against that commit rather than
+          relying on chat memory.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#edge-cases[3]
+        text: If a desirable demo requires --scope all, sibling/private output, or
+          third-party output, stop and reshape instead of committing it.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#edge-cases[4]
+        text: If the generated Markdown contains an unexpected private, absolute,
+          author, remote, source-snippet, or judgemental claim, stop and fix the
+          input or reshape the feature.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#edge-cases[5]
+        text: If adding a README link would make README feel process-heavy or
+          promotional, skip the link and keep the demo document standalone.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#verification[1]
+        text: "Run the normal project validation:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Run the normal project validation:"
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#verification[2]
+        text: "``sh zig build validate ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh zig build validate ``"
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#verification[3]
+        text: "Run whitespace validation:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Run whitespace validation:"
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#verification[4]
+        text: "``sh git diff --check ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh git diff --check ``"
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#verification[5]
+        text: "Validate deterministic generation from the recorded source commit. The
+          exact helper may differ if the document uses markers around the
+          generated section, but it must prove the same invariant:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Validate deterministic generation from the recorded source
+          commit. The exact helper may differ if the document uses markers
+          around the generated section, but it must prove the same invariant:"
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#verification[6]
+        text: "```sh test -f docs/demo-report.md RECORDEDHEAD=$(awk -F': ' '/^- Source
+          commit: / { print $2; exit }' docs/demo-report.md) git cat-file -e
+          \"$RECORDEDHEAD^{commit}\""
+        category: verification
+        packet_refs:
+          - P1
+        verification: "```sh test -f docs/demo-report.md RECORDEDHEAD=$(awk -F': ' '/^-
+          Source commit: / { print $2; exit }' docs/demo-report.md) git cat-file
+          -e \"$RECORDEDHEAD^{commit}\""
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#verification[7]
+        text: tmp=$(mktemp -d) trap 'rm -rf "$tmp"' EXIT git clone --quiet --no-local .
+          "$tmp/repo" git -C "$tmp/repo" checkout --quiet --detach
+          "$RECORDED_HEAD"
+        category: verification
+        packet_refs:
+          - P1
+        verification: tmp=$(mktemp -d) trap 'rm -rf "$tmp"' EXIT git clone --quiet
+          --no-local . "$tmp/repo" git -C "$tmp/repo" checkout --quiet --detach
+          "$RECORDED_HEAD"
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#verification[8]
+        text: ./zig-out/bin/git-hotspots --repo "$tmp/repo" --scope project --limit 10
+          --format markdown > "$tmp/a.md" ./zig-out/bin/git-hotspots --repo
+          "$tmp/repo" --scope project --limit 10 --format markdown > "$tmp/b.md"
+        category: verification
+        packet_refs:
+          - P1
+        verification: ./zig-out/bin/git-hotspots --repo "$tmp/repo" --scope project
+          --limit 10 --format markdown > "$tmp/a.md" ./zig-out/bin/git-hotspots
+          --repo "$tmp/repo" --scope project --limit 10 --format markdown >
+          "$tmp/b.md"
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#verification[9]
+        text: diff -u "$tmp/a.md" "$tmp/b.md" ```
+        category: verification
+        packet_refs:
+          - P1
+        verification: diff -u "$tmp/a.md" "$tmp/b.md" ```
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#verification[10]
+        text: If docs/demo-report.md is a pure generated snapshot, diff it directly
+          against $tmp/a.md. If it contains wrapper text, extract the generated
+          section between stable markers and diff only that section.
+        category: verification
+        packet_refs:
+          - P1
+        verification: If docs/demo-report.md is a pure generated snapshot, diff it
+          directly against $tmp/a.md. If it contains wrapper text, extract the
+          generated section between stable markers and diff only that section.
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#verification[11]
+        text: "Run a content/privacy scan over changed public docs. It must prove:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Run a content/privacy scan over changed public docs. It must prove:"
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#verification[12]
+        text: expected sections are present;
+        category: verification
+        packet_refs:
+          - P1
+        verification: expected sections are present;
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#verification[13]
+        text: "Dirty worktree: false, Auto fetch: false, Paths: repo-relative, and
+          Selected scope: project are present;"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Dirty worktree: false, Auto fetch: false, Paths: repo-relative,
+          and Selected scope: project are present;"
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#verification[14]
+        text: excluded project-scope prefixes do not appear as result paths, evidence
+          headings, co-change paths, or inspect paths;
+        category: verification
+        packet_refs:
+          - P1
+        verification: excluded project-scope prefixes do not appear as result paths,
+          evidence headings, co-change paths, or inspect paths;
+        required_for_close_out: true
+      - id: REQ-042
+        source_ref: prd.md#verification[15]
+        text: no absolute local paths, remote URLs, emails, author/committer labels,
+          commit messages, source snippets, private labels, raw private reports,
+          commercial strategy, SaaS/pricing/sales content, positive
+          bug-prediction claims, positive objective quality/risk claims,
+          maintainer judgement, developer ranking, ownership analysis, or
+          productivity claims appear.
+        category: verification
+        packet_refs:
+          - P1
+        verification: no absolute local paths, remote URLs, emails, author/committer
+          labels, commit messages, source snippets, private labels, raw private
+          reports, commercial strategy, SaaS/pricing/sales content, positive
+          bug-prediction claims, positive objective quality/risk claims,
+          maintainer judgement, developer ranking, ownership analysis, or
+          productivity claims appear.
+        required_for_close_out: true
+      - id: REQ-043
+        source_ref: prd.md#verification[16]
+        text: Close-out evidence should record command exits, empty diffs, the recorded
+          source commit, scan result summary, and clean post-commit status. It
+          must not commit or print raw private reports or temporary absolute
+          paths.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Close-out evidence should record command exits, empty diffs, the
+          recorded source commit, scan result summary, and clean post-commit
+          status. It must not commit or print raw private reports or temporary
+          absolute paths.
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: A privacy-safe public Markdown demo snapshot from this repository shows
+      project-scope hotspot evidence with careful investigation-prompt framing.
+    acceptance:
+      - Commit one public demo snapshot document generated from this repository
+        only.
+      - The snapshot source command is recorded and uses project scope, Markdown
+        output, and repo-relative paths.
+      - The generated report is captured from a clean detached source commit so
+        the snapshot does not carry dirty-worktree caveats caused by Flow
+        shaping state.
+      - The document frames hotspots as local Git-history investigation prompts,
+        not bug predictions, quality scores, risk labels, maintainer judgement,
+        developer ranking, ownership, or productivity analysis.
+      - The snapshot contains no private/sibling/third-party raw output,
+        absolute paths, remotes, author identities, emails, commit messages,
+        source snippets, private labels, or commercial/SaaS/pricing/sales
+        content.
+      - Project-scope excluded prefixes may appear only in scope metadata or
+        explanatory text, not as result paths, evidence headings, co-change
+        paths, or inspected paths.
+      - No runtime, source, fixture, build, provider, scoring, cache, CI,
+        release, or package behaviour changes are made.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands: []
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
