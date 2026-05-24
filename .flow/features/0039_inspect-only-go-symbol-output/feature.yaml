@@ -4,7 +4,7 @@ feature:
   slug: inspect-only-go-symbol-output
   title: Inspect-only Go symbol output
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Go parser source import, offline build proof, and internal Go symbol
@@ -73,7 +73,7 @@ proposal:
     materialised_at: 2026-05-24T16:10:44.183Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -145,7 +145,7 @@ design:
         product build/link safety before exposing user-facing Go output.
       owner_phase: runner
       depends_on: []
-      status: pending
+      status: done
       execution_context:
         - "Anchors: build.zig, src/tree_sitter_go.zig, src/tree_sitter_zig.zig,
           src/provider.zig, tests/tree_sitter_go_symbol_proof.zig"
@@ -215,7 +215,7 @@ design:
       owner_phase: runner
       depends_on:
         - P1
-      status: pending
+      status: done
       execution_context:
         - "Anchors: src/main.zig, src/report.zig, src/model.zig,
           src/tree_sitter_go.zig, README.md, src/explain.zig or equivalent,
@@ -281,7 +281,7 @@ design:
       depends_on:
         - P1
         - P2
-      status: pending
+      status: done
       execution_context:
         - "Anchors: tools/validate.sh, .github/workflows/ci.yml, docs,
           fixtures/expected, generated fixture ignore rules if needed"
@@ -736,6 +736,9 @@ dispatch:
 execution:
   requires_confirmation: true
   blockers: []
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
 timestamps:
   created_at: 2026-05-24T16:00:52.605Z
-  updated_at: 2026-05-24T16:20:58.954Z
+  updated_at: 2026-05-24T17:23:16.308Z
