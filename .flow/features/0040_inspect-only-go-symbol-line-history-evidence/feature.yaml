@@ -1,0 +1,54 @@
+schema: flow-feature.v1
+feature:
+  id: "0040"
+  slug: inspect-only-go-symbol-line-history-evidence
+  title: Inspect-only Go symbol line-history evidence
+  lane: standard
+  status: shaping
+  autonomy_default: ask
+intent:
+  problem: ""
+  outcome: ""
+  acceptance: []
+planning:
+  state: shaped
+  summary: Enable current-line Git evidence for inspect-only Go symbols using the
+    existing symbol-line-history model, without claiming historical symbol
+    lineage or adding package/build-tag/cgo analysis.
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment: null
+  quality_plan: null
+project_feature:
+  lifecycle_state: null
+  outcome_contract_ref: null
+  quality_plan: null
+  authority_refinement: null
+verification_independence_requirement: null
+readiness:
+  requirements_ready: true
+  acceptance_ready: false
+  packet_plan_ready: false
+  dependencies_ready: true
+  implementation_ready: false
+context:
+  roadmap_item_id: null
+  detached_reason: null
+  depends_on_feature_ids: []
+  blocked_by: []
+design:
+  rough_shape: []
+  packets: []
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids: []
+timestamps:
+  created_at: 2026-05-24T17:31:43.549Z
+  updated_at: 2026-05-24T17:31:43.549Z

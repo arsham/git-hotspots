@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 40
+  next_id: 42
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -185,6 +185,14 @@ features:
       slug: inspect-only-go-symbol-output
       path: .flow/features/0039_inspect-only-go-symbol-output
       created_at: 2026-05-24T16:00:52.605Z
+    - id: "0040"
+      slug: inspect-only-go-symbol-line-history-evidence
+      path: .flow/features/0040_inspect-only-go-symbol-line-history-evidence
+      created_at: 2026-05-24T17:31:43.549Z
+    - id: "0041"
+      slug: tree-sitter-python-grammar-admission-review
+      path: .flow/features/0041_tree-sitter-python-grammar-admission-review
+      created_at: 2026-05-24T17:31:54.418Z
 intake:
   mode: roadmap
   summary: null
