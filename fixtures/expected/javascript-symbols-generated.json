@@ -1,0 +1,34 @@
+{
+  "schema_version": "1",
+  "tool": { "name": "git-hotspots", "version": "0.1.0-alpha.1" },
+  "analysis": {
+    "history": { "head": "377029018206c23c5b7d9f96dad672c65e7075ac", "head_timestamp": 1777680000, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 2 },
+    "scope": { "selected_scope": "project", "filters_active": true, "include_prefixes": [], "exclude_prefixes": [".flow/", ".zig-cache/", "zig-out/", "target/", "node_modules/", "dist/", "build/", "coverage/"], "outside_include_path_count": 0, "outside_include_change_count": 0, "excluded_path_count": 0, "excluded_change_count": 0 },
+    "caveats": ["Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked"]
+  },
+  "symbols": {
+    "current_only": true,
+    "human_display": { "total_count": 3, "shown_count": 3, "omitted_count": 0, "default_limit": 25, "active_limit": 25, "limit_source": "default", "sort_basis": "provider order" },
+    "provider": { "name": "tree-sitter-javascript", "kind": "symbol", "version": "tree-sitter-core@v0.26.9/tree-sitter-javascript@v0.25.0/javascript-symbol-query-v1", "contract_version": "provider-symbol-evidence-v1", "freshness": "fresh", "failure": "ok", "confidence": "high", "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: module roots, class declarations, function declarations, direct class methods, module-level simple bindings, and deterministic named CommonJS exports", "range convention: one-based inclusive lines; method names are bare property identifiers", "provider order: module symbol first, then deterministic source order by symbol node start byte", "module names are repo-relative .js/.mjs/.cjs/.jsx paths; package, workspace, Node, module-resolution, TypeScript, TSX, LSP, and symbol history are out of scope", "dynamic property names, imports, dependency graphs, generated-source policy, scoring, and semantic moves are out of scope", "generated-file markers and minified one-line source are caveated only; generated/minified policy is not evaluated by this provider"], "provenance": { "input": "working-tree:src/generated.min.js", "local_only": true } },
+    "items": [
+      { "path": "src/generated.min.js", "name": "src/generated.min.js", "kind": "module", "range": { "type": "lines", "start": 1, "end": 2 }, "provider": "tree-sitter-javascript", "confidence": "high", "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: module roots, class declarations, function declarations, direct class methods, module-level simple bindings, and deterministic named CommonJS exports", "range convention: one-based inclusive lines; method names are bare property identifiers", "provider order: module symbol first, then deterministic source order by symbol node start byte", "module names are repo-relative .js/.mjs/.cjs/.jsx paths; package, workspace, Node, module-resolution, TypeScript, TSX, LSP, and symbol history are out of scope", "dynamic property names, imports, dependency graphs, generated-source policy, scoring, and semantic moves are out of scope", "generated-file markers and minified one-line source are caveated only; generated/minified policy is not evaluated by this provider"] },
+      { "path": "src/generated.min.js", "name": "GENERATED_VALUE", "kind": "other", "range": { "type": "lines", "start": 1, "end": 1 }, "provider": "tree-sitter-javascript", "confidence": "high", "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: module roots, class declarations, function declarations, direct class methods, module-level simple bindings, and deterministic named CommonJS exports", "range convention: one-based inclusive lines; method names are bare property identifiers", "provider order: module symbol first, then deterministic source order by symbol node start byte", "module names are repo-relative .js/.mjs/.cjs/.jsx paths; package, workspace, Node, module-resolution, TypeScript, TSX, LSP, and symbol history are out of scope", "dynamic property names, imports, dependency graphs, generated-source policy, scoring, and semantic moves are out of scope", "generated-file markers and minified one-line source are caveated only; generated/minified policy is not evaluated by this provider"] },
+      { "path": "src/generated.min.js", "name": "generatedFunction", "kind": "function", "range": { "type": "lines", "start": 1, "end": 1 }, "provider": "tree-sitter-javascript", "confidence": "high", "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: module roots, class declarations, function declarations, direct class methods, module-level simple bindings, and deterministic named CommonJS exports", "range convention: one-based inclusive lines; method names are bare property identifiers", "provider order: module symbol first, then deterministic source order by symbol node start byte", "module names are repo-relative .js/.mjs/.cjs/.jsx paths; package, workspace, Node, module-resolution, TypeScript, TSX, LSP, and symbol history are out of scope", "dynamic property names, imports, dependency graphs, generated-source policy, scoring, and semantic moves are out of scope", "generated-file markers and minified one-line source are caveated only; generated/minified policy is not evaluated by this provider"] }
+    ]
+  },
+  "inspect": { "requested_path": "src/generated.min.js", "matched_path": "src/generated.min.js", "rank": 9 },
+  "results": [
+    {
+      "path": "src/generated.min.js",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
+      "score": { "total": 39.040, "frequency": 10.000, "churn": 0.040, "recency": 19.000, "cochange": 10.000 },
+      "change_count": 1, "additions": 1, "deletions": 0, "churn": 1,
+      "recency": { "last_changed_timestamp": 1777593600, "last_changed_commit": "26fe46508bcc" },
+      "current_size": 112,
+      "cochanges": [{ "path": "src/anonymous_exports.js", "count": 1 }, { "path": "src/commonjs.cjs", "count": 1 }, { "path": "src/component.jsx", "count": 1 }, { "path": "src/empty.js", "count": 1 }, { "path": "src/example.mjs", "count": 1 }],
+      "confidence": "low",
+      "caveats": [],
+      "evidence": [{ "commit": "26fe46508bcc", "timestamp": 1777593600, "additions": 1, "deletions": 0 }]
+    }
+  ]
+}

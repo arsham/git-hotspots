@@ -68,9 +68,9 @@ The project should preserve trust by default:
 ## Provider direction
 
 The alpha includes one narrow opt-in provider path: `--symbols` with
-`--inspect PATH` can add current working-tree Tree-sitter Zig, Go, or Python
-symbols for the inspected file. File-level Git evidence remains the core
-product truth; provider output is optional current-only enrichment.
+`--inspect PATH` can add current working-tree Tree-sitter Zig, Go, Python, or
+JavaScript symbols for the inspected file. File-level Git evidence remains the
+core product truth; provider output is optional current-only enrichment.
 
 Broader language and dependency insight should arrive through optional
 providers rather than become the foundation of the project. Possible future
@@ -144,6 +144,7 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.go --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.py --symbols --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.js --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
 ./zig-out/bin/git-hotspots --repo . --progress --format json
 ./zig-out/bin/git-hotspots --explain
@@ -178,19 +179,23 @@ caveats, ranked hotspots, and per-result evidence. `--version` is standalone
 and prints the alpha version without requiring a Git repository.
 
 `--symbols` is opt-in and works only with `--inspect PATH`. It adds current
-working-tree Tree-sitter Zig, Go, or Python symbols for the matched in-scope
-`.zig`, `.go`, or `.py` file, with provider freshness, failure, confidence,
-caveats, and local provenance in the report. Symbol evidence is current-only
-enrichment: it does not change file score, rank, confidence, co-change evidence,
-Git rename lineage, scope, or inclusion/exclusion decisions. Unsupported or
-unavailable current files preserve the inspected file evidence and report
-provider caveats without parser diagnostics, source snippets, absolute paths,
-remotes, author identities, or commit messages. Go support is inspect-only for
-the matched file and does not evaluate packages, build tags, cgo, dependency
-graphs, symbol lineage, scoring, ranking, or true symbol history. Python support
-is inspect-only for the matched file and does not evaluate imports, packages,
-virtual environments, dependency graphs, generated-source policy, scoring,
-ownership, or semantic moves.
+working-tree Tree-sitter Zig, Go, Python, or JavaScript symbols for the matched
+in-scope `.zig`, `.go`, `.py`, `.js`, `.mjs`, `.cjs`, or admitted `.jsx` file,
+with provider freshness, failure, confidence, caveats, and local provenance in
+the report. Symbol evidence is current-only enrichment: it does not change file
+score, rank, confidence, co-change evidence, Git rename lineage, scope, or
+inclusion/exclusion decisions. Unsupported or unavailable current files preserve
+the inspected file evidence and report provider caveats without parser
+diagnostics, source snippets, absolute paths, remotes, author identities, or
+commit messages. Go support is inspect-only for the matched file and does not
+evaluate packages, build tags, cgo, dependency graphs, symbol lineage, scoring,
+ranking, or true symbol history. Python support is inspect-only for the matched
+file and does not evaluate imports, packages, virtual environments, dependency
+graphs, generated-source policy, scoring, ownership, or semantic moves.
+JavaScript support is inspect-only for `.js`, `.mjs`, `.cjs`, and admitted
+`.jsx` files and does not evaluate Node, packages, workspaces, module
+resolution, TypeScript, TSX, dependency graphs, scoring, ownership, repo-wide
+scanning, or symbol history.
 
 `--symbol-line-history` is a second opt-in layer that works only with
 `--inspect PATH --symbols`. It adds current-line Git evidence for current Zig,
@@ -277,7 +282,7 @@ runs the fuller local ladder and prints a privacy-safe evidence summary.
 - Report truth is deterministic file-level Git-history evidence.
 - Broad provider, cache, dependency, test, and coverage enrichers are future
   work; the current provider path supports opt-in inspect-only current
-  working-tree Tree-sitter Zig, Go, and Python symbols.
+  working-tree Tree-sitter Zig, Go, Python, and JavaScript symbols.
 - Runtime defaults remain local-only and do not perform network access.
 
 ## Contributing

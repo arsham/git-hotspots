@@ -1526,7 +1526,7 @@ else
   printf '  - none\n'
 fi
 printf 'privacy: summary uses labels and bounded counts only; raw reports and absolute private paths are not printed.\n'
-printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, packaging, or release automation; opt-in inspect-only Tree-sitter Zig, Go, or Python symbols are local current-file enrichment.\n'
+printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, packaging, or release automation; opt-in inspect-only Tree-sitter Zig, Go, Python, or JavaScript symbols are local current-file enrichment.\n'
 
 if [ "$FAILURES" -ne 0 ]; then
   printf 'validate: %d rung(s) failed\n' "$FAILURES" >&2

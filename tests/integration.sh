@@ -444,6 +444,78 @@ for data in (line, line_shallow, line_partial, line_empty, line_dirty, line_unre
     for forbidden in ('Fixture Author', 'fixture@example', 'source line', 'ownership', 'productivity'):
         assert forbidden not in text
 PY
+"$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --format json > /tmp/git-hotspots-javascript-symbols.json
+diff -u fixtures/expected/javascript-symbols.json /tmp/git-hotspots-javascript-symbols.json
+! grep -Fq -- 'current_line_history' /tmp/git-hotspots-javascript-symbols.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --format markdown > /tmp/git-hotspots-javascript-symbols.md
+diff -u fixtures/expected/javascript-symbols.md /tmp/git-hotspots-javascript-symbols.md
+"$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --format table > /tmp/git-hotspots-javascript-symbols.txt
+diff -u fixtures/expected/javascript-symbols.txt /tmp/git-hotspots-javascript-symbols.txt
+"$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --symbol-limit 4 --format json > /tmp/git-hotspots-javascript-symbols-limit.json
+diff -u fixtures/expected/javascript-symbols-limit.json /tmp/git-hotspots-javascript-symbols-limit.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --symbol-limit 4 --format markdown > /tmp/git-hotspots-javascript-symbols-limit.md
+diff -u fixtures/expected/javascript-symbols-limit.md /tmp/git-hotspots-javascript-symbols-limit.md
+"$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --symbol-limit 4 --format table > /tmp/git-hotspots-javascript-symbols-limit.txt
+diff -u fixtures/expected/javascript-symbols-limit.txt /tmp/git-hotspots-javascript-symbols-limit.txt
+"$EXE" --repo fixtures/javascript-symbols --inspect src/commonjs.cjs --symbols --format json > /tmp/git-hotspots-javascript-symbols-commonjs.json
+diff -u fixtures/expected/javascript-symbols-commonjs.json /tmp/git-hotspots-javascript-symbols-commonjs.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/component.jsx --symbols --format json > /tmp/git-hotspots-javascript-symbols-jsx.json
+diff -u fixtures/expected/javascript-symbols-jsx.json /tmp/git-hotspots-javascript-symbols-jsx.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/anonymous_exports.js --symbols --format json > /tmp/git-hotspots-javascript-symbols-anonymous.json
+diff -u fixtures/expected/javascript-symbols-anonymous.json /tmp/git-hotspots-javascript-symbols-anonymous.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/empty.js --symbols --format json > /tmp/git-hotspots-javascript-symbols-empty.json
+diff -u fixtures/expected/javascript-symbols-empty.json /tmp/git-hotspots-javascript-symbols-empty.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/invalid_partial.js --symbols --format json > /tmp/git-hotspots-javascript-symbols-invalid.json
+diff -u fixtures/expected/javascript-symbols-invalid.json /tmp/git-hotspots-javascript-symbols-invalid.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/generated.min.js --symbols --format json > /tmp/git-hotspots-javascript-symbols-generated.json
+diff -u fixtures/expected/javascript-symbols-generated.json /tmp/git-hotspots-javascript-symbols-generated.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/link.js --symbols --format json > /tmp/git-hotspots-javascript-symbols-symlink-unavailable.json
+diff -u fixtures/expected/javascript-symbols-symlink-unavailable.json /tmp/git-hotspots-javascript-symbols-symlink-unavailable.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/large.js --symbols --format json > /tmp/git-hotspots-javascript-symbols-large-unavailable.json
+diff -u fixtures/expected/javascript-symbols-large-unavailable.json /tmp/git-hotspots-javascript-symbols-large-unavailable.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/missing.js --symbols --format json > /tmp/git-hotspots-javascript-symbols-missing-unavailable.json
+diff -u fixtures/expected/javascript-symbols-missing-unavailable.json /tmp/git-hotspots-javascript-symbols-missing-unavailable.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/old-example.mjs --symbols --format json > /tmp/git-hotspots-javascript-symbols-rename-alias.json
+diff -u fixtures/expected/javascript-symbols-rename-alias.json /tmp/git-hotspots-javascript-symbols-rename-alias.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/other.js --symbols --format json > /tmp/git-hotspots-javascript-symbols-other.json
+! grep -Fq -- 'topFunction' /tmp/git-hotspots-javascript-symbols-other.json
+"$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --symbol-line-history --format json > /tmp/git-hotspots-javascript-line-history-deferred.json
+! grep -Fq -- 'current_line_history' /tmp/git-hotspots-javascript-line-history-deferred.json
+python3 - /tmp/git-hotspots-javascript-symbols.json /tmp/git-hotspots-javascript-symbols-limit.json /tmp/git-hotspots-javascript-symbols-commonjs.json /tmp/git-hotspots-javascript-symbols-jsx.json /tmp/git-hotspots-javascript-symbols-anonymous.json /tmp/git-hotspots-javascript-symbols-empty.json /tmp/git-hotspots-javascript-symbols-invalid.json /tmp/git-hotspots-javascript-symbols-generated.json /tmp/git-hotspots-javascript-symbols-symlink-unavailable.json /tmp/git-hotspots-javascript-symbols-large-unavailable.json /tmp/git-hotspots-javascript-symbols-missing-unavailable.json /tmp/git-hotspots-javascript-symbols-rename-alias.json /tmp/git-hotspots-javascript-symbols-other.json /tmp/git-hotspots-javascript-line-history-deferred.json <<'PY'
+import json, sys
+success, limited, commonjs, jsx, anonymous, empty, invalid, generated, symlink, large, missing, alias, other, line = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+assert success['symbols']['provider']['name'] == 'tree-sitter-javascript'
+assert success['symbols']['provider']['failure'] == 'ok'
+assert [row['name'] for row in success['symbols']['items']] == ['src/example.mjs', 'EXPORTED_CONSTANT', 'mutableValue', 'legacyValue', 'topFunction', 'innerFunction', 'LocalClass', 'methodOne', 'methodInner', 'ExportedClass', 'render', 'café', 'ignoredObject']
+assert [row['kind'] for row in success['symbols']['items']] == ['module', 'other', 'variable', 'variable', 'function', 'function', 'class', 'method', 'function', 'class', 'method', 'function', 'variable']
+assert all(row['path'] == 'src/example.mjs' for row in success['symbols']['items'])
+assert 'dynamicName' not in json.dumps(success)
+assert any(row['name'] == 'café' and row['kind'] == 'function' for row in success['symbols']['items'])
+assert len(limited['symbols']['items']) == len(success['symbols']['items'])
+assert limited['symbols']['human_display']['shown_count'] == 4
+assert limited['symbols']['human_display']['omitted_count'] == 9
+assert [row['name'] for row in commonjs['symbols']['items']] == ['src/commonjs.cjs', 'localOnly', 'makeThing', 'Widget', 'run', 'ANSWER']
+assert [row['kind'] for row in commonjs['symbols']['items']] == ['module', 'variable', 'function', 'class', 'method', 'other']
+assert [row['name'] for row in jsx['symbols']['items']] == ['src/component.jsx', 'View', 'element']
+assert any('TSX remains unsupported' in caveat for caveat in jsx['symbols']['provider']['caveats'])
+assert [row['name'] for row in anonymous['symbols']['items']] == ['src/anonymous_exports.js']
+assert any('anonymous default' in caveat for caveat in anonymous['symbols']['provider']['caveats'])
+assert empty['symbols']['provider']['failure'] == 'ok' and [row['name'] for row in empty['symbols']['items']] == ['src/empty.js']
+assert invalid['symbols']['provider']['failure'] == 'failed' and invalid['symbols']['items'] == []
+assert generated['symbols']['provider']['failure'] == 'ok' and any('generated-file markers' in caveat for caveat in generated['symbols']['provider']['caveats'])
+assert symlink['symbols']['provider']['failure'] == 'unavailable' and symlink['symbols']['items'] == []
+assert large['symbols']['provider']['failure'] == 'unavailable' and large['symbols']['items'] == []
+assert missing['symbols']['provider']['failure'] == 'unavailable' and missing['symbols']['items'] == []
+assert alias['inspect']['requested_path'] == 'src/old-example.mjs' and alias['inspect']['matched_path'] == 'src/example.mjs'
+assert all(row['path'] == 'src/example.mjs' for row in alias['symbols']['items'])
+assert [row['name'] for row in other['symbols']['items']] == ['src/other.js', 'OtherOnly']
+assert 'current_line_history' not in json.dumps(line)
+for data in (success, limited, commonjs, jsx, anonymous, empty, invalid, generated, symlink, large, missing, alias, other, line):
+    text = json.dumps(data, ensure_ascii=False)
+    for forbidden in ('Fixture Author', 'fixture@example', 'source line', 'ownership', 'productivity', 'Node package graph'):
+        assert forbidden not in text
+PY
+! grep -Eiq -- 'Fixture Author|fixture@example|fixture function|private|file://|raw blame|source line|previous filename|ownership|productivity|developer ranking' /tmp/git-hotspots-javascript-symbols.json /tmp/git-hotspots-javascript-symbols.md /tmp/git-hotspots-javascript-symbols.txt /tmp/git-hotspots-javascript-symbols-limit.json /tmp/git-hotspots-javascript-symbols-limit.md /tmp/git-hotspots-javascript-symbols-limit.txt /tmp/git-hotspots-javascript-symbols-commonjs.json /tmp/git-hotspots-javascript-symbols-jsx.json /tmp/git-hotspots-javascript-symbols-anonymous.json /tmp/git-hotspots-javascript-symbols-empty.json /tmp/git-hotspots-javascript-symbols-invalid.json /tmp/git-hotspots-javascript-symbols-generated.json /tmp/git-hotspots-javascript-symbols-symlink-unavailable.json /tmp/git-hotspots-javascript-symbols-large-unavailable.json /tmp/git-hotspots-javascript-symbols-missing-unavailable.json /tmp/git-hotspots-javascript-symbols-rename-alias.json /tmp/git-hotspots-javascript-symbols-other.json /tmp/git-hotspots-javascript-line-history-deferred.json fixtures/expected/javascript-symbols.json fixtures/expected/javascript-symbols.md fixtures/expected/javascript-symbols.txt fixtures/expected/javascript-symbols-limit.json fixtures/expected/javascript-symbols-limit.md fixtures/expected/javascript-symbols-limit.txt fixtures/expected/javascript-symbols-commonjs.json fixtures/expected/javascript-symbols-jsx.json fixtures/expected/javascript-symbols-anonymous.json fixtures/expected/javascript-symbols-empty.json fixtures/expected/javascript-symbols-invalid.json fixtures/expected/javascript-symbols-generated.json fixtures/expected/javascript-symbols-symlink-unavailable.json fixtures/expected/javascript-symbols-large-unavailable.json fixtures/expected/javascript-symbols-missing-unavailable.json fixtures/expected/javascript-symbols-rename-alias.json
 ! grep -Eiq -- 'Fixture Author|fixture@example|fixture function|private|file://|raw blame|source line|previous filename|ownership|productivity|developer ranking' /tmp/git-hotspots-go-line-history-success.json /tmp/git-hotspots-go-line-history-success.md /tmp/git-hotspots-go-line-history-success.txt /tmp/git-hotspots-go-line-history-shallow.json /tmp/git-hotspots-go-line-history-partial.json /tmp/git-hotspots-go-line-history-empty.json /tmp/git-hotspots-go-line-history-invalid.json /tmp/git-hotspots-go-line-history-symlink-unavailable.json /tmp/git-hotspots-go-line-history-large-unavailable.json /tmp/git-hotspots-go-line-history-missing-unavailable.json /tmp/git-hotspots-go-line-history-rename-alias.json /tmp/git-hotspots-go-line-history-dirty-inspected.json /tmp/git-hotspots-go-line-history-dirty-unrelated.json /tmp/git-hotspots-python-line-history-success.json /tmp/git-hotspots-python-line-history-success.md /tmp/git-hotspots-python-line-history-success.txt /tmp/git-hotspots-python-line-history-shallow.json /tmp/git-hotspots-python-line-history-partial.json /tmp/git-hotspots-python-line-history-empty.json /tmp/git-hotspots-python-line-history-invalid.json /tmp/git-hotspots-python-line-history-symlink-unavailable.json /tmp/git-hotspots-python-line-history-large-unavailable.json /tmp/git-hotspots-python-line-history-missing-unavailable.json /tmp/git-hotspots-python-line-history-dirty-inspected.json /tmp/git-hotspots-python-line-history-dirty-unrelated.json fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt fixtures/expected/python-line-history-success.json fixtures/expected/python-line-history-success.md fixtures/expected/python-line-history-success.txt
 "$EXE" --repo fixtures/scope --format json > /tmp/git-hotspots-scope-unfiltered.json
 "$EXE" --repo fixtures/scope --scope all --limit 200 --format json > /tmp/git-hotspots-scope-all.json

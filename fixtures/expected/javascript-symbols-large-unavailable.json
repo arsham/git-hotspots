@@ -1,0 +1,31 @@
+{
+  "schema_version": "1",
+  "tool": { "name": "git-hotspots", "version": "0.1.0-alpha.1" },
+  "analysis": {
+    "history": { "head": "377029018206c23c5b7d9f96dad672c65e7075ac", "head_timestamp": 1777680000, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 2 },
+    "scope": { "selected_scope": "project", "filters_active": true, "include_prefixes": [], "exclude_prefixes": [".flow/", ".zig-cache/", "zig-out/", "target/", "node_modules/", "dist/", "build/", "coverage/"], "outside_include_path_count": 0, "outside_include_change_count": 0, "excluded_path_count": 0, "excluded_change_count": 0 },
+    "caveats": ["Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked"]
+  },
+  "symbols": {
+    "current_only": true,
+    "human_display": { "total_count": 0, "shown_count": 0, "omitted_count": 0, "default_limit": 25, "active_limit": 25, "limit_source": "default", "sort_basis": "provider order" },
+    "provider": { "name": "tree-sitter-javascript", "kind": "symbol", "version": "tree-sitter-core@v0.26.9/tree-sitter-javascript@v0.25.0/javascript-symbol-query-v1", "contract_version": "provider-symbol-evidence-v1", "freshness": "unknown", "failure": "unavailable", "confidence": "unknown", "caveats": ["current working-tree file unavailable or not a regular bounded file", "no parser diagnostics, source snippets, absolute paths, remotes, author identities, commit messages, or private repo names exposed"], "provenance": { "input": "working-tree:src/large.js", "local_only": true } },
+    "items": [
+    ]
+  },
+  "inspect": { "requested_path": "src/large.js", "matched_path": "src/large.js", "rank": 6 },
+  "results": [
+    {
+      "path": "src/large.js",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
+      "score": { "total": 39.160, "frequency": 10.000, "churn": 0.160, "recency": 19.000, "cochange": 10.000 },
+      "change_count": 1, "additions": 4, "deletions": 0, "churn": 4,
+      "recency": { "last_changed_timestamp": 1777593600, "last_changed_commit": "26fe46508bcc" },
+      "current_size": 1048621,
+      "cochanges": [{ "path": "src/anonymous_exports.js", "count": 1 }, { "path": "src/commonjs.cjs", "count": 1 }, { "path": "src/component.jsx", "count": 1 }, { "path": "src/empty.js", "count": 1 }, { "path": "src/example.mjs", "count": 1 }],
+      "confidence": "low",
+      "caveats": [],
+      "evidence": [{ "commit": "26fe46508bcc", "timestamp": 1777593600, "additions": 4, "deletions": 0 }]
+    }
+  ]
+}

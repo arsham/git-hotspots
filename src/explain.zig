@@ -71,8 +71,9 @@ pub const text =
     \\## Inspect symbols
     \\
     \\The --symbols flag is opt-in and valid only with --inspect PATH. It adds
-    \\current working-tree Tree-sitter Zig, Go, or Python symbols for the matched
-    \\in-scope .zig, .go, or .py file. Provider output is current-only enrichment with
+    \\current working-tree Tree-sitter Zig, Go, Python, or JavaScript symbols for
+    \\the matched in-scope .zig, .go, .py, .js, .mjs, .cjs, or admitted .jsx
+    \\file. Provider output is current-only enrichment with
     \\freshness, failure, confidence, caveats, and local provenance.
     \\
     \\Symbol evidence does not change file score, rank, confidence, co-change
@@ -84,6 +85,10 @@ pub const text =
     \\Python support is inspect-only and does not evaluate imports, packages,
     \\virtual environments, generated-source policy, dependency graphs,
     \\scoring, ownership, or semantic moves.
+    \\JavaScript support is inspect-only for .js, .mjs, .cjs, and admitted
+    \\.jsx files. It does not evaluate Node, packages, workspaces, module
+    \\resolution, TypeScript, TSX, dependency graphs, scoring, ownership,
+    \\repo-wide scanning, or symbol history.
     \\
     \\--symbol-line-history is opt-in and valid only with --inspect PATH
     \\--symbols. It adds current-line Git blame evidence for current Zig, Go,
@@ -133,8 +138,9 @@ test "explanation includes confidence and non-claim boundaries" {
         "AI/LLM judgement",
         "--symbols flag is opt-in and valid only with --inspect PATH",
         "--symbol-line-history is opt-in and valid only with --inspect PATH",
-        "Tree-sitter Zig, Go, or Python symbols",
+        "Tree-sitter Zig, Go, Python, or JavaScript symbols",
         "Symbol evidence does not change file score",
+        "JavaScript support is inspect-only for .js, .mjs, .cjs, and admitted",
     }) |snippet| {
         try std.testing.expect(std.mem.indexOf(u8, text, snippet) != null);
     }

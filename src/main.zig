@@ -6,6 +6,7 @@ const provider = @import("provider.zig");
 const tree_sitter_zig = @import("tree_sitter_zig.zig");
 const tree_sitter_go = @import("tree_sitter_go.zig");
 const tree_sitter_python = @import("tree_sitter_python.zig");
+const tree_sitter_javascript = @import("tree_sitter_javascript.zig");
 const explain = @import("explain.zig");
 const version = @import("version.zig");
 const Io = std.Io;
@@ -40,8 +41,10 @@ const usage =
     \\                    accepted in-scope Git rename aliases may resolve to the
     \\                    canonical path; use \\t to target a tab in a Git path
     \\  --symbols         With --inspect PATH only, add opt-in current working-tree
-    \\                    Tree-sitter Zig, Go, or Python symbols for that file; does not
-    \\                    affect score, rank, lineage, confidence, or file-level evidence
+    \\                    Tree-sitter Zig, Go, Python, or JavaScript symbols for that
+    \\                    file; JavaScript covers .js, .mjs, .cjs, and admitted .jsx;
+    \\                    does not affect score, rank, lineage, confidence, or
+    \\                    file-level evidence
     \\  --symbol-line-history
     \\                    With --inspect PATH --symbols only, add opt-in current-line
     \\                    Git evidence for current Zig, Go, or Python symbol line
@@ -147,17 +150,21 @@ pub fn main(init: std.process.Init.Minimal) !void {
 
     if (cfg.symbols) {
         const matched_path = analysis.inspect.?.matched_path;
+        const javascript_symbols = tree_sitter_javascript.isSupportedJavaScriptPath(matched_path);
         if (std.mem.endsWith(u8, matched_path, ".go")) {
             const symbol_report = try tree_sitter_go.extractPath(allocator, io, analysis.repo_root, matched_path);
             analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
         } else if (std.mem.endsWith(u8, matched_path, ".py")) {
             const symbol_report = try tree_sitter_python.extractPath(allocator, io, analysis.repo_root, matched_path);
             analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
+        } else if (javascript_symbols) {
+            const symbol_report = try tree_sitter_javascript.extractPath(allocator, io, analysis.repo_root, matched_path);
+            analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
         } else {
             const symbol_report = try tree_sitter_zig.extractPath(allocator, io, analysis.repo_root, matched_path);
             analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
         }
-        if (cfg.symbol_line_history) try git.attachCurrentLineHistory(allocator, io, &analysis);
+        if (cfg.symbol_line_history and !javascript_symbols) try git.attachCurrentLineHistory(allocator, io, &analysis);
         analysis.symbol_display = .{ .limit = cfg.symbol_limit orelse model.default_symbol_display_limit, .explicit_limit = cfg.symbol_limit != null };
     }
 

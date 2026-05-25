@@ -63,6 +63,7 @@ fn addTreeSitterProviders(b: *std.Build, module: *std.Build.Module) void {
     addTreeSitterZigGrammar(b, module);
     addTreeSitterGoGrammar(b, module);
     addTreeSitterPythonGrammar(b, module);
+    addTreeSitterJavaScriptGrammar(b, module);
 }
 
 pub fn build(b: *std.Build) void {
@@ -257,11 +258,15 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    tree_sitter_javascript_symbol_proof_module.addImport("provider", b.createModule(.{
-        .root_source_file = b.path("src/provider.zig"),
+    const tree_sitter_javascript_provider_module = b.createModule(.{
+        .root_source_file = b.path("src/tree_sitter_javascript.zig"),
         .target = target,
         .optimize = optimize,
-    }));
+    });
+    tree_sitter_javascript_provider_module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
+    tree_sitter_javascript_provider_module.addIncludePath(b.path("third_party/tree-sitter-javascript/v0.25.0/src"));
+    tree_sitter_javascript_provider_module.link_libc = true;
+    tree_sitter_javascript_symbol_proof_module.addImport("tree_sitter_javascript", tree_sitter_javascript_provider_module);
     addTreeSitterJavaScript(b, tree_sitter_javascript_symbol_proof_module);
 
     const tree_sitter_javascript_symbol_proof = b.addTest(.{

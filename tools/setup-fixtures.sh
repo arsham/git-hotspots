@@ -419,6 +419,143 @@ EOF
   commit_all "$repo" '2026-05-02T00:00:00+0000' 'expand python symbol functions'
 }
 
+make_javascript_symbols() {
+  repo="$FIX/javascript-symbols"
+  rm -rf "$repo"
+  mkdir -p "$repo/src"
+  setup_repo "$repo"
+
+  cat > "$repo/src/old-example.mjs" <<'EOF'
+// Supported JavaScript query subset fixture.
+export const EXPORTED_CONSTANT = 1;
+let mutableValue = 2;
+var legacyValue = 3;
+
+export function topFunction(input) {
+  function innerFunction() {
+    return input;
+  }
+  return innerFunction();
+}
+
+class LocalClass {
+  methodOne() {
+    function methodInner() {
+      return 1;
+    }
+    return methodInner();
+  }
+}
+
+export class ExportedClass {
+  render() {
+    return "<tag>[safe](link)";
+  }
+}
+
+function café() {
+  return "unicode";
+}
+
+const ignoredObject = { field: 1 };
+({ dynamicName: mutableValue });
+EOF
+  cat > "$repo/src/commonjs.cjs" <<'EOF'
+// CommonJS export fixture.
+const localOnly = 1;
+exports.makeThing = function makeThing() {
+  return localOnly;
+};
+module.exports.Widget = class Widget {
+  run() {
+    return "ok";
+  }
+};
+exports.ANSWER = 42;
+EOF
+  cat > "$repo/src/component.jsx" <<'EOF'
+export function View() {
+  return <main id="proof">ok</main>;
+}
+
+const element = <View />;
+EOF
+  cat > "$repo/src/anonymous_exports.js" <<'EOF'
+export default function () {
+  return 1;
+}
+
+module.exports = function () {
+  return 2;
+};
+EOF
+  printf '/* Code generated; DO NOT EDIT. */const GENERATED_VALUE=1;function generatedFunction(){return GENERATED_VALUE;}\n' > "$repo/src/generated.min.js"
+  printf 'export function broken(\n' > "$repo/src/invalid_partial.js"
+  printf '' > "$repo/src/empty.js"
+  cat > "$repo/src/other.js" <<'EOF'
+export function OtherOnly() {
+  return 1;
+}
+EOF
+  cat > "$repo/src/target.js" <<'EOF'
+export function target() {
+  return 1;
+}
+EOF
+  ln -s target.js "$repo/src/link.js"
+  python3 - <<'PY' > "$repo/src/large.js"
+print('export function Large() {')
+print('  return 1;')
+print('}')
+print('// ' + 'x' * (1024 * 1024 + 1))
+PY
+  cat > "$repo/src/missing.js" <<'EOF'
+export function missing() {
+  return 1;
+}
+EOF
+  commit_all "$repo" '2026-05-01T00:00:00+0000' 'initial javascript symbol files'
+
+  git -C "$repo" mv src/old-example.mjs src/example.mjs
+  cat > "$repo/src/example.mjs" <<'EOF'
+// Supported JavaScript query subset fixture.
+export const EXPORTED_CONSTANT = 1;
+let mutableValue = 2;
+var legacyValue = 3;
+
+export function topFunction(input) {
+  function innerFunction() {
+    return input;
+  }
+  return innerFunction();
+}
+
+class LocalClass {
+  methodOne() {
+    function methodInner() {
+      return 1;
+    }
+    return methodInner();
+  }
+}
+
+export class ExportedClass {
+  render() {
+    return "<tag>[safe](link)";
+  }
+}
+
+function café() {
+  return "unicode";
+}
+
+const ignoredObject = { field: 1 };
+({ dynamicName: mutableValue });
+EOF
+  rm "$repo/src/missing.js"
+  commit_all "$repo" '2026-05-02T00:00:00+0000' 'expand javascript symbol functions'
+}
+
 make_symbol_line_history() {
   repo="$FIX/symbol-line-history"
   rm -rf "$repo"
@@ -478,6 +615,7 @@ make_lineage
 make_symbols
 make_go_symbols
 make_python_symbols
+make_javascript_symbols
 make_symbol_line_history
 rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked" "$FIX/symbol-line-history-shallow" "$FIX/symbol-line-history-partial" "$FIX/go-symbols-shallow" "$FIX/go-symbols-partial" "$FIX/python-symbols-shallow" "$FIX/python-symbols-partial"
 git clone -q --depth 1 "file://$FIX/basic" "$FIX/shallow"
