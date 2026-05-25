@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0055"
   active_run_id: null
   last_completed_feature_id: "0049"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 50
+  next_id: 56
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -225,6 +225,30 @@ features:
       slug: tree-sitter-typescript-grammar-admission-review
       path: .flow/features/0049_tree-sitter-typescript-grammar-admission-review
       created_at: 2026-05-25T00:02:49.093Z
+    - id: "0050"
+      slug: tree-sitter-javascript-source-import-proof
+      path: .flow/features/0050_tree-sitter-javascript-source-import-proof
+      created_at: 2026-05-25T10:50:50.530Z
+    - id: "0051"
+      slug: tree-sitter-javascript-offline-build-proof
+      path: .flow/features/0051_tree-sitter-javascript-offline-build-proof
+      created_at: 2026-05-25T10:50:56.460Z
+    - id: "0052"
+      slug: tree-sitter-javascript-query-contract-and-fixtures
+      path: .flow/features/0052_tree-sitter-javascript-query-contract-and-fixtures
+      created_at: 2026-05-25T10:51:04.082Z
+    - id: "0053"
+      slug: tree-sitter-javascript-symbol-extraction-proof
+      path: .flow/features/0053_tree-sitter-javascript-symbol-extraction-proof
+      created_at: 2026-05-25T10:51:09.856Z
+    - id: "0054"
+      slug: inspect-only-javascript-symbol-output
+      path: .flow/features/0054_inspect-only-javascript-symbol-output
+      created_at: 2026-05-25T10:51:16.511Z
+    - id: "0055"
+      slug: inspect-only-javascript-symbol-line-history-evidence
+      path: .flow/features/0055_inspect-only-javascript-symbol-line-history-evidence
+      created_at: 2026-05-25T10:51:27.544Z
 intake:
   mode: roadmap
   summary: null

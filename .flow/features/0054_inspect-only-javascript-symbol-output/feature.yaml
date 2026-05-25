@@ -1,0 +1,613 @@
+schema: flow-feature.v1
+feature:
+  id: "0054"
+  slug: inspect-only-javascript-symbol-output
+  title: Inspect-only JavaScript symbol output
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: JavaScript source import, build, query, and extraction proofs are
+    complete, but inspect-only Tree-sitter symbols are still exposed only for
+    Zig, Go, and Python files.
+  outcome: JavaScript current-symbol evidence is exposed through the existing
+    opt-in inspect-only symbols flow while defaults, file-level Git evidence,
+    scoring, and existing providers remain stable.
+  acceptance:
+    - Support git-hotspots --inspect path.js --symbols for resolved .js, .mjs,
+      .cjs, and admitted .jsx files.
+    - Reuse the existing symbols output envelope and provider metadata shape.
+    - Keep JavaScript symbols current working-tree evidence only; do not affect
+      score, rank, confidence, lineage, co-change, scope, or default analysis.
+    - Preserve existing no-provider, Zig, Go, and Python symbol outputs except
+      explicitly planned language-neutral wording.
+    - Document JavaScript inspect-only support in README, --help, and --explain
+      without claiming symbol history, Node/package/workspace/module analysis,
+      TypeScript/TSX, or repo-wide scanning.
+    - Add deterministic table, JSON, Markdown, edge-case, privacy, and real-repo
+      smoke validation.
+    - Do not add new flags, symbol-line-history, scoring/cache changes,
+      TypeScript/TSX support, Node provider identity, package/workspace
+      analysis, LSP, custom queries, network, telemetry, or remote enrichment.
+planning:
+  state: ready
+  summary: Shape inspect-only JavaScript symbol output as the first user-visible
+    JavaScript provider feature, after internal extraction proof.
+proposal:
+  lifecycle_state: discovering
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-25T10:59:45.905Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-25T10:59:45.905Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-25T10:59:45.905Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-25T10:59:45.905Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: false
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Follow-up to Feature 0053; expose JavaScript current-symbol
+    evidence only through the existing inspect symbols path.
+  depends_on_feature_ids:
+    - "0053"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add runtime JavaScript provider module using the proven extraction
+      contract.
+    - Dispatch inspect --symbols by resolved inspected extension for JavaScript
+      paths only.
+    - Add output goldens and semantic checks for JavaScript symbols and edge
+      cases.
+    - Update docs/help/explain to list Zig, Go, Python, and JavaScript
+      inspect-only symbols.
+    - Keep symbol line-history deferred.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Inspect-only JavaScript symbol output
+      goal: Expose JavaScript current symbols through the existing inspect-only output
+        envelope without changing default analysis or existing providers.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src tree-sitter provider modules, CLI inspect symbols path,
+          fixtures/expected, tests, README.md, help/explain text, docs for
+          JavaScript evidence."
+        - "In scope: runtime JavaScript extraction module, extension dispatch
+          for .js/.mjs/.cjs and admitted .jsx, output goldens, docs/help/explain
+          updates, validation evidence."
+        - "Out of scope: new CLI flags, symbol-line-history, report schema
+          expansion beyond existing symbols envelope, scoring/cache/default
+          analysis changes, TypeScript/TSX, Node/package/workspace/module
+          analysis, custom queries, LSP."
+        - "Protected: file-level Git evidence remains product truth; existing
+          no-provider and Zig/Go/Python symbol outputs stay stable unless
+          explicitly language-neutral; no provider execution outside inspect
+          --symbols."
+        - "Dependencies: Feature 0053 JavaScript symbol extraction proof
+          complete."
+        - "Validation/evidence: full validation ladder; JavaScript symbol
+          success and degraded goldens; repeated determinism; semantic JSON
+          checks; privacy/prohibited scans; sibling-local-repo close-out smoke."
+        - "Review focus: output is inspect-only, deterministic, privacy-safe,
+          current-only, and does not imply Node, package, TypeScript, or
+          symbol-history support."
+        - "Escalate if: schema expansion is needed, JavaScript output changes
+          scoring/default reports, existing provider goldens drift unexpectedly,
+          or symbol-line-history behaviour must change."
+        - "Done boundary: JavaScript inspect-only symbols are user-visible and
+          documented; line-history remains deferred."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build
+        - zig build validate
+        - zig build tree-sitter-javascript-symbol-proof
+        - git diff --check
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids: []
+timestamps:
+  created_at: 2026-05-25T10:51:16.511Z
+  updated_at: 2026-05-25T11:00:55.405Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-25T11:00:55.405Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0054"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids: []
+    feature:
+      title: Inspect-only JavaScript symbol output
+      problem: JavaScript source import, build, query, and extraction proofs are
+        complete, but inspect-only Tree-sitter symbols are still exposed only
+        for Zig, Go, and Python files.
+      outcome: JavaScript current-symbol evidence is exposed through the existing
+        opt-in inspect-only symbols flow while defaults, file-level Git
+        evidence, scoring, and existing providers remain stable.
+      acceptance:
+        - Support git-hotspots --inspect path.js --symbols for resolved .js,
+          .mjs, .cjs, and admitted .jsx files.
+        - Reuse the existing symbols output envelope and provider metadata shape.
+        - Keep JavaScript symbols current working-tree evidence only; do not
+          affect score, rank, confidence, lineage, co-change, scope, or default
+          analysis.
+        - Preserve existing no-provider, Zig, Go, and Python symbol outputs
+          except explicitly planned language-neutral wording.
+        - Document JavaScript inspect-only support in README, --help, and
+          --explain without claiming symbol history,
+          Node/package/workspace/module analysis, TypeScript/TSX, or repo-wide
+          scanning.
+        - Add deterministic table, JSON, Markdown, edge-case, privacy, and
+          real-repo smoke validation.
+        - Do not add new flags, symbol-line-history, scoring/cache changes,
+          TypeScript/TSX support, Node provider identity, package/workspace
+          analysis, LSP, custom queries, network, telemetry, or remote
+          enrichment.
+    brief_alignment:
+      status: null
+      role: null
+      summary: null
+      checked_at: null
+    briefs: []
+    prd_path: .flow/features/0054_inspect-only-javascript-symbol-output/prd.md
+  requirements_contract:
+    source_path: .flow/features/0054_inspect-only-javascript-symbol-output/prd.md
+    source_digest: f7d1d4871393546d9694bb333a17c8f505c9e3a00b9d3fff4ac3e4ff33060ef1
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#edge-cases[1]
+        text: Unsupported extension with --symbols returns visible provider unsupported
+          or existing clear behaviour without raw diagnostics.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#edge-cases[2]
+        text: Empty JavaScript file returns provider ok with zero symbols or a
+          deterministic module-only result according to the approved contract.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#edge-cases[3]
+        text: Invalid or partial JavaScript returns deterministic failure or caveated
+          partial output without raw parser diagnostics or source snippets.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#edge-cases[4]
+        text: Missing current file, symlink/non-regular file, and too-large file degrade
+          as unavailable.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#edge-cases[5]
+        text: JavaScript files with generated/minified markers, JSX, exports, CommonJS,
+          anonymous functions, dynamic constructs, Unicode identifiers, and
+          Markdown-sensitive names/paths are handled deterministically and
+          escaped in human outputs.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#edge-cases[6]
+        text: Rename-alias inspect must parse the resolved matched path, not the
+          requested alias.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#edge-cases[7]
+        text: "A fixture with two JavaScript files must prove inspect-only behaviour:
+          the provider parses only the inspected file."
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#edge-cases[8]
+        text: No authors, emails, commit messages, raw source snippets, parser stderr,
+          absolute paths, private repo identifiers, or remote URLs may appear in
+          output or committed evidence.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#verification[1]
+        text: "Required commands before close-out:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Required commands before close-out:"
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#verification[2]
+        text: "``sh zig fmt --check build.zig src tests zig build test zig build zig
+          build validate zig build tree-sitter-build-proof zig build
+          tree-sitter-symbol-proof zig build tree-sitter-go-build-proof zig
+          build tree-sitter-go-symbol-proof zig build
+          tree-sitter-python-build-proof zig build
+          tree-sitter-python-symbol-proof zig build
+          tree-sitter-javascript-build-proof zig build
+          tree-sitter-javascript-query-proof zig build
+          tree-sitter-javascript-symbol-proof git diff --check zig build
+          validate -Dcloseout=true -Dsmoke-repo=<local-sibling-repo>
+          -Dsmoke-label=sibling-local-repo ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh zig fmt --check build.zig src tests zig build test zig build
+          zig build validate zig build tree-sitter-build-proof zig build
+          tree-sitter-symbol-proof zig build tree-sitter-go-build-proof zig
+          build tree-sitter-go-symbol-proof zig build
+          tree-sitter-python-build-proof zig build
+          tree-sitter-python-symbol-proof zig build
+          tree-sitter-javascript-build-proof zig build
+          tree-sitter-javascript-query-proof zig build
+          tree-sitter-javascript-symbol-proof git diff --check zig build
+          validate -Dcloseout=true -Dsmoke-repo=<local-sibling-repo>
+          -Dsmoke-label=sibling-local-repo ``"
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#verification[3]
+        text: "Additional validation expectations:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Additional validation expectations:"
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#verification[4]
+        text: JavaScript symbol success goldens for JSON, Markdown, and table output.
+        category: verification
+        packet_refs:
+          - P1
+        verification: JavaScript symbol success goldens for JSON, Markdown, and table output.
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#verification[5]
+        text: .js, .mjs, .cjs, and admitted .jsx coverage.
+        category: verification
+        packet_refs:
+          - P1
+        verification: .js, .mjs, .cjs, and admitted .jsx coverage.
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#verification[6]
+        text: Explicit --symbol-limit human-output coverage for JavaScript when
+          applicable.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Explicit --symbol-limit human-output coverage for JavaScript when
+          applicable.
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#verification[7]
+        text: Semantic JSON checks proving symbols.items remains complete under human
+          limits.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Semantic JSON checks proving symbols.items remains complete under
+          human limits.
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#verification[8]
+        text: Unsupported, empty, invalid, unavailable, symlink/non-regular, too-large,
+          generated/minified, JSX, exports, CommonJS, anonymous, rename-alias,
+          and two-JavaScript-file cases.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Unsupported, empty, invalid, unavailable, symlink/non-regular,
+          too-large, generated/minified, JSX, exports, CommonJS, anonymous,
+          rename-alias, and two-JavaScript-file cases.
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#verification[9]
+        text: Repeated-output determinism for JavaScript symbol JSON, Markdown, and
+          table outputs.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Repeated-output determinism for JavaScript symbol JSON, Markdown,
+          and table outputs.
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#verification[10]
+        text: Existing no-provider, Zig symbol, Go symbol, and Python symbol goldens
+          remain stable.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Existing no-provider, Zig symbol, Go symbol, and Python symbol
+          goldens remain stable.
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#verification[11]
+        text: Privacy and prohibited-claim scans include new JavaScript symbol outputs,
+          fixtures, docs, and validation summaries.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Privacy and prohibited-claim scans include new JavaScript symbol
+          outputs, fixtures, docs, and validation summaries.
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#verification[12]
+        text: Runtime/dependency scans prove no network, telemetry, upload, fetch,
+          parser generation, package-manager commands, global Tree-sitter CLI,
+          submodules, repo-wide provider execution, cache, LSP,
+          Node/package/workspace analysis, module resolution, TypeScript, or TSX
+          support.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Runtime/dependency scans prove no network, telemetry, upload,
+          fetch, parser generation, package-manager commands, global Tree-sitter
+          CLI, submodules, repo-wide provider execution, cache, LSP,
+          Node/package/workspace analysis, module resolution, TypeScript, or TSX
+          support.
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#verification[13]
+        text: Real-repo close-out smoke may use the approved sibling repo only under the
+          durable label sibling-local-repo; no raw private output or absolute
+          private paths may be committed.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Real-repo close-out smoke may use the approved sibling repo only
+          under the durable label sibling-local-repo; no raw private output or
+          absolute private paths may be committed.
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#non-goals[1]
+        text: No default provider execution.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-023
+        source_ref: prd.md#non-goals[2]
+        text: No scoring or ranking changes.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-024
+        source_ref: prd.md#non-goals[3]
+        text: No symbol line-history for JavaScript.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-025
+        source_ref: prd.md#non-goals[4]
+        text: No TypeScript or TSX support.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-026
+        source_ref: prd.md#non-goals[5]
+        text: No Node provider identity or package/workspace/module analysis.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-027
+        source_ref: prd.md#non-goals[6]
+        text: No custom query execution, LSP, cache, package, release, network,
+          telemetry, upload, or remote enrichment.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: JavaScript grammar source import, offline build proof, query contract, and
+          internal JavaScript symbol extraction proof are complete. The CLI
+          still exposes Tree-sitter symbols only for inspected Zig, Go, and
+          Python files. Users inspecting a hot JavaScript file cannot yet see
+          current JavaScript symbols in that file.
+      - source_ref: prd.md#outcome[1]
+        text: "Expose a narrow, opt-in JavaScript symbol provider through the existing
+          inspect-only symbol flow:"
+      - source_ref: prd.md#outcome[2]
+        text: "``sh git-hotspots --inspect path.js --symbols ``"
+      - source_ref: prd.md#outcome[3]
+        text: The feature must reuse the existing symbols output envelope and preserve
+          file-level Git evidence as product truth. JavaScript symbols are
+          current working-tree symbols only. They must not affect file score,
+          file rank, file confidence, rename lineage, co-change evidence, scope
+          filtering, default analysis, package analysis, or Node/module
+          behaviour.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 4 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: JavaScript current-symbol evidence is exposed through the existing
+      opt-in inspect-only symbols flow while defaults, file-level Git evidence,
+      scoring, and existing providers remain stable.
+    acceptance:
+      - Support git-hotspots --inspect path.js --symbols for resolved .js, .mjs,
+        .cjs, and admitted .jsx files.
+      - Reuse the existing symbols output envelope and provider metadata shape.
+      - Keep JavaScript symbols current working-tree evidence only; do not
+        affect score, rank, confidence, lineage, co-change, scope, or default
+        analysis.
+      - Preserve existing no-provider, Zig, Go, and Python symbol outputs except
+        explicitly planned language-neutral wording.
+      - Document JavaScript inspect-only support in README, --help, and
+        --explain without claiming symbol history, Node/package/workspace/module
+        analysis, TypeScript/TSX, or repo-wide scanning.
+      - Add deterministic table, JSON, Markdown, edge-case, privacy, and
+        real-repo smoke validation.
+      - Do not add new flags, symbol-line-history, scoring/cache changes,
+        TypeScript/TSX support, Node provider identity, package/workspace
+        analysis, LSP, custom queries, network, telemetry, or remote enrichment.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig fmt --check build.zig src tests
+      - zig build test
+      - zig build
+      - zig build validate
+      - zig build tree-sitter-javascript-symbol-proof
+      - git diff --check
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+      - confirm output is inspect-only current-symbol evidence and preserves
+        existing providers
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+      - language-neutral wording touch that preserves schema and semantics
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+      - report schema scoring cache or default-output drift
+      - TypeScript TSX Node package workspace module analysis requested
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
