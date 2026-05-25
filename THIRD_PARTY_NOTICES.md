@@ -38,6 +38,17 @@ vendored paths only.
   `third_party/tree-sitter-go/v0.25.0/LICENSE`.
 - Provenance: `third_party/tree-sitter-go/v0.25.0/PROVENANCE.md`
 
+## tree-sitter-javascript
+
+- Upstream: `https://github.com/tree-sitter/tree-sitter-javascript`
+- Selected revision: tag `v0.25.0`, commit
+  `44c892e0be055ac465d5eeddae6d3e194424e7de`
+- Vendored path: `third_party/tree-sitter-javascript/v0.25.0`
+- License: MIT
+- Notice: preserve the upstream MIT license text and copyright notice copied in
+  `third_party/tree-sitter-javascript/v0.25.0/LICENSE`.
+- Provenance: `third_party/tree-sitter-javascript/v0.25.0/PROVENANCE.md`
+
 ## tree-sitter-python
 
 - Upstream: `https://github.com/tree-sitter/tree-sitter-python`
@@ -70,3 +81,12 @@ Git commit, with Git blobs recorded in
 `third_party/tree-sitter-python/v0.25.0/IMPORTED_FILES.tsv`. No local parser
 generator, package-manager fetch, build path, link path, parser runtime,
 provider behavior, or Python query support is added by this import.
+
+`third_party/tree-sitter-javascript/v0.25.0/src/parser.c` and
+`third_party/tree-sitter-javascript/v0.25.0/src/scanner.c` are accepted in
+Feature 0050 as pinned upstream generated/scanner artefacts copied from the
+selected Git commit, with Git blobs recorded in
+`third_party/tree-sitter-javascript/v0.25.0/IMPORTED_FILES.tsv`. No local parser
+generator, package-manager fetch, build path, link path, parser runtime,
+provider behavior, JavaScript query support, TypeScript support, or TSX support
+is added by this import.

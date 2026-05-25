@@ -1,0 +1,8 @@
+bytes	sha256	upstream_git_blob_sha1	vendored_path	upstream_path	copy_note
+1080	2e0110e07abef7c2548b26ec9d6969775617ca539a0dc8dbeeb14d6452c711d1	4b52d191cead337b11e274b79459a86f1b5a7779	third_party/tree-sitter-javascript/v0.25.0/LICENSE	LICENSE	byte-for-byte
+32852	f2623a3c87659395b5359eaefbce4b7dc841e06e08bfdd360690f44ba096f3a1	7ca23ffb2db9143e78cc04bb53072d7bb124b3f1	third_party/tree-sitter-javascript/v0.25.0/grammar.js	grammar.js	author-comment-lines-redacted
+174998	7d9364b824be9250ba023065784550475d277b9dc9a7d20f9bebe9e471c908c3	8623996a8f89582ec7e0f2d3f161f09ae96bb4c9	third_party/tree-sitter-javascript/v0.25.0/src/grammar.json	src/grammar.json	byte-for-byte
+64022	188a8baa97018edaf63bf7ece372c07bc0d74d1301004bc8f211eb7dee5a6e70	e508ff19eb32ec4096dc43968791b721329370f0	third_party/tree-sitter-javascript/v0.25.0/src/node-types.json	src/node-types.json	byte-for-byte
+2855934	67209ca7ef6e1a4f74e29e48b5928455f892fe1821a3960fbcd62f4e972f7384	94f8c346cda32ef7b22af38bb7ff8c4128af2b61	third_party/tree-sitter-javascript/v0.25.0/src/parser.c	src/parser.c	byte-for-byte
+10576	b3d3f64284d97bf80749c026862427782cf7ecc0b7dc094e6698ab311c9a42c7	795916dd3203674b50d491b198bd01e70b91031b	third_party/tree-sitter-javascript/v0.25.0/src/scanner.c	src/scanner.c	byte-for-byte
+7624	180b893c8734778fd32f372dfbc27bd6ad1cd2221f26150b31256ff6716320d2	858107deb9e4a1ffcd2ed5e6ffe98a5fcab3e1f6	third_party/tree-sitter-javascript/v0.25.0/src/tree_sitter/parser.h	src/tree_sitter/parser.h	byte-for-byte
