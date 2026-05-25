@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0057"
   active_run_id: null
   last_completed_feature_id: "0056"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 57
+  next_id: 62
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -253,6 +253,26 @@ features:
       slug: typescript-tsx-tree-sitter-source-import-proof
       path: .flow/features/0056_typescript-tsx-tree-sitter-source-import-proof
       created_at: 2026-05-25T19:37:34.003Z
+    - id: "0057"
+      slug: typescript-tsx-offline-build-proof
+      path: .flow/features/0057_typescript-tsx-offline-build-proof
+      created_at: 2026-05-25T20:26:09.529Z
+    - id: "0058"
+      slug: typescript-tsx-query-contract-and-fixtures
+      path: .flow/features/0058_typescript-tsx-query-contract-and-fixtures
+      created_at: 2026-05-25T20:26:14.389Z
+    - id: "0059"
+      slug: typescript-tsx-symbol-extraction-proof
+      path: .flow/features/0059_typescript-tsx-symbol-extraction-proof
+      created_at: 2026-05-25T20:26:19.663Z
+    - id: "0060"
+      slug: inspect-only-typescript-tsx-symbol-output
+      path: .flow/features/0060_inspect-only-typescript-tsx-symbol-output
+      created_at: 2026-05-25T20:26:23.871Z
+    - id: "0061"
+      slug: inspect-only-typescript-tsx-symbol-line-history-evidence
+      path: .flow/features/0061_inspect-only-typescript-tsx-symbol-line-history-evidence
+      created_at: 2026-05-25T20:26:28.303Z
 intake:
   mode: roadmap
   summary: null
