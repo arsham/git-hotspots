@@ -1,0 +1,949 @@
+schema: flow-feature.v1
+feature:
+  id: "0056"
+  slug: typescript-tsx-tree-sitter-source-import-proof
+  title: TypeScript/TSX Tree-sitter source import proof
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Feature 0049 admitted tree-sitter-typescript only as a future
+    candidate. The repository still lacks a pinned TypeScript and TSX grammar
+    source import with provenance, license/notice proof, generated
+    parser/scanner provenance, BOM, core compatibility, source-size evidence,
+    offline validation, and no-provider stability evidence.
+  outcome: A narrow pinned tree-sitter-typescript source import is committed with
+    TypeScript and TSX provenance, notices, source-size evidence, extension
+    admission state, and no-provider stability proof, while TypeScript/TSX
+    build/runtime/provider behaviour remains deferred.
+  acceptance:
+    - Import a narrow pinned tree-sitter-typescript source set under
+      third_party/tree-sitter-typescript/<revision>/.
+    - Record exact upstream source identity, selected immutable revision,
+      archive or checkout basis, checksum or per-file manifest evidence, and
+      vendored path.
+    - Preserve upstream license/notice text and update THIRD_PARTY_NOTICES.md
+      with public repo-relative attribution.
+    - Add PROVENANCE.md, IMPORTED_FILES.tsv, and a source-import evidence
+      document covering TypeScript and TSX parser/scanner provenance,
+      BOM/exclusions, Tree-sitter core compatibility, extension admission state,
+      source-size measurements, offline validation, and no-provider output
+      stability.
+    - Stop as blocked rather than closing if immutable revision, license/notice,
+      generated parser/scanner provenance, core compatibility, BOM narrowness,
+      TSX decision, or no-provider stability cannot be proven.
+    - Do not add TypeScript/TSX build/link proof, runtime provider behaviour,
+      provider registry entries, CLI flags, report schema fields, scoring
+      changes, cache changes, query fixtures, CI changes,
+      Node/package/workspace/module/tsconfig analysis, release, package,
+      network, telemetry, or remote enrichment behaviour.
+planning:
+  state: ready
+  summary: Shape a narrow tree-sitter-typescript source import and provenance
+    proof, following the JavaScript source-import precedent while explicitly
+    deferring TypeScript/TSX build, query, extraction, runtime provider,
+    package/workspace, tsconfig, and Node analysis work.
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Follow-up provider implementation slice for B001. It imports
+      TypeScript/TSX grammar sources only and explicitly defers runtime
+      provider, package/workspace, tsconfig, Node, LSP, and module analysis
+      behaviour.
+    checked_at: 2026-05-25T19:41:32.678Z
+  brief_sync:
+    status: updated
+    reason: Supports B001 provider expansion while preserving deterministic
+      local-first Git evidence as product truth.
+    checked_at: 2026-05-25T19:41:32.687Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-25T19:41:48.022Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-25T19:41:48.022Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-25T19:41:48.022Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-25T19:41:48.022Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Follow-up to Feature 0049 TypeScript grammar admission review;
+    first implementation gate for TypeScript/TSX Tree-sitter support.
+  depends_on_feature_ids:
+    - "0049"
+  blocked_by: []
+design:
+  rough_shape:
+    - Select and import a pinned tree-sitter-typescript source set under
+      third_party/tree-sitter-typescript/<revision>/.
+    - Add provenance, license/notice, imported manifest, and source-import
+      evidence artefacts for both TypeScript and TSX grammar inputs where
+      upstream separates them.
+    - Prove offline/local validation, extension admission state for
+      .ts/.mts/.cts/.tsx, Tree-sitter core compatibility, and no-provider output
+      stability.
+    - Explicitly defer TypeScript/TSX build proof, query fixtures, symbol
+      extraction, inspect output, line-history, provider runtime,
+      CLI/report/schema, scoring, cache, LSP, custom queries,
+      package/workspace/module resolution, tsconfig, Node analysis, and CI
+      changes.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: TypeScript and TSX source identity and provenance import
+      goal: Select the immutable tree-sitter-typescript source identity, import a
+        narrow vendored file set, and add provenance, manifest, license, notice,
+        extension-admission, and source-import evidence without build or runtime
+        behaviour.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: third_party/tree-sitter-typescript/<revision>/,
+          THIRD_PARTY_NOTICES.md,
+          docs/tree-sitter-typescript-grammar-admission.md,
+          docs/tree-sitter-typescript-source-import-evidence.md."
+        - "In scope: select immutable tree-sitter-typescript tag/full commit,
+          copy a narrow source set, copy license/notice, add PROVENANCE.md, add
+          IMPORTED_FILES.tsv, and update THIRD_PARTY_NOTICES.md."
+        - "In scope: record generated parser/scanner provenance for TypeScript
+          and TSX using reproducible pinned inputs or verified pinned upstream
+          artefact basis."
+        - "In scope: prove scanner presence or absence for the selected
+          TypeScript and TSX grammars and justify any required scanner helper
+          headers."
+        - "In scope: prove whether .ts, .mts, .cts, and .tsx are admitted for
+          the selected revision, or explicitly defer unsupported extensions
+          without implying runtime support."
+        - "Out of scope: build.zig, build.zig.zon, parser compile/link proof,
+          TypeScript or TSX runtime provider, provider registry,
+          CLI/report/schema/scoring/cache changes, query fixtures,
+          CI/release/package changes, Node provider identity,
+          package/workspace/module/tsconfig analysis, LSP, custom queries,
+          telemetry, network, and remote enrichment."
+        - "Protected: existing Zig, Go, Python, and JavaScript Tree-sitter
+          provider behaviour, no-provider report bytes, local-first/no-network
+          build path, OSS/publicity boundary, privacy-safe evidence."
+        - "Dependencies: Feature 0049 TypeScript grammar admission review is
+          complete; Tree-sitter core v0.26.9 is already vendored from Feature
+          0025."
+        - "Validation/evidence: changed-path scan; license/notice copy proof;
+          provenance identity proof; generated parser/scanner provenance proof;
+          BOM narrowness proof; extension admission or deferral proof;
+          source-size evidence; no-provider output stability check."
+        - "Review focus: source import is narrow, reviewable, pinned,
+          license-safe, local-only, and does not imply TypeScript or TSX runtime
+          support."
+        - "Escalate if: immutable revision/checksum cannot be selected, license
+          is unclear, generated parser/scanner provenance cannot be proven, BOM
+          expands into bindings/package-manager artefacts, TSX cannot be decided
+          honestly, or a core update is required."
+        - "Done boundary: vendored source tree and provenance/notice/evidence
+          artefacts exist, with no build/runtime/provider changes."
+      verification_commands:
+        - git diff --check
+        - zig build validate
+        - changed-path scan for source-import-only scope
+        - provenance/license/BOM scan
+        - generated parser/scanner provenance check
+        - extension admission or deferral check
+        - no-provider output stability check
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-25T19:37:34.003Z
+  updated_at: 2026-05-25T19:41:56.323Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-25T19:41:56.323Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0056"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: TypeScript/TSX Tree-sitter source import proof
+      problem: Feature 0049 admitted tree-sitter-typescript only as a future
+        candidate. The repository still lacks a pinned TypeScript and TSX
+        grammar source import with provenance, license/notice proof, generated
+        parser/scanner provenance, BOM, core compatibility, source-size
+        evidence, offline validation, and no-provider stability evidence.
+      outcome: A narrow pinned tree-sitter-typescript source import is committed with
+        TypeScript and TSX provenance, notices, source-size evidence, extension
+        admission state, and no-provider stability proof, while TypeScript/TSX
+        build/runtime/provider behaviour remains deferred.
+      acceptance:
+        - Import a narrow pinned tree-sitter-typescript source set under
+          third_party/tree-sitter-typescript/<revision>/.
+        - Record exact upstream source identity, selected immutable revision,
+          archive or checkout basis, checksum or per-file manifest evidence, and
+          vendored path.
+        - Preserve upstream license/notice text and update
+          THIRD_PARTY_NOTICES.md with public repo-relative attribution.
+        - Add PROVENANCE.md, IMPORTED_FILES.tsv, and a source-import evidence
+          document covering TypeScript and TSX parser/scanner provenance,
+          BOM/exclusions, Tree-sitter core compatibility, extension admission
+          state, source-size measurements, offline validation, and no-provider
+          output stability.
+        - Stop as blocked rather than closing if immutable revision,
+          license/notice, generated parser/scanner provenance, core
+          compatibility, BOM narrowness, TSX decision, or no-provider stability
+          cannot be proven.
+        - Do not add TypeScript/TSX build/link proof, runtime provider
+          behaviour, provider registry entries, CLI flags, report schema fields,
+          scoring changes, cache changes, query fixtures, CI changes,
+          Node/package/workspace/module/tsconfig analysis, release, package,
+          network, telemetry, or remote enrichment behaviour.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Follow-up provider implementation slice for B001. It imports
+        TypeScript/TSX grammar sources only and explicitly defers runtime
+        provider, package/workspace, tsconfig, Node, LSP, and module analysis
+        behaviour.
+      checked_at: 2026-05-25T19:41:32.678Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0056_typescript-tsx-tree-sitter-source-import-proof/prd.md
+  requirements_contract:
+    source_path: .flow/features/0056_typescript-tsx-tree-sitter-source-import-proof/prd.md
+    source_digest: 78856d85d49dba50f15a90671d4f904e064bb6dce53019a8bf2bdfe888ce9b57
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#r1-source-import-scope[1]
+        text: "Select an immutable tree-sitter-typescript revision: tag plus full
+          commit, or full commit when no suitable tag exists."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#r1-source-import-scope[2]
+        text: Import a narrow source set under
+          third_party/tree-sitter-typescript/<revision>/.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#r1-source-import-scope[3]
+        text: Include TypeScript and TSX grammar inputs only when provenance, license,
+          and BOM gates are satisfied for both.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#r1-source-import-scope[4]
+        text: Add or update only source-import artefacts, provenance/evidence docs,
+          notices, and Flow state.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#r1-source-import-scope[5]
+        text: Do not change src/, tests/, fixtures/, build.zig, build.zig.zon, .github/,
+          tools/validate.sh, CLI flags, report schemas, scoring, cache, provider
+          runtime, provider registry, CI, release, or package behaviour.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#r6-tree-sitter-core-compatibility[1]
+        text: The import must prove that the selected TypeScript and TSX grammar
+          language versions are compatible with the existing vendored
+          Tree-sitter core ABI and language-version range from
+          third_party/tree-sitter-core/v0.26.9.
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#r6-tree-sitter-core-compatibility[2]
+        text: If the selected grammar requires a newer Tree-sitter core, this feature
+          must stop or record a blocker. A Tree-sitter core update is out of
+          scope.
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#r7-extension-admission-evidence[1]
+        text: The import must inspect the selected revision and record whether .ts,
+          .mts, .cts, and .tsx can be supported by the selected grammar sources
+          using repository-local inputs.
+        category: verification
+        packet_refs:
+          - P1
+        verification: The import must inspect the selected revision and record whether
+          .ts, .mts, .cts, and .tsx can be supported by the selected grammar
+          sources using repository-local inputs.
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#r7-extension-admission-evidence[2]
+        text: If TSX support can be proven from the selected upstream source set, the
+          source-import evidence must record the proof basis and future fixture
+          expectation. If TSX cannot be proven locally for the selected
+          revision, .tsx must be explicitly deferred while .ts, .mts, and .cts
+          remain eligible for later TypeScript features.
+        category: verification
+        packet_refs:
+          - P1
+        verification: If TSX support can be proven from the selected upstream source
+          set, the source-import evidence must record the proof basis and future
+          fixture expectation. If TSX cannot be proven locally for the selected
+          revision, .tsx must be explicitly deferred while .ts, .mts, and .cts
+          remain eligible for later TypeScript features.
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#r7-extension-admission-evidence[3]
+        text: The feature must not claim runtime support for any TypeScript or TSX
+          extension. Extension admission is a source-import planning fact only.
+        category: verification
+        packet_refs:
+          - P1
+        verification: The feature must not claim runtime support for any TypeScript or
+          TSX extension. Extension admission is a source-import planning fact
+          only.
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#r9-source-size-and-build-impact-evidence[1]
+        text: "The import evidence must record:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "The import evidence must record:"
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#r9-source-size-and-build-impact-evidence[2]
+        text: bytes added under third_party/tree-sitter-typescript/<revision>/;
+        category: verification
+        packet_refs:
+          - P1
+        verification: bytes added under third_party/tree-sitter-typescript/<revision>/;
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#r9-source-size-and-build-impact-evidence[3]
+        text: largest ten imported files by byte size;
+        category: verification
+        packet_refs:
+          - P1
+        verification: largest ten imported files by byte size;
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#r9-source-size-and-build-impact-evidence[4]
+        text: TypeScript parser and scanner sizes;
+        category: verification
+        packet_refs:
+          - P1
+        verification: TypeScript parser and scanner sizes;
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#r9-source-size-and-build-impact-evidence[5]
+        text: TSX parser and scanner sizes, or explicit TSX deferral;
+        category: verification
+        packet_refs:
+          - P1
+        verification: TSX parser and scanner sizes, or explicit TSX deferral;
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#r9-source-size-and-build-impact-evidence[6]
+        text: repository working-tree size before and after import, excluding .git,
+          .zig-cache, and zig-out;
+        category: verification
+        packet_refs:
+          - P1
+        verification: repository working-tree size before and after import, excluding
+          .git, .zig-cache, and zig-out;
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#r9-source-size-and-build-impact-evidence[7]
+        text: zig build validate before and after import;
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig build validate before and after import;
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#r9-source-size-and-build-impact-evidence[8]
+        text: before/after validation timing summaries where practical; and
+        category: verification
+        packet_refs:
+          - P1
+        verification: before/after validation timing summaries where practical; and
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#r9-source-size-and-build-impact-evidence[9]
+        text: planner-review note if size or timing materially changes source-install
+          experience.
+        category: verification
+        packet_refs:
+          - P1
+        verification: planner-review note if size or timing materially changes
+          source-install experience.
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[1]
+        text: "The evidence document must state that TypeScript and TSX runtime support
+          is still not implemented. Expected path:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "The evidence document must state that TypeScript and TSX runtime
+          support is still not implemented. Expected path:"
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[2]
+        text: "``text docs/tree-sitter-typescript-source-import-evidence.md ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``text docs/tree-sitter-typescript-source-import-evidence.md ``"
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[3]
+        text: It must identify the next likely follow-up as TypeScript/TSX offline build
+          proof, or record blockers if import gates failed.
+        category: verification
+        packet_refs:
+          - P1
+        verification: It must identify the next likely follow-up as TypeScript/TSX
+          offline build proof, or record blockers if import gates failed.
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[4]
+        text: "It must explicitly defer:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "It must explicitly defer:"
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[5]
+        text: TypeScript/TSX parser compile/link proof;
+        category: verification
+        packet_refs:
+          - P1
+        verification: TypeScript/TSX parser compile/link proof;
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[6]
+        text: TypeScript/TSX extraction proof;
+        category: verification
+        packet_refs:
+          - P1
+        verification: TypeScript/TSX extraction proof;
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[7]
+        text: TypeScript/TSX symbol query fixtures;
+        category: verification
+        packet_refs:
+          - P1
+        verification: TypeScript/TSX symbol query fixtures;
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[8]
+        text: inspect-only TypeScript/TSX symbol output;
+        category: verification
+        packet_refs:
+          - P1
+        verification: inspect-only TypeScript/TSX symbol output;
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[9]
+        text: provider registry changes;
+        category: verification
+        packet_refs:
+          - P1
+        verification: provider registry changes;
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[10]
+        text: CLI/report/schema/scoring/cache changes;
+        category: verification
+        packet_refs:
+          - P1
+        verification: CLI/report/schema/scoring/cache changes;
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[11]
+        text: LSP;
+        category: verification
+        packet_refs:
+          - P1
+        verification: LSP;
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[12]
+        text: custom user query execution;
+        category: verification
+        packet_refs:
+          - P1
+        verification: custom user query execution;
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[13]
+        text: package.json, workspace, bundler, dependency graph, module resolution,
+          tsconfig analysis, Node provider identity, and repo-wide scanning
+          behaviour;
+        category: verification
+        packet_refs:
+          - P1
+        verification: package.json, workspace, bundler, dependency graph, module
+          resolution, tsconfig analysis, Node provider identity, and repo-wide
+          scanning behaviour;
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#r11-public-evidence-and-future-sequencing[14]
+        text: true symbol history, authorship, ownership, ranking, risk scoring,
+          telemetry, network, upload, and remote enrichment.
+        category: verification
+        packet_refs:
+          - P1
+        verification: true symbol history, authorship, ownership, ranking, risk scoring,
+          telemetry, network, upload, and remote enrichment.
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#acceptance-criteria[1]
+        text: third_party/tree-sitter-typescript/<revision>/ exists with a narrow
+          imported source set.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#acceptance-criteria[2]
+        text: The vendored TypeScript component includes unchanged upstream
+          license/notice text.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#acceptance-criteria[3]
+        text: The vendored TypeScript component includes PROVENANCE.md and
+          IMPORTED_FILES.tsv.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#acceptance-criteria[4]
+        text: THIRDPARTYNOTICES.md is updated with public, repo-relative TypeScript
+          attribution.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#acceptance-criteria[5]
+        text: A source-import evidence document records immutable source identity,
+          generated TypeScript and TSX parser/scanner provenance, Tree-sitter
+          core compatibility, extension admission state, source-size
+          measurements, offline validation, and no-provider output stability.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#acceptance-criteria[6]
+        text: No TypeScript/TSX build, runtime provider, provider registry, CLI, report
+          schema, scoring, cache, test fixture, CI, release, package, Node,
+          package/workspace/module, tsconfig, LSP, network, telemetry, or remote
+          enrichment behaviour is added.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#acceptance-criteria[7]
+        text: The feature stops as blocked rather than closing if immutable revision,
+          license/notice, generated parser/scanner provenance, core
+          compatibility, BOM narrowness, extension decision, or no-provider
+          stability cannot be proven.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#edge-cases[1]
+        text: If no suitable tag exists, pin a full commit and explain why no tag was
+          used.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-042
+        source_ref: prd.md#edge-cases[2]
+        text: If the selected source archive checksum cannot be recorded, use a pinned
+          checkout basis and record per-file manifest evidence instead of
+          guessing.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-043
+        source_ref: prd.md#edge-cases[3]
+        text: If generated parser or scanner files cannot be reproduced or verified,
+          stop as blocked.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-044
+        source_ref: prd.md#edge-cases[4]
+        text: If TypeScript and TSX live in separate upstream subdirectories, import
+          only the narrow files needed for each admitted grammar and record that
+          layout in the BOM.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-045
+        source_ref: prd.md#edge-cases[5]
+        text: If TSX cannot be proven locally for the selected revision, defer .tsx
+          rather than blocking .ts, .mts, and .cts source import.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-046
+        source_ref: prd.md#edge-cases[6]
+        text: If the grammar requires a newer Tree-sitter core than the current vendored
+          core, stop for a separate core-update feature.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-047
+        source_ref: prd.md#edge-cases[7]
+        text: If the BOM requires package manager, binding, Node, workspace, tsconfig,
+          LSP, or module-analysis files to function, stop and reshape.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-048
+        source_ref: prd.md#verification[1]
+        text: "Close-out must include evidence for:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Close-out must include evidence for:"
+        required_for_close_out: true
+      - id: REQ-049
+        source_ref: prd.md#verification[2]
+        text: "``sh git diff --check zig build validate changed-path scan for
+          source-import-only scope provenance/license/BOM scan generated
+          TypeScript parser/scanner provenance check generated TSX
+          parser/scanner provenance check or TSX deferral proof Tree-sitter core
+          compatibility check extension admission or deferral check no-provider
+          output stability check ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh git diff --check zig build validate changed-path scan for
+          source-import-only scope provenance/license/BOM scan generated
+          TypeScript parser/scanner provenance check generated TSX
+          parser/scanner provenance check or TSX deferral proof Tree-sitter core
+          compatibility check extension admission or deferral check no-provider
+          output stability check ``"
+        required_for_close_out: true
+      - id: REQ-050
+        source_ref: prd.md#verification[3]
+        text: "Close-out evidence must also include privacy-safe real-repository
+          validation: this repository and one suitable local sibling repository
+          when available, using repo-relative paths or privacy-safe labels only.
+          No committed evidence may include absolute local paths, private raw
+          report dumps, emails, telemetry, or remote enrichment."
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Close-out evidence must also include privacy-safe real-repository
+          validation: this repository and one suitable local sibling repository
+          when available, using repo-relative paths or privacy-safe labels only.
+          No committed evidence may include absolute local paths, private raw
+          report dumps, emails, telemetry, or remote enrichment."
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: Feature 0049 recorded tree-sitter-typescript as a plausible future grammar
+          but left implementation blocked on exact immutable source identity,
+          license and notice verification, generated TypeScript and TSX
+          parser/scanner provenance, BOM selection, extension admission proof,
+          source-size evidence, core compatibility, offline validation, and
+          no-provider output stability. TypeScript/TSX runtime support should
+          not proceed until the source import itself is reviewable and
+          local-first.
+      - source_ref: prd.md#outcome[1]
+        text: A pinned tree-sitter-typescript source set is vendored under
+          third_party/tree-sitter-typescript/<revision>/ with provenance,
+          imported-file manifest, license/notice handling, TypeScript and TSX
+          extension admission evidence, and source-import evidence. The
+          repository still has no TypeScript or TSX runtime support after this
+          feature; it only has reviewed local source inputs for later build,
+          query, and extraction proofs.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 2 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: A narrow pinned tree-sitter-typescript source import is committed with
+      TypeScript and TSX provenance, notices, source-size evidence, extension
+      admission state, and no-provider stability proof, while TypeScript/TSX
+      build/runtime/provider behaviour remains deferred.
+    acceptance:
+      - Import a narrow pinned tree-sitter-typescript source set under
+        third_party/tree-sitter-typescript/<revision>/.
+      - Record exact upstream source identity, selected immutable revision,
+        archive or checkout basis, checksum or per-file manifest evidence, and
+        vendored path.
+      - Preserve upstream license/notice text and update THIRD_PARTY_NOTICES.md
+        with public repo-relative attribution.
+      - Add PROVENANCE.md, IMPORTED_FILES.tsv, and a source-import evidence
+        document covering TypeScript and TSX parser/scanner provenance,
+        BOM/exclusions, Tree-sitter core compatibility, extension admission
+        state, source-size measurements, offline validation, and no-provider
+        output stability.
+      - Stop as blocked rather than closing if immutable revision,
+        license/notice, generated parser/scanner provenance, core compatibility,
+        BOM narrowness, TSX decision, or no-provider stability cannot be proven.
+      - Do not add TypeScript/TSX build/link proof, runtime provider behaviour,
+        provider registry entries, CLI flags, report schema fields, scoring
+        changes, cache changes, query fixtures, CI changes,
+        Node/package/workspace/module/tsconfig analysis, release, package,
+        network, telemetry, or remote enrichment behaviour.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig build validate
+      - changed-path scan for source-import-only scope
+      - provenance/license/BOM scan
+      - generated parser/scanner provenance check
+      - extension admission or deferral check
+      - no-provider output stability check
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+      - confirm TypeScript/TSX source import remains provenance-only and does
+        not add build/runtime/provider output
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
