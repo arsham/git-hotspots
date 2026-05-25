@@ -1,0 +1,640 @@
+schema: flow-feature.v1
+feature:
+  id: "0062"
+  slug: provider-capability-documentation-consolidation
+  title: Provider capability documentation consolidation
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Users can now inspect symbols for Zig, Go, Python, JavaScript,
+    TypeScript, and TSX, but the public documentation, help, explain text, and
+    validation story are spread across feature-specific additions. That makes it
+    harder to understand which provider capabilities are available, which are
+    inspect-only, which include current-line evidence, and which behaviours are
+    intentionally absent.
+  outcome: A concise provider capability surface documents supported languages,
+    inspect-only symbol evidence, current-line history availability, unsupported
+    boundaries, and validation coverage without changing runtime semantics.
+  acceptance:
+    - Public docs include a compact provider capability matrix for supported
+      languages and symbol evidence modes.
+    - CLI help, README, and explain language consistently describe symbol
+      evidence as opt-in inspect evidence and distinguish current-line evidence
+      from true symbol history.
+    - Validation or test coverage proves the documented capability matrix stays
+      aligned with current inspect behaviour for supported and unsupported
+      languages.
+    - Existing runtime outputs, default reports, scoring, ranking, confidence,
+      cache behaviour, provider extraction, line-history evidence, and language
+      support do not change except for documentation or validation text needed
+      to reflect existing behaviour.
+    - Public artefacts avoid private absolute paths, raw private report dumps,
+      developer-performance framing, bug prediction, quality scoring, ownership
+      claims, telemetry, upload, or remote enrichment claims.
+planning:
+  state: ready
+  summary: Consolidate user-facing provider capability documentation, help/explain
+    language, and validation matrix for inspect-only symbol evidence across
+    supported languages.
+  brief_sync:
+    status: updated
+    reason: Supports B001 by consolidating the provider capability surface after JS
+      and TS/TSX inspect-only evidence, while preserving local-first
+      deterministic Git evidence and avoiding provider overclaims.
+    checked_at: 2026-05-25T22:15:43.501Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Follow-up documentation and validation consolidation for B001. It
+      clarifies existing inspect-only provider capabilities and current-line
+      evidence without changing runtime semantics or adding providers.
+    checked_at: 2026-05-25T22:15:48.935Z
+proposal:
+  lifecycle_state: discovering
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-25T22:16:13.609Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-25T22:16:13.609Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-25T22:16:13.609Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-25T22:16:13.609Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Follow-up after JavaScript and TypeScript/TSX provider lanes to
+    consolidate inspect-only capability semantics before adding more providers.
+  depends_on_feature_ids: []
+  blocked_by: []
+design:
+  rough_shape:
+    - Add or update a public provider capability matrix covering Zig, Go,
+      Python, JavaScript, TypeScript, and TSX.
+    - Align README, CLI help, and explain text around inspect-only symbols,
+      current-line evidence, unsupported boundaries, and local-first behaviour.
+    - Add focused validation that checks documentation-facing capability claims
+      against current inspect behaviour without adding provider runtime scope.
+    - Keep the feature documentation and validation only; do not add new
+      language support, provider semantics, cache, scoring, telemetry, or remote
+      behaviour.
+  packets:
+    - id: P1
+      title: Provider capability documentation and validation matrix
+      goal: Consolidate the documented provider capability surface and add a
+        validation matrix that protects existing inspect-only semantics.
+      depends_on: []
+      status: planned
+      owner_phase: runner
+      execution_context:
+        - "Anchors: README.md, src/main.zig help text, src/explain.zig,
+          tests/integration.sh, tools/validate.sh, fixtures/expected/*explain*,
+          fixtures/expected/*symbols*, docs/ if a dedicated capability document
+          is useful."
+        - "In scope: capability matrix for Zig, Go, Python, JavaScript,
+          TypeScript, and TSX; wording that distinguishes symbols from
+          current-line evidence; validation that docs-facing claims match
+          existing inspect behaviour."
+        - "Out of scope: new providers, new language support, symbol extraction
+          changes, line-history behaviour changes, default report changes,
+          schema expansion, scoring/ranking/confidence changes, cache, CI
+          expansion beyond local validation, release packaging,
+          Node/package/tsconfig/LSP analysis, network, telemetry, upload, or
+          remote enrichment."
+        - "Protected: deterministic local-first defaults, existing
+          JSON/Markdown/table bytes except intentional docs/help/explain
+          fixtures, existing provider outputs, existing unsupported-language
+          behaviour, OSS/publicity boundary, privacy-safe evidence."
+        - "Dependencies: JavaScript and TypeScript/TSX provider lanes through
+          Feature 0061 are done; no dependency on future provider admissions."
+        - "Validation/evidence: git diff --check, zig fmt --check build.zig src
+          tests when touched, zig build test, zig build validate, targeted
+          inspect/help/explain golden checks, capability-matrix validation for
+          supported and unsupported languages, privacy/prohibited-claims scan."
+        - "Review focus: documentation matches current behaviour exactly, uses
+          no overclaims, and validation prevents matrix drift without changing
+          product semantics."
+        - "Escalate if: accurate wording requires runtime behaviour changes,
+          schema expansion, new provider semantics, type-aware package analysis,
+          or a capability claim that current code cannot prove."
+        - "Done boundary: docs/help/explain and validation are aligned, all
+          checks pass, and runtime/product semantics are unchanged."
+      verification_commands:
+        - git diff --check
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build validate
+        - targeted inspect/help/explain golden checks
+        - capability-matrix validation for supported and unsupported languages
+        - privacy and prohibited-claims scan
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-25T22:14:32.430Z
+  updated_at: 2026-05-25T22:16:28.034Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-25T22:16:28.034Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0062"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Provider capability documentation consolidation
+      problem: Users can now inspect symbols for Zig, Go, Python, JavaScript,
+        TypeScript, and TSX, but the public documentation, help, explain text,
+        and validation story are spread across feature-specific additions. That
+        makes it harder to understand which provider capabilities are available,
+        which are inspect-only, which include current-line evidence, and which
+        behaviours are intentionally absent.
+      outcome: A concise provider capability surface documents supported languages,
+        inspect-only symbol evidence, current-line history availability,
+        unsupported boundaries, and validation coverage without changing runtime
+        semantics.
+      acceptance:
+        - Public docs include a compact provider capability matrix for supported
+          languages and symbol evidence modes.
+        - CLI help, README, and explain language consistently describe symbol
+          evidence as opt-in inspect evidence and distinguish current-line
+          evidence from true symbol history.
+        - Validation or test coverage proves the documented capability matrix
+          stays aligned with current inspect behaviour for supported and
+          unsupported languages.
+        - Existing runtime outputs, default reports, scoring, ranking,
+          confidence, cache behaviour, provider extraction, line-history
+          evidence, and language support do not change except for documentation
+          or validation text needed to reflect existing behaviour.
+        - Public artefacts avoid private absolute paths, raw private report
+          dumps, developer-performance framing, bug prediction, quality scoring,
+          ownership claims, telemetry, upload, or remote enrichment claims.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Follow-up documentation and validation consolidation for B001. It
+        clarifies existing inspect-only provider capabilities and current-line
+        evidence without changing runtime semantics or adding providers.
+      checked_at: 2026-05-25T22:15:48.935Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0062_provider-capability-documentation-consolidation/prd.md
+  requirements_contract:
+    source_path: .flow/features/0062_provider-capability-documentation-consolidation/prd.md
+    source_digest: d6c8f7e8b16b9e9d3f2bdab59dc57e27cb76baf59f145054aa94a582a01a0952
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#req-003-current-line-evidence-framing[1]
+        text: Current-line evidence must be described as evidence for the lines occupied
+          by a symbol at HEAD. It must not be described as true symbol history,
+          historical identity tracking, git log -L, authorship, ownership, risk,
+          quality, or performance judgement.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Current-line evidence must be described as evidence for the lines
+          occupied by a symbol at HEAD. It must not be described as true symbol
+          history, historical identity tracking, git log -L, authorship,
+          ownership, risk, quality, or performance judgement.
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#req-006-validation-matrix[1]
+        text: The implementation must add or extend validation so documented capability
+          claims are checked against current behaviour. The validation may be
+          script, integration, fixture, or golden based, but must be
+          deterministic and local.
+        category: verification
+        packet_refs:
+          - P1
+        verification: The implementation must add or extend validation so documented
+          capability claims are checked against current behaviour. The
+          validation may be script, integration, fixture, or golden based, but
+          must be deterministic and local.
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#req-008-public-and-privacy-safe-evidence[1]
+        text: Public docs, fixtures, and validation output must avoid private absolute
+          paths, raw private report dumps, personal emails,
+          developer-performance framing, bug prediction, quality scoring,
+          ownership claims, or maintainer judgement.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Public docs, fixtures, and validation output must avoid private
+          absolute paths, raw private report dumps, personal emails,
+          developer-performance framing, bug prediction, quality scoring,
+          ownership claims, or maintainer judgement.
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#req-009-validation-ladder[1]
+        text: "Close-out evidence must include:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Close-out evidence must include:"
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#req-009-validation-ladder[2]
+        text: git diff --check;
+        category: verification
+        packet_refs:
+          - P1
+        verification: git diff --check;
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#req-009-validation-ladder[3]
+        text: zig fmt --check build.zig src tests when those paths are touched;
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig fmt --check build.zig src tests when those paths are touched;
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#req-009-validation-ladder[4]
+        text: zig build test;
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig build test;
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#req-009-validation-ladder[5]
+        text: zig build validate;
+        category: verification
+        packet_refs:
+          - P1
+        verification: zig build validate;
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#req-009-validation-ladder[6]
+        text: targeted inspect, help, or explain fixture checks affected by the feature;
+        category: verification
+        packet_refs:
+          - P1
+        verification: targeted inspect, help, or explain fixture checks affected by the
+          feature;
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#req-009-validation-ladder[7]
+        text: capability-matrix validation for supported and unsupported languages;
+        category: verification
+        packet_refs:
+          - P1
+        verification: capability-matrix validation for supported and unsupported languages;
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#req-009-validation-ladder[8]
+        text: privacy and prohibited-claims scan;
+        category: verification
+        packet_refs:
+          - P1
+        verification: privacy and prohibited-claims scan;
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#req-009-validation-ladder[9]
+        text: a privacy-safe close-out smoke using this repository and, when safe, a
+          sibling local repository labelled sibling-local-repo.
+        category: verification
+        packet_refs:
+          - P1
+        verification: a privacy-safe close-out smoke using this repository and, when
+          safe, a sibling local repository labelled sibling-local-repo.
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#edge-cases-and-non-goals[1]
+        text: Do not add another language provider in this feature.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-014
+        source_ref: prd.md#edge-cases-and-non-goals[2]
+        text: Do not add type checking, package or workspace analysis, module
+          resolution, tsconfig interpretation, Node execution, LSP, custom
+          runtime queries, cache, network access, telemetry, upload, or remote
+          enrichment.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-015
+        source_ref: prd.md#edge-cases-and-non-goals[3]
+        text: Do not turn current-line evidence into true symbol-history claims.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-016
+        source_ref: prd.md#edge-cases-and-non-goals[4]
+        text: Do not imply that hotspots predict bugs or judge code quality, owners,
+          maintainers, teams, or developers.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-017
+        source_ref: prd.md#edge-cases-and-non-goals[5]
+        text: If accurate documentation requires behaviour changes, stop for planning
+          rather than changing runtime scope inside this feature.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-018
+        source_ref: prd.md#verification-notes[1]
+        text: "Review should prove that this is a documentation and validation
+          consolidation feature, not a provider behaviour feature. The most
+          important review questions are:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Review should prove that this is a documentation and validation
+          consolidation feature, not a provider behaviour feature. The most
+          important review questions are:"
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#verification-notes[2]
+        text: Do the docs and help text match current behaviour exactly?
+        category: verification
+        packet_refs:
+          - P1
+        verification: Do the docs and help text match current behaviour exactly?
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#verification-notes[3]
+        text: Do the new validation checks prevent capability-matrix drift?
+        category: verification
+        packet_refs:
+          - P1
+        verification: Do the new validation checks prevent capability-matrix drift?
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#verification-notes[4]
+        text: Did any runtime output or semantics change outside intentional docs, help,
+          explain, or validation fixtures?
+        category: verification
+        packet_refs:
+          - P1
+        verification: Did any runtime output or semantics change outside intentional
+          docs, help, explain, or validation fixtures?
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#verification-notes[5]
+        text: Are all public claims local-first, deterministic, privacy-safe, and free
+          of prohibited quality, ownership, risk, or prediction framing?
+        category: verification
+        packet_refs:
+          - P1
+        verification: Are all public claims local-first, deterministic, privacy-safe,
+          and free of prohibited quality, ownership, risk, or prediction
+          framing?
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: The CLI now has inspect-only symbol evidence across Zig, Go, Python,
+          JavaScript, TypeScript, and TSX, plus current-line evidence for
+          several providers. The behaviour is feature-proven, but the
+          user-facing capability story is fragmented across README, help text,
+          explain text, fixtures, validation scripts, and feature-specific
+          evidence documents.
+      - source_ref: prd.md#problem[2]
+        text: "This creates two risks:"
+      - source_ref: prd.md#problem[3]
+        text: users may overread symbol evidence as default hotspot truth, true symbol
+          history, type-aware analysis, ownership, risk, quality, or bug
+          prediction;
+      - source_ref: prd.md#problem[4]
+        text: future provider changes may update behaviour without keeping the public
+          capability surface and validation matrix aligned.
+      - source_ref: prd.md#outcome[1]
+        text: Add a concise, public provider capability surface and validation matrix
+          that state what the CLI currently supports, what remains inspect-only,
+          what current line evidence means, and what is deliberately absent.
+      - source_ref: prd.md#outcome[2]
+        text: The feature must not change runtime semantics except for wording,
+          fixtures, or validation checks that reflect existing behaviour.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 6 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: A concise provider capability surface documents supported languages,
+      inspect-only symbol evidence, current-line history availability,
+      unsupported boundaries, and validation coverage without changing runtime
+      semantics.
+    acceptance:
+      - Public docs include a compact provider capability matrix for supported
+        languages and symbol evidence modes.
+      - CLI help, README, and explain language consistently describe symbol
+        evidence as opt-in inspect evidence and distinguish current-line
+        evidence from true symbol history.
+      - Validation or test coverage proves the documented capability matrix
+        stays aligned with current inspect behaviour for supported and
+        unsupported languages.
+      - Existing runtime outputs, default reports, scoring, ranking, confidence,
+        cache behaviour, provider extraction, line-history evidence, and
+        language support do not change except for documentation or validation
+        text needed to reflect existing behaviour.
+      - Public artefacts avoid private absolute paths, raw private report dumps,
+        developer-performance framing, bug prediction, quality scoring,
+        ownership claims, telemetry, upload, or remote enrichment claims.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig fmt --check build.zig src tests
+      - zig build test
+      - zig build validate
+      - targeted inspect/help/explain golden checks
+      - capability-matrix validation for supported and unsupported languages
+      - privacy and prohibited-claims scan
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null

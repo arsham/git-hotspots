@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0062"
   active_run_id: null
   last_completed_feature_id: "0061"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 62
+  next_id: 63
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -273,6 +273,10 @@ features:
       slug: inspect-only-typescript-tsx-symbol-line-history-evidence
       path: .flow/features/0061_inspect-only-typescript-tsx-symbol-line-history-evidence
       created_at: 2026-05-25T20:26:28.303Z
+    - id: "0062"
+      slug: provider-capability-documentation-consolidation
+      path: .flow/features/0062_provider-capability-documentation-consolidation
+      created_at: 2026-05-25T22:14:32.430Z
 intake:
   mode: roadmap
   summary: null
