@@ -4,7 +4,7 @@ feature:
   slug: tree-sitter-javascript-symbol-extraction-proof
   title: JavaScript symbol extraction proof
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: "JavaScript build and query proofs will not prove extraction semantics:
@@ -54,7 +54,7 @@ proposal:
     materialised_at: 2026-05-25T10:59:36.076Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -112,7 +112,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: JavaScript symbol extraction proof
       goal: Prove deterministic internal JavaScript current-symbol extraction
         semantics without user-facing runtime output.
@@ -163,7 +163,7 @@ links:
   brief_ids: []
 timestamps:
   created_at: 2026-05-25T10:51:09.856Z
-  updated_at: 2026-05-25T11:00:46.878Z
+  updated_at: 2026-05-25T17:43:52.229Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-25T11:00:46.878Z
