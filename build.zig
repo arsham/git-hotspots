@@ -25,6 +25,13 @@ fn addTreeSitterPythonGrammar(b: *std.Build, module: *std.Build.Module) void {
     module.link_libc = true;
 }
 
+fn addTreeSitterJavaScriptGrammar(b: *std.Build, module: *std.Build.Module) void {
+    module.addIncludePath(b.path("third_party/tree-sitter-javascript/v0.25.0/src"));
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-javascript/v0.25.0/src/parser.c"), .flags = &.{} });
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-javascript/v0.25.0/src/scanner.c"), .flags = &.{} });
+    module.link_libc = true;
+}
+
 fn addTreeSitterPythonHeaders(b: *std.Build, module: *std.Build.Module) void {
     module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
     module.addIncludePath(b.path("third_party/tree-sitter-python/v0.25.0/src"));
@@ -44,6 +51,11 @@ fn addTreeSitterGo(b: *std.Build, module: *std.Build.Module) void {
 fn addTreeSitterPython(b: *std.Build, module: *std.Build.Module) void {
     addTreeSitterCore(b, module);
     addTreeSitterPythonGrammar(b, module);
+}
+
+fn addTreeSitterJavaScript(b: *std.Build, module: *std.Build.Module) void {
+    addTreeSitterCore(b, module);
+    addTreeSitterJavaScriptGrammar(b, module);
 }
 
 fn addTreeSitterProviders(b: *std.Build, module: *std.Build.Module) void {
@@ -203,6 +215,22 @@ pub fn build(b: *std.Build) void {
     const run_tree_sitter_python_build_proof = b.addRunArtifact(tree_sitter_python_build_proof);
     const tree_sitter_python_build_proof_step = b.step("tree-sitter-python-build-proof", "Compile vendored Tree-sitter Python sources and run a tiny non-product Python parse smoke");
     tree_sitter_python_build_proof_step.dependOn(&run_tree_sitter_python_build_proof.step);
+
+    const tree_sitter_javascript_build_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_javascript_build_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    addTreeSitterJavaScript(b, tree_sitter_javascript_build_proof_module);
+
+    const tree_sitter_javascript_build_proof = b.addExecutable(.{
+        .name = "tree-sitter-javascript-build-proof",
+        .root_module = tree_sitter_javascript_build_proof_module,
+    });
+
+    const run_tree_sitter_javascript_build_proof = b.addRunArtifact(tree_sitter_javascript_build_proof);
+    const tree_sitter_javascript_build_proof_step = b.step("tree-sitter-javascript-build-proof", "Compile vendored Tree-sitter JavaScript sources and run tiny non-product JavaScript and JSX parse smokes");
+    tree_sitter_javascript_build_proof_step.dependOn(&run_tree_sitter_javascript_build_proof.step);
 
     const tree_sitter_python_query_proof_module = b.createModule(.{
         .root_source_file = b.path("tests/tree_sitter_python_query_proof.zig"),

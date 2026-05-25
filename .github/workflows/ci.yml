@@ -42,3 +42,6 @@ jobs:
 
       - name: Run Tree-sitter Python symbol proof
         run: zig build tree-sitter-python-symbol-proof
+
+      - name: Run Tree-sitter JavaScript build proof
+        run: zig build tree-sitter-javascript-build-proof
