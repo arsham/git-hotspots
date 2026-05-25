@@ -289,6 +289,46 @@ pub fn build(b: *std.Build) void {
     const tree_sitter_tsx_build_proof_step = b.step("tree-sitter-tsx-build-proof", "Compile vendored Tree-sitter TSX parser/scanner sources and run a tiny non-product TSX parse smoke");
     tree_sitter_tsx_build_proof_step.dependOn(&run_tree_sitter_tsx_build_proof.step);
 
+    const tree_sitter_typescript_query_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_typescript_query_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    tree_sitter_typescript_query_proof_module.addImport("provider", b.createModule(.{
+        .root_source_file = b.path("src/provider.zig"),
+        .target = target,
+        .optimize = optimize,
+    }));
+    addTreeSitterTypeScript(b, tree_sitter_typescript_query_proof_module);
+
+    const tree_sitter_typescript_query_proof = b.addTest(.{
+        .root_module = tree_sitter_typescript_query_proof_module,
+    });
+
+    const run_tree_sitter_typescript_query_proof = b.addRunArtifact(tree_sitter_typescript_query_proof);
+    const tree_sitter_typescript_query_proof_step = b.step("tree-sitter-typescript-query-proof", "Run test-only TypeScript symbol query contract proof with vendored Tree-sitter sources");
+    tree_sitter_typescript_query_proof_step.dependOn(&run_tree_sitter_typescript_query_proof.step);
+
+    const tree_sitter_tsx_query_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_tsx_query_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    tree_sitter_tsx_query_proof_module.addImport("provider", b.createModule(.{
+        .root_source_file = b.path("src/provider.zig"),
+        .target = target,
+        .optimize = optimize,
+    }));
+    addTreeSitterTsx(b, tree_sitter_tsx_query_proof_module);
+
+    const tree_sitter_tsx_query_proof = b.addTest(.{
+        .root_module = tree_sitter_tsx_query_proof_module,
+    });
+
+    const run_tree_sitter_tsx_query_proof = b.addRunArtifact(tree_sitter_tsx_query_proof);
+    const tree_sitter_tsx_query_proof_step = b.step("tree-sitter-tsx-query-proof", "Run test-only TSX symbol query contract proof with vendored Tree-sitter sources");
+    tree_sitter_tsx_query_proof_step.dependOn(&run_tree_sitter_tsx_query_proof.step);
+
     const tree_sitter_javascript_query_proof_module = b.createModule(.{
         .root_source_file = b.path("tests/tree_sitter_javascript_query_proof.zig"),
         .target = target,
