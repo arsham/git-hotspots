@@ -329,6 +329,46 @@ pub fn build(b: *std.Build) void {
     const tree_sitter_tsx_query_proof_step = b.step("tree-sitter-tsx-query-proof", "Run test-only TSX symbol query contract proof with vendored Tree-sitter sources");
     tree_sitter_tsx_query_proof_step.dependOn(&run_tree_sitter_tsx_query_proof.step);
 
+    const tree_sitter_typescript_symbol_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_typescript_symbol_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    tree_sitter_typescript_symbol_proof_module.addImport("provider", b.createModule(.{
+        .root_source_file = b.path("src/provider.zig"),
+        .target = target,
+        .optimize = optimize,
+    }));
+    addTreeSitterTypeScript(b, tree_sitter_typescript_symbol_proof_module);
+
+    const tree_sitter_typescript_symbol_proof = b.addTest(.{
+        .root_module = tree_sitter_typescript_symbol_proof_module,
+    });
+
+    const run_tree_sitter_typescript_symbol_proof = b.addRunArtifact(tree_sitter_typescript_symbol_proof);
+    const tree_sitter_typescript_symbol_proof_step = b.step("tree-sitter-typescript-symbol-proof", "Run internal TypeScript current-symbol extraction proof with vendored Tree-sitter sources");
+    tree_sitter_typescript_symbol_proof_step.dependOn(&run_tree_sitter_typescript_symbol_proof.step);
+
+    const tree_sitter_tsx_symbol_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_tsx_symbol_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    tree_sitter_tsx_symbol_proof_module.addImport("provider", b.createModule(.{
+        .root_source_file = b.path("src/provider.zig"),
+        .target = target,
+        .optimize = optimize,
+    }));
+    addTreeSitterTsx(b, tree_sitter_tsx_symbol_proof_module);
+
+    const tree_sitter_tsx_symbol_proof = b.addTest(.{
+        .root_module = tree_sitter_tsx_symbol_proof_module,
+    });
+
+    const run_tree_sitter_tsx_symbol_proof = b.addRunArtifact(tree_sitter_tsx_symbol_proof);
+    const tree_sitter_tsx_symbol_proof_step = b.step("tree-sitter-tsx-symbol-proof", "Run internal TSX current-symbol extraction proof with vendored Tree-sitter sources");
+    tree_sitter_tsx_symbol_proof_step.dependOn(&run_tree_sitter_tsx_symbol_proof.step);
+
     const tree_sitter_javascript_query_proof_module = b.createModule(.{
         .root_source_file = b.path("tests/tree_sitter_javascript_query_proof.zig"),
         .target = target,
