@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: "0055"
+  active_feature_id: "0050"
   active_run_id: null
   last_completed_feature_id: "0049"
 defaults:
@@ -24,7 +24,13 @@ focus:
   next_roadmap_item_id: null
 execution_queue:
   mode: serial
-  feature_ids: []
+  feature_ids:
+    - "0050"
+    - "0051"
+    - "0052"
+    - "0053"
+    - "0054"
+    - "0055"
   stop_on_blocked: true
 features:
   next_id: 56
