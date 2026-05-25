@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0058"
   active_run_id: null
   last_completed_feature_id: "0057"
 defaults:
