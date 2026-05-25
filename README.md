@@ -149,6 +149,7 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.ts --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.tsx --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.ts --symbols --symbol-line-history --format markdown
 ./zig-out/bin/git-hotspots --repo . --progress --format json
 ./zig-out/bin/git-hotspots --explain
 ./zig-out/bin/git-hotspots --version
@@ -206,14 +207,13 @@ repo-wide scanning, or symbol history.
 
 `--symbol-line-history` is a second opt-in layer that works only with
 `--inspect PATH --symbols`. It adds current-line Git evidence for current Zig,
-Go, Python, or JavaScript symbol line ranges using one local blame process only
-when symbol ranges are valid and the inspected file is clean; TypeScript/TSX
-line history remains unsupported. Output is summary-only:
-commit counts, bounded sample commit ids, timestamps, confidence, freshness,
-failure state, and caveats. It does not emit author identities, commit
-messages, source snippets, remotes, private repo names, or absolute paths, and
-it does not change file score, rank, confidence, co-change evidence, scope, or
-lineage.
+Go, Python, JavaScript, TypeScript, or TSX symbol line ranges using one local
+blame process only when symbol ranges are valid and the inspected file is
+clean. Output is summary-only: commit counts, bounded sample commit ids,
+timestamps, confidence, freshness, failure state, and caveats. It does not emit
+author identities, commit messages, source snippets, remotes, private repo
+names, or absolute paths, and it does not change file score, rank, confidence,
+co-change evidence, scope, or lineage.
 
 Git-detected file renames are folded conservatively when both the old and new
 paths are in scope. This is file-path lineage from local Git history only, not

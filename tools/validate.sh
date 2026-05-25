@@ -1143,6 +1143,48 @@ for data in (line, shallow, partial, commonjs, jsx, empty, invalid, symlink, lar
     for forbidden in ('Fixture Author', 'fixture@example', 'source line', 'ownership', 'productivity', 'Node package graph'):
         assert forbidden not in text, 'JavaScript private detail leaked'
 PY
+  TS_LINE_HISTORY_JSON=$ARTIFACT_DIR/typescript-line-history.json
+  TS_LINE_HISTORY_JSON_B=$ARTIFACT_DIR/typescript-line-history-b.json
+  TS_LINE_HISTORY_MD=$ARTIFACT_DIR/typescript-line-history.md
+  TS_LINE_HISTORY_TABLE=$ARTIFACT_DIR/typescript-line-history.txt
+  TSX_LINE_HISTORY_JSON=$ARTIFACT_DIR/typescript-line-history-tsx.json
+  TSX_LINE_HISTORY_MD=$ARTIFACT_DIR/typescript-line-history-tsx.md
+  TSX_LINE_HISTORY_TABLE=$ARTIFACT_DIR/typescript-line-history-tsx.txt
+  TS_LINE_HISTORY_SHALLOW_JSON=$ARTIFACT_DIR/typescript-line-history-shallow.json
+  TS_LINE_HISTORY_PARTIAL_JSON=$ARTIFACT_DIR/typescript-line-history-partial.json
+  "$EXE" --repo fixtures/typescript-symbols --inspect src/example.ts --symbols --symbol-line-history --format json > "$TS_LINE_HISTORY_JSON" || return 1
+  diff -u fixtures/expected/typescript-line-history-success.json "$TS_LINE_HISTORY_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/typescript-symbols --inspect src/example.ts --symbols --symbol-line-history --format json > "$TS_LINE_HISTORY_JSON_B" || return 1
+  diff -u "$TS_LINE_HISTORY_JSON" "$TS_LINE_HISTORY_JSON_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/typescript-symbols --inspect src/example.ts --symbols --symbol-line-history --format markdown > "$TS_LINE_HISTORY_MD" || return 1
+  diff -u fixtures/expected/typescript-line-history-success.md "$TS_LINE_HISTORY_MD" >/dev/null || return 1
+  "$EXE" --repo fixtures/typescript-symbols --inspect src/example.ts --symbols --symbol-line-history --format table > "$TS_LINE_HISTORY_TABLE" || return 1
+  diff -u fixtures/expected/typescript-line-history-success.txt "$TS_LINE_HISTORY_TABLE" >/dev/null || return 1
+  "$EXE" --repo fixtures/typescript-symbols --inspect src/component.tsx --symbols --symbol-line-history --format json > "$TSX_LINE_HISTORY_JSON" || return 1
+  diff -u fixtures/expected/typescript-line-history-tsx.json "$TSX_LINE_HISTORY_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/typescript-symbols --inspect src/component.tsx --symbols --symbol-line-history --format markdown > "$TSX_LINE_HISTORY_MD" || return 1
+  diff -u fixtures/expected/typescript-line-history-tsx.md "$TSX_LINE_HISTORY_MD" >/dev/null || return 1
+  "$EXE" --repo fixtures/typescript-symbols --inspect src/component.tsx --symbols --symbol-line-history --format table > "$TSX_LINE_HISTORY_TABLE" || return 1
+  diff -u fixtures/expected/typescript-line-history-tsx.txt "$TSX_LINE_HISTORY_TABLE" >/dev/null || return 1
+  "$EXE" --repo fixtures/typescript-symbols-shallow --inspect src/example.ts --symbols --symbol-line-history --format json > "$TS_LINE_HISTORY_SHALLOW_JSON" || return 1
+  grep -Fq -- 'current-line Git evidence may be incomplete: repository history is shallow; auto_fetch is false' "$TS_LINE_HISTORY_SHALLOW_JSON" || return 1
+  "$EXE" --repo fixtures/typescript-symbols-partial --inspect src/example.ts --symbols --symbol-line-history --format json > "$TS_LINE_HISTORY_PARTIAL_JSON" || return 1
+  grep -Fq -- 'current-line Git evidence may be incomplete: repository history may be partial/promisor; auto_fetch is false' "$TS_LINE_HISTORY_PARTIAL_JSON" || return 1
+  python3 - "$TS_LINE_HISTORY_JSON" "$TSX_LINE_HISTORY_JSON" "$TS_LINE_HISTORY_SHALLOW_JSON" "$TS_LINE_HISTORY_PARTIAL_JSON" <<'PY'
+import json, sys
+ts, tsx, shallow, partial = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+assert all('current_line_history' in row for row in ts['symbols']['items']), 'TypeScript current-line evidence missing'
+assert all(row['current_line_history']['basis'] == 'current-line-range-at-head' for row in ts['symbols']['items']), 'TypeScript line-history basis changed'
+assert any(row['current_line_history']['most_recent_line_touched_timestamp'] == 1777593600 for row in ts['symbols']['items']), 'TypeScript timestamp changed'
+assert tsx['symbols']['provider']['name'] == 'tree-sitter-tsx', 'TSX provider missing'
+assert all('current_line_history' in row for row in tsx['symbols']['items']), 'TSX current-line evidence missing'
+assert any('shallow' in ' '.join(row['current_line_history']['caveats']) for row in shallow['symbols']['items']), 'TypeScript shallow caveat missing'
+assert any('partial/promisor' in ' '.join(row['current_line_history']['caveats']) for row in partial['symbols']['items']), 'TypeScript partial caveat missing'
+for data in (ts, tsx, shallow, partial):
+    text = json.dumps(data, ensure_ascii=False)
+    for forbidden in ('Fixture Author', 'fixture@example', 'source line', 'ownership', 'productivity', 'tsconfig path', 'Node package graph'):
+        assert forbidden not in text, 'TypeScript private detail leaked'
+PY
   if "$EXE" --symbols > "$ARTIFACT_DIR/symbols-alone.out" 2> "$ARTIFACT_DIR/symbols-alone.err"; then return 1; fi
   grep -q -- '--symbols can only be combined with --inspect PATH' "$ARTIFACT_DIR/symbols-alone.err" || return 1
   if "$EXE" --repo fixtures/basic --inspect src/app.txt --limit 1 >/dev/null 2> "$ARTIFACT_DIR/inspect-limit.err"; then return 1; fi
@@ -1262,6 +1304,7 @@ real_repo_smoke() {
   tracked_go_count=$(git -C "$repo" ls-files '*.go' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
   tracked_python_count=$(git -C "$repo" ls-files '*.py' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
   tracked_javascript_count=$(git -C "$repo" ls-files '*.js' '*.mjs' '*.cjs' '*.jsx' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
+  tracked_typescript_count=$(git -C "$repo" ls-files '*.ts' '*.mts' '*.cts' '*.tsx' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
 
   if "$EXE" --repo "$repo" --scope all --format table > "$table_out" 2> "$timing_file"; then
     table_status=pass
@@ -1392,12 +1435,50 @@ PY
     done < "$javascript_candidates"
   fi
 
+  first_typescript_path=$(git -C "$repo" ls-files '*.ts' '*.mts' '*.cts' '*.tsx' 2>/dev/null | LC_ALL=C sort | head -n 1 || true)
+  typescript_symbol_status=skip-no-tracked-typescript-file
+  typescript_line_history_status=skip-no-tracked-typescript-file
+  if [ -n "$first_typescript_path" ]; then
+    typescript_symbol_status=skip-no-successful-typescript-symbol-file
+    typescript_line_history_status=skip-no-safe-tracked-typescript-file
+    typescript_candidates=$(mktemp "$ARTIFACT_DIR/real-typescript-candidates.XXXXXX")
+    git -C "$repo" ls-files '*.ts' '*.mts' '*.cts' '*.tsx' 2>/dev/null | LC_ALL=C sort | head -n 12 > "$typescript_candidates" || true
+    while IFS= read -r typescript_path; do
+      [ -n "$typescript_path" ] || continue
+      typescript_symbol_out=$(mktemp "$ARTIFACT_DIR/real-typescript-symbol.XXXXXX.json")
+      if [ "$typescript_symbol_status" != pass ] && "$EXE" --repo "$repo" --inspect "$typescript_path" --symbols --format json > "$typescript_symbol_out" 2> "$timing_file" && python3 -m json.tool "$typescript_symbol_out" >/dev/null 2>&1; then
+        typescript_symbol_status=pass
+      fi
+      typescript_line_history_out=$(mktemp "$ARTIFACT_DIR/real-typescript-line-history.XXXXXX.json")
+      if "$EXE" --repo "$repo" --inspect "$typescript_path" --symbols --symbol-line-history --format json > "$typescript_line_history_out" 2> "$timing_file" && python3 - "$typescript_line_history_out" <<'PY'
+import json, sys
+with open(sys.argv[1], encoding='utf-8') as fh:
+    data = json.load(fh)
+symbols = data.get('symbols') or {}
+if (symbols.get('provider') or {}).get('failure') != 'ok':
+    raise SystemExit(2)
+items = symbols.get('items') or []
+if not items:
+    raise SystemExit(3)
+histories = [row.get('current_line_history') for row in items]
+if not all(histories):
+    raise SystemExit(4)
+if not any(history.get('failure') == 'ok' and int(history.get('distinct_last_touch_commit_count') or 0) > 0 for history in histories):
+    raise SystemExit(5)
+PY
+      then
+        typescript_line_history_status=pass
+        break
+      fi
+    done < "$typescript_candidates"
+  fi
+
   if [ "$table_status" = pass ] && [ "$json_status" = pass ] && [ "$markdown_status" = pass ] && [ "$project_table_status" = pass ] && [ "$project_json_status" = pass ] && [ "$project_markdown_status" = pass ] && [ "$progress_status" = pass ]; then
     summary=$(json_count_summary "$json_out") || summary='results=unknown caveats=unknown dirty=unknown'
     project_summary=$(json_count_summary "$project_json_out") || project_summary='results=unknown caveats=unknown dirty=unknown'
     elapsed=${timing#*|}
     project_elapsed=${project_timing#*|}
-    printf 'real-repo label=%s commits=%s tracked_files=%s tracked_go_files=%s tracked_python_files=%s tracked_javascript_files=%s go_symbol=%s python_symbol=%s python_line_history=%s javascript_symbol=%s javascript_line_history=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$tracked_go_count" "$tracked_python_count" "$tracked_javascript_count" "$go_symbol_status" "$python_symbol_status" "$python_line_history_status" "$javascript_symbol_status" "$javascript_line_history_status" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
+    printf 'real-repo label=%s commits=%s tracked_files=%s tracked_go_files=%s tracked_python_files=%s tracked_javascript_files=%s tracked_typescript_files=%s go_symbol=%s python_symbol=%s python_line_history=%s javascript_symbol=%s javascript_line_history=%s typescript_symbol=%s typescript_line_history=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$tracked_go_count" "$tracked_python_count" "$tracked_javascript_count" "$tracked_typescript_count" "$go_symbol_status" "$python_symbol_status" "$python_line_history_status" "$javascript_symbol_status" "$javascript_line_history_status" "$typescript_symbol_status" "$typescript_line_history_status" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
     pass_rung "real repo smoke $label"
     return 0
   fi

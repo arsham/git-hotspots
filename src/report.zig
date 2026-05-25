@@ -17,6 +17,9 @@ const SymbolDisplaySummary = struct {
     }
 };
 
+const typescript_symbol_line_history_out_of_scope_caveat = "module names are repo-relative .ts/.mts/.cts/.tsx paths; package, workspace, Node, module-resolution, tsconfig, type checking, LSP, and symbol line history are out of scope";
+const typescript_true_symbol_history_out_of_scope_caveat = "module names are repo-relative .ts/.mts/.cts/.tsx paths; package, workspace, Node, module-resolution, tsconfig, type checking, LSP, and true symbol history are out of scope";
+
 fn symbolDisplaySummary(symbols: model.SymbolReport, display: model.SymbolDisplay) SymbolDisplaySummary {
     const shown = @min(symbols.symbols.len, display.limit);
     return .{
@@ -366,7 +369,8 @@ fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport, display:
     try writer.print(", \"confidence\": ", .{});
     try jsonString(writer, @tagName(symbols.provider.confidence));
     try writer.print(", \"caveats\": ", .{});
-    try stringArray(writer, symbols.provider.caveats);
+    const has_line_history = symbolsHaveLineHistory(symbols.symbols);
+    try stringArrayWithLineHistoryContext(writer, symbols.provider.caveats, has_line_history);
     try writer.print(", \"provenance\": {{ \"input\": ", .{});
     try jsonString(writer, symbols.provider.input.identity);
     try writer.print(", \"local_only\": true }} }},\n", .{});
@@ -384,7 +388,7 @@ fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport, display:
         try writer.print(", \"confidence\": ", .{});
         try jsonString(writer, @tagName(symbol.confidence));
         try writer.print(", \"caveats\": ", .{});
-        try stringArray(writer, symbol.caveats);
+        try stringArrayWithLineHistoryContext(writer, symbol.caveats, symbol.current_line_history != null);
         if (symbol.current_line_history) |line_history| {
             try writer.print(", \"current_line_history\": ", .{});
             try renderCurrentLineHistoryJson(writer, line_history);
@@ -407,9 +411,10 @@ fn renderSymbolReportMarkdown(writer: anytype, symbols: model.SymbolReport, disp
     if (symbols.provider.caveats.len == 0) {
         try writer.writeAll("  - None\n");
     } else {
+        const has_line_history = symbolsHaveLineHistory(symbols.symbols);
         for (symbols.provider.caveats) |caveat| {
             try writer.writeAll("  - ");
-            try markdownText(writer, caveat);
+            try markdownText(writer, caveatForLineHistoryContext(caveat, has_line_history));
             try writer.writeByte('\n');
         }
     }
@@ -563,6 +568,20 @@ fn stringArray(writer: anytype, values: []const []const u8) !void {
         try jsonString(writer, v);
     }
     try writer.print("]", .{});
+}
+
+fn stringArrayWithLineHistoryContext(writer: anytype, values: []const []const u8, line_history_context: bool) !void {
+    try writer.print("[", .{});
+    for (values, 0..) |v, i| {
+        if (i != 0) try writer.print(", ", .{});
+        try jsonString(writer, caveatForLineHistoryContext(v, line_history_context));
+    }
+    try writer.print("]", .{});
+}
+
+fn caveatForLineHistoryContext(caveat: []const u8, line_history_context: bool) []const u8 {
+    if (line_history_context and std.mem.eql(u8, caveat, typescript_symbol_line_history_out_of_scope_caveat)) return typescript_true_symbol_history_out_of_scope_caveat;
+    return caveat;
 }
 
 fn renderInlineStringArray(writer: anytype, values: []const []const u8) !void {

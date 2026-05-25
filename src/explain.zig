@@ -97,12 +97,11 @@ pub const text =
     \\
     \\--symbol-line-history is opt-in and valid only with --inspect PATH
     \\--symbols. It adds current-line Git blame evidence for current Zig, Go,
-    \\Python, or JavaScript symbol line ranges using one local blame process only
-    \\when current ranges are valid and the inspected file is clean. TypeScript
-    \\and TSX line history remains unsupported. It reports
-    \\commit-count and timestamp summaries without author identities, commit
-    \\messages, source snippets, remotes, or absolute paths. This is not
-    \\symbol lineage, ownership, scoring input, or semantic history.
+    \\Python, JavaScript, TypeScript, or TSX symbol line ranges using one local
+    \\blame process only when current ranges are valid and the inspected file is
+    \\clean. It reports commit-count and timestamp summaries without author
+    \\identities, commit messages, source snippets, remotes, or absolute paths.
+    \\This is not symbol lineage, ownership, scoring input, or semantic history.
     \\
     \\## Limitations and non-claims
     \\
