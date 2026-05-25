@@ -7,12 +7,11 @@ feature:
   status: ready
   autonomy_default: ask
 intent:
-  problem: >-
-    JavaScript is the next high-value Tree-sitter language family, but it has
-    broader runtime and syntax risk than Go or Python: CommonJS and ESM, JSX,
-    anonymous exports, generated bundles, Node monorepo paths, and multiple
+  problem: "JavaScript is the next high-value Tree-sitter language family, but it
+    has broader runtime and syntax risk than Go or Python: CommonJS and ESM,
+    JSX, anonymous exports, generated bundles, Node monorepo paths, and multiple
     extensions. The repository needs an admission record before any
-    tree-sitter-javascript source import or runtime provider work.
+    tree-sitter-javascript source import or runtime provider work."
   outcome: Add a documentation-only JavaScript grammar admission review that
     records upstream identity, JS/JSX scope, license, generated parser/scanner,
     Tree-sitter core compatibility, BOM, source-size, query, fixture, monorepo,
@@ -20,16 +19,16 @@ intent:
   acceptance:
     - Add docs/tree-sitter-javascript-grammar-admission.md as the single public
       admission review artefact.
-    - The document records candidate upstream identity for tree-sitter-javascript,
-      immutable revision or blocker, checksum requirement, proposed vendored
-      path, BOM expectations, excluded file classes, and Tree-sitter core
-      compatibility requirements.
+    - The document records candidate upstream identity for
+      tree-sitter-javascript, immutable revision or blocker, checksum
+      requirement, proposed vendored path, BOM expectations, excluded file
+      classes, and Tree-sitter core compatibility requirements.
     - The document records whether JSX is admitted with JavaScript or deferred;
       if deferred, .jsx remains unsupported until a later shaped feature.
-    - The document records license and notice gates, generated parser and scanner
-      provenance gates, local-first build supply-chain gates, source-size and
-      build-impact gates, query fixture expectations, and no-provider stability
-      gates for future JavaScript work.
+    - The document records license and notice gates, generated parser and
+      scanner provenance gates, local-first build supply-chain gates,
+      source-size and build-impact gates, query fixture expectations, and
+      no-provider stability gates for future JavaScript work.
     - The document states JavaScript runtime support is not implemented and
       current runtime Tree-sitter support remains Zig, Go, and Python only.
     - The document frames future JavaScript symbols as optional, current-only,
@@ -55,8 +54,8 @@ planning:
   brief_alignment:
     status: aligned
     role: follow_up
-    summary: Follow-up provider planning slice for B001. It admits JavaScript
-      only as a future candidate and explicitly defers implementation.
+    summary: Follow-up provider planning slice for B001. It admits JavaScript only
+      as a future candidate and explicitly defers implementation.
     checked_at: 2026-05-25T00:07:03.000Z
 proposal:
   lifecycle_state: shaping
@@ -146,23 +145,49 @@ design:
   packets:
     - id: P1
       title: JavaScript grammar admission review document
-      goal: Add one docs-only admission review for tree-sitter-javascript that
-        records upstream identity, provenance, license, compatibility, scanner,
-        JS/JSX scope, query, monorepo, and future validation gates before source
+      goal: Add one docs-only admission review for tree-sitter-javascript that records
+        upstream identity, provenance, license, compatibility, scanner, JS/JSX
+        scope, query, monorepo, and future validation gates before source
         import.
       owner_phase: runner
       depends_on: []
       status: pending
       execution_context:
-        - "Anchors: docs/tree-sitter-javascript-grammar-admission.md, docs/tree-sitter-multi-language-query-strategy.md, docs/tree-sitter-go-grammar-admission.md, docs/tree-sitter-python-grammar-admission.md"
-        - "In scope: one documentation-only JavaScript grammar admission review with candidate identity, immutable revision/checksum gates, license/notice, generated parser/scanner provenance, core ABI compatibility, BOM/excluded file classes, source-size/build-impact, JS/JSX scope decision, query fixture gates, monorepo path behaviour, Node-as-context-only language boundary, and decision state"
-        - "Out of scope: third_party/tree-sitter-javascript import, source/build/test/fixture changes, build.zig.zon, CI changes, provider registry, CLI flags, report schema changes, scoring, cache, runtime JavaScript provider behaviour, custom user queries, package.json/workspace/dependency analysis, LSP, release/package work"
-        - "Protected: local-first behaviour, no network/telemetry/upload/remote enrichment, no background provider execution, no bug prediction/code-quality scoring/developer ranking/maintainer judgement, existing Zig/Go/Python provider behaviour"
-        - "Dependencies: Feature 0034 language strategy is complete and identifies JavaScript as a future candidate subject to admission gates"
-        - "Validation/evidence: git diff --check; zig build validate; docs-only changed-path scan; no tree-sitter-javascript source import scan; prohibited-claim/privacy/local-first scan over changed docs"
-        - "Review focus: admission gates are concrete enough to shape the next JavaScript source-import feature without overclaiming JavaScript runtime support"
-        - "Escalate if: implementation requires source import, build/runtime changes, provider registry, CLI/report schema changes, custom query execution, package/module analysis, LSP integration, Node provider identity, or unsupported public JavaScript support claims"
-        - "Done boundary: admission document exists, no protected surfaces changed, validation passes, and future import/runtime sequencing is explicit"
+        - "Anchors: docs/tree-sitter-javascript-grammar-admission.md,
+          docs/tree-sitter-multi-language-query-strategy.md,
+          docs/tree-sitter-go-grammar-admission.md,
+          docs/tree-sitter-python-grammar-admission.md"
+        - "In scope: one documentation-only JavaScript grammar admission review
+          with candidate identity, immutable revision/checksum gates,
+          license/notice, generated parser/scanner provenance, core ABI
+          compatibility, BOM/excluded file classes, source-size/build-impact,
+          JS/JSX scope decision, query fixture gates, monorepo path behaviour,
+          Node-as-context-only language boundary, and decision state"
+        - "Out of scope: third_party/tree-sitter-javascript import,
+          source/build/test/fixture changes, build.zig.zon, CI changes, provider
+          registry, CLI flags, report schema changes, scoring, cache, runtime
+          JavaScript provider behaviour, custom user queries,
+          package.json/workspace/dependency analysis, LSP, release/package work"
+        - "Protected: local-first behaviour, no network/telemetry/upload/remote
+          enrichment, no background provider execution, no bug
+          prediction/code-quality scoring/developer ranking/maintainer
+          judgement, existing Zig/Go/Python provider behaviour"
+        - "Dependencies: Feature 0034 language strategy is complete and
+          identifies JavaScript as a future candidate subject to admission
+          gates"
+        - "Validation/evidence: git diff --check; zig build validate; docs-only
+          changed-path scan; no tree-sitter-javascript source import scan;
+          prohibited-claim/privacy/local-first scan over changed docs"
+        - "Review focus: admission gates are concrete enough to shape the next
+          JavaScript source-import feature without overclaiming JavaScript
+          runtime support"
+        - "Escalate if: implementation requires source import, build/runtime
+          changes, provider registry, CLI/report schema changes, custom query
+          execution, package/module analysis, LSP integration, Node provider
+          identity, or unsupported public JavaScript support claims"
+        - "Done boundary: admission document exists, no protected surfaces
+          changed, validation passes, and future import/runtime sequencing is
+          explicit"
       anchors:
         - docs/tree-sitter-javascript-grammar-admission.md
         - docs/tree-sitter-multi-language-query-strategy.md
@@ -215,4 +240,454 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-25T00:02:35.185Z
-  updated_at: 2026-05-25T00:07:03.000Z
+  updated_at: 2026-05-25T00:10:55.187Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-25T00:10:55.187Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0048"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Tree-sitter JavaScript grammar admission review
+      problem: "JavaScript is the next high-value Tree-sitter language family, but it
+        has broader runtime and syntax risk than Go or Python: CommonJS and ESM,
+        JSX, anonymous exports, generated bundles, Node monorepo paths, and
+        multiple extensions. The repository needs an admission record before any
+        tree-sitter-javascript source import or runtime provider work."
+      outcome: Add a documentation-only JavaScript grammar admission review that
+        records upstream identity, JS/JSX scope, license, generated
+        parser/scanner, Tree-sitter core compatibility, BOM, source-size, query,
+        fixture, monorepo, and validation gates.
+      acceptance:
+        - Add docs/tree-sitter-javascript-grammar-admission.md as the single
+          public admission review artefact.
+        - The document records candidate upstream identity for
+          tree-sitter-javascript, immutable revision or blocker, checksum
+          requirement, proposed vendored path, BOM expectations, excluded file
+          classes, and Tree-sitter core compatibility requirements.
+        - The document records whether JSX is admitted with JavaScript or
+          deferred; if deferred, .jsx remains unsupported until a later shaped
+          feature.
+        - The document records license and notice gates, generated parser and
+          scanner provenance gates, local-first build supply-chain gates,
+          source-size and build-impact gates, query fixture expectations, and
+          no-provider stability gates for future JavaScript work.
+        - The document states JavaScript runtime support is not implemented and
+          current runtime Tree-sitter support remains Zig, Go, and Python only.
+        - The document frames future JavaScript symbols as optional,
+          current-only, inspect-oriented, additive, caveated provider evidence.
+        - The document records Node as runtime context only, not a provider or
+          parser identity.
+        - The document records monorepo behaviour as inspect-path-only and
+          extension-based; it must not imply package.json, workspace, bundler,
+          dependency graph, module resolution, LSP, or repo-wide scanning.
+        - No third_party, source, test, fixture, build, CI, CLI, report schema,
+          scoring, cache, provider runtime, provider registry, release, package,
+          network, telemetry, or background behaviour changes are made.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Follow-up provider planning slice for B001. It admits JavaScript only
+        as a future candidate and explicitly defers implementation.
+      checked_at: 2026-05-25T00:07:03.000Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0048_tree-sitter-javascript-grammar-admission-review/prd.md
+  requirements_contract:
+    source_path: .flow/features/0048_tree-sitter-javascript-grammar-admission-review/prd.md
+    source_digest: 86e8abef3a3b581b6fa49b9a6c095048b0e4e24adb2e67958307599ecb911980
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#non-goals[1]
+        text: No third_party/tree-sitter-javascript source import.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-002
+        source_ref: prd.md#non-goals[2]
+        text: No build.zig, build.zig.zon, CI, test, fixture, source, provider registry,
+          CLI, report schema, scoring, cache, release, package, network,
+          telemetry, upload, remote enrichment, or runtime provider behaviour
+          changes.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-003
+        source_ref: prd.md#non-goals[3]
+        text: No JavaScript parser build proof, extraction proof, inspect output, line
+          history, custom query execution, LSP, package.json parsing, workspace
+          discovery, module resolution, dependency graph, bundler analysis, or
+          repo-wide scan.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-004
+        source_ref: prd.md#non-goals[4]
+        text: No node provider identity. Node remains runtime context only.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-005
+        source_ref: prd.md#requirements[1]
+        text: The admission document records public upstream candidate identity for
+          tree-sitter-javascript.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[2]
+        text: The document records that immutable revision, checksum, license, and
+          notice conclusions must be refreshed against the exact future selected
+          revision.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[3]
+        text: The document defines generated parser and scanner provenance gates.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[4]
+        text: The document defines Tree-sitter core ABI compatibility gates against the
+          already vendored core.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[5]
+        text: The document defines JavaScript path rules for .js, .mjs, .cjs, and .jsx,
+          and explicitly decides whether .jsx is admitted or deferred.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[6]
+        text: The document defines a narrow future BOM and excluded file classes.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[7]
+        text: The document defines source-size and build-impact gates for the future
+          source import.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[8]
+        text: The document defines JavaScript query fixture expectations for functions,
+          classes, methods, constants, variables, ESM exports, CommonJS exports,
+          anonymous exports, JSX if admitted, generated bundles, empty files,
+          invalid files, unsupported paths, and monorepo paths.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[9]
+        text: The document states monorepo behaviour is inspect-path-only and extension-
+          based; it must not imply package.json, workspace, bundler, dependency
+          graph, module resolution, LSP, or repo-wide scanning.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[10]
+        text: The document states that JavaScript runtime support is not implemented.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#requirements[11]
+        text: The document preserves local-first and OSS/publicity boundaries.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#verification[1]
+        text: "Required validation commands:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Required validation commands:"
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#verification[2]
+        text: "``sh git diff --check zig build validate ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh git diff --check zig build validate ``"
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#verification[3]
+        text: "Close-out must also prove:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Close-out must also prove:"
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#verification[4]
+        text: changed paths are docs/Flow only;
+        category: verification
+        packet_refs:
+          - P1
+        verification: changed paths are docs/Flow only;
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#verification[5]
+        text: no third_party/tree-sitter-javascript path was added;
+        category: verification
+        packet_refs:
+          - P1
+        verification: no third_party/tree-sitter-javascript path was added;
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#verification[6]
+        text: no runtime/source/test/build/fixture/CI files changed;
+        category: verification
+        packet_refs:
+          - P1
+        verification: no runtime/source/test/build/fixture/CI files changed;
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#verification[7]
+        text: no public claim says JavaScript support exists;
+        category: verification
+        packet_refs:
+          - P1
+        verification: no public claim says JavaScript support exists;
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#verification[8]
+        text: Node is described only as runtime context, not a provider;
+        category: verification
+        packet_refs:
+          - P1
+        verification: Node is described only as runtime context, not a provider;
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#verification[9]
+        text: prohibited-claim and privacy scans pass; and
+        category: verification
+        packet_refs:
+          - P1
+        verification: prohibited-claim and privacy scans pass; and
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#verification[10]
+        text: future sequencing is explicit.
+        category: verification
+        packet_refs:
+          - P1
+        verification: future sequencing is explicit.
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: JavaScript is a high-value Tree-sitter candidate, but it is riskier than
+          the Go and Python tracks already implemented. A JavaScript provider
+          must account for CommonJS, ESM, JSX, anonymous exports, generated
+          bundles, multiple path extensions, and Node monorepo context without
+          implying package-manager or workspace discovery.
+      - source_ref: prd.md#problem[2]
+        text: The repository must not import or run tree-sitter-javascript before
+          upstream identity, license, generated parser or scanner provenance,
+          compatibility, BOM, query, fixture, monorepo, and local-first gates
+          are recorded.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 2 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: Add a documentation-only JavaScript grammar admission review that
+      records upstream identity, JS/JSX scope, license, generated
+      parser/scanner, Tree-sitter core compatibility, BOM, source-size, query,
+      fixture, monorepo, and validation gates.
+    acceptance:
+      - Add docs/tree-sitter-javascript-grammar-admission.md as the single
+        public admission review artefact.
+      - The document records candidate upstream identity for
+        tree-sitter-javascript, immutable revision or blocker, checksum
+        requirement, proposed vendored path, BOM expectations, excluded file
+        classes, and Tree-sitter core compatibility requirements.
+      - The document records whether JSX is admitted with JavaScript or
+        deferred; if deferred, .jsx remains unsupported until a later shaped
+        feature.
+      - The document records license and notice gates, generated parser and
+        scanner provenance gates, local-first build supply-chain gates,
+        source-size and build-impact gates, query fixture expectations, and
+        no-provider stability gates for future JavaScript work.
+      - The document states JavaScript runtime support is not implemented and
+        current runtime Tree-sitter support remains Zig, Go, and Python only.
+      - The document frames future JavaScript symbols as optional, current-only,
+        inspect-oriented, additive, caveated provider evidence.
+      - The document records Node as runtime context only, not a provider or
+        parser identity.
+      - The document records monorepo behaviour as inspect-path-only and
+        extension-based; it must not imply package.json, workspace, bundler,
+        dependency graph, module resolution, LSP, or repo-wide scanning.
+      - No third_party, source, test, fixture, build, CI, CLI, report schema,
+        scoring, cache, provider runtime, provider registry, release, package,
+        network, telemetry, or background behaviour changes are made.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands: []
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
