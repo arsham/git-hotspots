@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0063"
   active_run_id: null
   last_completed_feature_id: "0062"
 defaults:
@@ -24,10 +24,12 @@ focus:
   next_roadmap_item_id: null
 execution_queue:
   mode: serial
-  feature_ids: []
+  feature_ids:
+    - "0063"
+    - "0064"
   stop_on_blocked: true
 features:
-  next_id: 63
+  next_id: 65
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -277,6 +279,14 @@ features:
       slug: provider-capability-documentation-consolidation
       path: .flow/features/0062_provider-capability-documentation-consolidation
       created_at: 2026-05-25T22:14:32.430Z
+    - id: "0063"
+      slug: tree-sitter-rust-grammar-admission-review
+      path: .flow/features/0063_tree-sitter-rust-grammar-admission-review
+      created_at: 2026-05-25T23:12:54.292Z
+    - id: "0064"
+      slug: tree-sitter-lua-grammar-admission-review
+      path: .flow/features/0064_tree-sitter-lua-grammar-admission-review
+      created_at: 2026-05-25T23:13:11.411Z
 intake:
   mode: roadmap
   summary: null
