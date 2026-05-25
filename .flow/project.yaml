@@ -7,7 +7,7 @@ state:
   status: active
   active_feature_id: null
   active_run_id: null
-  last_completed_feature_id: "0063"
+  last_completed_feature_id: "0064"
 defaults:
   autonomy: ask
   lane: standard
@@ -24,8 +24,7 @@ focus:
   next_roadmap_item_id: null
 execution_queue:
   mode: serial
-  feature_ids:
-    - "0064"
+  feature_ids: []
   stop_on_blocked: true
 features:
   next_id: 65
