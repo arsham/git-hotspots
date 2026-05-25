@@ -7,6 +7,7 @@ const tree_sitter_zig = @import("tree_sitter_zig.zig");
 const tree_sitter_go = @import("tree_sitter_go.zig");
 const tree_sitter_python = @import("tree_sitter_python.zig");
 const tree_sitter_javascript = @import("tree_sitter_javascript.zig");
+const tree_sitter_typescript = @import("tree_sitter_typescript.zig");
 const explain = @import("explain.zig");
 const version = @import("version.zig");
 const Io = std.Io;
@@ -41,14 +42,16 @@ const usage =
     \\                    accepted in-scope Git rename aliases may resolve to the
     \\                    canonical path; use \\t to target a tab in a Git path
     \\  --symbols         With --inspect PATH only, add opt-in current working-tree
-    \\                    Tree-sitter Zig, Go, Python, or JavaScript symbols for that
-    \\                    file; JavaScript covers .js, .mjs, .cjs, and admitted .jsx;
-    \\                    does not affect score, rank, lineage, confidence, or
+    \\                    Tree-sitter Zig, Go, Python, JavaScript, TypeScript, or TSX
+    \\                    symbols for that file; JavaScript covers .js, .mjs, .cjs,
+    \\                    and admitted .jsx; TypeScript/TSX covers .ts, .mts, .cts,
+    \\                    and .tsx; does not affect score, rank, lineage, confidence, or
     \\                    file-level evidence
     \\  --symbol-line-history
     \\                    With --inspect PATH --symbols only, add opt-in current-line
     \\                    Git evidence for current Zig, Go, Python, or JavaScript
-    \\                    symbol line ranges; not symbol history, lineage, scoring, or
+    \\                    symbol line ranges; TypeScript/TSX line history is unsupported;
+    \\                    not symbol history, lineage, scoring, or
     \\                    ownership
     \\  --symbol-limit N  With --inspect PATH --symbols only, limit human table and
     \\                    Markdown symbol rows (default: 25); JSON symbols.items
@@ -151,6 +154,7 @@ pub fn main(init: std.process.Init.Minimal) !void {
     if (cfg.symbols) {
         const matched_path = analysis.inspect.?.matched_path;
         const javascript_symbols = tree_sitter_javascript.isSupportedJavaScriptPath(matched_path);
+        const typescript_symbols = tree_sitter_typescript.isSupportedPath(matched_path);
         if (std.mem.endsWith(u8, matched_path, ".go")) {
             const symbol_report = try tree_sitter_go.extractPath(allocator, io, analysis.repo_root, matched_path);
             analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
@@ -160,11 +164,14 @@ pub fn main(init: std.process.Init.Minimal) !void {
         } else if (javascript_symbols) {
             const symbol_report = try tree_sitter_javascript.extractPath(allocator, io, analysis.repo_root, matched_path);
             analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
+        } else if (typescript_symbols) {
+            const symbol_report = try tree_sitter_typescript.extractPath(allocator, io, analysis.repo_root, matched_path);
+            analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
         } else {
             const symbol_report = try tree_sitter_zig.extractPath(allocator, io, analysis.repo_root, matched_path);
             analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
         }
-        if (cfg.symbol_line_history) try git.attachCurrentLineHistory(allocator, io, &analysis);
+        if (cfg.symbol_line_history and !typescript_symbols) try git.attachCurrentLineHistory(allocator, io, &analysis);
         analysis.symbol_display = .{ .limit = cfg.symbol_limit orelse model.default_symbol_display_limit, .explicit_limit = cfg.symbol_limit != null };
     }
 
@@ -748,6 +755,7 @@ test {
     _ = provider;
     _ = @import("report.zig");
     _ = tree_sitter_go;
+    _ = tree_sitter_typescript;
     _ = @import("scoring.zig");
     _ = @import("version.zig");
 }

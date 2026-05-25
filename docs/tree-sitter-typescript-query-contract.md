@@ -1,9 +1,11 @@
 # Tree-sitter TypeScript and TSX query contract and fixtures
 
-This is a non-product, test-only contract for future TypeScript and TSX
-Tree-sitter symbol providers. It adds project-owned query assets, fixture
+This began as a non-product, test-only contract for future TypeScript and TSX
+Tree-sitter symbol providers. It added project-owned query assets, fixture
 corpora, and proof targets without exposing TypeScript or TSX symbols through
 the CLI, reports, provider registry, scoring, cache, or runtime defaults.
+Feature 0060 later reused the same query contract for inspect-only runtime
+TypeScript/TSX `--symbols` output.
 
 ## Scope and protected surfaces
 
@@ -19,11 +21,12 @@ Changed implementation surfaces are limited to:
 - `build.zig`
 - `docs/tree-sitter-typescript-query-contract.md`
 
-The contract does not change `src/`, CLI flags, report schemas, scoring, cache
-behavior, provider registration, runtime TypeScript or TSX symbol output,
-CI/release/package behavior, LSP behavior, Node/package/workspace/module
-analysis, network access, telemetry, uploads, remote enrichment, parser
-generation, system package use, or custom user query execution.
+The original contract did not change `src/`, CLI flags, report schemas,
+scoring, cache behavior, provider registration, runtime TypeScript or TSX
+symbol output, CI/release/package behavior, LSP behavior,
+Node/package/workspace/module analysis, network access, telemetry, uploads,
+remote enrichment, parser generation, system package use, or custom user query
+execution.
 
 ## Query identities
 
@@ -66,7 +69,7 @@ React framework semantics, or runtime provider registry wiring.
 ## Symbol-kind and range mapping
 
 The proofs map query candidates into the existing
-`provider.CurrentSymbolEvidence` shape only inside tests:
+`provider.CurrentSymbolEvidence` shape:
 
 | Query candidate | Proof mapping |
 | --- | --- |

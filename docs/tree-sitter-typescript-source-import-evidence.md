@@ -159,10 +159,11 @@ separately shaped feature deliberately changes that boundary.
 
 ## Explicit deferrals and future sequencing
 
-TypeScript and TSX runtime support remains unimplemented. The next likely
-follow-up is TypeScript/TSX offline build proof, not runtime provider wiring.
+At the time of this source-import evidence, TypeScript and TSX runtime support
+remained unimplemented and the next likely follow-up was TypeScript/TSX offline
+build proof, not runtime provider wiring.
 
-This source-import feature explicitly defers all of the following:
+This source-import feature explicitly deferred all of the following:
 
 - TypeScript/TSX parser compile/link proof and offline build proof beyond the
   source import evidence recorded here;

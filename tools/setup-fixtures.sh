@@ -556,6 +556,136 @@ EOF
   commit_all "$repo" '2026-05-02T00:00:00+0000' 'expand javascript symbol functions'
 }
 
+make_typescript_symbols() {
+  repo="$FIX/typescript-symbols"
+  rm -rf "$repo"
+  mkdir -p "$repo/src"
+  setup_repo "$repo"
+
+  cat > "$repo/src/old-example.ts" <<'EOF'
+// Supported TypeScript query subset fixture.
+export const EXPORTED_FLAG = true;
+let mutableCount = 1;
+
+export function compute(input: number): number {
+  function localHelper(value: number): number {
+    return value + input;
+  }
+  return localHelper(input);
+}
+
+class LocalWorker {
+  run(): number {
+    function methodHelper(): number { return 1; }
+    return methodHelper();
+  }
+}
+
+interface UserShape {
+  id: UserId;
+}
+type UserId = string;
+enum Mode { One, Two }
+namespace Tools {
+  export function inside() { return 1; }
+}
+
+function café(): string {
+  return "unicode";
+}
+EOF
+  cat > "$repo/src/component.tsx" <<'EOF'
+type Props = {
+  title: string;
+};
+
+export function Panel(props: Props) {
+  return <section>{props.title}</section>;
+}
+
+const InlineWidget = () => <span />;
+
+class ClassWidget {
+  render() {
+    return <Panel title="ok" />;
+  }
+}
+
+type PanelProps = Props;
+enum DisplayMode { Compact, Full }
+EOF
+  cat > "$repo/src/module_case.mts" <<'EOF'
+export function moduleEntry() {
+  return 1;
+}
+EOF
+  cat > "$repo/src/common_case.cts" <<'EOF'
+const legacyValue = require('legacy');
+EOF
+  printf '/* Code generated; DO NOT EDIT. */const GENERATED_VALUE=1;function generatedFunction(){return GENERATED_VALUE;}\n' > "$repo/src/generated.min.ts"
+  printf 'export function broken(\n' > "$repo/src/invalid_partial.ts"
+  printf '' > "$repo/src/empty.ts"
+  cat > "$repo/src/other.ts" <<'EOF'
+export function OtherOnly() {
+  return 1;
+}
+EOF
+  cat > "$repo/src/target.ts" <<'EOF'
+export function target() {
+  return 1;
+}
+EOF
+  ln -s target.ts "$repo/src/link.ts"
+  python3 - <<'PY' > "$repo/src/large.ts"
+print('export function Large() {')
+print('  return 1;')
+print('}')
+print('// ' + 'x' * (1024 * 1024 + 1))
+PY
+  cat > "$repo/src/missing.ts" <<'EOF'
+export function missing() {
+  return 1;
+}
+EOF
+  commit_all "$repo" '2026-05-01T00:00:00+0000' 'initial typescript symbol files'
+
+  git -C "$repo" mv src/old-example.ts src/example.ts
+  cat > "$repo/src/example.ts" <<'EOF'
+// Supported TypeScript query subset fixture.
+export const EXPORTED_FLAG = true;
+let mutableCount = 1;
+
+export function compute(input: number): number {
+  function localHelper(value: number): number {
+    return value + input;
+  }
+  return localHelper(input);
+}
+
+class LocalWorker {
+  run(): number {
+    function methodHelper(): number { return 1; }
+    return methodHelper();
+  }
+}
+
+interface UserShape {
+  id: UserId;
+}
+type UserId = string;
+enum Mode { One, Two }
+namespace Tools {
+  export function inside() { return 1; }
+}
+
+function café(): string {
+  return "unicode";
+}
+EOF
+  rm "$repo/src/missing.ts"
+  commit_all "$repo" '2026-05-02T00:00:00+0000' 'expand typescript symbol functions'
+}
+
 make_symbol_line_history() {
   repo="$FIX/symbol-line-history"
   rm -rf "$repo"
@@ -616,8 +746,9 @@ make_symbols
 make_go_symbols
 make_python_symbols
 make_javascript_symbols
+make_typescript_symbols
 make_symbol_line_history
-rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked" "$FIX/symbol-line-history-shallow" "$FIX/symbol-line-history-partial" "$FIX/go-symbols-shallow" "$FIX/go-symbols-partial" "$FIX/python-symbols-shallow" "$FIX/python-symbols-partial" "$FIX/javascript-symbols-shallow" "$FIX/javascript-symbols-partial"
+rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked" "$FIX/symbol-line-history-shallow" "$FIX/symbol-line-history-partial" "$FIX/go-symbols-shallow" "$FIX/go-symbols-partial" "$FIX/python-symbols-shallow" "$FIX/python-symbols-partial" "$FIX/javascript-symbols-shallow" "$FIX/javascript-symbols-partial" "$FIX/typescript-symbols-shallow" "$FIX/typescript-symbols-partial"
 git clone -q --depth 1 "file://$FIX/basic" "$FIX/shallow"
 git clone -q "$FIX/basic" "$FIX/medium"
 printf 'local dirty note\n' >> "$FIX/medium/docs/guide.md"
@@ -638,3 +769,6 @@ git -C "$FIX/python-symbols-partial" config remote.origin.promisor true
 git clone -q --depth 1 "file://$FIX/javascript-symbols" "$FIX/javascript-symbols-shallow"
 git clone -q "$FIX/javascript-symbols" "$FIX/javascript-symbols-partial"
 git -C "$FIX/javascript-symbols-partial" config remote.origin.promisor true
+git clone -q --depth 1 "file://$FIX/typescript-symbols" "$FIX/typescript-symbols-shallow"
+git clone -q "$FIX/typescript-symbols" "$FIX/typescript-symbols-partial"
+git -C "$FIX/typescript-symbols-partial" config remote.origin.promisor true

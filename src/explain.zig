@@ -71,10 +71,11 @@ pub const text =
     \\## Inspect symbols
     \\
     \\The --symbols flag is opt-in and valid only with --inspect PATH. It adds
-    \\current working-tree Tree-sitter Zig, Go, Python, or JavaScript symbols for
-    \\the matched in-scope .zig, .go, .py, .js, .mjs, .cjs, or admitted .jsx
-    \\file. Provider output is current-only enrichment with
-    \\freshness, failure, confidence, caveats, and local provenance.
+    \\current working-tree Tree-sitter Zig, Go, Python, JavaScript, TypeScript,
+    \\or TSX symbols for the matched in-scope .zig, .go, .py, .js, .mjs, .cjs,
+    \\admitted .jsx, .ts, .mts, .cts, or .tsx file. Provider output is
+    \\current-only enrichment with freshness, failure, confidence, caveats, and
+    \\local provenance.
     \\
     \\Symbol evidence does not change file score, rank, confidence, co-change
     \\evidence, Git rename lineage, scope, or inclusion/exclusion decisions.
@@ -89,11 +90,16 @@ pub const text =
     \\.jsx files. It does not evaluate Node, packages, workspaces, module
     \\resolution, TypeScript, TSX, dependency graphs, scoring, ownership,
     \\repo-wide scanning, or symbol history.
+    \\TypeScript/TSX support is inspect-only for .ts, .mts, .cts, and .tsx
+    \\files. It does not evaluate packages, workspaces, tsconfig, module
+    \\resolution, type checking, dependency graphs, scoring, ownership, cache,
+    \\repo-wide scanning, or symbol history.
     \\
     \\--symbol-line-history is opt-in and valid only with --inspect PATH
     \\--symbols. It adds current-line Git blame evidence for current Zig, Go,
     \\Python, or JavaScript symbol line ranges using one local blame process only
-    \\when current ranges are valid and the inspected file is clean. It reports
+    \\when current ranges are valid and the inspected file is clean. TypeScript
+    \\and TSX line history remains unsupported. It reports
     \\commit-count and timestamp summaries without author identities, commit
     \\messages, source snippets, remotes, or absolute paths. This is not
     \\symbol lineage, ownership, scoring input, or semantic history.
@@ -138,9 +144,10 @@ test "explanation includes confidence and non-claim boundaries" {
         "AI/LLM judgement",
         "--symbols flag is opt-in and valid only with --inspect PATH",
         "--symbol-line-history is opt-in and valid only with --inspect PATH",
-        "Tree-sitter Zig, Go, Python, or JavaScript symbols",
+        "Tree-sitter Zig, Go, Python, JavaScript, TypeScript",
         "Symbol evidence does not change file score",
         "JavaScript support is inspect-only for .js, .mjs, .cjs, and admitted",
+        "TypeScript/TSX support is inspect-only for .ts, .mts, .cts, and .tsx",
     }) |snippet| {
         try std.testing.expect(std.mem.indexOf(u8, text, snippet) != null);
     }

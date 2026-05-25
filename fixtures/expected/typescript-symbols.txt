@@ -1,0 +1,29 @@
+git-hotspots: file-level Git-history investigation prompts
+commits=2 shallow=false partial=false dirty=false auto_fetch=false
+scope: selected=project include_prefixes=[] exclude_prefixes=[.flow/,.zig-cache/,zig-out/,target/,node_modules/,dist/,build/,coverage/] outside_include_paths=0 outside_include_changes=0 excluded_paths=0 excluded_changes=0
+caveats: Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked
+inspect: requested=src/example.ts matched=src/example.ts rank=1
+symbols: provider=tree-sitter-typescript state=current-only freshness=fresh failure=ok confidence=high total=14 shown=14 omitted=0 limit=25 limit_source=default sort_basis="provider order"
+symbols caveat: current working-tree enrichment only; file-level Git evidence, score, file order, lineage, and confidence are unchanged
+
+rank  score   changes churn   confidence lineage path
+1     53.2    2       30      medium     yes     src/example.ts
+
+current symbols (shown first by provider order):
+  summary: total=14 shown=14 omitted=0 limit=25 limit_source=default sort_basis="provider order"
+  module src/example.ts lines 1-31 confidence=high
+  other EXPORTED_FLAG lines 2-2 confidence=high
+  variable mutableCount lines 3-3 confidence=high
+  function compute lines 5-10 confidence=high
+  function localHelper lines 6-8 confidence=high
+  class LocalWorker lines 12-17 confidence=high
+  method run lines 13-16 confidence=high
+  function methodHelper lines 14-14 confidence=high
+  type UserShape lines 19-21 confidence=high
+  type UserId lines 22-22 confidence=high
+  type Mode lines 23-23 confidence=high
+  type Tools lines 24-26 confidence=high
+  function inside lines 25-25 confidence=high
+  function café lines 28-30 confidence=high
+
+Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.

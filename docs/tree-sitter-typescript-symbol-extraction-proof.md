@@ -1,10 +1,12 @@
 # Tree-sitter TypeScript and TSX symbol extraction proof
 
-This is an internal, non-product proof. It does not add runtime TypeScript or
-TSX `--symbols` output, a provider registry entry, CLI flags, report schema
+This began as an internal, non-product proof. It did not add runtime TypeScript
+or TSX `--symbols` output, a provider registry entry, CLI flags, report schema
 fields, scoring, cache behaviour, telemetry, network access, parser generation,
 Node/package/workspace/module-resolution analysis, `tsconfig` interpretation,
 type checking, LSP analysis, custom user queries, or symbol history.
+Feature 0060 later promoted the same bounded extraction shape to inspect-only
+runtime TypeScript/TSX `--symbols` output without expanding the public schema.
 
 ## Proof targets
 
@@ -27,7 +29,7 @@ type checking, LSP analysis, custom user queries, or symbol history.
 ## Supported subset
 
 The proofs map the Feature 0058 project-owned query captures into the existing
-`provider.CurrentSymbolEvidence` shape inside tests only:
+`provider.CurrentSymbolEvidence` shape:
 
 - program roots as `SymbolKind.module`, named by repo-relative `.ts`, `.mts`,
   `.cts`, or `.tsx` paths
@@ -65,13 +67,13 @@ with caveats only; raw parser diagnostics and source snippets are not exposed.
 If export, anonymous, namespace, or component naming is not deterministic, the
 proof skips or caveats the construct rather than expanding the public schema.
 
-## Deferred runtime boundary
+## Runtime boundary
 
-TypeScript and TSX runtime `--symbols` output is not implemented yet. This proof
-adds no runtime provider registry wiring, CLI/report/schema/scoring/cache
-changes, line-history integration, package metadata handling, Node execution,
-workspace scanning, `tsconfig` analysis, type checking, LSP analysis, custom
-query execution, snippets, authors, emails, ownership metrics, quality scoring,
+Feature 0060 implements inspect-only TypeScript and TSX runtime `--symbols`
+output. It still adds no new public report schema fields, scoring/cache changes,
+line-history integration, package metadata handling, Node execution, workspace
+scanning, `tsconfig` analysis, type checking, LSP analysis, custom query
+execution, snippets, authors, emails, ownership metrics, quality scoring,
 developer ranking, or bug prediction.
 
 ## Validation evidence
@@ -80,7 +82,7 @@ Fresh local validation on 2026-05-25:
 
 | Command | Exit status | Privacy-safe observation |
 | --- | --- | --- |
-| `zig build validate` | `0` | Product validation passed without TypeScript or TSX runtime provider output. |
+| `zig build validate` | `0` | Product validation passed before TypeScript or TSX runtime provider output was added. |
 | `zig build tree-sitter-typescript-build-proof` | `0` | Existing TypeScript parser/scanner build proof compiled, linked, and ran. |
 | `zig build tree-sitter-tsx-build-proof` | `0` | Existing TSX parser/scanner build proof compiled, linked, and ran. |
 | `zig build tree-sitter-typescript-query-proof` | `0` | Project-owned TypeScript query contract fixtures passed. |
@@ -92,6 +94,5 @@ Fresh local validation on 2026-05-25:
 The proofs use only repository-local vendored Tree-sitter core and
 Tree-sitter TypeScript parser/scanner sources plus local fixtures. They perform
 no network access, package-manager resolution, parser generation, telemetry,
-upload, remote enrichment, background analysis, runtime TypeScript/TSX provider
-registration, package/workspace scanning, module-resolution analysis, CI release
-automation, cache use, or artifacts.
+upload, remote enrichment, background analysis, package/workspace scanning,
+module-resolution analysis, CI release automation, cache use, or artifacts.

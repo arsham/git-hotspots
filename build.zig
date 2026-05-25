@@ -88,6 +88,8 @@ fn addTreeSitterProviders(b: *std.Build, module: *std.Build.Module) void {
     addTreeSitterGoGrammar(b, module);
     addTreeSitterPythonGrammar(b, module);
     addTreeSitterJavaScriptGrammar(b, module);
+    addTreeSitterTypeScriptGrammar(b, module);
+    addTreeSitterTsxGrammar(b, module);
 }
 
 pub fn build(b: *std.Build) void {
