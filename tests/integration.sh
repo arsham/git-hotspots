@@ -93,6 +93,9 @@ grep -q -- "--progress" /tmp/git-hotspots-help.txt
 grep -q -- "--symbols" /tmp/git-hotspots-help.txt
 grep -q -- "--symbol-line-history" /tmp/git-hotspots-help.txt
 grep -q -- "--symbol-limit N" /tmp/git-hotspots-help.txt
+grep -q -- "Provider capability:" /tmp/git-hotspots-help.txt
+grep -q -- "inspect-only current working-tree symbol evidence" /tmp/git-hotspots-help.txt
+grep -q -- "not true symbol history" /tmp/git-hotspots-help.txt
 "$EXE" --progress --help > /tmp/git-hotspots-progress-help.txt 2> /tmp/git-hotspots-progress-help.err
 grep -q -- "--progress" /tmp/git-hotspots-progress-help.txt
 test ! -s /tmp/git-hotspots-progress-help.err

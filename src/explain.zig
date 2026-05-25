@@ -95,13 +95,27 @@ pub const text =
     \\resolution, type checking, dependency graphs, scoring, ownership, cache,
     \\repo-wide scanning, or symbol history.
     \\
+    \\### Provider capability matrix
+    \\
+    \\| Language lane | Inspected paths | --symbols provider | --symbols evidence | --symbol-line-history evidence | Explicit boundary |
+    \\| --- | --- | --- | --- | --- | --- |
+    \\| Zig | .zig | tree-sitter-zig | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no dependencies, semantic moves, true symbol history, scoring, or ownership claims |
+    \\| Go | .go | tree-sitter-go | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, build tags, cgo, dependency graphs, true symbol history, scoring, or ownership claims |
+    \\| Python | .py | tree-sitter-python | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no imports, packages, virtual environments, dependency graphs, generated-source policy, true symbol history, scoring, or ownership claims |
+    \\| JavaScript | .js, .mjs, .cjs, admitted .jsx | tree-sitter-javascript | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, true symbol history, scoring, or ownership claims |
+    \\| TypeScript | .ts, .mts, .cts | tree-sitter-typescript | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, true symbol history, scoring, or ownership claims |
+    \\| TSX | .tsx | tree-sitter-tsx | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no React, DOM, packages, type analysis, dependency graphs, cache, true symbol history, scoring, or ownership claims |
+    \\| Unsupported current files | all other paths | unsupported fallback | provider reports unsupported and keeps inspected file evidence | no current-line evidence | no parser diagnostics, source snippets, or parsed symbols |
+    \\
     \\--symbol-line-history is opt-in and valid only with --inspect PATH
     \\--symbols. It adds current-line Git blame evidence for current Zig, Go,
     \\Python, JavaScript, TypeScript, or TSX symbol line ranges using one local
     \\blame process only when current ranges are valid and the inspected file is
-    \\clean. It reports commit-count and timestamp summaries without author
-    \\identities, commit messages, source snippets, remotes, or absolute paths.
-    \\This is not symbol lineage, ownership, scoring input, or semantic history.
+    \\clean. Current-line evidence is for the lines occupied by a symbol at HEAD;
+    \\it is not true symbol history, historical identity tracking, or git log -L.
+    \\It reports commit-count and timestamp summaries without author identities,
+    \\commit messages, source snippets, remotes, or absolute paths. This is not
+    \\symbol lineage, ownership, scoring input, or semantic history.
     \\
     \\## Limitations and non-claims
     \\
@@ -147,6 +161,12 @@ test "explanation includes confidence and non-claim boundaries" {
         "Symbol evidence does not change file score",
         "JavaScript support is inspect-only for .js, .mjs, .cjs, and admitted",
         "TypeScript/TSX support is inspect-only for .ts, .mts, .cts, and .tsx",
+        "Provider capability matrix",
+        "| Zig | .zig |",
+        "| TSX | .tsx |",
+        "Unsupported current files",
+        "current-line Git evidence for HEAD line ranges",
+        "not true symbol history, historical identity tracking, or git log -L",
     }) |snippet| {
         try std.testing.expect(std.mem.indexOf(u8, text, snippet) != null);
     }

@@ -205,14 +205,28 @@ history. TypeScript/TSX support is inspect-only for `.ts`, `.mts`, `.cts`, and
 resolution, type checking, dependency graphs, scoring, ownership, cache,
 repo-wide scanning, or symbol history.
 
+Provider capability matrix:
+
+| Language lane | Inspected paths | `--symbols` provider | `--symbols` evidence | `--symbol-line-history` evidence | Explicit boundary |
+| --- | --- | --- | --- | --- | --- |
+| Zig | `.zig` | `tree-sitter-zig` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no dependencies, semantic moves, true symbol history, scoring, or ownership claims |
+| Go | `.go` | `tree-sitter-go` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, build tags, cgo, dependency graphs, true symbol history, scoring, or ownership claims |
+| Python | `.py` | `tree-sitter-python` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no imports, packages, virtual environments, dependency graphs, generated-source policy, true symbol history, scoring, or ownership claims |
+| JavaScript | `.js`, `.mjs`, `.cjs`, admitted `.jsx` | `tree-sitter-javascript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, true symbol history, scoring, or ownership claims |
+| TypeScript | `.ts`, `.mts`, `.cts` | `tree-sitter-typescript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, true symbol history, scoring, or ownership claims |
+| TSX | `.tsx` | `tree-sitter-tsx` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no React, DOM, packages, type analysis, dependency graphs, cache, true symbol history, scoring, or ownership claims |
+| Unsupported current files | all other paths | unsupported fallback | provider reports `unsupported` and keeps inspected file evidence | no current-line evidence | no parser diagnostics, source snippets, or parsed symbols |
+
 `--symbol-line-history` is a second opt-in layer that works only with
 `--inspect PATH --symbols`. It adds current-line Git evidence for current Zig,
 Go, Python, JavaScript, TypeScript, or TSX symbol line ranges using one local
 blame process only when symbol ranges are valid and the inspected file is
-clean. Output is summary-only: commit counts, bounded sample commit ids,
-timestamps, confidence, freshness, failure state, and caveats. It does not emit
-author identities, commit messages, source snippets, remotes, private repo
-names, or absolute paths, and it does not change file score, rank, confidence,
+clean. Current-line evidence is for the lines occupied by a symbol at HEAD;
+it is not true symbol history, historical identity tracking, or `git log -L`.
+Output is summary-only: commit counts, bounded sample commit ids, timestamps,
+confidence, freshness, failure state, and caveats. It does not emit author
+identities, commit messages, source snippets, remotes, private repo names, or
+absolute paths, and it does not change file score, rank, confidence,
 co-change evidence, scope, or lineage.
 
 Git-detected file renames are folded conservatively when both the old and new

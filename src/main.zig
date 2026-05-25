@@ -41,18 +41,18 @@ const usage =
     \\                    scoring and ranking, before normal --limit truncation;
     \\                    accepted in-scope Git rename aliases may resolve to the
     \\                    canonical path; use \\t to target a tab in a Git path
-    \\  --symbols         With --inspect PATH only, add opt-in current working-tree
-    \\                    Tree-sitter Zig, Go, Python, JavaScript, TypeScript, or TSX
-    \\                    symbols for that file; JavaScript covers .js, .mjs, .cjs,
-    \\                    and admitted .jsx; TypeScript/TSX covers .ts, .mts, .cts,
+    \\  --symbols         With --inspect PATH only, add opt-in inspect-only current
+    \\                    working-tree Tree-sitter Zig, Go, Python, JavaScript,
+    \\                    TypeScript, or TSX symbols for that file; JavaScript covers
+    \\                    .js, .mjs, .cjs, and admitted .jsx; TypeScript/TSX covers
+    \\                    .ts, .mts, .cts,
     \\                    and .tsx; does not affect score, rank, lineage, confidence, or
     \\                    file-level evidence
     \\  --symbol-line-history
     \\                    With --inspect PATH --symbols only, add opt-in current-line
     \\                    Git evidence for current Zig, Go, Python, JavaScript,
-    \\                    TypeScript, or TSX symbol line ranges; not symbol history,
-    \\                    lineage, scoring, or
-    \\                    ownership
+    \\                    TypeScript, or TSX symbol line ranges at HEAD; not true
+    \\                    symbol history, lineage, scoring, or ownership
     \\  --symbol-limit N  With --inspect PATH --symbols only, limit human table and
     \\                    Markdown symbol rows (default: 25); JSON symbols.items
     \\                    remains complete
@@ -66,6 +66,14 @@ const usage =
     \\pushes, uploads source, contacts remotes, or emits telemetry.
     \\Git-detected file renames are folded conservatively when in scope; this is
     \\not symbol/function lineage or semantic ownership.
+    \\
+    \\Provider capability:
+    \\  --symbols is opt-in inspect-only current working-tree symbol evidence for
+    \\  Zig (.zig), Go (.go), Python (.py), JavaScript (.js/.mjs/.cjs/.jsx),
+    \\  TypeScript (.ts/.mts/.cts), and TSX (.tsx). Other current files report
+    \\  unsupported provider caveats while preserving inspected file evidence.
+    \\  --symbol-line-history adds current-line Git evidence for HEAD symbol
+    \\  ranges only; it is not true symbol history, lineage, scoring, or ownership.
     \\
 ;
 
