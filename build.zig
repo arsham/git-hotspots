@@ -32,6 +32,20 @@ fn addTreeSitterJavaScriptGrammar(b: *std.Build, module: *std.Build.Module) void
     module.link_libc = true;
 }
 
+fn addTreeSitterTypeScriptGrammar(b: *std.Build, module: *std.Build.Module) void {
+    module.addIncludePath(b.path("third_party/tree-sitter-typescript/v0.23.2/typescript/src"));
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-typescript/v0.23.2/typescript/src/parser.c"), .flags = &.{} });
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-typescript/v0.23.2/typescript/src/scanner.c"), .flags = &.{} });
+    module.link_libc = true;
+}
+
+fn addTreeSitterTsxGrammar(b: *std.Build, module: *std.Build.Module) void {
+    module.addIncludePath(b.path("third_party/tree-sitter-typescript/v0.23.2/tsx/src"));
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-typescript/v0.23.2/tsx/src/parser.c"), .flags = &.{} });
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-typescript/v0.23.2/tsx/src/scanner.c"), .flags = &.{} });
+    module.link_libc = true;
+}
+
 fn addTreeSitterPythonHeaders(b: *std.Build, module: *std.Build.Module) void {
     module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
     module.addIncludePath(b.path("third_party/tree-sitter-python/v0.25.0/src"));
@@ -56,6 +70,16 @@ fn addTreeSitterPython(b: *std.Build, module: *std.Build.Module) void {
 fn addTreeSitterJavaScript(b: *std.Build, module: *std.Build.Module) void {
     addTreeSitterCore(b, module);
     addTreeSitterJavaScriptGrammar(b, module);
+}
+
+fn addTreeSitterTypeScript(b: *std.Build, module: *std.Build.Module) void {
+    addTreeSitterCore(b, module);
+    addTreeSitterTypeScriptGrammar(b, module);
+}
+
+fn addTreeSitterTsx(b: *std.Build, module: *std.Build.Module) void {
+    addTreeSitterCore(b, module);
+    addTreeSitterTsxGrammar(b, module);
 }
 
 fn addTreeSitterProviders(b: *std.Build, module: *std.Build.Module) void {
@@ -232,6 +256,38 @@ pub fn build(b: *std.Build) void {
     const run_tree_sitter_javascript_build_proof = b.addRunArtifact(tree_sitter_javascript_build_proof);
     const tree_sitter_javascript_build_proof_step = b.step("tree-sitter-javascript-build-proof", "Compile vendored Tree-sitter JavaScript sources and run tiny non-product JavaScript and JSX parse smokes");
     tree_sitter_javascript_build_proof_step.dependOn(&run_tree_sitter_javascript_build_proof.step);
+
+    const tree_sitter_typescript_build_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_typescript_build_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    addTreeSitterTypeScript(b, tree_sitter_typescript_build_proof_module);
+
+    const tree_sitter_typescript_build_proof = b.addExecutable(.{
+        .name = "tree-sitter-typescript-build-proof",
+        .root_module = tree_sitter_typescript_build_proof_module,
+    });
+
+    const run_tree_sitter_typescript_build_proof = b.addRunArtifact(tree_sitter_typescript_build_proof);
+    const tree_sitter_typescript_build_proof_step = b.step("tree-sitter-typescript-build-proof", "Compile vendored Tree-sitter TypeScript parser/scanner sources and run a tiny non-product TypeScript parse smoke");
+    tree_sitter_typescript_build_proof_step.dependOn(&run_tree_sitter_typescript_build_proof.step);
+
+    const tree_sitter_tsx_build_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_tsx_build_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    addTreeSitterTsx(b, tree_sitter_tsx_build_proof_module);
+
+    const tree_sitter_tsx_build_proof = b.addExecutable(.{
+        .name = "tree-sitter-tsx-build-proof",
+        .root_module = tree_sitter_tsx_build_proof_module,
+    });
+
+    const run_tree_sitter_tsx_build_proof = b.addRunArtifact(tree_sitter_tsx_build_proof);
+    const tree_sitter_tsx_build_proof_step = b.step("tree-sitter-tsx-build-proof", "Compile vendored Tree-sitter TSX parser/scanner sources and run a tiny non-product TSX parse smoke");
+    tree_sitter_tsx_build_proof_step.dependOn(&run_tree_sitter_tsx_build_proof.step);
 
     const tree_sitter_javascript_query_proof_module = b.createModule(.{
         .root_source_file = b.path("tests/tree_sitter_javascript_query_proof.zig"),
