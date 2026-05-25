@@ -608,7 +608,7 @@ explain_output_checks() {
 
 prohibited_claim_scan() {
   have_python || return 1
-  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/python-symbols.json fixtures/expected/python-symbols.md fixtures/expected/python-symbols.txt fixtures/expected/python-symbols-limit.json fixtures/expected/python-symbols-limit.md fixtures/expected/python-symbols-limit.txt fixtures/expected/python-symbols-empty.json fixtures/expected/python-symbols-invalid.json fixtures/expected/python-symbols-generated.json fixtures/expected/python-symbols-symlink-unavailable.json fixtures/expected/python-symbols-large-unavailable.json fixtures/expected/python-symbols-missing-unavailable.json fixtures/expected/python-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt fixtures/expected/python-line-history-success.json fixtures/expected/python-line-history-success.md fixtures/expected/python-line-history-success.txt README.md CONTRIBUTING.md <<'PY'
+  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/python-symbols.json fixtures/expected/python-symbols.md fixtures/expected/python-symbols.txt fixtures/expected/python-symbols-limit.json fixtures/expected/python-symbols-limit.md fixtures/expected/python-symbols-limit.txt fixtures/expected/python-symbols-empty.json fixtures/expected/python-symbols-invalid.json fixtures/expected/python-symbols-generated.json fixtures/expected/python-symbols-symlink-unavailable.json fixtures/expected/python-symbols-large-unavailable.json fixtures/expected/python-symbols-missing-unavailable.json fixtures/expected/python-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt fixtures/expected/python-line-history-success.json fixtures/expected/python-line-history-success.md fixtures/expected/python-line-history-success.txt fixtures/expected/javascript-line-history-success.json fixtures/expected/javascript-line-history-success.md fixtures/expected/javascript-line-history-success.txt README.md CONTRIBUTING.md <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -636,6 +636,7 @@ allowed_markers = (
     ' no ',
     'no ',
     'without ',
+    'out of scope',
     'avoid ',
     'should not ',
     'does not ',
@@ -703,6 +704,8 @@ allowed = (
     'git clone -q "$FIX/go-symbols"',
     'git clone -q --depth 1 "file://$FIX/python-symbols"',
     'git clone -q "$FIX/python-symbols"',
+    'git clone -q --depth 1 "file://$FIX/javascript-symbols"',
+    'git clone -q "$FIX/javascript-symbols"',
     'https?://|ssh://|git@',
     "('network command', re.compile",
     "('git network command', re.compile",
@@ -1085,6 +1088,61 @@ for data in (py_line, py_line_shallow, py_line_partial, py_line_empty, py_line_d
     for forbidden in ('Fixture Author', 'fixture@example', 'source line', 'ownership', 'productivity'):
         assert forbidden not in text, 'Python line-history private detail leaked'
 PY
+  JS_SYMBOLS_JSON=$ARTIFACT_DIR/javascript-symbols.json
+  JS_LINE_HISTORY_JSON=$ARTIFACT_DIR/javascript-line-history.json
+  JS_LINE_HISTORY_JSON_B=$ARTIFACT_DIR/javascript-line-history-b.json
+  JS_LINE_HISTORY_MD=$ARTIFACT_DIR/javascript-line-history.md
+  JS_LINE_HISTORY_TABLE=$ARTIFACT_DIR/javascript-line-history.txt
+  JS_LINE_HISTORY_SHALLOW_JSON=$ARTIFACT_DIR/javascript-line-history-shallow.json
+  JS_LINE_HISTORY_PARTIAL_JSON=$ARTIFACT_DIR/javascript-line-history-partial.json
+  JS_LINE_HISTORY_COMMONJS_JSON=$ARTIFACT_DIR/javascript-line-history-commonjs.json
+  JS_LINE_HISTORY_JSX_JSON=$ARTIFACT_DIR/javascript-line-history-jsx.json
+  JS_LINE_HISTORY_EMPTY_JSON=$ARTIFACT_DIR/javascript-line-history-empty.json
+  JS_LINE_HISTORY_INVALID_JSON=$ARTIFACT_DIR/javascript-line-history-invalid.json
+  JS_LINE_HISTORY_SYMLINK_JSON=$ARTIFACT_DIR/javascript-line-history-symlink.json
+  JS_LINE_HISTORY_LARGE_JSON=$ARTIFACT_DIR/javascript-line-history-large.json
+  JS_LINE_HISTORY_MISSING_JSON=$ARTIFACT_DIR/javascript-line-history-missing.json
+  "$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --format json > "$JS_SYMBOLS_JSON" || return 1
+  diff -u fixtures/expected/javascript-symbols.json "$JS_SYMBOLS_JSON" >/dev/null || return 1
+  ! grep -Fq -- 'current_line_history' "$JS_SYMBOLS_JSON" || return 1
+  "$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --symbol-line-history --format json > "$JS_LINE_HISTORY_JSON" || return 1
+  diff -u fixtures/expected/javascript-line-history-success.json "$JS_LINE_HISTORY_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --symbol-line-history --format json > "$JS_LINE_HISTORY_JSON_B" || return 1
+  diff -u "$JS_LINE_HISTORY_JSON" "$JS_LINE_HISTORY_JSON_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --symbol-line-history --format markdown > "$JS_LINE_HISTORY_MD" || return 1
+  diff -u fixtures/expected/javascript-line-history-success.md "$JS_LINE_HISTORY_MD" >/dev/null || return 1
+  "$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --symbol-line-history --format table > "$JS_LINE_HISTORY_TABLE" || return 1
+  diff -u fixtures/expected/javascript-line-history-success.txt "$JS_LINE_HISTORY_TABLE" >/dev/null || return 1
+  "$EXE" --repo fixtures/javascript-symbols-shallow --inspect src/example.mjs --symbols --symbol-line-history --format json > "$JS_LINE_HISTORY_SHALLOW_JSON" || return 1
+  grep -Fq -- 'current-line Git evidence may be incomplete: repository history is shallow; auto_fetch is false' "$JS_LINE_HISTORY_SHALLOW_JSON" || return 1
+  "$EXE" --repo fixtures/javascript-symbols-partial --inspect src/example.mjs --symbols --symbol-line-history --format json > "$JS_LINE_HISTORY_PARTIAL_JSON" || return 1
+  grep -Fq -- 'current-line Git evidence may be incomplete: repository history may be partial/promisor; auto_fetch is false' "$JS_LINE_HISTORY_PARTIAL_JSON" || return 1
+  "$EXE" --repo fixtures/javascript-symbols --inspect src/commonjs.cjs --symbols --symbol-line-history --format json > "$JS_LINE_HISTORY_COMMONJS_JSON" || return 1
+  "$EXE" --repo fixtures/javascript-symbols --inspect src/component.jsx --symbols --symbol-line-history --format json > "$JS_LINE_HISTORY_JSX_JSON" || return 1
+  "$EXE" --repo fixtures/javascript-symbols --inspect src/empty.js --symbols --symbol-line-history --format json > "$JS_LINE_HISTORY_EMPTY_JSON" || return 1
+  "$EXE" --repo fixtures/javascript-symbols --inspect src/invalid_partial.js --symbols --symbol-line-history --format json > "$JS_LINE_HISTORY_INVALID_JSON" || return 1
+  "$EXE" --repo fixtures/javascript-symbols --inspect src/link.js --symbols --symbol-line-history --format json > "$JS_LINE_HISTORY_SYMLINK_JSON" || return 1
+  "$EXE" --repo fixtures/javascript-symbols --inspect src/large.js --symbols --symbol-line-history --format json > "$JS_LINE_HISTORY_LARGE_JSON" || return 1
+  "$EXE" --repo fixtures/javascript-symbols --inspect src/missing.js --symbols --symbol-line-history --format json > "$JS_LINE_HISTORY_MISSING_JSON" || return 1
+  python3 - "$JS_LINE_HISTORY_JSON" "$JS_LINE_HISTORY_SHALLOW_JSON" "$JS_LINE_HISTORY_PARTIAL_JSON" "$JS_LINE_HISTORY_COMMONJS_JSON" "$JS_LINE_HISTORY_JSX_JSON" "$JS_LINE_HISTORY_EMPTY_JSON" "$JS_LINE_HISTORY_INVALID_JSON" "$JS_LINE_HISTORY_SYMLINK_JSON" "$JS_LINE_HISTORY_LARGE_JSON" "$JS_LINE_HISTORY_MISSING_JSON" <<'PY'
+import json, sys
+line, shallow, partial, commonjs, jsx, empty, invalid, symlink, large, missing = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+assert all('current_line_history' in row for row in line['symbols']['items']), 'JavaScript current-line evidence missing'
+assert any(row['current_line_history']['most_recent_line_touched_timestamp'] == 1777593600 for row in line['symbols']['items']), 'JavaScript line-history timestamp changed'
+assert any('shallow' in ' '.join(row['current_line_history']['caveats']) for row in shallow['symbols']['items']), 'JavaScript shallow caveat missing'
+assert any('partial/promisor' in ' '.join(row['current_line_history']['caveats']) for row in partial['symbols']['items']), 'JavaScript partial caveat missing'
+assert all('current_line_history' in row for row in commonjs['symbols']['items']), 'CommonJS current-line evidence missing'
+assert all('current_line_history' in row for row in jsx['symbols']['items']), 'JSX current-line evidence missing'
+assert any('TSX remains unsupported' in caveat for caveat in jsx['symbols']['provider']['caveats']), 'JSX caveat missing'
+assert any(row['current_line_history']['uncommitted_or_unblamable_line_count'] > 0 for row in empty['symbols']['items']), 'empty JavaScript did not degrade safely'
+assert invalid['symbols']['provider']['failure'] == 'failed' and invalid['symbols']['items'] == [], 'invalid JavaScript should fail closed'
+for data in (symlink, large, missing):
+    assert data['symbols']['provider']['failure'] == 'unavailable' and data['symbols']['items'] == [], 'unavailable JavaScript current file changed'
+for data in (line, shallow, partial, commonjs, jsx, empty, invalid, symlink, large, missing):
+    text = json.dumps(data, ensure_ascii=False)
+    for forbidden in ('Fixture Author', 'fixture@example', 'source line', 'ownership', 'productivity', 'Node package graph'):
+        assert forbidden not in text, 'JavaScript private detail leaked'
+PY
   if "$EXE" --symbols > "$ARTIFACT_DIR/symbols-alone.out" 2> "$ARTIFACT_DIR/symbols-alone.err"; then return 1; fi
   grep -q -- '--symbols can only be combined with --inspect PATH' "$ARTIFACT_DIR/symbols-alone.err" || return 1
   if "$EXE" --repo fixtures/basic --inspect src/app.txt --limit 1 >/dev/null 2> "$ARTIFACT_DIR/inspect-limit.err"; then return 1; fi
@@ -1203,6 +1261,7 @@ real_repo_smoke() {
   tracked_file_count=$(git -C "$repo" ls-files 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
   tracked_go_count=$(git -C "$repo" ls-files '*.go' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
   tracked_python_count=$(git -C "$repo" ls-files '*.py' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
+  tracked_javascript_count=$(git -C "$repo" ls-files '*.js' '*.mjs' '*.cjs' '*.jsx' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
 
   if "$EXE" --repo "$repo" --scope all --format table > "$table_out" 2> "$timing_file"; then
     table_status=pass
@@ -1295,12 +1354,50 @@ PY
     done < "$python_candidates"
   fi
 
+  first_javascript_path=$(git -C "$repo" ls-files '*.js' '*.mjs' '*.cjs' '*.jsx' 2>/dev/null | LC_ALL=C sort | head -n 1 || true)
+  javascript_symbol_status=skip-no-tracked-javascript-file
+  javascript_line_history_status=skip-no-tracked-javascript-file
+  if [ -n "$first_javascript_path" ]; then
+    javascript_symbol_status=skip-no-successful-javascript-symbol-file
+    javascript_line_history_status=skip-no-safe-tracked-javascript-file
+    javascript_candidates=$(mktemp "$ARTIFACT_DIR/real-javascript-candidates.XXXXXX")
+    git -C "$repo" ls-files '*.js' '*.mjs' '*.cjs' '*.jsx' 2>/dev/null | LC_ALL=C sort | head -n 12 > "$javascript_candidates" || true
+    while IFS= read -r javascript_path; do
+      [ -n "$javascript_path" ] || continue
+      javascript_symbol_out=$(mktemp "$ARTIFACT_DIR/real-javascript-symbol.XXXXXX.json")
+      if [ "$javascript_symbol_status" != pass ] && "$EXE" --repo "$repo" --inspect "$javascript_path" --symbols --format json > "$javascript_symbol_out" 2> "$timing_file" && python3 -m json.tool "$javascript_symbol_out" >/dev/null 2>&1; then
+        javascript_symbol_status=pass
+      fi
+      javascript_line_history_out=$(mktemp "$ARTIFACT_DIR/real-javascript-line-history.XXXXXX.json")
+      if "$EXE" --repo "$repo" --inspect "$javascript_path" --symbols --symbol-line-history --format json > "$javascript_line_history_out" 2> "$timing_file" && python3 - "$javascript_line_history_out" <<'PY'
+import json, sys
+with open(sys.argv[1], encoding='utf-8') as fh:
+    data = json.load(fh)
+symbols = data.get('symbols') or {}
+if (symbols.get('provider') or {}).get('failure') != 'ok':
+    raise SystemExit(2)
+items = symbols.get('items') or []
+if not items:
+    raise SystemExit(3)
+histories = [row.get('current_line_history') for row in items]
+if not all(histories):
+    raise SystemExit(4)
+if not any(history.get('failure') == 'ok' and int(history.get('distinct_last_touch_commit_count') or 0) > 0 for history in histories):
+    raise SystemExit(5)
+PY
+      then
+        javascript_line_history_status=pass
+        break
+      fi
+    done < "$javascript_candidates"
+  fi
+
   if [ "$table_status" = pass ] && [ "$json_status" = pass ] && [ "$markdown_status" = pass ] && [ "$project_table_status" = pass ] && [ "$project_json_status" = pass ] && [ "$project_markdown_status" = pass ] && [ "$progress_status" = pass ]; then
     summary=$(json_count_summary "$json_out") || summary='results=unknown caveats=unknown dirty=unknown'
     project_summary=$(json_count_summary "$project_json_out") || project_summary='results=unknown caveats=unknown dirty=unknown'
     elapsed=${timing#*|}
     project_elapsed=${project_timing#*|}
-    printf 'real-repo label=%s commits=%s tracked_files=%s tracked_go_files=%s tracked_python_files=%s go_symbol=%s python_symbol=%s python_line_history=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$tracked_go_count" "$tracked_python_count" "$go_symbol_status" "$python_symbol_status" "$python_line_history_status" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
+    printf 'real-repo label=%s commits=%s tracked_files=%s tracked_go_files=%s tracked_python_files=%s tracked_javascript_files=%s go_symbol=%s python_symbol=%s python_line_history=%s javascript_symbol=%s javascript_line_history=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$tracked_go_count" "$tracked_python_count" "$tracked_javascript_count" "$go_symbol_status" "$python_symbol_status" "$python_line_history_status" "$javascript_symbol_status" "$javascript_line_history_status" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
     pass_rung "real repo smoke $label"
     return 0
   fi

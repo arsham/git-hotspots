@@ -4,7 +4,7 @@ feature:
   slug: inspect-only-javascript-symbol-line-history-evidence
   title: JavaScript symbol line-history evidence
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Feature 0054 adds inspect-only JavaScript symbols, but JavaScript
@@ -52,7 +52,7 @@ proposal:
     materialised_at: 2026-05-25T10:59:50.025Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -110,7 +110,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: JavaScript symbol line-history evidence
       goal: Attach current-line Git evidence to inspected JavaScript symbols through
         the existing symbol-line-history model without claiming true symbol
@@ -169,7 +169,7 @@ links:
   brief_ids: []
 timestamps:
   created_at: 2026-05-25T10:51:27.544Z
-  updated_at: 2026-05-25T11:01:04.830Z
+  updated_at: 2026-05-25T18:45:09.946Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-25T11:01:04.830Z
