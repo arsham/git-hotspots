@@ -1,0 +1,16 @@
+bytes	sha256	upstream_git_blob_sha1	vendored_path	upstream_path	copy_note
+1080	49bf33cf78ef5897e4e161ce1517df7de1ae5042a65b6bcfd44401e0fc606559	aa9f858db5722d9576104726471b11cc0e31f131	third_party/tree-sitter-typescript/v0.23.2/LICENSE	LICENSE	byte-for-byte
+33533	c2ac6894e0db6164f56dc339788d9da2da60ce1f81d888e6b74a74fc81db818f	efb0b76abd5dc80b5e1d0e86042d1adb8f344348	third_party/tree-sitter-typescript/v0.23.2/common/define-grammar.js	common/define-grammar.js	byte-for-byte
+10097	da66ef2bd14a3f7ea743e25ba068c6c9aae2c3509db200ff80c4a0e6116e564c	23b78b5bc53dace668064eb952dff903022154aa	third_party/tree-sitter-typescript/v0.23.2/common/scanner.h	common/scanner.h	byte-for-byte
+106	7e4109889b2ce2731dde89f82f545a12f1e54a286f72bc874f1aed9965c5d5ae	4acf4a5867356d8cce34bc0e4abf3d479653e243	third_party/tree-sitter-typescript/v0.23.2/typescript/grammar.js	typescript/grammar.js	byte-for-byte
+281518	99dc4b95424dff47c89acb50d5d3f25b081b07eaff43994b7881dccd4186b214	3ac060d9898d3b0a449c2114d2f2a3da3f639ffc	third_party/tree-sitter-typescript/v0.23.2/typescript/src/grammar.json	typescript/src/grammar.json	byte-for-byte
+108583	c790a733fc756b54d4e54dceeb7d2d51e40d8b57136e70277753a75804cce3e3	cc98309cf0e1f0d9feef2c4deb099cfa1b24d891	third_party/tree-sitter-typescript/v0.23.2/typescript/src/node-types.json	typescript/src/node-types.json	byte-for-byte
+8745894	74fe453edd70f4eae9af0a1050cbd7943d8971d59165b6aaebbaa0a0b716d1aa	a88f8e155319a834b11fa96f13821de99f7d64f2	third_party/tree-sitter-typescript/v0.23.2/typescript/src/parser.c	typescript/src/parser.c	byte-for-byte
+573	9125013b42cb888379d9be909f1d73dfb75a37626c2cdbf4122718a2b431a6d3	ebdb193eaf11c48d7e9d1e75c796f43fdb989278	third_party/tree-sitter-typescript/v0.23.2/typescript/src/scanner.c	typescript/src/scanner.c	byte-for-byte
+7039	a1f6ef161fbaf48a0e10fca90ef5290a062462b307b3898aa562993853b9f80a	799f599bd4e292e95565f90733c59fa422899eae	third_party/tree-sitter-typescript/v0.23.2/typescript/src/tree_sitter/parser.h	typescript/src/tree_sitter/parser.h	byte-for-byte
+99	19b7bc89bac1dfbb64e01ca15ca52345056028c2582d71762efd675af947a0f6	e31c3c6de8891427510a602da6225ea06bc408a6	third_party/tree-sitter-typescript/v0.23.2/tsx/grammar.js	tsx/grammar.js	byte-for-byte
+281578	f98a7830b67be266c9e9effb673a5fc154ad6aa26f87f7c6d4a9191e09d8b357	794ae1e52a83e4413686a5f13ccfc6be715abed9	third_party/tree-sitter-typescript/v0.23.2/tsx/src/grammar.json	tsx/src/grammar.json	byte-for-byte
+113345	78b5789145286799a27a0a7ecc36cc1bcb151f94ec7fa631b248459867010c8c	34251f886f03afe3f05d08564330c5dd90c6510f	third_party/tree-sitter-typescript/v0.23.2/tsx/src/node-types.json	tsx/src/node-types.json	byte-for-byte
+8769870	1902cb53fa7ff5179df89b2eea863165e84c8cc866226419dc26921d8c055885	faa8aa40839fe3c48974c474c3209abfb3f5b7b5	third_party/tree-sitter-typescript/v0.23.2/tsx/src/parser.c	tsx/src/parser.c	byte-for-byte
+538	d563cd30b2f39718c9ae4292795c5ce03a2ad01954ba3a86ef84c2781a736673	ac3f57ce5a3b21fc1b9d7ca2358b4b5a2c7dfc2d	third_party/tree-sitter-typescript/v0.23.2/tsx/src/scanner.c	tsx/src/scanner.c	byte-for-byte
+7039	a1f6ef161fbaf48a0e10fca90ef5290a062462b307b3898aa562993853b9f80a	799f599bd4e292e95565f90733c59fa422899eae	third_party/tree-sitter-typescript/v0.23.2/tsx/src/tree_sitter/parser.h	tsx/src/tree_sitter/parser.h	byte-for-byte

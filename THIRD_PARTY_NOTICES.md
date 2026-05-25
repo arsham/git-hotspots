@@ -49,6 +49,17 @@ vendored paths only.
   `third_party/tree-sitter-javascript/v0.25.0/LICENSE`.
 - Provenance: `third_party/tree-sitter-javascript/v0.25.0/PROVENANCE.md`
 
+## tree-sitter-typescript
+
+- Upstream: `https://github.com/tree-sitter/tree-sitter-typescript`
+- Selected revision: tag `v0.23.2`, commit
+  `f975a621f4e7f532fe322e13c4f79495e0a7b2e7`
+- Vendored path: `third_party/tree-sitter-typescript/v0.23.2`
+- License: MIT
+- Notice: preserve the upstream MIT license text and copyright notice copied in
+  `third_party/tree-sitter-typescript/v0.23.2/LICENSE`.
+- Provenance: `third_party/tree-sitter-typescript/v0.23.2/PROVENANCE.md`
+
 ## tree-sitter-python
 
 - Upstream: `https://github.com/tree-sitter/tree-sitter-python`
@@ -90,3 +101,15 @@ selected Git commit, with Git blobs recorded in
 generator, package-manager fetch, build path, link path, parser runtime,
 provider behavior, JavaScript query support, TypeScript support, or TSX support
 is added by this import.
+
+`third_party/tree-sitter-typescript/v0.23.2/typescript/src/parser.c` and
+`third_party/tree-sitter-typescript/v0.23.2/tsx/src/parser.c` are accepted in
+Feature 0056 as pinned upstream generated parser artefacts copied from the
+selected Git commit. The TypeScript and TSX scanner wrappers plus shared scanner
+source are accepted as pinned upstream scanner artefacts copied from the same
+commit, with Git blobs recorded in
+`third_party/tree-sitter-typescript/v0.23.2/IMPORTED_FILES.tsv`. No local parser
+generator, package-manager fetch, build path, link path, parser runtime,
+provider behavior, TypeScript or TSX query support, package/workspace/module or
+`tsconfig` analysis, LSP support, network behavior, telemetry, or remote
+enrichment is added by this import.
