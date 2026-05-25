@@ -4,33 +4,105 @@ feature:
   slug: inspect-only-typescript-tsx-symbol-output
   title: Inspect-only TypeScript/TSX symbol output
   lane: standard
-  status: discovering
+  status: ready
   autonomy_default: ask
 intent:
-  problem: ""
-  outcome: ""
-  acceptance: []
+  problem: TypeScript/TSX extraction proofs exist, but inspected TypeScript and
+    TSX files still have no opt-in runtime symbol output.
+  outcome: Expose current TypeScript/TSX symbols only through the existing
+    inspect-only symbol flow while preserving file-level Git evidence as product
+    truth.
+  acceptance:
+    - Add inspect-only TypeScript/TSX provider support for `.ts`, `.tsx`,
+      `.mts`, and `.cts` where deterministic.
+    - Reuse the existing `symbols` output envelope for JSON, Markdown, and table
+      output.
+    - Dispatch by the resolved inspected matched path and parse only that one
+      file.
+    - Preserve no-provider and existing Zig/Go/Python/JavaScript symbol output
+      byte stability.
+    - Keep TypeScript/TSX symbols current-only and non-scoring; no line history,
+      lineage, package, module, tsconfig, type-checking, LSP, default report,
+      schema, cache, or telemetry changes.
+    - Record public evidence and privacy-safe close-out validation.
 planning:
-  state: stub
-  summary: Expose TypeScript/TSX symbols only through inspect output while
-    preserving default reports.
+  state: ready
+  summary: Runtime inspect-only exposure for TypeScript/TSX symbols, following the
+    JavaScript inspect-output precedent while protecting default reports and all
+    package/type-analysis surfaces.
+  brief_sync:
+    status: updated
+    reason: Supports B001 provider expansion by exposing TypeScript/TSX symbols only
+      as opt-in inspect evidence while preserving deterministic Git evidence as
+      product truth.
+    checked_at: 2026-05-25T21:20:49.978Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Follow-up provider implementation slice for B001. It exposes
+      TypeScript/TSX current symbols only through inspect output and defers line
+      history, package/workspace, tsconfig, type checking, LSP, telemetry, and
+      remote enrichment.
+    checked_at: 2026-05-25T21:20:54.396Z
 proposal:
-  lifecycle_state: discovering
+  lifecycle_state: shaping
   outcome_contract_ref: null
-  risk_assessment: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-25T21:21:04.396Z
   quality_plan: null
 project_feature:
-  lifecycle_state: null
-  outcome_contract_ref: null
-  quality_plan: null
-  authority_refinement: null
-verification_independence_requirement: null
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-25T21:21:04.396Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-25T21:21:04.396Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-25T21:21:04.396Z
+verification_independence_requirement: continuity_safe_delegated
 readiness:
-  requirements_ready: false
-  acceptance_ready: false
-  packet_plan_ready: false
-  dependencies_ready: false
-  implementation_ready: false
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
 context:
   roadmap_item_id: null
   detached_reason: Serial follow-up after TypeScript/TSX symbol extraction proof.
@@ -38,8 +110,81 @@ context:
     - "0059"
   blocked_by: []
 design:
-  rough_shape: []
-  packets: []
+  rough_shape:
+    - Add runtime TypeScript/TSX extraction support using Feature 0059 proof
+      semantics.
+    - Wire inspect-only provider dispatch for TypeScript/TSX extensions without
+      changing default reports.
+    - Add JSON, Markdown, and table output goldens plus protected-surface
+      stability checks.
+    - Update docs/help/explain only for inspect-only TypeScript/TSX symbols and
+      current-only caveats.
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+  packets:
+    - id: P1
+      title: Inspect-only TypeScript/TSX symbol output
+      goal: Wire TypeScript/TSX current-symbol extraction into the existing
+        inspect-only output envelope with deterministic tests and public
+        evidence.
+      depends_on: []
+      status: planned
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src tree-sitter provider modules, inspect symbol dispatch,
+          existing symbol output renderers, tests/fixtures, README/help/explain
+          docs."
+        - "In scope: `.ts`, `.tsx`, `.mts`, and `.cts` inspect-only symbols
+          where deterministic; JSON/Markdown/table goldens; docs and evidence."
+        - "Out of scope: default provider execution, scoring/ranking, symbol
+          line history, package/workspace/module analysis, tsconfig, type
+          checking, LSP, Node runtime, custom queries, cache, release, network,
+          telemetry, upload, remote enrichment."
+        - "Protected: no-provider outputs, Zig/Go/Python/JavaScript symbol
+          outputs, default reports, schema semantics, local-first/no-network
+          defaults, privacy-safe evidence."
+        - "Dependencies: Feature 0059 is done; no dependency on Feature 0061
+          line-history work."
+        - "Validation/evidence: git diff --check, zig fmt --check build.zig src
+          tests, zig build test, zig build, zig build validate, all tree-sitter
+          proof targets through TS/TSX symbol proofs, TypeScript/TSX
+          inspect-output goldens, byte-stability checks, privacy-safe
+          sibling-local-repo smoke."
+        - "Review focus: TypeScript/TSX runtime support is inspect-only,
+          current-only, deterministic, and does not claim type-aware or
+          package-aware semantics."
+        - "Escalate if: schema expansion, type checking, tsconfig/module/package
+          analysis, line history, default output drift, or unsupported
+          deterministic TSX cases are needed."
+        - "Done boundary: TypeScript/TSX inspect symbols work through existing
+          output envelope, evidence is committed, validation passes, and
+          line-history remains unsupported/deferred."
+      verification_commands:
+        - git diff --check
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build
+        - zig build validate
+        - zig build tree-sitter-typescript-symbol-proof
+        - zig build tree-sitter-tsx-symbol-proof
+        - TypeScript/TSX inspect JSON/Markdown/table golden checks
+        - existing provider byte-stability checks
+        - zig build validate -Dcloseout=true -Dsmoke-repo=<local-sibling-repo>
+          -Dsmoke-label=sibling-local-repo
 execution:
   active_run_id: null
   current_packet_id: null
@@ -48,7 +193,520 @@ execution:
   requires_confirmation: true
 links:
   epic_todo_id: null
-  brief_ids: []
+  brief_ids:
+    - B001
 timestamps:
   created_at: 2026-05-25T20:26:23.871Z
-  updated_at: 2026-05-25T20:26:23.871Z
+  updated_at: 2026-05-25T21:21:11.640Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-25T21:21:11.640Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0060"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Inspect-only TypeScript/TSX symbol output
+      problem: TypeScript/TSX extraction proofs exist, but inspected TypeScript and
+        TSX files still have no opt-in runtime symbol output.
+      outcome: Expose current TypeScript/TSX symbols only through the existing
+        inspect-only symbol flow while preserving file-level Git evidence as
+        product truth.
+      acceptance:
+        - Add inspect-only TypeScript/TSX provider support for `.ts`, `.tsx`,
+          `.mts`, and `.cts` where deterministic.
+        - Reuse the existing `symbols` output envelope for JSON, Markdown, and
+          table output.
+        - Dispatch by the resolved inspected matched path and parse only that
+          one file.
+        - Preserve no-provider and existing Zig/Go/Python/JavaScript symbol
+          output byte stability.
+        - Keep TypeScript/TSX symbols current-only and non-scoring; no line
+          history, lineage, package, module, tsconfig, type-checking, LSP,
+          default report, schema, cache, or telemetry changes.
+        - Record public evidence and privacy-safe close-out validation.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Follow-up provider implementation slice for B001. It exposes
+        TypeScript/TSX current symbols only through inspect output and defers
+        line history, package/workspace, tsconfig, type checking, LSP,
+        telemetry, and remote enrichment.
+      checked_at: 2026-05-25T21:20:54.396Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0060_inspect-only-typescript-tsx-symbol-output/prd.md
+  requirements_contract:
+    source_path: .flow/features/0060_inspect-only-typescript-tsx-symbol-output/prd.md
+    source_digest: 3fcc3a8f1f25b853be4f3a9537192d1d8fe8cb929592f52b7ec89b029f1d590d
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#edge-cases[1]
+        text: Unsupported extension with --symbols returns visible provider unsupported
+          or existing clear behaviour without raw diagnostics.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#edge-cases[2]
+        text: Empty TypeScript/TSX file returns provider ok with zero symbols or a
+          deterministic module-only result according to the approved contract.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#edge-cases[3]
+        text: Invalid or partial TypeScript/TSX returns deterministic failure or
+          caveated partial output without raw parser diagnostics or source
+          snippets.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#edge-cases[4]
+        text: Missing current file, symlink/non-regular file, and too-large file degrade
+          as unavailable.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#edge-cases[5]
+        text: TypeScript/TSX files with generated/minified markers, JSX, exports,
+          CommonJS, anonymous functions, dynamic constructs, Unicode
+          identifiers, Markdown-sensitive names/paths, interfaces, type aliases,
+          enums, namespaces, decorators, overloads, and declaration merging are
+          handled deterministically and escaped in human outputs.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#edge-cases[6]
+        text: Rename-alias inspect must parse the resolved matched path, not the
+          requested alias.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#edge-cases[7]
+        text: "A fixture with two TypeScript/TSX files must prove inspect-only
+          behaviour: the provider parses only the inspected file."
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#edge-cases[8]
+        text: No authors, emails, commit messages, raw source snippets, parser stderr,
+          absolute paths, private repo identifiers, or remote URLs may appear in
+          output or committed evidence.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#verification[1]
+        text: "Required commands before close-out:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Required commands before close-out:"
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#verification[2]
+        text: "``sh zig fmt --check build.zig src tests zig build test zig build zig
+          build validate zig build tree-sitter-build-proof zig build
+          tree-sitter-symbol-proof zig build tree-sitter-go-build-proof zig
+          build tree-sitter-go-symbol-proof zig build
+          tree-sitter-python-build-proof zig build
+          tree-sitter-python-symbol-proof zig build
+          tree-sitter-javascript-build-proof zig build
+          tree-sitter-javascript-query-proof zig build
+          tree-sitter-javascript-symbol-proof zig build
+          tree-sitter-typescript-build-proof zig build
+          tree-sitter-tsx-build-proof zig build
+          tree-sitter-typescript-query-proof zig build
+          tree-sitter-tsx-query-proof zig build
+          tree-sitter-typescript-symbol-proof zig build
+          tree-sitter-tsx-symbol-proof git diff --check zig build validate
+          -Dcloseout=true -Dsmoke-repo=<local-sibling-repo>
+          -Dsmoke-label=sibling-local-repo ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh zig fmt --check build.zig src tests zig build test zig build
+          zig build validate zig build tree-sitter-build-proof zig build
+          tree-sitter-symbol-proof zig build tree-sitter-go-build-proof zig
+          build tree-sitter-go-symbol-proof zig build
+          tree-sitter-python-build-proof zig build
+          tree-sitter-python-symbol-proof zig build
+          tree-sitter-javascript-build-proof zig build
+          tree-sitter-javascript-query-proof zig build
+          tree-sitter-javascript-symbol-proof zig build
+          tree-sitter-typescript-build-proof zig build
+          tree-sitter-tsx-build-proof zig build
+          tree-sitter-typescript-query-proof zig build
+          tree-sitter-tsx-query-proof zig build
+          tree-sitter-typescript-symbol-proof zig build
+          tree-sitter-tsx-symbol-proof git diff --check zig build validate
+          -Dcloseout=true -Dsmoke-repo=<local-sibling-repo>
+          -Dsmoke-label=sibling-local-repo ``"
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#verification[3]
+        text: "Additional validation expectations:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Additional validation expectations:"
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#verification[4]
+        text: TypeScript and TSX symbol success goldens for JSON, Markdown, and table
+          output.
+        category: verification
+        packet_refs:
+          - P1
+        verification: TypeScript and TSX symbol success goldens for JSON, Markdown, and
+          table output.
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#verification[5]
+        text: .ts, .tsx, .mts, and .cts coverage where deterministic.
+        category: verification
+        packet_refs:
+          - P1
+        verification: .ts, .tsx, .mts, and .cts coverage where deterministic.
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#verification[6]
+        text: Explicit --symbol-limit human-output coverage for TypeScript/TSX when
+          applicable.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Explicit --symbol-limit human-output coverage for TypeScript/TSX
+          when applicable.
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#verification[7]
+        text: Semantic JSON checks proving symbols.items remains complete under human
+          limits.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Semantic JSON checks proving symbols.items remains complete under
+          human limits.
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#verification[8]
+        text: Unsupported, empty, invalid, unavailable, symlink/non-regular, too-large,
+          generated/minified, JSX, exports, CommonJS, anonymous, rename-alias,
+          Unicode, Markdown-sensitive, and two-file inspect-only cases.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Unsupported, empty, invalid, unavailable, symlink/non-regular,
+          too-large, generated/minified, JSX, exports, CommonJS, anonymous,
+          rename-alias, Unicode, Markdown-sensitive, and two-file inspect-only
+          cases.
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#verification[9]
+        text: Repeated-output determinism for TypeScript/TSX symbol JSON, Markdown, and
+          table outputs.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Repeated-output determinism for TypeScript/TSX symbol JSON,
+          Markdown, and table outputs.
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#verification[10]
+        text: Existing no-provider, Zig, Go, Python, and JavaScript symbol goldens
+          remain stable.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Existing no-provider, Zig, Go, Python, and JavaScript symbol
+          goldens remain stable.
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#verification[11]
+        text: Privacy and prohibited-claim scans include new TypeScript/TSX symbol
+          outputs, fixtures, docs, and validation summaries.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Privacy and prohibited-claim scans include new TypeScript/TSX
+          symbol outputs, fixtures, docs, and validation summaries.
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#verification[12]
+        text: Runtime/dependency scans prove no network, telemetry, upload, fetch,
+          parser generation, package-manager commands, global Tree-sitter CLI,
+          submodules, repo-wide provider execution, cache, LSP,
+          package/workspace analysis, module resolution, tsconfig analysis, type
+          checking, or Node runtime support.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Runtime/dependency scans prove no network, telemetry, upload,
+          fetch, parser generation, package-manager commands, global Tree-sitter
+          CLI, submodules, repo-wide provider execution, cache, LSP,
+          package/workspace analysis, module resolution, tsconfig analysis, type
+          checking, or Node runtime support.
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#verification[13]
+        text: Real-repo close-out smoke may use the approved sibling repo only under the
+          durable label sibling-local-repo; no raw private output or absolute
+          private paths may be committed.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Real-repo close-out smoke may use the approved sibling repo only
+          under the durable label sibling-local-repo; no raw private output or
+          absolute private paths may be committed.
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#non-goals[1]
+        text: No default provider execution.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-023
+        source_ref: prd.md#non-goals[2]
+        text: No scoring or ranking changes.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-024
+        source_ref: prd.md#non-goals[3]
+        text: No symbol line-history for TypeScript/TSX.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-025
+        source_ref: prd.md#non-goals[4]
+        text: No Node provider identity, package/workspace/module analysis, tsconfig
+          analysis, type checking, or LSP.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-026
+        source_ref: prd.md#non-goals[5]
+        text: No custom query execution, cache, package, release, network, telemetry,
+          upload, or remote enrichment.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: TypeScript/TSX source import, offline build proof, query contract, and
+          internal symbol extraction proof are complete. The CLI still exposes
+          Tree-sitter symbols only for inspected Zig, Go, Python, and JavaScript
+          files. Users inspecting a hot TypeScript or TSX file cannot yet see
+          current symbols for that one file.
+      - source_ref: prd.md#outcome[1]
+        text: "Expose a narrow, opt-in TypeScript/TSX symbol provider through the
+          existing inspect-only symbol flow:"
+      - source_ref: prd.md#outcome[2]
+        text: "``sh git-hotspots --inspect path.ts --symbols git-hotspots --inspect
+          path.tsx --symbols ``"
+      - source_ref: prd.md#outcome[3]
+        text: The feature must reuse the existing symbols output envelope and preserve
+          file-level Git evidence as product truth. TypeScript/TSX symbols are
+          current working-tree symbols only. They must not affect file score,
+          file rank, file confidence, rename lineage, co-change evidence, scope
+          filtering, default analysis, package analysis, type checking, module
+          resolution, or Node runtime behaviour.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 4 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: Expose current TypeScript/TSX symbols only through the existing
+      inspect-only symbol flow while preserving file-level Git evidence as
+      product truth.
+    acceptance:
+      - Add inspect-only TypeScript/TSX provider support for `.ts`, `.tsx`,
+        `.mts`, and `.cts` where deterministic.
+      - Reuse the existing `symbols` output envelope for JSON, Markdown, and
+        table output.
+      - Dispatch by the resolved inspected matched path and parse only that one
+        file.
+      - Preserve no-provider and existing Zig/Go/Python/JavaScript symbol output
+        byte stability.
+      - Keep TypeScript/TSX symbols current-only and non-scoring; no line
+        history, lineage, package, module, tsconfig, type-checking, LSP, default
+        report, schema, cache, or telemetry changes.
+      - Record public evidence and privacy-safe close-out validation.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig fmt --check build.zig src tests
+      - zig build test
+      - zig build
+      - zig build validate
+      - zig build tree-sitter-typescript-symbol-proof
+      - zig build tree-sitter-tsx-symbol-proof
+      - TypeScript/TSX inspect JSON/Markdown/table golden checks
+      - existing provider byte-stability checks
+      - zig build validate -Dcloseout=true -Dsmoke-repo=<local-sibling-repo>
+        -Dsmoke-label=sibling-local-repo
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+      - prove protected output byte stability and inspect-only runtime boundary
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+      - type checking or tsconfig/package/module analysis required
+      - schema expansion required
+      - line-history behaviour required
+      - default output drift
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
