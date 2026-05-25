@@ -1,0 +1,217 @@
+schema: flow-feature.v1
+feature:
+  id: "0049"
+  slug: tree-sitter-typescript-grammar-admission-review
+  title: Tree-sitter TypeScript grammar admission review
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: TypeScript and TSX are high-value Tree-sitter candidates, but they add
+    type-only constructs, declarations, enums, decorators, TSX, multiple
+    extensions, and possible multi-parser upstream layout. The repository needs
+    a separate admission record before tree-sitter-typescript source import or
+    runtime provider work.
+  outcome: Add a documentation-only TypeScript grammar admission review that
+    records upstream identity, TS/TSX scope, license, generated parser/scanner,
+    Tree-sitter core compatibility, BOM, source-size, query, fixture, monorepo,
+    and validation gates.
+  acceptance:
+    - Add docs/tree-sitter-typescript-grammar-admission.md as the single public
+      admission review artefact.
+    - The document records candidate upstream identity for tree-sitter-typescript,
+      immutable revision or blocker, checksum requirement, proposed vendored
+      path, BOM expectations, excluded file classes, and Tree-sitter core
+      compatibility requirements.
+    - The document records whether TSX is admitted with TypeScript or deferred;
+      if deferred, .tsx remains unsupported until a later shaped feature.
+    - The document records license and notice gates, generated parser and scanner
+      provenance gates for TypeScript and TSX where applicable, local-first build
+      supply-chain gates, source-size and build-impact gates, query fixture
+      expectations, and no-provider stability gates for future TypeScript work.
+    - The document states TypeScript runtime support is not implemented and
+      current runtime Tree-sitter support remains Zig, Go, and Python only.
+    - The document frames future TypeScript symbols as optional, current-only,
+      inspect-oriented, additive, caveated provider evidence.
+    - The document records Node as runtime context only, not a provider or parser
+      identity.
+    - The document records monorepo behaviour as inspect-path-only and
+      extension-based; it must not imply package.json, tsconfig, workspace,
+      bundler, dependency graph, module resolution, LSP, or repo-wide scanning.
+    - No third_party, source, test, fixture, build, CI, CLI, report schema,
+      scoring, cache, provider runtime, provider registry, release, package,
+      network, telemetry, or background behaviour changes are made.
+planning:
+  state: ready
+  summary: Shape a docs-only TypeScript grammar admission review before any
+    tree-sitter-typescript source import, build proof, extraction proof, or
+    runtime support.
+  brief_sync:
+    status: updated
+    reason: Supports B001 provider expansion while preserving local-first
+      deterministic file-level Git evidence as product truth.
+    checked_at: 2026-05-25T00:07:03.000Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Follow-up provider planning slice for B001. It admits TypeScript
+      only as a future candidate and explicitly defers implementation.
+    checked_at: 2026-05-25T00:07:03.000Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - public_api_or_platform_risk_keywords
+      - third_party_dependency_planning
+      - provider_language_admission
+      - typescript_tsx_complexity
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-25T00:07:03.000Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-25T00:07:03.000Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-25T00:07:03.000Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-25T00:07:03.000Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Follow-up to the Tree-sitter multi-language strategy, which
+    identifies TypeScript as a future language candidate requiring separate
+    admission before source import or runtime work.
+  depends_on_feature_ids:
+    - "0034"
+  blocked_by: []
+  linked_brief_ids:
+    - B001
+design:
+  rough_shape:
+    - Add one TypeScript grammar admission review document.
+    - Keep the feature documentation-only and use it to gate later
+      tree-sitter-typescript source import.
+    - Explicitly defer source import, build proof, extraction proof, inspect
+      output, line-history, custom user queries, LSP, package/module analysis,
+      tsconfig analysis, and Node workspace discovery.
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+  packets:
+    - id: P1
+      title: TypeScript grammar admission review document
+      goal: Add one docs-only admission review for tree-sitter-typescript that
+        records upstream identity, provenance, license, compatibility, scanner,
+        TS/TSX scope, query, monorepo, and future validation gates before source
+        import.
+      owner_phase: runner
+      depends_on: []
+      status: pending
+      execution_context:
+        - "Anchors: docs/tree-sitter-typescript-grammar-admission.md, docs/tree-sitter-multi-language-query-strategy.md, docs/tree-sitter-javascript-grammar-admission.md, docs/tree-sitter-python-grammar-admission.md"
+        - "In scope: one documentation-only TypeScript grammar admission review with candidate identity, immutable revision/checksum gates, license/notice, generated parser/scanner provenance for TypeScript and TSX where applicable, core ABI compatibility, BOM/excluded file classes, source-size/build-impact, TS/TSX scope decision, query fixture gates, monorepo path behaviour, Node-as-context-only language boundary, and decision state"
+        - "Out of scope: third_party/tree-sitter-typescript import, source/build/test/fixture changes, build.zig.zon, CI changes, provider registry, CLI flags, report schema changes, scoring, cache, runtime TypeScript provider behaviour, custom user queries, package.json/tsconfig/workspace/dependency analysis, LSP, release/package work"
+        - "Protected: local-first behaviour, no network/telemetry/upload/remote enrichment, no background provider execution, no bug prediction/code-quality scoring/developer ranking/maintainer judgement, existing Zig/Go/Python provider behaviour"
+        - "Dependencies: Feature 0034 language strategy is complete and identifies TypeScript as a future candidate subject to admission gates; JavaScript admission should be shaped first in the queue"
+        - "Validation/evidence: git diff --check; zig build validate; docs-only changed-path scan; no tree-sitter-typescript source import scan; prohibited-claim/privacy/local-first scan over changed docs"
+        - "Review focus: admission gates are concrete enough to shape the next TypeScript source-import feature without overclaiming TypeScript runtime support"
+        - "Escalate if: implementation requires source import, build/runtime changes, provider registry, CLI/report schema changes, custom query execution, package/module/tsconfig analysis, LSP integration, Node provider identity, or unsupported public TypeScript support claims"
+        - "Done boundary: admission document exists, no protected surfaces changed, validation passes, and future import/runtime sequencing is explicit"
+      anchors:
+        - docs/tree-sitter-typescript-grammar-admission.md
+        - docs/tree-sitter-multi-language-query-strategy.md
+        - docs/tree-sitter-javascript-grammar-admission.md
+        - docs/tree-sitter-python-grammar-admission.md
+      in_scope:
+        - One docs-only TypeScript grammar admission review document.
+        - Future TypeScript source-import and provider validation gates.
+        - Explicit TypeScript runtime deferral and decision state.
+      out_of_scope:
+        - TypeScript grammar import or vendored source changes.
+        - Runtime TypeScript provider, CLI, report schema, scoring, cache, CI,
+          release, or package changes.
+        - Custom query execution, LSP, package/module/tsconfig analysis, or
+          workspace discovery.
+      protected_surfaces:
+        - Runtime CLI behaviour and report schema.
+        - File-level Git evidence truth.
+        - Local-first and privacy boundaries.
+        - Existing Zig, Go, and Python provider behaviour.
+        - Third-party vendored source state.
+      validation_commands:
+        - git diff --check
+        - zig build validate
+        - changed-path scan for docs-only scope
+        - no tree-sitter-typescript source import scan
+        - prohibited-claim and privacy scan over changed docs
+      review_focus:
+        - TypeScript admission gates are concrete.
+        - No runtime support is claimed.
+        - Future sequencing is explicit.
+        - Node is context only, not a provider.
+        - Public repo boundaries are preserved.
+      escalation_triggers:
+        - Source import or build changes are needed.
+        - Runtime TypeScript provider behaviour is needed.
+        - Public docs imply TypeScript support exists.
+        - Admission facts cannot be stated without unsupported guesses.
+      done_boundary: One docs-only TypeScript admission artefact is committed and
+        independently reviewable.
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-25T00:02:49.093Z
+  updated_at: 2026-05-25T00:07:03.000Z
