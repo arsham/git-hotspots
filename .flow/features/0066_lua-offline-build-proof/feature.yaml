@@ -1,0 +1,619 @@
+schema: flow-feature.v1
+feature:
+  id: "0066"
+  slug: lua-offline-build-proof
+  title: Lua offline build proof
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Lua source import alone does not prove the vendored parser and scanner
+    compile and link against the repository Tree-sitter core. The build boundary
+    must be proven before query, extraction, or runtime inspect work proceeds.
+  outcome: A deterministic offline Lua parser/scanner build proof exists using
+    only repository-local vendored inputs and the existing Tree-sitter core,
+    while Lua runtime provider behaviour remains absent.
+  acceptance:
+    - Add a deterministic offline build proof for the Lua parser/scanner sources
+      imported by Feature 0065.
+    - Use the existing vendored Tree-sitter core and stop if a core update is
+      required.
+    - Record public evidence for source paths, proof targets, validation,
+      no-provider stability, and privacy-safe smoke validation.
+    - Preserve no Lua runtime provider, inspect output, query fixtures,
+      extraction, default report, schema, scoring, cache, CI, package/release,
+      LuaRocks, module/package-path, LSP, network, telemetry, upload, or
+      remote-enrichment behaviour.
+    - Stop as blocked if Feature 0065 did not leave an exact vendored source
+      path or the build cannot be proven from repository-local inputs.
+planning:
+  state: ready
+  summary: Shape the Lua offline build proof as the second serial implementation
+    slice after source import.
+  brief_sync:
+    status: updated
+    reason: Supports B001 by proving Lua grammar buildability locally before any
+      runtime provider evidence is exposed.
+    checked_at: 2026-05-25T23:57:23.761Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Follow-up provider implementation slice for B001. It proves Lua
+      parser/scanner buildability offline and defers query, extraction, inspect
+      output, provider runtime, package/module analysis, telemetry, and remote
+      enrichment.
+    checked_at: 2026-05-25T23:57:40.033Z
+proposal:
+  lifecycle_state: discovering
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-25T23:58:44.810Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-25T23:58:44.810Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-25T23:58:44.810Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-25T23:58:44.810Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: false
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Serial Lua Tree-sitter implementation lane after source import proof.
+  depends_on_feature_ids:
+    - "0065"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add a Lua build-proof target mirroring existing language proof targets.
+    - Compile and link enough Lua parser/scanner source to catch ABI and scanner
+      integration failures.
+    - Document proof target names, source paths, validation, and no-provider
+      stability.
+    - Keep query, extraction, and runtime output deferred.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Lua offline build proof
+      goal: Prove vendored Lua parser/scanner sources build offline against the
+        existing Tree-sitter core without runtime output.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: build.zig proof target area,
+          third_party/tree-sitter-lua/<revision>/ from Feature 0065,
+          docs/tree-sitter-lua-build-proof.md or source-import evidence
+          extension."
+        - "In scope: local compile/link proof target, scanner wrapper treatment
+          if needed, proof documentation, validation and smoke evidence."
+        - "Out of scope: runtime provider wiring, query fixtures, extraction,
+          inspect output, CLI/report/schema/scoring/cache, CI/release/package,
+          LuaRocks, package-path/module analysis, LSP, network/telemetry/remote
+          enrichment."
+        - "Protected: existing no-provider and language symbol outputs remain
+          byte-stable; no Tree-sitter core update."
+        - "Dependencies: Feature 0065 must be done and must name the exact
+          vendored Lua source path."
+        - "Validation/evidence: git diff --check; zig build validate; zig build
+          test; zig build; Lua build proof target; changed-path scans;
+          privacy-safe smoke."
+        - "Review focus: proof is offline, repository-local, deterministic, and
+          catches parser/scanner/core compatibility failures without runtime
+          exposure."
+        - "Escalate if: dependency source path is absent, generated files are
+          missing, scanner compile needs unsupported treatment, or core update
+          is required."
+        - "Done boundary: Lua build proof target and evidence pass; Lua runtime
+          output remains absent."
+      verification_commands:
+        - git diff --check
+        - zig build validate
+        - zig build test
+        - zig build
+        - zig build tree-sitter-lua-build-proof
+        - changed-path scan for build-proof-only scope
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-25T23:48:29.734Z
+  updated_at: 2026-05-26T00:00:11.161Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-26T00:00:11.161Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0066"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Lua offline build proof
+      problem: Lua source import alone does not prove the vendored parser and scanner
+        compile and link against the repository Tree-sitter core. The build
+        boundary must be proven before query, extraction, or runtime inspect
+        work proceeds.
+      outcome: A deterministic offline Lua parser/scanner build proof exists using
+        only repository-local vendored inputs and the existing Tree-sitter core,
+        while Lua runtime provider behaviour remains absent.
+      acceptance:
+        - Add a deterministic offline build proof for the Lua parser/scanner
+          sources imported by Feature 0065.
+        - Use the existing vendored Tree-sitter core and stop if a core update
+          is required.
+        - Record public evidence for source paths, proof targets, validation,
+          no-provider stability, and privacy-safe smoke validation.
+        - Preserve no Lua runtime provider, inspect output, query fixtures,
+          extraction, default report, schema, scoring, cache, CI,
+          package/release, LuaRocks, module/package-path, LSP, network,
+          telemetry, upload, or remote-enrichment behaviour.
+        - Stop as blocked if Feature 0065 did not leave an exact vendored source
+          path or the build cannot be proven from repository-local inputs.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Follow-up provider implementation slice for B001. It proves Lua
+        parser/scanner buildability offline and defers query, extraction,
+        inspect output, provider runtime, package/module analysis, telemetry,
+        and remote enrichment.
+      checked_at: 2026-05-25T23:57:40.033Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0066_lua-offline-build-proof/prd.md
+  requirements_contract:
+    source_path: .flow/features/0066_lua-offline-build-proof/prd.md
+    source_digest: 5bacc4fd1d9ddd948a45f865b392c132b0c2b22c9b794534351a3a8ffcc65137
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#r1-build-proof-scope[1]
+        text: Add a narrow build proof for the vendored Lua parser and scanner sources
+          imported by Feature 0065.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#r1-build-proof-scope[2]
+        text: Use the existing vendored Tree-sitter core compatibility boundary; do not
+          update Tree-sitter core in this feature.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#r1-build-proof-scope[3]
+        text: Keep the proof offline and repository-local.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#r1-build-proof-scope[4]
+        text: Do not add Lua runtime provider registration, CLI behaviour, report schema
+          fields, default output changes, scoring changes, cache changes, query
+          fixtures, symbol extraction behaviour, LuaRocks/package/module
+          analysis, LSP, CI, release, network, telemetry, upload, or remote
+          enrichment.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#r3-evidence[1]
+        text: Add or update a public evidence document for the Lua build proof.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Add or update a public evidence document for the Lua build proof.
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#r3-evidence[2]
+        text: Evidence must identify the exact vendored source revision and source paths
+          used.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Evidence must identify the exact vendored source revision and
+          source paths used.
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#r3-evidence[3]
+        text: Evidence must record Lua parser/scanner compile/link commands or
+          validation targets.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Evidence must record Lua parser/scanner compile/link commands or
+          validation targets.
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#r3-evidence[4]
+        text: Evidence must record before/after validation results, including git diff
+          --check, zig build validate, zig build test, and zig build where
+          applicable.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Evidence must record before/after validation results, including
+          git diff --check, zig build validate, zig build test, and zig build
+          where applicable.
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#r3-evidence[5]
+        text: Evidence must record no-provider output stability for existing language
+          providers where applicable.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Evidence must record no-provider output stability for existing
+          language providers where applicable.
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#r3-evidence[6]
+        text: Evidence must include privacy-safe real-repository validation for this
+          repository and one suitable local sibling repository when available,
+          using labels such as this-repo and sibling-local-repo only.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Evidence must include privacy-safe real-repository validation for
+          this repository and one suitable local sibling repository when
+          available, using labels such as this-repo and sibling-local-repo only.
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#acceptance-criteria[1]
+        text: The repository has a deterministic offline build proof for the selected
+          Lua parser and scanner sources.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#acceptance-criteria[2]
+        text: The proof uses only vendored, repository-local inputs and does not require
+          Lua, LuaRocks, package managers, grammar regeneration, network,
+          telemetry, upload, or remote enrichment.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#acceptance-criteria[3]
+        text: The proof does not expose Lua runtime provider behaviour or change default
+          reports, inspect output, report schemas, scoring, cache, CLI, CI,
+          release, package, LSP, package-path, module-resolution, or dependency
+          behaviour.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#acceptance-criteria[4]
+        text: Public evidence documents the build proof, source paths, validation
+          ladder, no-provider stability, and privacy-safe smoke validation.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#acceptance-criteria[5]
+        text: The feature stops as blocked rather than closing if the compile/link proof
+          cannot be completed against the existing vendored Tree-sitter core.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#edge-cases[1]
+        text: If Feature 0065 has not recorded an exact vendored Lua source path, stop
+          and return to dispatch after that dependency closes.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#edge-cases[2]
+        text: If Lua scanner compilation needs a wrapper or C++ treatment, document the
+          difference and keep the proof explicit.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#edge-cases[3]
+        text: If the grammar requires a newer Tree-sitter core, stop for a separate
+          core-update feature.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#edge-cases[4]
+        text: If the build proof needs generated files not imported by Feature 0065,
+          stop and reshape instead of silently expanding the BOM.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#edge-cases[5]
+        text: If local sibling smoke has no safe Lua file, record a bounded privacy-safe
+          no-safe-file finding instead of committing private paths or raw report
+          dumps.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#edge-cases[6]
+        text: If build validation passes only through cached artefacts, clean or
+          otherwise prove the build is not cache-dependent.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#verification[1]
+        text: "Close-out must include evidence for:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Close-out must include evidence for:"
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#verification[2]
+        text: "``sh git diff --check zig build validate zig build test zig build Lua
+          parser/scanner compile/link proof changed-path scan for
+          build-proof-only scope no-provider output stability check privacy-safe
+          this-repo smoke privacy-safe sibling-local-repo smoke or bounded
+          no-safe-file finding ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh git diff --check zig build validate zig build test zig build
+          Lua parser/scanner compile/link proof changed-path scan for
+          build-proof-only scope no-provider output stability check privacy-safe
+          this-repo smoke privacy-safe sibling-local-repo smoke or bounded
+          no-safe-file finding ``"
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: Feature 0065 is expected to import pinned Lua Tree-sitter sources with
+          provenance, but the repository still needs proof that the selected
+          parser and scanner sources compile and link offline against the
+          existing vendored Tree-sitter core. Runtime provider behaviour must
+          remain deferred until the build boundary is proven.
+      - source_ref: prd.md#outcome[1]
+        text: The build graph can compile and link the vendored Lua parser and scanner
+          sources offline in a local proof target, with deterministic evidence
+          and no Lua runtime provider, inspect output, default report, scoring,
+          cache, LuaRocks, package-path, module-resolution, LSP, network,
+          telemetry, upload, or remote-enrichment behaviour.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 2 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: A deterministic offline Lua parser/scanner build proof exists using
+      only repository-local vendored inputs and the existing Tree-sitter core,
+      while Lua runtime provider behaviour remains absent.
+    acceptance:
+      - Add a deterministic offline build proof for the Lua parser/scanner
+        sources imported by Feature 0065.
+      - Use the existing vendored Tree-sitter core and stop if a core update is
+        required.
+      - Record public evidence for source paths, proof targets, validation,
+        no-provider stability, and privacy-safe smoke validation.
+      - Preserve no Lua runtime provider, inspect output, query fixtures,
+        extraction, default report, schema, scoring, cache, CI, package/release,
+        LuaRocks, module/package-path, LSP, network, telemetry, upload, or
+        remote-enrichment behaviour.
+      - Stop as blocked if Feature 0065 did not leave an exact vendored source
+        path or the build cannot be proven from repository-local inputs.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig build validate
+      - zig build test
+      - zig build
+      - zig build tree-sitter-lua-build-proof
+      - changed-path scan for build-proof-only scope
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null

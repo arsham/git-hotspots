@@ -1,0 +1,601 @@
+schema: flow-feature.v1
+feature:
+  id: "0067"
+  slug: lua-query-contract-and-fixtures
+  title: Lua query contract and fixtures
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Lua build proof does not define supported symbol captures,
+    dynamic-language caveats, or fixture coverage. Runtime symbols would be
+    unsafe without a project-owned Lua query contract first.
+  outcome: A deterministic Lua query contract and fixture corpus define supported
+    captures, symbol-kind mapping, ranges, ordering, caveats, provider/query
+    version metadata, and proof evidence without exposing runtime Lua symbols.
+  acceptance:
+    - Define project-owned Lua query captures for stable inspect-oriented syntax.
+    - Cover .lua paths, local/global/table/colon-method functions, stable
+      assigned anonymous functions, module-table syntax, comments/strings,
+      dynamic/metatable cases, generated Lua, embedded DSLs, empty/invalid
+      files, unsupported paths, and monorepo-style paths.
+    - Record capture names, supported subset, symbol-kind mapping, ranges,
+      ordering, provider/query versions, caveats, and validation evidence in
+      docs/tree-sitter-lua-query-contract.md.
+    - Preserve no runtime Lua provider output, provider registry, custom user
+      queries, report schema, scoring, cache, LuaRocks/package/module analysis,
+      LSP, network, telemetry, upload, or remote enrichment.
+    - Stop rather than inventing runtime/module meaning for ambiguous dynamic
+      Lua patterns.
+planning:
+  state: ready
+  summary: Shape Lua query contract and fixtures as the third serial slice after
+    offline build proof.
+  brief_sync:
+    status: updated
+    reason: Supports B001 by defining deterministic Lua query evidence before symbol
+      extraction or runtime output.
+    checked_at: 2026-05-25T23:57:23.768Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Follow-up provider implementation slice for B001. It defines Lua query
+      contracts and fixtures only, deferring extraction, inspect output,
+      provider runtime, package/module analysis, telemetry, and remote
+      enrichment.
+    checked_at: 2026-05-25T23:57:40.034Z
+proposal:
+  lifecycle_state: discovering
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-25T23:58:50.137Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-25T23:58:50.137Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-25T23:58:50.137Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-25T23:58:50.137Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: false
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Serial Lua Tree-sitter implementation lane after offline build proof.
+  depends_on_feature_ids:
+    - "0066"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add project-owned Lua query assets and fixture/proof inputs.
+    - Prove supported and degraded Lua syntax deterministically.
+    - Document query contract, caveats, mapping, and validation evidence.
+    - Keep extraction and runtime output deferred.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Lua query contract and fixtures
+      goal: Define and prove project-owned Lua symbol query captures without runtime
+        output.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: Lua query asset location, Lua fixture/proof inputs,
+          docs/tree-sitter-lua-query-contract.md, existing symbol query proof
+          patterns."
+        - "In scope: capture names, supported subset, mapping, ranges, ordering,
+          caveats, fixtures/proofs for stable and degraded Lua constructs."
+        - "Out of scope: runtime provider output, provider registry,
+          CLI/report/schema/scoring/cache, custom user queries,
+          LuaRocks/package/module analysis, LSP, network/telemetry/remote
+          enrichment."
+        - "Protected: existing no-provider and
+          Zig/Go/Python/JavaScript/TypeScript/TSX symbol outputs remain
+          byte-stable."
+        - "Dependencies: Feature 0066 Lua build proof complete."
+        - "Validation/evidence: zig build validate; Lua build proof target; Lua
+          query proof target; fixture coverage proof; git diff --check;
+          privacy-safe smoke."
+        - "Review focus: query contract is deterministic, project-owned,
+          fixture-covered, and does not overclaim dynamic Lua runtime meaning."
+        - "Escalate if: captures cannot represent supported subset
+          deterministically, symbol kinds need schema expansion, or runtime
+          output changes are needed."
+        - "Done boundary: query contract, fixtures/proofs, and evidence doc
+          exist; Lua runtime output still absent."
+      verification_commands:
+        - git diff --check
+        - zig build validate
+        - zig build tree-sitter-lua-build-proof
+        - zig build tree-sitter-lua-query-proof
+        - fixture coverage proof
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-25T23:48:34.273Z
+  updated_at: 2026-05-26T00:00:11.154Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-26T00:00:11.154Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0067"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Lua query contract and fixtures
+      problem: Lua build proof does not define supported symbol captures,
+        dynamic-language caveats, or fixture coverage. Runtime symbols would be
+        unsafe without a project-owned Lua query contract first.
+      outcome: A deterministic Lua query contract and fixture corpus define supported
+        captures, symbol-kind mapping, ranges, ordering, caveats, provider/query
+        version metadata, and proof evidence without exposing runtime Lua
+        symbols.
+      acceptance:
+        - Define project-owned Lua query captures for stable inspect-oriented
+          syntax.
+        - Cover .lua paths, local/global/table/colon-method functions, stable
+          assigned anonymous functions, module-table syntax, comments/strings,
+          dynamic/metatable cases, generated Lua, embedded DSLs, empty/invalid
+          files, unsupported paths, and monorepo-style paths.
+        - Record capture names, supported subset, symbol-kind mapping, ranges,
+          ordering, provider/query versions, caveats, and validation evidence in
+          docs/tree-sitter-lua-query-contract.md.
+        - Preserve no runtime Lua provider output, provider registry, custom
+          user queries, report schema, scoring, cache, LuaRocks/package/module
+          analysis, LSP, network, telemetry, upload, or remote enrichment.
+        - Stop rather than inventing runtime/module meaning for ambiguous
+          dynamic Lua patterns.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Follow-up provider implementation slice for B001. It defines Lua query
+        contracts and fixtures only, deferring extraction, inspect output,
+        provider runtime, package/module analysis, telemetry, and remote
+        enrichment.
+      checked_at: 2026-05-25T23:57:40.034Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0067_lua-query-contract-and-fixtures/prd.md
+  requirements_contract:
+    source_path: .flow/features/0067_lua-query-contract-and-fixtures/prd.md
+    source_digest: f113d8a09f28ca7d86828dccaa262119f62f7e70f0036e1c42dde0ca7623d549
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#r1-query-contract-scope[1]
+        text: Define built-in Lua symbol query captures for stable inspect-oriented
+          syntax.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#r1-query-contract-scope[2]
+        text: Cover local functions, global functions, table-field functions,
+          colon-method definitions, anonymous functions assigned to stable
+          local/global/table names, and module-table patterns only when
+          represented syntactically.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#r1-query-contract-scope[3]
+        text: Define symbol-kind mapping, range semantics, deterministic ordering,
+          provider version metadata, query version metadata, and
+          unsupported-case caveats.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#r1-query-contract-scope[4]
+        text: Keep query assets project-owned; do not blindly import upstream highlight
+          queries.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#r1-query-contract-scope[5]
+        text: Do not add runtime provider output, provider registry entries, CLI flags,
+          report schema fields, scoring changes, cache changes, custom user
+          query execution, LuaRocks/package/module analysis, LSP, network,
+          telemetry, upload, or remote enrichment.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#r3-evidence-document[1]
+        text: "Add a concise public evidence document, expected path:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Add a concise public evidence document, expected path:"
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#r3-evidence-document[2]
+        text: "``text docs/tree-sitter-lua-query-contract.md ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``text docs/tree-sitter-lua-query-contract.md ``"
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#r3-evidence-document[3]
+        text: It must record query asset identities, query versions, proof target names,
+          supported subsets, capture names, range and ordering semantics,
+          symbol-kind mapping, fixture coverage, caveats, validation commands,
+          local/offline proof boundary, and explicit statement that Lua runtime
+          --symbols output is not implemented yet.
+        category: verification
+        packet_refs:
+          - P1
+        verification: It must record query asset identities, query versions, proof
+          target names, supported subsets, capture names, range and ordering
+          semantics, symbol-kind mapping, fixture coverage, caveats, validation
+          commands, local/offline proof boundary, and explicit statement that
+          Lua runtime --symbols output is not implemented yet.
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#r4-existing-behaviour-preservation[1]
+        text: Existing proof targets and product validation must continue to pass.
+          No-provider table, JSON, Markdown, inspect, and existing Zig, Go,
+          Python, JavaScript, TypeScript, and TSX symbol outputs must remain
+          byte-stable unless a separate feature explicitly changes them.
+        category: behaviour
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#acceptance-criteria[1]
+        text: A project-owned Lua query contract exists and is covered by deterministic
+          fixture/proof targets.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#acceptance-criteria[2]
+        text: Supported syntax, skipped syntax, caveats, capture names, symbol kinds,
+          ranges, ordering, provider/query versions, and fixture coverage are
+          explicit.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#acceptance-criteria[3]
+        text: The evidence document exists at docs/tree-sitter-lua-query-contract.md.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#acceptance-criteria[4]
+        text: Lua runtime symbol output, provider registry wiring, custom user queries,
+          package/module analysis, report schemas, scoring, cache, CI, network,
+          telemetry, upload, and remote enrichment remain absent.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#acceptance-criteria[5]
+        text: Existing language provider outputs and no-provider outputs remain stable.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#edge-cases[1]
+        text: If a Lua construct cannot be named deterministically, skip or caveat it
+          rather than inventing runtime meaning.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#edge-cases[2]
+        text: If module-table patterns require require, package path, or runtime
+          interpretation, keep them out of the supported subset.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#edge-cases[3]
+        text: If symbol kinds require public schema expansion, stop for planning rather
+          than expanding the schema locally.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#edge-cases[4]
+        text: If fixtures expose Markdown-sensitive names or paths, human output
+          evidence must prove escaping before runtime output is later added.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#edge-cases[5]
+        text: If query proof needs generated files not imported by Feature 0065, stop
+          and reshape instead of silently expanding the BOM.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#verification[1]
+        text: "Close-out must include evidence for:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Close-out must include evidence for:"
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#verification[2]
+        text: "``sh git diff --check zig build validate zig build
+          tree-sitter-lua-build-proof zig build tree-sitter-lua-query-proof
+          fixture coverage proof unsupported and degraded case proof
+          changed-path scan for query-proof-only scope no-runtime-output scan
+          no-provider output stability check privacy-safe this-repo smoke
+          privacy-safe sibling-local-repo smoke or bounded no-safe-file finding
+          ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh git diff --check zig build validate zig build
+          tree-sitter-lua-build-proof zig build tree-sitter-lua-query-proof
+          fixture coverage proof unsupported and degraded case proof
+          changed-path scan for query-proof-only scope no-runtime-output scan
+          no-provider output stability check privacy-safe this-repo smoke
+          privacy-safe sibling-local-repo smoke or bounded no-safe-file finding
+          ``"
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: A Lua parser build proof does not define which Lua constructs become
+          current symbols, how query captures map to provider evidence, or which
+          fixtures prove deterministic Lua semantics. Without a query contract,
+          user-facing Lua symbols would combine grammar, query design,
+          extraction semantics, dynamic Lua caveats, and output risk in one
+          step.
+      - source_ref: prd.md#outcome[1]
+        text: A project-owned Lua symbol query contract and fixture corpus define the
+          supported subset, capture names, mapping, ranges, ordering, caveats,
+          and validation evidence. Lua runtime symbol output remains absent
+          after this feature.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 2 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: A deterministic Lua query contract and fixture corpus define supported
+      captures, symbol-kind mapping, ranges, ordering, caveats, provider/query
+      version metadata, and proof evidence without exposing runtime Lua symbols.
+    acceptance:
+      - Define project-owned Lua query captures for stable inspect-oriented
+        syntax.
+      - Cover .lua paths, local/global/table/colon-method functions, stable
+        assigned anonymous functions, module-table syntax, comments/strings,
+        dynamic/metatable cases, generated Lua, embedded DSLs, empty/invalid
+        files, unsupported paths, and monorepo-style paths.
+      - Record capture names, supported subset, symbol-kind mapping, ranges,
+        ordering, provider/query versions, caveats, and validation evidence in
+        docs/tree-sitter-lua-query-contract.md.
+      - Preserve no runtime Lua provider output, provider registry, custom user
+        queries, report schema, scoring, cache, LuaRocks/package/module
+        analysis, LSP, network, telemetry, upload, or remote enrichment.
+      - Stop rather than inventing runtime/module meaning for ambiguous dynamic
+        Lua patterns.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig build validate
+      - zig build tree-sitter-lua-build-proof
+      - zig build tree-sitter-lua-query-proof
+      - fixture coverage proof
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null

@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0065"
   active_run_id: null
   last_completed_feature_id: "0064"
 defaults:
@@ -24,10 +24,16 @@ focus:
   next_roadmap_item_id: null
 execution_queue:
   mode: serial
-  feature_ids: []
+  feature_ids:
+    - "0065"
+    - "0066"
+    - "0067"
+    - "0068"
+    - "0069"
+    - "0070"
   stop_on_blocked: true
 features:
-  next_id: 65
+  next_id: 71
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -285,6 +291,30 @@ features:
       slug: tree-sitter-lua-grammar-admission-review
       path: .flow/features/0064_tree-sitter-lua-grammar-admission-review
       created_at: 2026-05-25T23:13:11.411Z
+    - id: "0065"
+      slug: lua-tree-sitter-source-import-proof
+      path: .flow/features/0065_lua-tree-sitter-source-import-proof
+      created_at: 2026-05-25T23:48:25.307Z
+    - id: "0066"
+      slug: lua-offline-build-proof
+      path: .flow/features/0066_lua-offline-build-proof
+      created_at: 2026-05-25T23:48:29.734Z
+    - id: "0067"
+      slug: lua-query-contract-and-fixtures
+      path: .flow/features/0067_lua-query-contract-and-fixtures
+      created_at: 2026-05-25T23:48:34.273Z
+    - id: "0068"
+      slug: lua-symbol-extraction-proof
+      path: .flow/features/0068_lua-symbol-extraction-proof
+      created_at: 2026-05-25T23:48:40.444Z
+    - id: "0069"
+      slug: inspect-only-lua-symbol-output
+      path: .flow/features/0069_inspect-only-lua-symbol-output
+      created_at: 2026-05-25T23:48:44.969Z
+    - id: "0070"
+      slug: lua-current-line-history-evidence
+      path: .flow/features/0070_lua-current-line-history-evidence
+      created_at: 2026-05-25T23:48:49.515Z
 intake:
   mode: roadmap
   summary: null
