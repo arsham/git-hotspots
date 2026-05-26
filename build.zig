@@ -287,6 +287,26 @@ pub fn build(b: *std.Build) void {
     const tree_sitter_lua_build_proof_step = b.step("tree-sitter-lua-build-proof", "Compile vendored Tree-sitter Lua parser/scanner sources and run tiny non-product Lua parse smokes");
     tree_sitter_lua_build_proof_step.dependOn(&run_tree_sitter_lua_build_proof.step);
 
+    const tree_sitter_lua_query_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_lua_query_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    tree_sitter_lua_query_proof_module.addImport("provider", b.createModule(.{
+        .root_source_file = b.path("src/provider.zig"),
+        .target = target,
+        .optimize = optimize,
+    }));
+    addTreeSitterLua(b, tree_sitter_lua_query_proof_module);
+
+    const tree_sitter_lua_query_proof = b.addTest(.{
+        .root_module = tree_sitter_lua_query_proof_module,
+    });
+
+    const run_tree_sitter_lua_query_proof = b.addRunArtifact(tree_sitter_lua_query_proof);
+    const tree_sitter_lua_query_proof_step = b.step("tree-sitter-lua-query-proof", "Run test-only Lua symbol query contract proof with vendored Tree-sitter sources");
+    tree_sitter_lua_query_proof_step.dependOn(&run_tree_sitter_lua_query_proof.step);
+
     const tree_sitter_typescript_build_proof_module = b.createModule(.{
         .root_source_file = b.path("tests/tree_sitter_typescript_build_proof.zig"),
         .target = target,
