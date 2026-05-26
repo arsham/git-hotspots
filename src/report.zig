@@ -8,16 +8,16 @@ const report_json = @import("report_json.zig");
 const report_markdown = @import("report_markdown.zig");
 const report_table = @import("report_table.zig");
 
-pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
-    return report_table.renderTable(writer, analysis);
+pub fn renderTable(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
+    return report_table.renderTable(allocator, writer, analysis);
 }
 
 pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
     return report_json.renderJson(writer, analysis);
 }
 
-pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
-    return report_markdown.renderMarkdown(writer, analysis);
+pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
+    return report_markdown.renderMarkdown(allocator, writer, analysis);
 }
 
 test "markdown report has stable sections and no raw private root" {
@@ -55,7 +55,7 @@ test "markdown report has stable sections and no raw private root" {
 
     var aw: std.Io.Writer.Allocating = .init(std.testing.allocator);
     defer aw.deinit();
-    try renderMarkdown(&aw.writer, analysis);
+    try renderMarkdown(std.testing.allocator, &aw.writer, analysis);
     const out = aw.written();
 
     try std.testing.expect(std.mem.indexOf(u8, out, "# git-hotspots report\n\n") != null);

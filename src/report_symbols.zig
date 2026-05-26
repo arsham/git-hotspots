@@ -44,8 +44,8 @@ pub fn haveLineHistory(symbols: []const provider.CurrentSymbolEvidence) bool {
     return false;
 }
 
-pub fn orderedHumanIndexes(symbols: []const provider.CurrentSymbolEvidence) ![]usize {
-    const indexes = try std.heap.page_allocator.alloc(usize, symbols.len);
+pub fn orderedHumanIndexes(allocator: std.mem.Allocator, symbols: []const provider.CurrentSymbolEvidence) ![]usize {
+    const indexes = try allocator.alloc(usize, symbols.len);
     for (indexes, 0..) |*index, i| index.* = i;
     if (haveLineHistory(symbols)) {
         std.mem.sort(usize, indexes, symbols, lessHumanSymbolIndex);
@@ -141,8 +141,8 @@ test "human symbols with line history sort by evidence strength then stable iden
         .{ .path = "src/a.zig", .name = "beta", .kind = .function, .current_range = .{ .lines = .{ .start = 20, .end = 25 } }, .provider_name = "tree-sitter-zig", .confidence = .high, .current_line_history = .{ .line_count = 6, .distinct_last_touch_commit_count = 2, .most_recent_line_touched_timestamp = 5, .uncommitted_or_unblamable_line_count = 0, .sample_commits = beta_commits[0..], .freshness = .fresh, .failure = .ok, .confidence = .high, .caveats = caveats[0..] } },
         .{ .path = "src/a.zig", .name = "gamma", .kind = .function, .current_range = .{ .lines = .{ .start = 30, .end = 30 } }, .provider_name = "tree-sitter-zig", .confidence = .high, .current_line_history = .{ .line_count = 1, .distinct_last_touch_commit_count = 1, .most_recent_line_touched_timestamp = 20, .uncommitted_or_unblamable_line_count = 0, .sample_commits = gamma_commits[0..], .freshness = .fresh, .failure = .ok, .confidence = .high, .caveats = caveats[0..] } },
     };
-    const indexes = try orderedHumanIndexes(symbols[0..]);
-    defer std.heap.page_allocator.free(indexes);
+    const indexes = try orderedHumanIndexes(std.testing.allocator, symbols[0..]);
+    defer std.testing.allocator.free(indexes);
     try std.testing.expectEqual(@as(usize, 1), indexes[0]);
     try std.testing.expectEqual(@as(usize, 2), indexes[1]);
     try std.testing.expectEqual(@as(usize, 0), indexes[2]);

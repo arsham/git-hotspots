@@ -4,7 +4,7 @@ const version = @import("version.zig");
 const fmt = @import("report_format.zig");
 const report_symbols = @import("report_symbols.zig");
 
-pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
+pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
     try writer.writeAll("# git-hotspots report\n\n");
     try writer.writeAll("File-level Git-history investigation prompts, not bug predictions or code-quality ratings.\n\n");
 
@@ -63,7 +63,7 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
     }
 
     if (analysis.symbol_report) |symbols| {
-        try renderSymbolReportMarkdown(writer, symbols, analysis.symbol_display);
+        try renderSymbolReportMarkdown(allocator, writer, symbols, analysis.symbol_display);
     }
 
     try writer.writeAll("## Caveats\n\n");
@@ -164,7 +164,7 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
     }
 }
 
-fn renderSymbolReportMarkdown(writer: anytype, symbols: model.SymbolReport, display: model.SymbolDisplay) !void {
+fn renderSymbolReportMarkdown(allocator: std.mem.Allocator, writer: anytype, symbols: model.SymbolReport, display: model.SymbolDisplay) !void {
     const summary = report_symbols.displaySummary(symbols, display);
     try writer.writeAll("## Symbols\n\n");
     try writer.writeAll("Symbols are opt-in current working-tree enrichment only. They do not change score, file order, lineage, confidence, or file-level Git evidence.\n\n");
@@ -194,8 +194,8 @@ fn renderSymbolReportMarkdown(writer: anytype, symbols: model.SymbolReport, disp
         if (has_line_history) try writer.writeAll("| None | - | - | - | - |\n\n") else try writer.writeAll("| None | - | - | - |\n\n");
         return;
     }
-    const indexes = try report_symbols.orderedHumanIndexes(symbols.symbols);
-    defer std.heap.page_allocator.free(indexes);
+    const indexes = try report_symbols.orderedHumanIndexes(allocator, symbols.symbols);
+    defer allocator.free(indexes);
     for (indexes[0..summary.shown]) |index| {
         const symbol = symbols.symbols[index];
         const range = report_symbols.displayLineRange(symbol.current_range);

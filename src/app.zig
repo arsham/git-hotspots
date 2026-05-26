@@ -72,9 +72,9 @@ pub fn run(allocator: std.mem.Allocator, io: std.Io, args: []const [:0]const u8,
     try writeProgress(progress, "rendering report");
 
     switch (cfg.format) {
-        .table => try report.renderTable(stdout, analysis),
+        .table => try report.renderTable(allocator, stdout, analysis),
         .json => try report.renderJson(stdout, analysis),
-        .markdown => try report.renderMarkdown(stdout, analysis),
+        .markdown => try report.renderMarkdown(allocator, stdout, analysis),
     }
     if (progress) |writer| {
         const elapsed = progress_started.durationTo(Io.Clock.Timestamp.now(io, .awake));

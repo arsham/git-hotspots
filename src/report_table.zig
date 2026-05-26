@@ -3,7 +3,7 @@ const model = @import("model.zig");
 const fmt = @import("report_format.zig");
 const report_symbols = @import("report_symbols.zig");
 
-pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
+pub fn renderTable(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
     try writer.print("git-hotspots: file-level Git-history investigation prompts\n", .{});
     try writer.print("commits={d} shallow={} partial={} dirty={} auto_fetch=false\n", .{ analysis.history.commit_count, analysis.history.is_shallow, analysis.history.is_partial, analysis.history.dirty_worktree });
     if (analysis.scope.filters_active) {
@@ -40,15 +40,15 @@ pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
         if (symbols.symbols.len == 0) {
             try writer.print("  none\n", .{});
         } else {
-            try renderTableSymbolRows(writer, symbols, analysis.symbol_display);
+            try renderTableSymbolRows(allocator, writer, symbols, analysis.symbol_display);
         }
     }
     try writer.print("\nScores are deterministic prompts for investigation, not bug predictions or code-quality ratings.\n", .{});
 }
 
-fn renderTableSymbolRows(writer: anytype, symbols: model.SymbolReport, display: model.SymbolDisplay) !void {
-    const indexes = try report_symbols.orderedHumanIndexes(symbols.symbols);
-    defer std.heap.page_allocator.free(indexes);
+fn renderTableSymbolRows(allocator: std.mem.Allocator, writer: anytype, symbols: model.SymbolReport, display: model.SymbolDisplay) !void {
+    const indexes = try report_symbols.orderedHumanIndexes(allocator, symbols.symbols);
+    defer allocator.free(indexes);
     const shown = @min(indexes.len, display.limit);
     for (indexes[0..shown]) |index| {
         const symbol = symbols.symbols[index];
