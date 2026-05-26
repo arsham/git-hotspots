@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0071"
   active_run_id: null
   last_completed_feature_id: "0070"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 71
+  next_id: 74
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -309,6 +309,18 @@ features:
       slug: lua-current-line-history-evidence
       path: .flow/features/0070_lua-current-line-history-evidence
       created_at: 2026-05-25T23:48:49.515Z
+    - id: "0071"
+      slug: rust-tree-sitter-source-import-proof
+      path: .flow/features/0071_rust-tree-sitter-source-import-proof
+      created_at: 2026-05-26T12:39:46.812Z
+    - id: "0072"
+      slug: rust-offline-build-proof
+      path: .flow/features/0072_rust-offline-build-proof
+      created_at: 2026-05-26T12:39:51.206Z
+    - id: "0073"
+      slug: rust-query-contract-and-fixtures
+      path: .flow/features/0073_rust-query-contract-and-fixtures
+      created_at: 2026-05-26T12:39:55.288Z
 intake:
   mode: roadmap
   summary: null

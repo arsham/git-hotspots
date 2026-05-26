@@ -1,0 +1,723 @@
+schema: flow-feature.v1
+feature:
+  id: "0071"
+  slug: rust-tree-sitter-source-import-proof
+  title: Rust Tree-sitter source import proof
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Feature 0063 admitted Rust conditionally, but Rust source import is
+    still blocked until an exact tree-sitter-rust revision, provenance, license,
+    scanner/parser, BOM, core compatibility, size, and no-provider stability
+    evidence are proven.
+  outcome: A pinned tree-sitter-rust source set is vendored with provenance, BOM,
+    license, parser/scanner, core-compatibility, size, validation, and
+    no-provider evidence, while Rust runtime support remains absent.
+  acceptance:
+    - Import a narrow pinned tree-sitter-rust source set under a revisioned
+      third_party path with provenance and imported-file manifest.
+    - Record license, notice, generated parser, scanner, BOM, excluded file
+      classes, core compatibility, source-size, and .rs path admission evidence.
+    - Add public evidence at docs/tree-sitter-rust-source-import.md.
+    - Do not add Rust build proof, query fixtures, extraction, runtime provider,
+      inspect output, report schema, scoring, cache, CI, package, release,
+      network, telemetry, upload, remote enrichment, Cargo, crate graph, module
+      resolution, macro expansion, type checking, LSP, or custom query
+      execution.
+    - Preserve existing provider outputs and no-provider outputs.
+planning:
+  state: ready
+  summary: Shape the Rust source-import proof as the first implementation step
+    after admission, with no build, query, extraction, or runtime exposure.
+  brief_sync:
+    status: updated
+    reason: Supports B001 provider expansion while preserving local-first
+      deterministic file-level Git evidence as product truth.
+    checked_at: 2026-05-26T12:45:00.000Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Follow-up provider implementation slice for B001. It imports Rust
+      sources only and explicitly defers build, query, extraction, and runtime
+      support.
+    checked_at: 2026-05-26T12:45:00.000Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-26T12:45:16.001Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-26T12:45:16.001Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-26T12:45:16.001Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-26T12:45:16.001Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Rust grammar admission is done; source import must be proven
+    before build/query/runtime work.
+  depends_on_feature_ids:
+    - "0063"
+  blocked_by: []
+design:
+  rough_shape:
+    - Resolve the exact immutable tree-sitter-rust revision and source basis.
+    - Import only the narrow source/provenance/notices file set required for
+      later local build and query review.
+    - Record public evidence and validation without wiring Rust into build or
+      runtime provider paths.
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+  packets:
+    - id: P1
+      title: Rust source import and provenance proof
+      goal: Import pinned tree-sitter-rust source/provenance only, with no build or
+        runtime provider exposure.
+      depends_on: []
+      status: planned
+      owner_phase: runner
+      execution_context:
+        - "Anchors: third_party/tree-sitter-rust/<revision>/,
+          docs/tree-sitter-rust-source-import.md, THIRD_PARTY_NOTICES.md,
+          docs/tree-sitter-rust-grammar-admission.md"
+        - "In scope: immutable Rust grammar revision selection, narrow vendored
+          source set, provenance, imported-file manifest, license/notice
+          handling, generated parser/scanner provenance, core ABI compatibility,
+          source-size evidence, .rs path admission evidence, no-provider
+          stability evidence"
+        - "Out of scope: build proof, query fixtures, extraction proof, runtime
+          provider, provider registry, CLI flags, report schema, scoring, cache,
+          CI, package/release, Cargo/crate/module analysis, macro expansion,
+          type checking, LSP, custom user queries, network, telemetry, upload,
+          remote enrichment"
+        - "Protected: runtime outputs, existing provider outputs, no-provider
+          outputs, build.zig/build.zig.zon unless blocked and reshaped,
+          validation scripts, local-first defaults, privacy-safe evidence"
+        - "Dependencies: Feature 0063 Rust admission is done"
+        - "Validation/evidence: git diff --check; zig build validate;
+          source-import-only changed-path scan; vendored-path scan proving no
+          runtime/build/query/extraction/provider changes; license/notice
+          verification; BOM review; parser/scanner provenance proof; core
+          compatibility proof; source-size/largest-file measurements;
+          no-provider stability; privacy-safe this-repo and sibling-local-repo
+          smoke or bounded no-safe-file finding"
+        - "Review focus: exact source identity, narrow BOM, generated
+          parser/scanner honesty, no runtime/build/query drift, and no public
+          Rust support claim"
+        - "Escalate if: selected grammar requires newer Tree-sitter core,
+          scanner provenance is unclear, BOM expands beyond source/provenance
+          needs, validation requires network/Cargo/global parser tools, source
+          size is unexpectedly large, or runtime/build/query files need changes"
+        - "Done boundary: pinned source is imported with public evidence and
+          existing outputs remain stable; Rust runtime support is still absent"
+      verification_commands:
+        - git diff --check
+        - zig build validate
+        - changed-path scan for source-import-only scope
+        - vendored-path scan proving no runtime/build/query/extraction/provider
+          changes
+        - license and notice verification
+        - BOM and excluded-file-class review
+        - parser and scanner provenance proof
+        - Tree-sitter core compatibility proof
+        - source-size and largest-file measurements
+        - no-provider output stability check
+        - privacy-safe this-repo smoke
+        - privacy-safe sibling-local-repo smoke or bounded no-safe-file finding
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-26T12:39:46.812Z
+  updated_at: 2026-05-26T12:45:45.096Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-26T12:45:45.096Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0071"
+    packet_ids:
+      - P1
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Rust Tree-sitter source import proof
+      problem: Feature 0063 admitted Rust conditionally, but Rust source import is
+        still blocked until an exact tree-sitter-rust revision, provenance,
+        license, scanner/parser, BOM, core compatibility, size, and no-provider
+        stability evidence are proven.
+      outcome: A pinned tree-sitter-rust source set is vendored with provenance, BOM,
+        license, parser/scanner, core-compatibility, size, validation, and
+        no-provider evidence, while Rust runtime support remains absent.
+      acceptance:
+        - Import a narrow pinned tree-sitter-rust source set under a revisioned
+          third_party path with provenance and imported-file manifest.
+        - Record license, notice, generated parser, scanner, BOM, excluded file
+          classes, core compatibility, source-size, and .rs path admission
+          evidence.
+        - Add public evidence at docs/tree-sitter-rust-source-import.md.
+        - Do not add Rust build proof, query fixtures, extraction, runtime
+          provider, inspect output, report schema, scoring, cache, CI, package,
+          release, network, telemetry, upload, remote enrichment, Cargo, crate
+          graph, module resolution, macro expansion, type checking, LSP, or
+          custom query execution.
+        - Preserve existing provider outputs and no-provider outputs.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Follow-up provider implementation slice for B001. It imports Rust
+        sources only and explicitly defers build, query, extraction, and runtime
+        support.
+      checked_at: 2026-05-26T12:45:00.000Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0071_rust-tree-sitter-source-import-proof/prd.md
+  requirements_contract:
+    source_path: .flow/features/0071_rust-tree-sitter-source-import-proof/prd.md
+    source_digest: df23d87054698066be73b2889d0140a54aecaa65ece9ab3d85ab64359361d49d
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#r1-source-import-scope[1]
+        text: "Select an immutable tree-sitter-rust revision: tag plus full commit, or
+          full commit when no suitable tag exists."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#r1-source-import-scope[2]
+        text: Import a narrow source set under third_party/tree-sitter-rust/<revision>/.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#r1-source-import-scope[3]
+        text: Add or update only source-import artefacts, provenance and evidence docs,
+          notices, and Flow state.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#r1-source-import-scope[4]
+        text: Do not change src/, tests/, fixtures, build.zig, build.zig.zon, .github/,
+          validation scripts, CLI flags, report schemas, scoring, cache,
+          provider runtime, provider registry, CI, release, or package
+          behaviour.
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#r6-tree-sitter-core-compatibility[1]
+        text: The import must prove that the selected Rust grammar language version is
+          compatible with the existing vendored Tree-sitter core ABI and
+          language-version range from third_party/tree-sitter-core/v0.26.9.
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#r6-tree-sitter-core-compatibility[2]
+        text: If the selected grammar requires a newer Tree-sitter core, this feature
+          must stop or record a blocker. A Tree-sitter core update is out of
+          scope.
+        category: constraint
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#r7-rust-path-admission-evidence[1]
+        text: The import must record that future Rust runtime work is limited to
+          requested inspect paths ending in .rs. It must not imply Cargo.toml
+          parsing, Cargo workspace discovery, crate graph analysis, dependency
+          graph inference, macro expansion, type checking, module resolution,
+          LSP integration, or repo-wide scanning.
+        category: verification
+        packet_refs:
+          - P1
+        verification: The import must record that future Rust runtime work is limited to
+          requested inspect paths ending in .rs. It must not imply Cargo.toml
+          parsing, Cargo workspace discovery, crate graph analysis, dependency
+          graph inference, macro expansion, type checking, module resolution,
+          LSP integration, or repo-wide scanning.
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#r8-source-size-and-build-impact-evidence[1]
+        text: "The import must record:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "The import must record:"
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#r8-source-size-and-build-impact-evidence[2]
+        text: bytes added under the vendored Rust grammar path;
+        category: verification
+        packet_refs:
+          - P1
+        verification: bytes added under the vendored Rust grammar path;
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#r8-source-size-and-build-impact-evidence[3]
+        text: largest imported files and their byte sizes;
+        category: verification
+        packet_refs:
+          - P1
+        verification: largest imported files and their byte sizes;
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#r8-source-size-and-build-impact-evidence[4]
+        text: repository working-tree size before and after import, excluding transient
+          build and Git directories;
+        category: verification
+        packet_refs:
+          - P1
+        verification: repository working-tree size before and after import, excluding
+          transient build and Git directories;
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#r8-source-size-and-build-impact-evidence[5]
+        text: validation before and after import; and
+        category: verification
+        packet_refs:
+          - P1
+        verification: validation before and after import; and
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#r8-source-size-and-build-impact-evidence[6]
+        text: no-provider output stability for table, JSON, Markdown, and inspect
+          outputs.
+        category: verification
+        packet_refs:
+          - P1
+        verification: no-provider output stability for table, JSON, Markdown, and
+          inspect outputs.
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#r9-evidence-document[1]
+        text: "Add a concise public evidence document, expected path:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Add a concise public evidence document, expected path:"
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#r9-evidence-document[2]
+        text: "``text docs/tree-sitter-rust-source-import.md ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``text docs/tree-sitter-rust-source-import.md ``"
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#r9-evidence-document[3]
+        text: It must record source identity, selected revision, vendored path, BOM,
+          excluded file classes, license and notice handling, parser and scanner
+          provenance, core compatibility, .rs extension admission, source-size
+          evidence, validation commands, local/offline boundary, and explicit
+          statement that Rust runtime support is not implemented yet.
+        category: verification
+        packet_refs:
+          - P1
+        verification: It must record source identity, selected revision, vendored path,
+          BOM, excluded file classes, license and notice handling, parser and
+          scanner provenance, core compatibility, .rs extension admission,
+          source-size evidence, validation commands, local/offline boundary, and
+          explicit statement that Rust runtime support is not implemented yet.
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#r10-existing-behaviour-preservation[1]
+        text: Existing proof targets and product validation must continue to pass.
+          Existing Zig, Go, Python, JavaScript, Lua, TypeScript, and TSX symbol
+          outputs and no-provider table, JSON, Markdown, and inspect outputs
+          must remain byte-stable unless a separate feature explicitly changes
+          them.
+        category: behaviour
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#acceptance-criteria[1]
+        text: A narrow, pinned tree-sitter-rust source set exists under a revisioned
+          vendored path.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#acceptance-criteria[2]
+        text: The import has deterministic provenance, BOM, license, notice, parser,
+          scanner, core-compatibility, source-size, and .rs path evidence.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#acceptance-criteria[3]
+        text: Public evidence exists at docs/tree-sitter-rust-source-import.md.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#acceptance-criteria[4]
+        text: No Rust build proof, query fixtures, extraction, runtime provider, inspect
+          output, default report change, schema change, scoring change, cache
+          change, CI change, package/release change, or network/runtime
+          behaviour is added.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#acceptance-criteria[5]
+        text: The feature stops as blocked rather than importing unreviewed,
+          incompatible, or overbroad source.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#edge-cases[1]
+        text: If the upstream identity differs from Feature 0063, record the reason and
+          do not import without refreshing admission evidence.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#edge-cases[2]
+        text: If the source archive or checkout cannot be pinned immutably, stop as
+          blocked.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#edge-cases[3]
+        text: If scanner presence or absence is unclear, stop as blocked.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#edge-cases[4]
+        text: If the grammar requires a newer Tree-sitter core, stop for a separate
+          core-update feature.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#edge-cases[5]
+        text: If source-size or validation impact is unexpectedly high, escalate before
+          closing.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#edge-cases[6]
+        text: If no safe local sibling repository has Rust files, record a bounded
+          privacy-safe no-safe-file finding instead of committing private paths
+          or raw report dumps.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#verification[1]
+        text: "Close-out must include evidence for:"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "Close-out must include evidence for:"
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#verification[2]
+        text: "``sh git diff --check zig build validate changed-path scan for
+          source-import-only scope vendored-path scan proving no
+          runtime/build/query/extraction/provider changes license and notice
+          verification BOM and excluded-file-class review parser and scanner
+          provenance proof Tree-sitter core compatibility proof source-size and
+          largest-file measurements no-provider output stability check
+          privacy-safe this-repo smoke privacy-safe sibling-local-repo smoke or
+          bounded no-safe-file finding ``"
+        category: verification
+        packet_refs:
+          - P1
+        verification: "``sh git diff --check zig build validate changed-path scan for
+          source-import-only scope vendored-path scan proving no
+          runtime/build/query/extraction/provider changes license and notice
+          verification BOM and excluded-file-class review parser and scanner
+          provenance proof Tree-sitter core compatibility proof source-size and
+          largest-file measurements no-provider output stability check
+          privacy-safe this-repo smoke privacy-safe sibling-local-repo smoke or
+          bounded no-safe-file finding ``"
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: Feature 0063 recorded tree-sitter-rust as a plausible future grammar but
+          left implementation blocked on exact immutable source identity,
+          license and notice verification, generated parser and scanner
+          provenance, BOM selection, .rs extension admission proof, source-size
+          evidence, core compatibility, offline validation, and no-provider
+          output stability. Rust runtime support should not proceed until the
+          source import itself is reviewable and local-first.
+      - source_ref: prd.md#outcome[1]
+        text: A pinned tree-sitter-rust source set is vendored under
+          third_party/tree-sitter-rust/<revision>/ with provenance,
+          imported-file manifest, license and notice handling, .rs extension
+          admission evidence, and source-import evidence. The repository still
+          has no Rust runtime support after this feature; it only has reviewed
+          local source inputs for later build, query, and extraction proofs.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 2 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: A pinned tree-sitter-rust source set is vendored with provenance, BOM,
+      license, parser/scanner, core-compatibility, size, validation, and
+      no-provider evidence, while Rust runtime support remains absent.
+    acceptance:
+      - Import a narrow pinned tree-sitter-rust source set under a revisioned
+        third_party path with provenance and imported-file manifest.
+      - Record license, notice, generated parser, scanner, BOM, excluded file
+        classes, core compatibility, source-size, and .rs path admission
+        evidence.
+      - Add public evidence at docs/tree-sitter-rust-source-import.md.
+      - Do not add Rust build proof, query fixtures, extraction, runtime
+        provider, inspect output, report schema, scoring, cache, CI, package,
+        release, network, telemetry, upload, remote enrichment, Cargo, crate
+        graph, module resolution, macro expansion, type checking, LSP, or custom
+        query execution.
+      - Preserve existing provider outputs and no-provider outputs.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig build validate
+      - changed-path scan for source-import-only scope
+      - vendored-path scan proving no runtime/build/query/extraction/provider
+        changes
+      - license and notice verification
+      - BOM and excluded-file-class review
+      - parser and scanner provenance proof
+      - Tree-sitter core compatibility proof
+      - source-size and largest-file measurements
+      - no-provider output stability check
+      - privacy-safe this-repo smoke
+      - privacy-safe sibling-local-repo smoke or bounded no-safe-file finding
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
