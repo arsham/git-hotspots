@@ -316,6 +316,26 @@ pub fn build(b: *std.Build) void {
     const tree_sitter_rust_build_proof_step = b.step("tree-sitter-rust-build-proof", "Compile vendored Tree-sitter Rust parser/scanner sources and run tiny non-product Rust parse smokes");
     tree_sitter_rust_build_proof_step.dependOn(&run_tree_sitter_rust_build_proof.step);
 
+    const tree_sitter_rust_query_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_rust_query_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    tree_sitter_rust_query_proof_module.addImport("provider", b.createModule(.{
+        .root_source_file = b.path("src/provider.zig"),
+        .target = target,
+        .optimize = optimize,
+    }));
+    addTreeSitterRust(b, tree_sitter_rust_query_proof_module);
+
+    const tree_sitter_rust_query_proof = b.addTest(.{
+        .root_module = tree_sitter_rust_query_proof_module,
+    });
+
+    const run_tree_sitter_rust_query_proof = b.addRunArtifact(tree_sitter_rust_query_proof);
+    const tree_sitter_rust_query_proof_step = b.step("tree-sitter-rust-query-proof", "Run test-only Rust symbol query contract proof with vendored Tree-sitter sources");
+    tree_sitter_rust_query_proof_step.dependOn(&run_tree_sitter_rust_query_proof.step);
+
     const tree_sitter_lua_query_proof_module = b.createModule(.{
         .root_source_file = b.path("tests/tree_sitter_lua_query_proof.zig"),
         .target = target,

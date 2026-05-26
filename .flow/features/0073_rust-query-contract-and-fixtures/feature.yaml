@@ -4,7 +4,7 @@ feature:
   slug: rust-query-contract-and-fixtures
   title: Rust query contract and fixtures
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Rust build proof does not define supported symbol captures, kind
@@ -56,7 +56,7 @@ proposal:
     materialised_at: 2026-05-26T12:45:15.982Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -132,7 +132,7 @@ design:
       goal: Define and prove project-owned Rust symbol query captures without runtime
         output.
       depends_on: []
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: tests/tree_sitter_rust_query_proof.zig,
@@ -191,7 +191,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-26T12:39:55.288Z
-  updated_at: 2026-05-26T12:45:45.104Z
+  updated_at: 2026-05-26T14:20:11.845Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-26T12:45:45.104Z
