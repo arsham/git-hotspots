@@ -4,7 +4,7 @@ feature:
   slug: lua-offline-build-proof
   title: Lua offline build proof
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Lua source import alone does not prove the vendored parser and scanner
@@ -62,7 +62,7 @@ proposal:
     materialised_at: 2026-05-25T23:58:44.810Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -119,7 +119,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Lua offline build proof
       goal: Prove vendored Lua parser/scanner sources build offline against the
         existing Tree-sitter core without runtime output.
@@ -176,7 +176,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-25T23:48:29.734Z
-  updated_at: 2026-05-26T00:00:11.161Z
+  updated_at: 2026-05-26T00:54:32.720Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-26T00:00:11.161Z
