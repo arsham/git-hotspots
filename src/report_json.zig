@@ -1,0 +1,161 @@
+const std = @import("std");
+const model = @import("model.zig");
+const provider = @import("provider.zig");
+const version = @import("version.zig");
+const fmt = @import("report_format.zig");
+const report_symbols = @import("report_symbols.zig");
+
+pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
+    try writer.print("{{\n", .{});
+    try writer.print("  \"schema_version\": \"1\",\n", .{});
+    try writer.print("  \"tool\": {{ \"name\": \"git-hotspots\", \"version\": \"{s}\" }},\n", .{version.value});
+    try writer.print("  \"analysis\": {{\n", .{});
+    try writer.print("    \"history\": {{ \"head\": ", .{});
+    try fmt.jsonString(writer, analysis.history.head);
+    try writer.print(", \"head_timestamp\": {d}, ", .{analysis.history.head_timestamp});
+    try writer.print("\"range\": ", .{});
+    if (analysis.history.range) |r| try fmt.jsonString(writer, r) else try writer.print("null", .{});
+    try writer.print(", \"is_shallow\": {}, \"is_partial\": {}, \"auto_fetch\": false, \"dirty_worktree\": {}, \"commit_count\": {d} }},\n", .{ analysis.history.is_shallow, analysis.history.is_partial, analysis.history.dirty_worktree, analysis.history.commit_count });
+    try writer.print("    \"scope\": {{ \"selected_scope\": ", .{});
+    try fmt.jsonString(writer, model.scopePresetName(analysis.scope.selected_scope));
+    try writer.print(", \"filters_active\": {}, \"include_prefixes\": ", .{analysis.scope.filters_active});
+    try fmt.stringArray(writer, analysis.scope.include_prefixes);
+    try writer.print(", \"exclude_prefixes\": ", .{});
+    try fmt.stringArray(writer, analysis.scope.exclude_prefixes);
+    try writer.print(", \"outside_include_path_count\": {d}, \"outside_include_change_count\": {d}, \"excluded_path_count\": {d}, \"excluded_change_count\": {d} }},\n", .{ analysis.scope.outside_include_path_count, analysis.scope.outside_include_change_count, analysis.scope.excluded_path_count, analysis.scope.excluded_change_count });
+    try writer.print("    \"caveats\": ", .{});
+    try fmt.stringArray(writer, analysis.caveats);
+    try writer.print("\n", .{});
+    try writer.print("  }},\n", .{});
+    if (analysis.symbol_report) |symbols| {
+        try renderSymbolReportJson(writer, symbols, analysis.symbol_display);
+        try writer.print(",\n", .{});
+    }
+    if (analysis.inspect) |inspect| {
+        try writer.print("  \"inspect\": {{ \"requested_path\": ", .{});
+        try fmt.jsonString(writer, inspect.requested_path);
+        try writer.print(", \"matched_path\": ", .{});
+        try fmt.jsonString(writer, inspect.matched_path);
+        try writer.print(", \"rank\": {d} }},\n", .{inspect.rank});
+    }
+    try writer.print("  \"results\": [\n", .{});
+    for (analysis.results, 0..) |row, i| {
+        try writer.print("    {{\n", .{});
+        try writer.print("      \"path\": ", .{});
+        try fmt.jsonString(writer, row.path);
+        try writer.print(",\n", .{});
+        try writer.print("      \"lineage\": {{ \"aliases\": ", .{});
+        try fmt.stringArray(writer, row.lineage_aliases);
+        try writer.print(", \"partial\": {}, \"caveat\": ", .{row.lineage_partial});
+        try fmt.jsonString(writer, "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked");
+        try writer.print(" }},\n", .{});
+        try writer.print("      \"score\": {{ \"total\": {d:.3}, \"frequency\": {d:.3}, \"churn\": {d:.3}, \"recency\": {d:.3}, \"cochange\": {d:.3} }},\n", .{ row.score.total, row.score.frequency, row.score.churn, row.score.recency, row.score.cochange });
+        try writer.print("      \"change_count\": {d}, \"additions\": {d}, \"deletions\": {d}, \"churn\": {d},\n", .{ row.change_count, row.additions, row.deletions, row.churn });
+        try writer.print("      \"recency\": {{ \"last_changed_timestamp\": {d}, \"last_changed_commit\": ", .{row.last_changed_timestamp});
+        try fmt.jsonString(writer, row.last_changed_commit);
+        try writer.print(" }},\n", .{});
+        try writer.print("      \"current_size\": ", .{});
+        if (row.current_size) |s| try writer.print("{d}", .{s}) else try writer.print("null", .{});
+        try writer.print(",\n", .{});
+        try writer.print("      \"cochanges\": [", .{});
+        for (row.cochanges, 0..) |cc, j| {
+            if (j != 0) try writer.print(", ", .{});
+            try writer.print("{{ \"path\": ", .{});
+            try fmt.jsonString(writer, cc.path);
+            try writer.print(", \"count\": {d} }}", .{cc.count});
+        }
+        try writer.print("],\n", .{});
+        try writer.print("      \"confidence\": ", .{});
+        try fmt.jsonString(writer, row.confidence);
+        try writer.print(",\n", .{});
+        try writer.print("      \"caveats\": ", .{});
+        try fmt.stringArray(writer, row.caveats);
+        try writer.print(",\n", .{});
+        try writer.print("      \"evidence\": [", .{});
+        for (row.evidence, 0..) |ev, j| {
+            if (j != 0) try writer.print(", ", .{});
+            try writer.print("{{ \"commit\": ", .{});
+            try fmt.jsonString(writer, ev.commit);
+            try writer.print(", \"timestamp\": {d}, \"additions\": ", .{ev.timestamp});
+            if (ev.additions) |a| try writer.print("{d}", .{a}) else try writer.print("null", .{});
+            try writer.print(", \"deletions\": ", .{});
+            if (ev.deletions) |d| try writer.print("{d}", .{d}) else try writer.print("null", .{});
+            try writer.print(" }}", .{});
+        }
+        try writer.print("]\n", .{});
+        try writer.print("    }}{s}\n", .{if (i + 1 == analysis.results.len) "" else ","});
+    }
+    try writer.print("  ]\n", .{});
+    try writer.print("}}\n", .{});
+}
+
+fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport, display: model.SymbolDisplay) !void {
+    const summary = report_symbols.displaySummary(symbols, display);
+    try writer.print("  \"symbols\": {{\n", .{});
+    try writer.print("    \"current_only\": true,\n", .{});
+    try writer.print("    \"human_display\": {{ \"total_count\": {d}, \"shown_count\": {d}, \"omitted_count\": {d}, \"default_limit\": {d}, \"active_limit\": {d}, \"limit_source\": ", .{ summary.total, summary.shown, summary.omitted, model.default_symbol_display_limit, summary.limit });
+    try fmt.jsonString(writer, summary.limitSource());
+    try writer.print(", \"sort_basis\": ", .{});
+    try fmt.jsonString(writer, report_symbols.sortBasis(symbols));
+    try writer.print(" }},\n", .{});
+    try writer.print("    \"provider\": {{ \"name\": ", .{});
+    try fmt.jsonString(writer, symbols.provider.name);
+    try writer.print(", \"kind\": ", .{});
+    try fmt.jsonString(writer, @tagName(symbols.provider.kind));
+    try writer.print(", \"version\": ", .{});
+    try fmt.jsonString(writer, symbols.provider.version);
+    try writer.print(", \"contract_version\": ", .{});
+    try fmt.jsonString(writer, symbols.provider.contract_version);
+    try writer.print(", \"freshness\": ", .{});
+    try fmt.jsonString(writer, @tagName(symbols.provider.freshness));
+    try writer.print(", \"failure\": ", .{});
+    try fmt.jsonString(writer, @tagName(symbols.provider.failure));
+    try writer.print(", \"confidence\": ", .{});
+    try fmt.jsonString(writer, @tagName(symbols.provider.confidence));
+    try writer.print(", \"caveats\": ", .{});
+    const has_line_history = report_symbols.haveLineHistory(symbols.symbols);
+    try fmt.stringArrayWithLineHistoryContext(writer, symbols.provider.caveats, has_line_history);
+    try writer.print(", \"provenance\": {{ \"input\": ", .{});
+    try fmt.jsonString(writer, symbols.provider.input.identity);
+    try writer.print(", \"local_only\": true }} }},\n", .{});
+    try writer.print("    \"items\": [\n", .{});
+    for (symbols.symbols, 0..) |symbol, i| {
+        const range = report_symbols.displayLineRange(symbol.current_range);
+        try writer.print("      {{ \"path\": ", .{});
+        try fmt.jsonString(writer, symbol.path);
+        try writer.print(", \"name\": ", .{});
+        try fmt.jsonString(writer, symbol.name);
+        try writer.print(", \"kind\": ", .{});
+        try fmt.jsonString(writer, @tagName(symbol.kind));
+        try writer.print(", \"range\": {{ \"type\": \"lines\", \"start\": {d}, \"end\": {d} }}, \"provider\": ", .{ range.start, range.end });
+        try fmt.jsonString(writer, symbol.provider_name);
+        try writer.print(", \"confidence\": ", .{});
+        try fmt.jsonString(writer, @tagName(symbol.confidence));
+        try writer.print(", \"caveats\": ", .{});
+        try fmt.stringArrayWithLineHistoryContext(writer, symbol.caveats, symbol.current_line_history != null);
+        if (symbol.current_line_history) |line_history| {
+            try writer.print(", \"current_line_history\": ", .{});
+            try renderCurrentLineHistoryJson(writer, line_history);
+        }
+        try writer.print(" }}{s}\n", .{if (i + 1 == symbols.symbols.len) "" else ","});
+    }
+    try writer.print("    ]\n  }}", .{});
+}
+
+fn renderCurrentLineHistoryJson(writer: anytype, line_history: provider.CurrentLineHistoryEvidence) !void {
+    try writer.print("{{ \"basis\": ", .{});
+    try fmt.jsonString(writer, line_history.basis);
+    try writer.print(", \"current_only\": {}, \"line_count\": {d}, \"distinct_last_touch_commit_count\": {d}, \"most_recent_line_touched_timestamp\": ", .{ line_history.current_only, line_history.line_count, line_history.distinct_last_touch_commit_count });
+    if (line_history.most_recent_line_touched_timestamp) |ts| try writer.print("{d}", .{ts}) else try writer.print("null", .{});
+    try writer.print(", \"uncommitted_or_unblamable_line_count\": {d}, \"sample_commits\": ", .{line_history.uncommitted_or_unblamable_line_count});
+    try fmt.stringArray(writer, line_history.sample_commits);
+    try writer.print(", \"freshness\": ", .{});
+    try fmt.jsonString(writer, @tagName(line_history.freshness));
+    try writer.print(", \"failure\": ", .{});
+    try fmt.jsonString(writer, @tagName(line_history.failure));
+    try writer.print(", \"confidence\": ", .{});
+    try fmt.jsonString(writer, @tagName(line_history.confidence));
+    try writer.print(", \"caveats\": ", .{});
+    try fmt.stringArray(writer, line_history.caveats);
+    try writer.print(" }}", .{});
+}
