@@ -2,6 +2,7 @@ const std = @import("std");
 const model = @import("model.zig");
 const provider = @import("provider.zig");
 const version = @import("version.zig");
+const fmt = @import("report_format.zig");
 
 const LineDisplayRange = struct { start: u32, end: u32 };
 
@@ -16,9 +17,6 @@ const SymbolDisplaySummary = struct {
         return if (self.explicit_limit) "explicit" else "default";
     }
 };
-
-const typescript_symbol_line_history_out_of_scope_caveat = "module names are repo-relative .ts/.mts/.cts/.tsx paths; package, workspace, Node, module-resolution, tsconfig, type checking, LSP, and symbol line history are out of scope";
-const typescript_true_symbol_history_out_of_scope_caveat = "module names are repo-relative .ts/.mts/.cts/.tsx paths; package, workspace, Node, module-resolution, tsconfig, type checking, LSP, and true symbol history are out of scope";
 
 fn symbolDisplaySummary(symbols: model.SymbolReport, display: model.SymbolDisplay) SymbolDisplaySummary {
     const shown = @min(symbols.symbols.len, display.limit);
@@ -40,9 +38,9 @@ pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("commits={d} shallow={} partial={} dirty={} auto_fetch=false\n", .{ analysis.history.commit_count, analysis.history.is_shallow, analysis.history.is_partial, analysis.history.dirty_worktree });
     if (analysis.scope.filters_active) {
         try writer.print("scope: selected={s} include_prefixes=", .{model.scopePresetName(analysis.scope.selected_scope)});
-        try renderInlineStringArray(writer, analysis.scope.include_prefixes);
+        try fmt.renderInlineStringArray(writer, analysis.scope.include_prefixes);
         try writer.print(" exclude_prefixes=", .{});
-        try renderInlineStringArray(writer, analysis.scope.exclude_prefixes);
+        try fmt.renderInlineStringArray(writer, analysis.scope.exclude_prefixes);
         try writer.print(" outside_include_paths={d} outside_include_changes={d} excluded_paths={d} excluded_changes={d}\n", .{ analysis.scope.outside_include_path_count, analysis.scope.outside_include_change_count, analysis.scope.excluded_path_count, analysis.scope.excluded_change_count });
     }
     if (analysis.caveats.len > 0) {
@@ -88,7 +86,7 @@ fn renderTableSymbolRows(writer: anytype, symbols: model.SymbolReport, display: 
         try writer.print("  {s} {s} lines {d}-{d} confidence={s}\n", .{ @tagName(symbol.kind), symbol.name, range.start, range.end, @tagName(symbol.confidence) });
         if (symbol.current_line_history) |line_history| {
             try writer.print("    Current-line Git evidence: commits={d} lines={d} unblamable={d} freshness={s} failure={s} confidence={s} caveats=", .{ line_history.distinct_last_touch_commit_count, line_history.line_count, line_history.uncommitted_or_unblamable_line_count, @tagName(line_history.freshness), @tagName(line_history.failure), @tagName(line_history.confidence) });
-            try renderCaveatInline(writer, line_history.caveats);
+            try fmt.renderCaveatInline(writer, line_history.caveats);
             try writer.writeByte('\n');
         }
     }
@@ -100,20 +98,20 @@ pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("  \"tool\": {{ \"name\": \"git-hotspots\", \"version\": \"{s}\" }},\n", .{version.value});
     try writer.print("  \"analysis\": {{\n", .{});
     try writer.print("    \"history\": {{ \"head\": ", .{});
-    try jsonString(writer, analysis.history.head);
+    try fmt.jsonString(writer, analysis.history.head);
     try writer.print(", \"head_timestamp\": {d}, ", .{analysis.history.head_timestamp});
     try writer.print("\"range\": ", .{});
-    if (analysis.history.range) |r| try jsonString(writer, r) else try writer.print("null", .{});
+    if (analysis.history.range) |r| try fmt.jsonString(writer, r) else try writer.print("null", .{});
     try writer.print(", \"is_shallow\": {}, \"is_partial\": {}, \"auto_fetch\": false, \"dirty_worktree\": {}, \"commit_count\": {d} }},\n", .{ analysis.history.is_shallow, analysis.history.is_partial, analysis.history.dirty_worktree, analysis.history.commit_count });
     try writer.print("    \"scope\": {{ \"selected_scope\": ", .{});
-    try jsonString(writer, model.scopePresetName(analysis.scope.selected_scope));
+    try fmt.jsonString(writer, model.scopePresetName(analysis.scope.selected_scope));
     try writer.print(", \"filters_active\": {}, \"include_prefixes\": ", .{analysis.scope.filters_active});
-    try stringArray(writer, analysis.scope.include_prefixes);
+    try fmt.stringArray(writer, analysis.scope.include_prefixes);
     try writer.print(", \"exclude_prefixes\": ", .{});
-    try stringArray(writer, analysis.scope.exclude_prefixes);
+    try fmt.stringArray(writer, analysis.scope.exclude_prefixes);
     try writer.print(", \"outside_include_path_count\": {d}, \"outside_include_change_count\": {d}, \"excluded_path_count\": {d}, \"excluded_change_count\": {d} }},\n", .{ analysis.scope.outside_include_path_count, analysis.scope.outside_include_change_count, analysis.scope.excluded_path_count, analysis.scope.excluded_change_count });
     try writer.print("    \"caveats\": ", .{});
-    try stringArray(writer, analysis.caveats);
+    try fmt.stringArray(writer, analysis.caveats);
     try writer.print("\n", .{});
     try writer.print("  }},\n", .{});
     if (analysis.symbol_report) |symbols| {
@@ -122,26 +120,26 @@ pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
     }
     if (analysis.inspect) |inspect| {
         try writer.print("  \"inspect\": {{ \"requested_path\": ", .{});
-        try jsonString(writer, inspect.requested_path);
+        try fmt.jsonString(writer, inspect.requested_path);
         try writer.print(", \"matched_path\": ", .{});
-        try jsonString(writer, inspect.matched_path);
+        try fmt.jsonString(writer, inspect.matched_path);
         try writer.print(", \"rank\": {d} }},\n", .{inspect.rank});
     }
     try writer.print("  \"results\": [\n", .{});
     for (analysis.results, 0..) |row, i| {
         try writer.print("    {{\n", .{});
         try writer.print("      \"path\": ", .{});
-        try jsonString(writer, row.path);
+        try fmt.jsonString(writer, row.path);
         try writer.print(",\n", .{});
         try writer.print("      \"lineage\": {{ \"aliases\": ", .{});
-        try stringArray(writer, row.lineage_aliases);
+        try fmt.stringArray(writer, row.lineage_aliases);
         try writer.print(", \"partial\": {}, \"caveat\": ", .{row.lineage_partial});
-        try jsonString(writer, "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked");
+        try fmt.jsonString(writer, "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked");
         try writer.print(" }},\n", .{});
         try writer.print("      \"score\": {{ \"total\": {d:.3}, \"frequency\": {d:.3}, \"churn\": {d:.3}, \"recency\": {d:.3}, \"cochange\": {d:.3} }},\n", .{ row.score.total, row.score.frequency, row.score.churn, row.score.recency, row.score.cochange });
         try writer.print("      \"change_count\": {d}, \"additions\": {d}, \"deletions\": {d}, \"churn\": {d},\n", .{ row.change_count, row.additions, row.deletions, row.churn });
         try writer.print("      \"recency\": {{ \"last_changed_timestamp\": {d}, \"last_changed_commit\": ", .{row.last_changed_timestamp});
-        try jsonString(writer, row.last_changed_commit);
+        try fmt.jsonString(writer, row.last_changed_commit);
         try writer.print(" }},\n", .{});
         try writer.print("      \"current_size\": ", .{});
         if (row.current_size) |s| try writer.print("{d}", .{s}) else try writer.print("null", .{});
@@ -150,21 +148,21 @@ pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
         for (row.cochanges, 0..) |cc, j| {
             if (j != 0) try writer.print(", ", .{});
             try writer.print("{{ \"path\": ", .{});
-            try jsonString(writer, cc.path);
+            try fmt.jsonString(writer, cc.path);
             try writer.print(", \"count\": {d} }}", .{cc.count});
         }
         try writer.print("],\n", .{});
         try writer.print("      \"confidence\": ", .{});
-        try jsonString(writer, row.confidence);
+        try fmt.jsonString(writer, row.confidence);
         try writer.print(",\n", .{});
         try writer.print("      \"caveats\": ", .{});
-        try stringArray(writer, row.caveats);
+        try fmt.stringArray(writer, row.caveats);
         try writer.print(",\n", .{});
         try writer.print("      \"evidence\": [", .{});
         for (row.evidence, 0..) |ev, j| {
             if (j != 0) try writer.print(", ", .{});
             try writer.print("{{ \"commit\": ", .{});
-            try jsonString(writer, ev.commit);
+            try fmt.jsonString(writer, ev.commit);
             try writer.print(", \"timestamp\": {d}, \"additions\": ", .{ev.timestamp});
             if (ev.additions) |a| try writer.print("{d}", .{a}) else try writer.print("null", .{});
             try writer.print(", \"deletions\": ", .{});
@@ -185,10 +183,10 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
     try writer.writeAll("## Run summary\n\n");
     try writer.print("- Tool: git-hotspots {s}\n", .{version.value});
     try writer.writeAll("- Head commit: ");
-    try markdownText(writer, analysis.history.head);
+    try fmt.markdownText(writer, analysis.history.head);
     try writer.writeByte('\n');
     try writer.writeAll("- Range: ");
-    if (analysis.history.range) |range| try markdownText(writer, range) else try writer.writeAll("None");
+    if (analysis.history.range) |range| try fmt.markdownText(writer, range) else try writer.writeAll("None");
     try writer.writeByte('\n');
     try writer.print("- Commit count: {d}\n", .{analysis.history.commit_count});
     try writer.print("- Shallow history: {}\n", .{analysis.history.is_shallow});
@@ -206,7 +204,7 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
     } else {
         for (analysis.scope.include_prefixes, 0..) |prefix, i| {
             if (i != 0) try writer.writeAll(", ");
-            try markdownText(writer, prefix);
+            try fmt.markdownText(writer, prefix);
         }
     }
     try writer.writeByte('\n');
@@ -216,7 +214,7 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
     } else {
         for (analysis.scope.exclude_prefixes, 0..) |prefix, i| {
             if (i != 0) try writer.writeAll(", ");
-            try markdownText(writer, prefix);
+            try fmt.markdownText(writer, prefix);
         }
     }
     try writer.writeByte('\n');
@@ -228,10 +226,10 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
     if (analysis.inspect) |inspect| {
         try writer.writeAll("## Inspect\n\n");
         try writer.writeAll("- Requested path: ");
-        try markdownText(writer, inspect.requested_path);
+        try fmt.markdownText(writer, inspect.requested_path);
         try writer.writeByte('\n');
         try writer.writeAll("- Matched path: ");
-        try markdownText(writer, inspect.matched_path);
+        try fmt.markdownText(writer, inspect.matched_path);
         try writer.writeByte('\n');
         try writer.print("- Rank in scoped evidence universe: {d}\n\n", .{inspect.rank});
     }
@@ -241,20 +239,20 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
     }
 
     try writer.writeAll("## Caveats\n\n");
-    try renderMarkdownStringList(writer, analysis.caveats);
+    try fmt.renderMarkdownStringList(writer, analysis.caveats);
 
     try writer.writeAll("\n## Top hotspots\n\n");
     try writer.writeAll("| Rank | Path | Score | Changes | Churn | Confidence | Lineage | Last commit |\n");
     try writer.writeAll("| ---: | --- | ---: | ---: | ---: | --- | --- | --- |\n");
     for (analysis.results, 0..) |row, i| {
         try writer.print("| {d} | ", .{i + 1});
-        try markdownText(writer, row.path);
+        try fmt.markdownText(writer, row.path);
         try writer.print(" | {d:.1} | {d} | {d} | ", .{ row.score.total, row.change_count, row.churn });
-        try markdownText(writer, row.confidence);
+        try fmt.markdownText(writer, row.confidence);
         try writer.writeAll(" | ");
-        try markdownText(writer, lineageIndicator(row));
+        try fmt.markdownText(writer, lineageIndicator(row));
         try writer.writeAll(" | ");
-        try markdownText(writer, row.last_changed_commit);
+        try fmt.markdownText(writer, row.last_changed_commit);
         try writer.writeAll(" |\n");
     }
     if (analysis.results.len == 0) try writer.writeAll("\nNo hotspots matched the requested scope.\n");
@@ -267,7 +265,7 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
 
     for (analysis.results, 0..) |row, i| {
         try writer.print("\n### {d}. ", .{i + 1});
-        try markdownText(writer, row.path);
+        try fmt.markdownText(writer, row.path);
         try writer.writeAll("\n\n");
         try writer.print("- Score breakdown: total={d:.3}, frequency={d:.3}, churn={d:.3}, recency={d:.3}, cochange={d:.3}\n", .{ row.score.total, row.score.frequency, row.score.churn, row.score.recency, row.score.cochange });
         try writer.print("- Changes: {d}\n", .{row.change_count});
@@ -277,10 +275,10 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
         if (row.current_size) |size| try writer.print("{d}", .{size}) else try writer.writeAll("None");
         try writer.writeByte('\n');
         try writer.writeAll("- Confidence: ");
-        try markdownText(writer, row.confidence);
+        try fmt.markdownText(writer, row.confidence);
         try writer.writeByte('\n');
         try writer.writeAll("- Last commit: ");
-        try markdownText(writer, row.last_changed_commit);
+        try fmt.markdownText(writer, row.last_changed_commit);
         try writer.writeByte('\n');
 
         try writer.writeAll("- Lineage: ");
@@ -292,7 +290,7 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
                 try writer.writeAll("  - Accepted aliases: ");
                 for (row.lineage_aliases, 0..) |alias, alias_i| {
                     if (alias_i != 0) try writer.writeAll(", ");
-                    try markdownText(writer, alias);
+                    try fmt.markdownText(writer, alias);
                 }
                 try writer.writeByte('\n');
             }
@@ -305,7 +303,7 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
         } else {
             for (row.cochanges) |cc| {
                 try writer.writeAll("  - ");
-                try markdownText(writer, cc.path);
+                try fmt.markdownText(writer, cc.path);
                 try writer.print(" (count={d})\n", .{cc.count});
             }
         }
@@ -316,11 +314,11 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
         } else {
             for (row.evidence) |ev| {
                 try writer.writeAll("  - commit=");
-                try markdownText(writer, ev.commit);
+                try fmt.markdownText(writer, ev.commit);
                 try writer.print(" timestamp={d} additions=", .{ev.timestamp});
-                try renderOptionalU64(writer, ev.additions);
+                try fmt.renderOptionalU64(writer, ev.additions);
                 try writer.writeAll(" deletions=");
-                try renderOptionalU64(writer, ev.deletions);
+                try fmt.renderOptionalU64(writer, ev.deletions);
                 try writer.writeByte('\n');
             }
         }
@@ -331,7 +329,7 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
         } else {
             for (row.caveats) |caveat| {
                 try writer.writeAll("  - ");
-                try markdownText(writer, caveat);
+                try fmt.markdownText(writer, caveat);
                 try writer.writeByte('\n');
             }
         }
@@ -350,45 +348,45 @@ fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport, display:
     try writer.print("  \"symbols\": {{\n", .{});
     try writer.print("    \"current_only\": true,\n", .{});
     try writer.print("    \"human_display\": {{ \"total_count\": {d}, \"shown_count\": {d}, \"omitted_count\": {d}, \"default_limit\": {d}, \"active_limit\": {d}, \"limit_source\": ", .{ summary.total, summary.shown, summary.omitted, model.default_symbol_display_limit, summary.limit });
-    try jsonString(writer, summary.limitSource());
+    try fmt.jsonString(writer, summary.limitSource());
     try writer.print(", \"sort_basis\": ", .{});
-    try jsonString(writer, symbolSortBasis(symbols));
+    try fmt.jsonString(writer, symbolSortBasis(symbols));
     try writer.print(" }},\n", .{});
     try writer.print("    \"provider\": {{ \"name\": ", .{});
-    try jsonString(writer, symbols.provider.name);
+    try fmt.jsonString(writer, symbols.provider.name);
     try writer.print(", \"kind\": ", .{});
-    try jsonString(writer, @tagName(symbols.provider.kind));
+    try fmt.jsonString(writer, @tagName(symbols.provider.kind));
     try writer.print(", \"version\": ", .{});
-    try jsonString(writer, symbols.provider.version);
+    try fmt.jsonString(writer, symbols.provider.version);
     try writer.print(", \"contract_version\": ", .{});
-    try jsonString(writer, symbols.provider.contract_version);
+    try fmt.jsonString(writer, symbols.provider.contract_version);
     try writer.print(", \"freshness\": ", .{});
-    try jsonString(writer, @tagName(symbols.provider.freshness));
+    try fmt.jsonString(writer, @tagName(symbols.provider.freshness));
     try writer.print(", \"failure\": ", .{});
-    try jsonString(writer, @tagName(symbols.provider.failure));
+    try fmt.jsonString(writer, @tagName(symbols.provider.failure));
     try writer.print(", \"confidence\": ", .{});
-    try jsonString(writer, @tagName(symbols.provider.confidence));
+    try fmt.jsonString(writer, @tagName(symbols.provider.confidence));
     try writer.print(", \"caveats\": ", .{});
     const has_line_history = symbolsHaveLineHistory(symbols.symbols);
-    try stringArrayWithLineHistoryContext(writer, symbols.provider.caveats, has_line_history);
+    try fmt.stringArrayWithLineHistoryContext(writer, symbols.provider.caveats, has_line_history);
     try writer.print(", \"provenance\": {{ \"input\": ", .{});
-    try jsonString(writer, symbols.provider.input.identity);
+    try fmt.jsonString(writer, symbols.provider.input.identity);
     try writer.print(", \"local_only\": true }} }},\n", .{});
     try writer.print("    \"items\": [\n", .{});
     for (symbols.symbols, 0..) |symbol, i| {
         const range = displayLineRange(symbol.current_range);
         try writer.print("      {{ \"path\": ", .{});
-        try jsonString(writer, symbol.path);
+        try fmt.jsonString(writer, symbol.path);
         try writer.print(", \"name\": ", .{});
-        try jsonString(writer, symbol.name);
+        try fmt.jsonString(writer, symbol.name);
         try writer.print(", \"kind\": ", .{});
-        try jsonString(writer, @tagName(symbol.kind));
+        try fmt.jsonString(writer, @tagName(symbol.kind));
         try writer.print(", \"range\": {{ \"type\": \"lines\", \"start\": {d}, \"end\": {d} }}, \"provider\": ", .{ range.start, range.end });
-        try jsonString(writer, symbol.provider_name);
+        try fmt.jsonString(writer, symbol.provider_name);
         try writer.print(", \"confidence\": ", .{});
-        try jsonString(writer, @tagName(symbol.confidence));
+        try fmt.jsonString(writer, @tagName(symbol.confidence));
         try writer.print(", \"caveats\": ", .{});
-        try stringArrayWithLineHistoryContext(writer, symbol.caveats, symbol.current_line_history != null);
+        try fmt.stringArrayWithLineHistoryContext(writer, symbol.caveats, symbol.current_line_history != null);
         if (symbol.current_line_history) |line_history| {
             try writer.print(", \"current_line_history\": ", .{});
             try renderCurrentLineHistoryJson(writer, line_history);
@@ -403,7 +401,7 @@ fn renderSymbolReportMarkdown(writer: anytype, symbols: model.SymbolReport, disp
     try writer.writeAll("## Symbols\n\n");
     try writer.writeAll("Symbols are opt-in current working-tree enrichment only. They do not change score, file order, lineage, confidence, or file-level Git evidence.\n\n");
     try writer.writeAll("- Provider: ");
-    try markdownText(writer, symbols.provider.name);
+    try fmt.markdownText(writer, symbols.provider.name);
     try writer.writeByte('\n');
     try writer.print("- State: current-only\n- Freshness: {s}\n- Failure: {s}\n- Confidence: {s}\n", .{ @tagName(symbols.provider.freshness), @tagName(symbols.provider.failure), @tagName(symbols.provider.confidence) });
     try writer.print("- Total symbols: {d}\n- Shown symbols: {d}\n- Omitted symbols: {d}\n- Human display limit: {d} ({s})\n- Sort basis: shown first by {s}\n", .{ summary.total, summary.shown, summary.omitted, summary.limit, summary.limitSource(), symbolSortBasis(symbols) });
@@ -414,7 +412,7 @@ fn renderSymbolReportMarkdown(writer: anytype, symbols: model.SymbolReport, disp
         const has_line_history = symbolsHaveLineHistory(symbols.symbols);
         for (symbols.provider.caveats) |caveat| {
             try writer.writeAll("  - ");
-            try markdownText(writer, caveatForLineHistoryContext(caveat, has_line_history));
+            try fmt.markdownText(writer, fmt.caveatForLineHistoryContext(caveat, has_line_history));
             try writer.writeByte('\n');
         }
     }
@@ -434,12 +432,12 @@ fn renderSymbolReportMarkdown(writer: anytype, symbols: model.SymbolReport, disp
         const symbol = symbols.symbols[index];
         const range = displayLineRange(symbol.current_range);
         try writer.writeAll("| ");
-        try markdownText(writer, symbol.name);
+        try fmt.markdownText(writer, symbol.name);
         try writer.print(" | {s} | {d}-{d} | {s} |", .{ @tagName(symbol.kind), range.start, range.end, @tagName(symbol.confidence) });
         if (has_line_history) {
             if (symbol.current_line_history) |line_history| {
                 try writer.print(" Current-line Git evidence: commits={d}; lines={d}; unblamable={d}; freshness={s}; failure={s}; confidence={s}; caveats=", .{ line_history.distinct_last_touch_commit_count, line_history.line_count, line_history.uncommitted_or_unblamable_line_count, @tagName(line_history.freshness), @tagName(line_history.failure), @tagName(line_history.confidence) });
-                try renderMarkdownCaveatInline(writer, line_history.caveats);
+                try fmt.renderMarkdownCaveatInline(writer, line_history.caveats);
                 try writer.writeAll(" |\n");
             } else {
                 try writer.writeAll(" - |\n");
@@ -523,150 +521,26 @@ fn compareRangeForSort(lhs: provider.CurrentRange, rhs: provider.CurrentRange) s
 
 fn renderCurrentLineHistoryJson(writer: anytype, line_history: provider.CurrentLineHistoryEvidence) !void {
     try writer.print("{{ \"basis\": ", .{});
-    try jsonString(writer, line_history.basis);
+    try fmt.jsonString(writer, line_history.basis);
     try writer.print(", \"current_only\": {}, \"line_count\": {d}, \"distinct_last_touch_commit_count\": {d}, \"most_recent_line_touched_timestamp\": ", .{ line_history.current_only, line_history.line_count, line_history.distinct_last_touch_commit_count });
     if (line_history.most_recent_line_touched_timestamp) |ts| try writer.print("{d}", .{ts}) else try writer.print("null", .{});
     try writer.print(", \"uncommitted_or_unblamable_line_count\": {d}, \"sample_commits\": ", .{line_history.uncommitted_or_unblamable_line_count});
-    try stringArray(writer, line_history.sample_commits);
+    try fmt.stringArray(writer, line_history.sample_commits);
     try writer.print(", \"freshness\": ", .{});
-    try jsonString(writer, @tagName(line_history.freshness));
+    try fmt.jsonString(writer, @tagName(line_history.freshness));
     try writer.print(", \"failure\": ", .{});
-    try jsonString(writer, @tagName(line_history.failure));
+    try fmt.jsonString(writer, @tagName(line_history.failure));
     try writer.print(", \"confidence\": ", .{});
-    try jsonString(writer, @tagName(line_history.confidence));
+    try fmt.jsonString(writer, @tagName(line_history.confidence));
     try writer.print(", \"caveats\": ", .{});
-    try stringArray(writer, line_history.caveats);
+    try fmt.stringArray(writer, line_history.caveats);
     try writer.print(" }}", .{});
-}
-
-fn renderCaveatInline(writer: anytype, caveats: []const []const u8) !void {
-    if (caveats.len == 0) {
-        try writer.writeAll("none");
-        return;
-    }
-    for (caveats, 0..) |caveat, i| {
-        if (i != 0) try writer.writeAll("; ");
-        try writer.writeAll(caveat);
-    }
-}
-
-fn renderMarkdownCaveatInline(writer: anytype, caveats: []const []const u8) !void {
-    if (caveats.len == 0) {
-        try writer.writeAll("none");
-        return;
-    }
-    for (caveats, 0..) |caveat, i| {
-        if (i != 0) try writer.writeAll("; ");
-        try markdownText(writer, caveat);
-    }
-}
-
-fn stringArray(writer: anytype, values: []const []const u8) !void {
-    try writer.print("[", .{});
-    for (values, 0..) |v, i| {
-        if (i != 0) try writer.print(", ", .{});
-        try jsonString(writer, v);
-    }
-    try writer.print("]", .{});
-}
-
-fn stringArrayWithLineHistoryContext(writer: anytype, values: []const []const u8, line_history_context: bool) !void {
-    try writer.print("[", .{});
-    for (values, 0..) |v, i| {
-        if (i != 0) try writer.print(", ", .{});
-        try jsonString(writer, caveatForLineHistoryContext(v, line_history_context));
-    }
-    try writer.print("]", .{});
-}
-
-fn caveatForLineHistoryContext(caveat: []const u8, line_history_context: bool) []const u8 {
-    if (line_history_context and std.mem.eql(u8, caveat, typescript_symbol_line_history_out_of_scope_caveat)) return typescript_true_symbol_history_out_of_scope_caveat;
-    return caveat;
-}
-
-fn renderInlineStringArray(writer: anytype, values: []const []const u8) !void {
-    try writer.print("[", .{});
-    for (values, 0..) |value, i| {
-        if (i != 0) try writer.print(",", .{});
-        try writer.print("{s}", .{value});
-    }
-    try writer.print("]", .{});
-}
-
-fn renderMarkdownStringList(writer: anytype, values: []const []const u8) !void {
-    if (values.len == 0) {
-        try writer.writeAll("- None\n");
-        return;
-    }
-    for (values) |value| {
-        try writer.writeAll("- ");
-        try markdownText(writer, value);
-        try writer.writeByte('\n');
-    }
-}
-
-fn renderOptionalU64(writer: anytype, value: ?u64) !void {
-    if (value) |v| try writer.print("{d}", .{v}) else try writer.writeAll("None");
 }
 
 fn lineageIndicator(row: model.Result) []const u8 {
     if (row.lineage_partial) return "partial";
     if (row.lineage_aliases.len > 0) return "yes";
     return "no";
-}
-
-fn markdownText(writer: anytype, value: []const u8) !void {
-    for (value) |c| switch (c) {
-        '\\' => try writer.writeAll("\\\\"),
-        '`' => try writer.writeAll("\\`"),
-        '*' => try writer.writeAll("\\*"),
-        '_' => try writer.writeAll("\\_"),
-        '{' => try writer.writeAll("\\{"),
-        '}' => try writer.writeAll("\\}"),
-        '[' => try writer.writeAll("\\["),
-        ']' => try writer.writeAll("\\]"),
-        '(' => try writer.writeAll("\\("),
-        ')' => try writer.writeAll("\\)"),
-        '#' => try writer.writeAll("\\#"),
-        '+' => try writer.writeAll("\\+"),
-        '-' => try writer.writeAll("\\-"),
-        '!' => try writer.writeAll("\\!"),
-        '|' => try writer.writeAll("\\|"),
-        '>' => try writer.writeAll("\\>"),
-        '\n' => try writer.writeAll("\\n"),
-        '\r' => try writer.writeAll("\\r"),
-        '\t' => try writer.writeAll("\\t"),
-        0...8, 11...12, 14...0x1f, 0x7f => try writer.print("\\x{x:0>2}", .{c}),
-        else => try writer.writeByte(c),
-    };
-}
-
-fn jsonString(writer: anytype, value: []const u8) !void {
-    try writer.writeByte('"');
-    for (value) |c| switch (c) {
-        '"' => try writer.writeAll("\\\""),
-        '\\' => try writer.writeAll("\\\\"),
-        '\n' => try writer.writeAll("\\n"),
-        '\r' => try writer.writeAll("\\r"),
-        '\t' => try writer.writeAll("\\t"),
-        0...8, 11...12, 14...0x1f => try writer.print("\\u{x:0>4}", .{c}),
-        else => try writer.writeByte(c),
-    };
-    try writer.writeByte('"');
-}
-
-test "json string escapes paths" {
-    var aw: std.Io.Writer.Allocating = .init(std.testing.allocator);
-    defer aw.deinit();
-    try jsonString(&aw.writer, "a b/é\t\\q\"");
-    try std.testing.expectEqualStrings("\"a b/é\\t\\\\q\\\"\"", aw.written());
-}
-
-test "markdown text escapes markdown and control characters" {
-    var aw: std.Io.Writer.Allocating = .init(std.testing.allocator);
-    defer aw.deinit();
-    try markdownText(&aw.writer, "# [a|b] `x`\t\\q\x01");
-    try std.testing.expectEqualStrings("\\# \\[a\\|b\\] \\`x\\`\\t\\\\q\\x01", aw.written());
 }
 
 test "human symbol display limit keeps json-complete metadata separate" {
