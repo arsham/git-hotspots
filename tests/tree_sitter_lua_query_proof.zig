@@ -20,6 +20,8 @@ const unsupported_source = @embedFile("fixtures/tree_sitter_lua_query/unsupporte
 
 const provider_name = "tree-sitter-lua-query-proof";
 const query_version = "lua-symbol-query-v1";
+const provider_version = "tree-sitter-core@v0.26.9/tree-sitter-lua@v0.5.0/lua-symbol-query-v1";
+const query_fingerprint = "tests/fixtures/tree_sitter_lua_query/lua-symbols.scm:lua-symbol-query-v1";
 const expected_capture_names = [_][]const u8{
     "lua.module",
     "lua.definition.name",
@@ -114,7 +116,8 @@ const SymbolCandidate = struct {
     symbol: provider.CurrentSymbolEvidence,
 };
 
-const SymbolExtractionResult = struct {
+pub const SymbolExtractionResult = struct {
+    provider: provider.ProviderEvidence,
     failure: provider.Failure,
     symbols: []provider.CurrentSymbolEvidence,
     caveats: []const []const u8,
@@ -123,43 +126,48 @@ const SymbolExtractionResult = struct {
     metatable_skip_count: usize = 0,
     embedded_dsl_caveated: bool = false,
 
-    fn deinit(self: *SymbolExtractionResult, allocator: std.mem.Allocator) void {
+    pub fn deinit(self: *SymbolExtractionResult, allocator: std.mem.Allocator) void {
         if (self.symbols.len > 0) allocator.free(self.symbols);
         self.* = undefined;
     }
 };
 
-fn extractLuaQuerySymbols(
+pub fn extractLuaQuerySymbols(
     allocator: std.mem.Allocator,
+    repo_relative_path: []const u8,
+    source: []const u8,
+) !SymbolExtractionResult {
+    return extractLuaQuerySymbolsWithProvider(allocator, provider_name, repo_relative_path, source);
+}
+
+pub fn extractLuaQuerySymbolsWithProvider(
+    allocator: std.mem.Allocator,
+    proof_provider_name: []const u8,
     repo_relative_path: []const u8,
     source: []const u8,
 ) !SymbolExtractionResult {
     try provider.validateRepoRelativePath(repo_relative_path);
 
     if (!std.mem.endsWith(u8, repo_relative_path, ".lua")) {
-        return .{
-            .failure = .unsupported,
-            .symbols = &.{},
-            .caveats = &unsupported_caveats,
-        };
+        return extractionResult(proof_provider_name, repo_relative_path, .unsupported, .unknown, .unknown, &unsupported_caveats, &.{});
     }
 
-    const parser = c.ts_parser_new() orelse return failedResult();
+    const parser = c.ts_parser_new() orelse return failedResult(proof_provider_name, repo_relative_path);
     defer c.ts_parser_delete(parser);
 
-    if (!c.ts_parser_set_language(parser, tree_sitter_lua())) return failedResult();
+    if (!c.ts_parser_set_language(parser, tree_sitter_lua())) return failedResult(proof_provider_name, repo_relative_path);
 
-    const source_len = std.math.cast(u32, source.len) orelse return failedResult();
-    const tree = c.ts_parser_parse_string(parser, null, source.ptr, source_len) orelse return failedResult();
+    const source_len = std.math.cast(u32, source.len) orelse return failedResult(proof_provider_name, repo_relative_path);
+    const tree = c.ts_parser_parse_string(parser, null, source.ptr, source_len) orelse return failedResult(proof_provider_name, repo_relative_path);
     defer c.ts_tree_delete(tree);
 
     const root = c.ts_tree_root_node(tree);
-    if (c.ts_node_has_error(root)) return failedResult();
+    if (c.ts_node_has_error(root)) return failedResult(proof_provider_name, repo_relative_path);
 
     const query = try compileLuaQuery();
     defer c.ts_query_delete(query);
 
-    const cursor = c.ts_query_cursor_new() orelse return failedResult();
+    const cursor = c.ts_query_cursor_new() orelse return failedResult(proof_provider_name, repo_relative_path);
     defer c.ts_query_cursor_delete(cursor);
 
     var candidates: std.ArrayList(SymbolCandidate) = .empty;
@@ -184,6 +192,7 @@ fn extractLuaQuerySymbols(
                 try appendCandidate(
                     allocator,
                     &candidates,
+                    proof_provider_name,
                     repo_relative_path,
                     repo_relative_path,
                     .module,
@@ -213,7 +222,7 @@ fn extractLuaQuerySymbols(
 
         if (definition_kind) |kind| {
             if (!has_name) continue;
-            try appendDefinitionCandidate(allocator, &candidates, repo_relative_path, source, definition_node, name_node, kind, profile);
+            try appendDefinitionCandidate(allocator, &candidates, proof_provider_name, repo_relative_path, source, definition_node, name_node, kind, profile);
         }
     }
 
@@ -223,15 +232,12 @@ fn extractLuaQuerySymbols(
     errdefer symbols.deinit(allocator);
     for (candidates.items) |candidate| try symbols.append(allocator, candidate.symbol);
 
-    return .{
-        .failure = .ok,
-        .symbols = try symbols.toOwnedSlice(allocator),
-        .caveats = caveatsForModule(profile),
-        .comment_capture_count = comment_capture_count,
-        .dynamic_table_assignment_skip_count = profile.dynamic_table_assignment_skip_count,
-        .metatable_skip_count = profile.metatable_skip_count,
-        .embedded_dsl_caveated = profile.embedded_dsl,
-    };
+    var extracted = extractionResult(proof_provider_name, repo_relative_path, .ok, .fresh, .high, caveatsForModule(profile), try symbols.toOwnedSlice(allocator));
+    extracted.comment_capture_count = comment_capture_count;
+    extracted.dynamic_table_assignment_skip_count = profile.dynamic_table_assignment_skip_count;
+    extracted.metatable_skip_count = profile.metatable_skip_count;
+    extracted.embedded_dsl_caveated = profile.embedded_dsl;
+    return extracted;
 }
 
 fn compileLuaQuery() !*c.TSQuery {
@@ -246,17 +252,42 @@ fn compileLuaQuery() !*c.TSQuery {
     ) orelse error.QueryCompileFailed;
 }
 
-fn failedResult() SymbolExtractionResult {
+fn extractionResult(
+    proof_provider_name: []const u8,
+    repo_relative_path: []const u8,
+    failure: provider.Failure,
+    freshness: provider.Freshness,
+    confidence: provider.Confidence,
+    caveats: []const []const u8,
+    symbols: []provider.CurrentSymbolEvidence,
+) SymbolExtractionResult {
     return .{
-        .failure = .failed,
-        .symbols = &.{},
-        .caveats = &failed_caveats,
+        .provider = .{
+            .name = proof_provider_name,
+            .kind = .symbol,
+            .version = provider_version,
+            .config_fingerprint = query_fingerprint,
+            .input = .{ .identity = repo_relative_path },
+            .freshness = freshness,
+            .failure = failure,
+            .confidence = confidence,
+            .caveats = caveats,
+            .provenance = .{ .provider_name = proof_provider_name, .input_identity = repo_relative_path },
+        },
+        .failure = failure,
+        .symbols = symbols,
+        .caveats = caveats,
     };
+}
+
+fn failedResult(proof_provider_name: []const u8, repo_relative_path: []const u8) SymbolExtractionResult {
+    return extractionResult(proof_provider_name, repo_relative_path, .failed, .unknown, .low, &failed_caveats, &.{});
 }
 
 fn appendDefinitionCandidate(
     allocator: std.mem.Allocator,
     candidates: *std.ArrayList(SymbolCandidate),
+    proof_provider_name: []const u8,
     path: []const u8,
     source: []const u8,
     definition_node: c.TSNode,
@@ -268,8 +299,8 @@ fn appendDefinitionCandidate(
 
     const symbol_name = nodeSourceSlice(source, name_node) orelse return;
     switch (kind) {
-        .function => try appendCandidate(allocator, candidates, path, symbol_name, .function, name_node, definition_node, caveatsForDefinition(.function, profile)),
-        .method => try appendCandidate(allocator, candidates, path, symbol_name, .method, name_node, definition_node, caveatsForDefinition(.method, profile)),
+        .function => try appendCandidate(allocator, candidates, proof_provider_name, path, symbol_name, .function, name_node, definition_node, caveatsForDefinition(.function, profile)),
+        .method => try appendCandidate(allocator, candidates, proof_provider_name, path, symbol_name, .method, name_node, definition_node, caveatsForDefinition(.method, profile)),
         .variable => {
             if (nodeTypeIs(definition_node, "assignment_statement") and nodeTypeIs(c.ts_node_parent(definition_node), "variable_declaration")) return;
             const assigned_value = assignedSingleValueNode(definition_node);
@@ -277,7 +308,7 @@ fn appendDefinitionCandidate(
                 if (nodeTypeIs(value, "function_definition")) .function else if (isConstantLikeName(symbol_name)) .other else .variable
             else if (isConstantLikeName(symbol_name)) .other else .variable;
             const caveat_kind: CaveatKind = if (symbol_kind == .function) .assigned_function else if (symbol_kind == .other) .constant else .variable;
-            try appendCandidate(allocator, candidates, path, symbol_name, symbol_kind, name_node, definition_node, caveatsForDefinition(caveat_kind, profile));
+            try appendCandidate(allocator, candidates, proof_provider_name, path, symbol_name, symbol_kind, name_node, definition_node, caveatsForDefinition(caveat_kind, profile));
         },
         .table_field => {
             if (!isModuleLevelStableTableDefinition(definition_node)) return;
@@ -285,7 +316,7 @@ fn appendDefinitionCandidate(
             const value = tableDefinitionValueNode(definition_node);
             const symbol_kind: provider.SymbolKind = if (nodeTypeIs(value, "function_definition")) .function else if (isConstantLikeName(symbol_name)) .other else .variable;
             const caveat_kind: CaveatKind = if (symbol_kind == .function) .table_function else if (symbol_kind == .other) .constant else .table_field;
-            try appendCandidate(allocator, candidates, path, symbol_name, symbol_kind, name_node, definition_node, caveatsForDefinition(caveat_kind, profile));
+            try appendCandidate(allocator, candidates, proof_provider_name, path, symbol_name, symbol_kind, name_node, definition_node, caveatsForDefinition(caveat_kind, profile));
         },
     }
 }
@@ -293,6 +324,7 @@ fn appendDefinitionCandidate(
 fn appendCandidate(
     allocator: std.mem.Allocator,
     candidates: *std.ArrayList(SymbolCandidate),
+    proof_provider_name: []const u8,
     path: []const u8,
     symbol_name: []const u8,
     kind: provider.SymbolKind,
@@ -308,7 +340,7 @@ fn appendCandidate(
             .name = symbol_name,
             .kind = kind,
             .current_range = .{ .lines = nodeLineRange(symbol_range_node) },
-            .provider_name = provider_name,
+            .provider_name = proof_provider_name,
             .confidence = .high,
             .caveats = caveats,
         },
@@ -540,6 +572,27 @@ fn expectCaveat(caveats: []const []const u8, expected: []const u8) !void {
     return error.ExpectedCaveat;
 }
 
+fn expectProviderEvidence(
+    evidence: provider.ProviderEvidence,
+    expected_provider_name: []const u8,
+    expected_input_identity: []const u8,
+    expected_failure: provider.Failure,
+    expected_freshness: provider.Freshness,
+    expected_confidence: provider.Confidence,
+) !void {
+    try std.testing.expectEqualStrings(expected_provider_name, evidence.name);
+    try std.testing.expectEqual(provider.ProviderKind.symbol, evidence.kind);
+    try std.testing.expectEqualStrings(provider_version, evidence.version);
+    try std.testing.expectEqualStrings(provider.contract_version, evidence.contract_version);
+    try std.testing.expectEqualStrings(query_fingerprint, evidence.config_fingerprint.?);
+    try std.testing.expectEqualStrings(expected_input_identity, evidence.input.identity);
+    try std.testing.expectEqual(expected_freshness, evidence.freshness);
+    try std.testing.expectEqual(expected_failure, evidence.failure);
+    try std.testing.expectEqual(expected_confidence, evidence.confidence);
+    try std.testing.expectEqualStrings(expected_provider_name, evidence.provenance.provider_name);
+    try std.testing.expectEqualStrings(expected_input_identity, evidence.provenance.input_identity);
+}
+
 test "Lua query contract exposes expected capture names" {
     const query = try compileLuaQuery();
     defer c.ts_query_delete(query);
@@ -560,6 +613,7 @@ test "extracts supported Lua query symbols in deterministic source order" {
     defer result.deinit(std.testing.allocator);
 
     try std.testing.expectEqual(provider.Failure.ok, result.failure);
+    try expectProviderEvidence(result.provider, provider_name, "lua/supported_subset.lua", .ok, .fresh, .high);
     try std.testing.expectEqual(@as(usize, 10), result.symbols.len);
     try std.testing.expectEqual(@as(usize, 1), result.comment_capture_count);
     try expectSymbol(result.symbols[0], "lua/supported_subset.lua", .module, 1, 33);
@@ -659,6 +713,7 @@ test "invalid partial Lua fixture fails safely without diagnostics" {
     defer result.deinit(std.testing.allocator);
 
     try std.testing.expectEqual(provider.Failure.failed, result.failure);
+    try expectProviderEvidence(result.provider, provider_name, "lua/invalid_partial.lua", .failed, .unknown, .low);
     try std.testing.expectEqual(@as(usize, 0), result.symbols.len);
     try expectCaveat(result.caveats, "no parser diagnostics or source snippets exposed");
 }
@@ -682,6 +737,7 @@ test "unsupported and unsafe Lua query paths fail closed" {
     defer result.deinit(std.testing.allocator);
 
     try std.testing.expectEqual(provider.Failure.unsupported, result.failure);
+    try expectProviderEvidence(result.provider, provider_name, "docs/unsupported.md", .unsupported, .unknown, .unknown);
     try std.testing.expectEqual(@as(usize, 0), result.symbols.len);
     try expectCaveat(result.caveats, "no Lua parser was run for the unsupported path");
 
