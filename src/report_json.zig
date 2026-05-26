@@ -120,14 +120,15 @@ fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport, display:
     try writer.print(", \"local_only\": true }} }},\n", .{});
     try writer.print("    \"items\": [\n", .{});
     for (symbols.symbols, 0..) |symbol, i| {
-        const range = report_symbols.displayLineRange(symbol.current_range);
         try writer.print("      {{ \"path\": ", .{});
         try fmt.jsonString(writer, symbol.path);
         try writer.print(", \"name\": ", .{});
         try fmt.jsonString(writer, symbol.name);
         try writer.print(", \"kind\": ", .{});
         try fmt.jsonString(writer, @tagName(symbol.kind));
-        try writer.print(", \"range\": {{ \"type\": \"lines\", \"start\": {d}, \"end\": {d} }}, \"provider\": ", .{ range.start, range.end });
+        try writer.print(", \"range\": ", .{});
+        try renderRangeJson(writer, symbol.current_range);
+        try writer.print(", \"provider\": ", .{});
         try fmt.jsonString(writer, symbol.provider_name);
         try writer.print(", \"confidence\": ", .{});
         try fmt.jsonString(writer, @tagName(symbol.confidence));
@@ -140,6 +141,13 @@ fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport, display:
         try writer.print(" }}{s}\n", .{if (i + 1 == symbols.symbols.len) "" else ","});
     }
     try writer.print("    ]\n  }}", .{});
+}
+
+fn renderRangeJson(writer: anytype, range: provider.CurrentRange) !void {
+    switch (range) {
+        .lines => |lines| try writer.print("{{ \"type\": \"lines\", \"start\": {d}, \"end\": {d} }}", .{ lines.start, lines.end }),
+        .bytes => |bytes| try writer.print("{{ \"type\": \"bytes\", \"start\": {d}, \"end\": {d} }}", .{ bytes.start, bytes.end }),
+    }
 }
 
 fn renderCurrentLineHistoryJson(writer: anytype, line_history: provider.CurrentLineHistoryEvidence) !void {
@@ -158,4 +166,47 @@ fn renderCurrentLineHistoryJson(writer: anytype, line_history: provider.CurrentL
     try writer.print(", \"caveats\": ", .{});
     try fmt.stringArray(writer, line_history.caveats);
     try writer.print(" }}", .{});
+}
+
+test "symbol JSON preserves line and byte ranges" {
+    var symbol_items = [_]provider.CurrentSymbolEvidence{
+        .{
+            .path = "src/raw.bin",
+            .name = "raw-symbol",
+            .kind = .other,
+            .current_range = .{ .bytes = .{ .start = 100, .end = 200 } },
+            .provider_name = "synthetic-provider",
+            .confidence = .low,
+        },
+        .{
+            .path = "src/main.zig",
+            .name = "line-symbol",
+            .kind = .function,
+            .current_range = .{ .lines = .{ .start = 3, .end = 5 } },
+            .provider_name = "synthetic-provider",
+            .confidence = .high,
+        },
+    };
+    const report_model = model.SymbolReport{
+        .provider = .{
+            .name = "synthetic-provider",
+            .kind = .symbol,
+            .version = "synthetic-1",
+            .input = .{ .identity = "working-tree:src/raw.bin" },
+            .freshness = .fresh,
+            .failure = .ok,
+            .confidence = .low,
+            .caveats = &.{},
+            .provenance = .{ .provider_name = "synthetic-provider", .input_identity = "working-tree:src/raw.bin" },
+        },
+        .symbols = symbol_items[0..],
+    };
+
+    var aw: std.Io.Writer.Allocating = .init(std.testing.allocator);
+    defer aw.deinit();
+    try renderSymbolReportJson(&aw.writer, report_model, .{ .limit = 10, .explicit_limit = false });
+    const out = aw.written();
+    try std.testing.expect(std.mem.indexOf(u8, out, "\"range\": { \"type\": \"bytes\", \"start\": 100, \"end\": 200 }") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "\"range\": { \"type\": \"lines\", \"start\": 3, \"end\": 5 }") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "\"type\": \"lines\", \"start\": 0, \"end\": 0") == null);
 }
