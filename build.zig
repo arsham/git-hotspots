@@ -100,6 +100,7 @@ fn addTreeSitterProviders(b: *std.Build, module: *std.Build.Module) void {
     addTreeSitterGoGrammar(b, module);
     addTreeSitterPythonGrammar(b, module);
     addTreeSitterJavaScriptGrammar(b, module);
+    addTreeSitterLuaGrammar(b, module);
     addTreeSitterTypeScriptGrammar(b, module);
     addTreeSitterTsxGrammar(b, module);
 }

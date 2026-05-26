@@ -619,6 +619,7 @@ capability_matrix_checks() {
   matrix_go=$ARTIFACT_DIR/capability-go.json
   matrix_python=$ARTIFACT_DIR/capability-python.json
   matrix_javascript=$ARTIFACT_DIR/capability-javascript.json
+  matrix_lua=$ARTIFACT_DIR/capability-lua.json
   matrix_typescript=$ARTIFACT_DIR/capability-typescript.json
   matrix_tsx=$ARTIFACT_DIR/capability-tsx.json
   matrix_unsupported=$ARTIFACT_DIR/capability-unsupported.json
@@ -631,11 +632,12 @@ capability_matrix_checks() {
   "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-line-history --format json > "$matrix_go" || return 1
   "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-line-history --format json > "$matrix_python" || return 1
   "$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --symbol-line-history --format json > "$matrix_javascript" || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format json > "$matrix_lua" || return 1
   "$EXE" --repo fixtures/typescript-symbols --inspect src/example.ts --symbols --symbol-line-history --format json > "$matrix_typescript" || return 1
   "$EXE" --repo fixtures/typescript-symbols --inspect src/component.tsx --symbols --symbol-line-history --format json > "$matrix_tsx" || return 1
   "$EXE" --repo fixtures/symbols --inspect src/readme.txt --symbols --format json > "$matrix_unsupported" || return 1
 
-  python3 - README.md "$matrix_explain" "$matrix_help" "$matrix_zig" "$matrix_go" "$matrix_python" "$matrix_javascript" "$matrix_typescript" "$matrix_tsx" "$matrix_unsupported" <<'PY'
+  python3 - README.md "$matrix_explain" "$matrix_help" "$matrix_zig" "$matrix_go" "$matrix_python" "$matrix_javascript" "$matrix_lua" "$matrix_typescript" "$matrix_tsx" "$matrix_unsupported" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -643,13 +645,14 @@ from pathlib import Path
 readme = Path(sys.argv[1]).read_text(encoding='utf-8')
 explain = Path(sys.argv[2]).read_text(encoding='utf-8')
 help_text = Path(sys.argv[3]).read_text(encoding='utf-8')
-zig, go, python, javascript, typescript, tsx, unsupported = [json.load(open(path, encoding='utf-8')) for path in sys.argv[4:]]
+zig, go, python, javascript, lua, typescript, tsx, unsupported = [json.load(open(path, encoding='utf-8')) for path in sys.argv[4:]]
 
 readme_rows = [
     '| Zig | `.zig` | `tree-sitter-zig` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no dependencies, semantic moves, true symbol history, scoring, or ownership claims |',
     '| Go | `.go` | `tree-sitter-go` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, build tags, cgo, dependency graphs, true symbol history, scoring, or ownership claims |',
     '| Python | `.py` | `tree-sitter-python` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no imports, packages, virtual environments, dependency graphs, generated-source policy, true symbol history, scoring, or ownership claims |',
     '| JavaScript | `.js`, `.mjs`, `.cjs`, admitted `.jsx` | `tree-sitter-javascript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, true symbol history, scoring, or ownership claims |',
+    '| Lua | `.lua` | `tree-sitter-lua` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, true symbol history, scoring, or ownership claims |',
     '| TypeScript | `.ts`, `.mts`, `.cts` | `tree-sitter-typescript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, true symbol history, scoring, or ownership claims |',
     '| TSX | `.tsx` | `tree-sitter-tsx` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no React, DOM, packages, type analysis, dependency graphs, cache, true symbol history, scoring, or ownership claims |',
     '| Unsupported current files | all other paths | unsupported fallback | provider reports `unsupported` and keeps inspected file evidence | no current-line evidence | no parser diagnostics, source snippets, or parsed symbols |',
@@ -679,6 +682,7 @@ cases = [
     ('Go', go, 'tree-sitter-go', 'src/example.go'),
     ('Python', python, 'tree-sitter-python', 'src/example.py'),
     ('JavaScript', javascript, 'tree-sitter-javascript', 'src/example.mjs'),
+    ('Lua', lua, 'tree-sitter-lua', 'src/example.lua'),
     ('TypeScript', typescript, 'tree-sitter-typescript', 'src/example.ts'),
     ('TSX', tsx, 'tree-sitter-tsx', 'src/component.tsx'),
 ]
@@ -1813,7 +1817,7 @@ else
   printf '  - none\n'
 fi
 printf 'privacy: summary uses labels and bounded counts only; raw reports and absolute private paths are not printed.\n'
-printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, packaging, or release automation; opt-in inspect-only Tree-sitter Zig, Go, Python, JavaScript, TypeScript, or TSX symbols are local current-file enrichment.\n'
+printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, packaging, or release automation; opt-in inspect-only Tree-sitter Zig, Go, Python, JavaScript, Lua, TypeScript, or TSX symbols are local current-file enrichment.\n'
 
 if [ "$FAILURES" -ne 0 ]; then
   printf 'validate: %d rung(s) failed\n' "$FAILURES" >&2

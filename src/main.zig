@@ -7,6 +7,7 @@ const tree_sitter_zig = @import("tree_sitter_zig.zig");
 const tree_sitter_go = @import("tree_sitter_go.zig");
 const tree_sitter_python = @import("tree_sitter_python.zig");
 const tree_sitter_javascript = @import("tree_sitter_javascript.zig");
+const tree_sitter_lua = @import("tree_sitter_lua.zig");
 const tree_sitter_typescript = @import("tree_sitter_typescript.zig");
 const explain = @import("explain.zig");
 const version = @import("version.zig");
@@ -43,15 +44,15 @@ const usage =
     \\                    canonical path; use \\t to target a tab in a Git path
     \\  --symbols         With --inspect PATH only, add opt-in inspect-only current
     \\                    working-tree Tree-sitter Zig, Go, Python, JavaScript,
-    \\                    TypeScript, or TSX symbols for that file; JavaScript covers
-    \\                    .js, .mjs, .cjs, and admitted .jsx; TypeScript/TSX covers
-    \\                    .ts, .mts, .cts,
-    \\                    and .tsx; does not affect score, rank, lineage, confidence, or
+    \\                    Lua, TypeScript, or TSX symbols for that file; JavaScript
+    \\                    covers .js, .mjs, .cjs, and admitted .jsx; Lua covers
+    \\                    .lua; TypeScript/TSX covers .ts, .mts, .cts, and .tsx;
+    \\                    does not affect score, rank, lineage, confidence, or
     \\                    file-level evidence
     \\  --symbol-line-history
     \\                    With --inspect PATH --symbols only, add opt-in current-line
     \\                    Git evidence for current Zig, Go, Python, JavaScript,
-    \\                    TypeScript, or TSX symbol line ranges at HEAD; not true
+    \\                    Lua, TypeScript, or TSX symbol line ranges at HEAD; not true
     \\                    symbol history, lineage, scoring, or ownership
     \\  --symbol-limit N  With --inspect PATH --symbols only, limit human table and
     \\                    Markdown symbol rows (default: 25); JSON symbols.items
@@ -70,8 +71,8 @@ const usage =
     \\Provider capability:
     \\  --symbols is opt-in inspect-only current working-tree symbol evidence for
     \\  Zig (.zig), Go (.go), Python (.py), JavaScript (.js/.mjs/.cjs/.jsx),
-    \\  TypeScript (.ts/.mts/.cts), and TSX (.tsx). Other current files report
-    \\  unsupported provider caveats while preserving inspected file evidence.
+    \\  Lua (.lua), TypeScript (.ts/.mts/.cts), and TSX (.tsx). Other current files
+    \\  report unsupported provider caveats while preserving inspected file evidence.
     \\  --symbol-line-history adds current-line Git evidence for HEAD symbol
     \\  ranges only; it is not true symbol history, lineage, scoring, or ownership.
     \\
@@ -168,6 +169,9 @@ pub fn main(init: std.process.Init.Minimal) !void {
             analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
         } else if (std.mem.endsWith(u8, matched_path, ".py")) {
             const symbol_report = try tree_sitter_python.extractPath(allocator, io, analysis.repo_root, matched_path);
+            analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
+        } else if (tree_sitter_lua.isSupportedPath(matched_path)) {
+            const symbol_report = try tree_sitter_lua.extractPath(allocator, io, analysis.repo_root, matched_path);
             analysis.symbol_report = .{ .provider = symbol_report.provider, .symbols = symbol_report.symbols };
         } else if (javascript_symbols) {
             const symbol_report = try tree_sitter_javascript.extractPath(allocator, io, analysis.repo_root, matched_path);
@@ -763,6 +767,7 @@ test {
     _ = provider;
     _ = @import("report.zig");
     _ = tree_sitter_go;
+    _ = tree_sitter_lua;
     _ = tree_sitter_typescript;
     _ = @import("scoring.zig");
     _ = @import("version.zig");

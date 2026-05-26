@@ -71,11 +71,11 @@ pub const text =
     \\## Inspect symbols
     \\
     \\The --symbols flag is opt-in and valid only with --inspect PATH. It adds
-    \\current working-tree Tree-sitter Zig, Go, Python, JavaScript, TypeScript,
-    \\or TSX symbols for the matched in-scope .zig, .go, .py, .js, .mjs, .cjs,
-    \\admitted .jsx, .ts, .mts, .cts, or .tsx file. Provider output is
-    \\current-only enrichment with freshness, failure, confidence, caveats, and
-    \\local provenance.
+    \\current working-tree Tree-sitter Zig, Go, Python, JavaScript, Lua,
+    \\TypeScript, or TSX symbols for the matched in-scope .zig, .go, .py, .js,
+    \\.mjs, .cjs, admitted .jsx, .lua, .ts, .mts, .cts, or .tsx file. Provider
+    \\output is current-only enrichment with freshness, failure, confidence,
+    \\caveats, and local provenance.
     \\
     \\Symbol evidence does not change file score, rank, confidence, co-change
     \\evidence, Git rename lineage, scope, or inclusion/exclusion decisions.
@@ -90,6 +90,10 @@ pub const text =
     \\.jsx files. It does not evaluate Node, packages, workspaces, module
     \\resolution, TypeScript, TSX, dependency graphs, scoring, ownership,
     \\repo-wide scanning, or symbol history.
+    \\Lua support is inspect-only for .lua files. It does not evaluate package,
+    \\require, runtime module resolution, metatables, dynamic table keys,
+    \\dependency graphs, runtime execution, scoring, ownership, or repo-wide
+    \\scanning; symbol history is out of scope.
     \\TypeScript/TSX support is inspect-only for .ts, .mts, .cts, and .tsx
     \\files. It does not evaluate packages, workspaces, tsconfig, module
     \\resolution, type checking, dependency graphs, scoring, ownership, cache,
@@ -103,14 +107,15 @@ pub const text =
     \\| Go | .go | tree-sitter-go | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, build tags, cgo, dependency graphs, true symbol history, scoring, or ownership claims |
     \\| Python | .py | tree-sitter-python | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no imports, packages, virtual environments, dependency graphs, generated-source policy, true symbol history, scoring, or ownership claims |
     \\| JavaScript | .js, .mjs, .cjs, admitted .jsx | tree-sitter-javascript | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, true symbol history, scoring, or ownership claims |
+    \\| Lua | .lua | tree-sitter-lua | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, true symbol history, scoring, or ownership claims |
     \\| TypeScript | .ts, .mts, .cts | tree-sitter-typescript | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, true symbol history, scoring, or ownership claims |
     \\| TSX | .tsx | tree-sitter-tsx | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no React, DOM, packages, type analysis, dependency graphs, cache, true symbol history, scoring, or ownership claims |
     \\| Unsupported current files | all other paths | unsupported fallback | provider reports unsupported and keeps inspected file evidence | no current-line evidence | no parser diagnostics, source snippets, or parsed symbols |
     \\
     \\--symbol-line-history is opt-in and valid only with --inspect PATH
     \\--symbols. It adds current-line Git blame evidence for current Zig, Go,
-    \\Python, JavaScript, TypeScript, or TSX symbol line ranges using one local
-    \\blame process only when current ranges are valid and the inspected file is
+    \\Python, JavaScript, Lua, TypeScript, or TSX symbol line ranges using one
+    \\local blame process only when current ranges are valid and the inspected file is
     \\clean. Current-line evidence is for the lines occupied by a symbol at HEAD;
     \\it is not true symbol history, historical identity tracking, or git log -L.
     \\It reports commit-count and timestamp summaries without author identities,
@@ -157,12 +162,14 @@ test "explanation includes confidence and non-claim boundaries" {
         "AI/LLM judgement",
         "--symbols flag is opt-in and valid only with --inspect PATH",
         "--symbol-line-history is opt-in and valid only with --inspect PATH",
-        "Tree-sitter Zig, Go, Python, JavaScript, TypeScript",
+        "Tree-sitter Zig, Go, Python, JavaScript, Lua",
         "Symbol evidence does not change file score",
         "JavaScript support is inspect-only for .js, .mjs, .cjs, and admitted",
+        "Lua support is inspect-only for .lua files",
         "TypeScript/TSX support is inspect-only for .ts, .mts, .cts, and .tsx",
         "Provider capability matrix",
         "| Zig | .zig |",
+        "| Lua | .lua |",
         "| TSX | .tsx |",
         "Unsupported current files",
         "current-line Git evidence for HEAD line ranges",

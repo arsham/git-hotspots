@@ -1,0 +1,31 @@
+{
+  "schema_version": "1",
+  "tool": { "name": "git-hotspots", "version": "0.1.0-alpha.1" },
+  "analysis": {
+    "history": { "head": "5fcc64c39359f84831609a0cbcffaa114938f572", "head_timestamp": 1777680000, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 2 },
+    "scope": { "selected_scope": "project", "filters_active": true, "include_prefixes": [], "exclude_prefixes": [".flow/", ".zig-cache/", "zig-out/", "target/", "node_modules/", "dist/", "build/", "coverage/"], "outside_include_path_count": 0, "outside_include_change_count": 0, "excluded_path_count": 0, "excluded_change_count": 0 },
+    "caveats": ["Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked"]
+  },
+  "symbols": {
+    "current_only": true,
+    "human_display": { "total_count": 0, "shown_count": 0, "omitted_count": 0, "default_limit": 25, "active_limit": 25, "limit_source": "default", "sort_basis": "provider order" },
+    "provider": { "name": "tree-sitter-lua", "kind": "symbol", "version": "tree-sitter-core@v0.26.9/tree-sitter-lua@v0.5.0/lua-symbol-query-v1", "contract_version": "provider-symbol-evidence-v1", "freshness": "unknown", "failure": "unavailable", "confidence": "unknown", "caveats": ["current working-tree file unavailable or not a regular bounded file", "no parser diagnostics, source snippets, absolute paths, remotes, author identities, commit messages, or private repo names exposed"], "provenance": { "input": "working-tree:src/missing.lua", "local_only": true } },
+    "items": [
+    ]
+  },
+  "inspect": { "requested_path": "src/missing.lua", "matched_path": "src/missing.lua", "rank": 2 },
+  "results": [
+    {
+      "path": "src/missing.lua",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
+      "score": { "total": 52.400, "frequency": 20.000, "churn": 0.400, "recency": 20.000, "cochange": 12.000 },
+      "change_count": 2, "additions": 5, "deletions": 5, "churn": 10,
+      "recency": { "last_changed_timestamp": 1777680000, "last_changed_commit": "5fcc64c39359" },
+      "current_size": null,
+      "cochanges": [{ "path": "src/example.lua", "count": 2 }, { "path": "src/dynamic_table_assignment.lua", "count": 1 }, { "path": "src/embedded_dsl.lua", "count": 1 }, { "path": "src/empty.lua", "count": 1 }, { "path": "src/generated.lua", "count": 1 }],
+      "confidence": "medium",
+      "caveats": ["path is deleted or not present at HEAD"],
+      "evidence": [{ "commit": "5fcc64c39359", "timestamp": 1777680000, "additions": 0, "deletions": 5 }, { "commit": "980cd9bb1af4", "timestamp": 1777593600, "additions": 5, "deletions": 0 }]
+    }
+  ]
+}
