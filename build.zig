@@ -574,6 +574,30 @@ pub fn build(b: *std.Build) void {
     const tree_sitter_python_symbol_proof_step = b.step("tree-sitter-python-symbol-proof", "Run internal Python current-symbol extraction proof with vendored Tree-sitter sources");
     tree_sitter_python_symbol_proof_step.dependOn(&run_tree_sitter_python_symbol_proof.step);
 
+    const validate_all_step = b.step("validate-all", "Run validation plus all Tree-sitter proof steps");
+    validate_all_step.dependOn(validate_step);
+    validate_all_step.dependOn(tree_sitter_build_proof_step);
+    validate_all_step.dependOn(tree_sitter_symbol_proof_step);
+    validate_all_step.dependOn(tree_sitter_go_build_proof_step);
+    validate_all_step.dependOn(tree_sitter_go_symbol_proof_step);
+    validate_all_step.dependOn(tree_sitter_python_build_proof_step);
+    validate_all_step.dependOn(tree_sitter_python_query_proof_step);
+    validate_all_step.dependOn(tree_sitter_python_symbol_proof_step);
+    validate_all_step.dependOn(tree_sitter_javascript_build_proof_step);
+    validate_all_step.dependOn(tree_sitter_javascript_query_proof_step);
+    validate_all_step.dependOn(tree_sitter_javascript_symbol_proof_step);
+    validate_all_step.dependOn(tree_sitter_lua_build_proof_step);
+    validate_all_step.dependOn(tree_sitter_lua_query_proof_step);
+    validate_all_step.dependOn(tree_sitter_lua_symbol_proof_step);
+    validate_all_step.dependOn(tree_sitter_typescript_build_proof_step);
+    validate_all_step.dependOn(tree_sitter_typescript_query_proof_step);
+    validate_all_step.dependOn(tree_sitter_typescript_symbol_proof_step);
+    validate_all_step.dependOn(tree_sitter_tsx_build_proof_step);
+    validate_all_step.dependOn(tree_sitter_tsx_query_proof_step);
+    validate_all_step.dependOn(tree_sitter_tsx_symbol_proof_step);
+    validate_all_step.dependOn(tree_sitter_rust_build_proof_step);
+    validate_all_step.dependOn(tree_sitter_rust_query_proof_step);
+
     const run_cmd = b.addRunArtifact(exe);
     if (b.args) |args| run_cmd.addArgs(args);
     const run_step = b.step("run", "Run git-hotspots");

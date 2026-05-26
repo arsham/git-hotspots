@@ -25,10 +25,16 @@ zig build validate
 If a narrower change only needs the fast gate while iterating, `zig build test`
 is useful, but `zig build validate` is the expected pre-PR check.
 
-The public Validation workflow runs `zig build validate` plus Tree-sitter proof
-steps on pushes to `master` and pull requests. Local validation remains the
-source of truth for contributors; treat CI as remote confirmation of the same
-gate.
+Provider-lane changes should also run the full local proof aggregate:
+
+```sh
+zig build validate-all
+```
+
+The current public Validation workflow runs validation plus representative
+Tree-sitter proof coverage on pushes to `master` and pull requests. Local
+validation remains the source of truth for contributors. Run
+`zig build validate-all` when touching provider lanes or proof wiring.
 
 ## Project boundaries
 

@@ -115,7 +115,7 @@ JavaScript, Lua, TypeScript, or TSX symbol line ranges using one local
 current-line Git evidence command only when current ranges are valid and the
 inspected file is clean. Current-line evidence is for the lines occupied by a
 symbol at HEAD.
-it is not true symbol history, historical identity tracking, or git log -L.
+It is not true symbol history, historical identity tracking, or git log -L.
 It reports commit-count and timestamp summaries without author identities,
 commit messages, source snippets, remotes, or absolute paths. This is not
 symbol lineage, ownership, scoring input, or semantic history.

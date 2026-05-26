@@ -173,7 +173,7 @@ fn parseBlameHeader(line: []const u8) ?BlameRange {
     const result_start = std.fmt.parseInt(u32, result_start_text, 10) catch return null;
     const span = std.fmt.parseInt(u32, span_text, 10) catch return null;
     if (result_start == 0) return null;
-    return .{ .commit = commit[0..@min(commit.len, 12)], .result_start = result_start, .span = span };
+    return .{ .commit = commit, .result_start = result_start, .span = span };
 }
 
 fn isCommitObjectId(value: []const u8) bool {
@@ -229,7 +229,12 @@ fn aggregateSymbolLineHistory(allocator: std.mem.Allocator, range: provider.Line
     const sample_len = @min(commits.items.len, 3);
     const sample = try allocator.alloc([]const u8, sample_len);
     errdefer allocator.free(sample);
-    for (commits.items[0..sample_len], 0..) |commit, i| sample[i] = try allocator.dupe(u8, commit.commit);
+    var sample_i: usize = 0;
+    errdefer for (sample[0..sample_i]) |commit| allocator.free(commit);
+    for (commits.items[0..sample_len]) |commit| {
+        sample[sample_i] = try allocator.dupe(u8, commit.commit[0..@min(commit.commit.len, 12)]);
+        sample_i += 1;
+    }
 
     return .{
         .line_count = line_count,
@@ -308,7 +313,7 @@ test "incremental blame parser ignores private and unapproved fields" {
     var ranges = try parseIncrementalBlame(std.testing.allocator, text);
     defer ranges.deinit();
     try std.testing.expectEqual(@as(usize, 1), ranges.items.len);
-    try std.testing.expectEqualStrings("aaaaaaaaaaaa", ranges.items[0].commit);
+    try std.testing.expectEqualStrings("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", ranges.items[0].commit);
     try std.testing.expectEqual(@as(u32, 1), ranges.items[0].result_start);
     try std.testing.expectEqual(@as(u32, 2), ranges.items[0].span);
     try std.testing.expectEqual(@as(i64, 1770000000), ranges.items[0].timestamp.?);
@@ -823,16 +828,17 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
             }
         }
         const keep_index = found_index orelse return error.InspectTargetNotFound;
-        const kept = results.items[keep_index];
-        for (results.items, 0..) |*r, i| {
-            if (i != keep_index) freeResult(allocator, r);
-        }
-        results.items[0] = kept;
+        const rank = keep_index + 1;
+        if (keep_index != 0) std.mem.swap(model.Result, &results.items[0], &results.items[keep_index]);
+        for (results.items[1..]) |*r| freeResult(allocator, r);
         results.shrinkRetainingCapacity(1);
+        const requested_path = try allocator.dupe(u8, requested);
+        errdefer allocator.free(requested_path);
+        const matched_path = try allocator.dupe(u8, results.items[0].path);
         inspect = .{
-            .requested_path = try allocator.dupe(u8, requested),
-            .matched_path = try allocator.dupe(u8, kept.path),
-            .rank = keep_index + 1,
+            .requested_path = requested_path,
+            .matched_path = matched_path,
+            .rank = rank,
         };
     } else if (results.items.len > cfg.limit) {
         for (results.items[cfg.limit..]) |*r| {
