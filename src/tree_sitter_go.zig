@@ -38,27 +38,7 @@ const type_caveats = ok_caveats ++ [_][]const u8{
     "struct and interface type specs map to provider SymbolKind.type",
 };
 
-pub const Extraction = struct {
-    provider: provider.ProviderEvidence,
-    symbols: []provider.CurrentSymbolEvidence,
-
-    pub fn deinit(self: *Extraction, allocator: std.mem.Allocator) void {
-        allocator.free(self.provider.input.identity);
-        for (self.symbols) |symbol| {
-            allocator.free(symbol.path);
-            allocator.free(symbol.name);
-            if (symbol.current_line_history) |line_history| {
-                for (line_history.sample_commits) |commit| allocator.free(commit);
-                allocator.free(line_history.sample_commits);
-                for (line_history.caveats) |caveat| allocator.free(caveat);
-                allocator.free(line_history.caveats);
-            }
-        }
-        allocator.free(self.symbols);
-        self.* = undefined;
-    }
-};
-
+pub const Extraction = tree_sitter_common.Extraction;
 pub fn extractPath(allocator: std.mem.Allocator, io: std.Io, repo_root: []const u8, repo_relative_path: []const u8) !Extraction {
     try provider.validateRepoRelativePath(repo_relative_path);
     if (!std.mem.endsWith(u8, repo_relative_path, ".go")) {
@@ -112,21 +92,7 @@ fn extraction(
     caveats: []const []const u8,
     symbols: []provider.CurrentSymbolEvidence,
 ) !Extraction {
-    const identity = try std.fmt.allocPrint(allocator, "working-tree:{s}", .{repo_relative_path});
-    return .{
-        .provider = .{
-            .name = provider_name,
-            .kind = .symbol,
-            .version = provider_version,
-            .input = .{ .identity = identity },
-            .freshness = freshness,
-            .failure = failure,
-            .confidence = confidence,
-            .caveats = caveats,
-            .provenance = .{ .provider_name = provider_name, .input_identity = identity },
-        },
-        .symbols = symbols,
-    };
+    return tree_sitter_common.makeExtraction(allocator, provider_name, provider_version, repo_relative_path, failure, freshness, confidence, caveats, symbols);
 }
 
 fn collectTopLevelDeclarations(

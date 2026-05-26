@@ -46,17 +46,7 @@ const generated_caveats = ok_caveats ++ [_][]const u8{
     "generated-file markers are caveated only; generated-source policy is not evaluated by this provider",
 };
 
-pub const Extraction = struct {
-    provider: provider.ProviderEvidence,
-    symbols: []provider.CurrentSymbolEvidence,
-
-    pub fn deinit(self: *Extraction, allocator: std.mem.Allocator) void {
-        allocator.free(self.provider.input.identity);
-        freeSymbols(allocator, self.symbols);
-        self.* = undefined;
-    }
-};
-
+pub const Extraction = tree_sitter_common.Extraction;
 const DefinitionKind = enum {
     class,
     function,
@@ -116,7 +106,7 @@ pub fn extractSource(allocator: std.mem.Allocator, repo_relative_path: []const u
 
     var candidates: std.ArrayList(SymbolCandidate) = .empty;
     defer candidates.deinit(allocator);
-    errdefer freeCandidateSymbols(allocator, candidates.items);
+    errdefer tree_sitter_common.freeCandidateSymbols(allocator, candidates.items);
 
     const generated = hasGeneratedMarker(source);
 
@@ -167,10 +157,12 @@ pub fn extractSource(allocator: std.mem.Allocator, repo_relative_path: []const u
     std.mem.sort(SymbolCandidate, candidates.items, {}, lessCandidate);
 
     const symbols = try allocator.alloc(provider.CurrentSymbolEvidence, candidates.items.len);
-    errdefer allocator.free(symbols);
+    var symbols_owned = true;
+    errdefer if (symbols_owned) allocator.free(symbols);
     for (candidates.items, 0..) |candidate, i| symbols[i] = candidate.symbol;
     candidates.clearRetainingCapacity();
 
+    symbols_owned = false;
     return extraction(allocator, repo_relative_path, .ok, .fresh, .high, caveatsForModule(generated), symbols);
 }
 
@@ -183,22 +175,7 @@ fn extraction(
     caveats: []const []const u8,
     symbols: []provider.CurrentSymbolEvidence,
 ) !Extraction {
-    errdefer freeSymbols(allocator, symbols);
-    const identity = try std.fmt.allocPrint(allocator, "working-tree:{s}", .{repo_relative_path});
-    return .{
-        .provider = .{
-            .name = provider_name,
-            .kind = .symbol,
-            .version = provider_version,
-            .input = .{ .identity = identity },
-            .freshness = freshness,
-            .failure = failure,
-            .confidence = confidence,
-            .caveats = caveats,
-            .provenance = .{ .provider_name = provider_name, .input_identity = identity },
-        },
-        .symbols = symbols,
-    };
+    return tree_sitter_common.makeExtraction(allocator, provider_name, provider_version, repo_relative_path, failure, freshness, confidence, caveats, symbols);
 }
 
 fn compilePythonQuery() !*c.TSQuery {
@@ -365,26 +342,6 @@ fn lessCandidate(_: void, lhs: SymbolCandidate, rhs: SymbolCandidate) bool {
     if (lhs.start_byte != rhs.start_byte) return lhs.start_byte < rhs.start_byte;
     if (lhs.end_byte != rhs.end_byte) return lhs.end_byte < rhs.end_byte;
     return std.mem.order(u8, lhs.symbol.name, rhs.symbol.name) == .lt;
-}
-
-fn freeCandidateSymbols(allocator: std.mem.Allocator, candidates: []SymbolCandidate) void {
-    for (candidates) |candidate| freeSymbol(allocator, candidate.symbol);
-}
-
-fn freeSymbols(allocator: std.mem.Allocator, symbols: []provider.CurrentSymbolEvidence) void {
-    for (symbols) |symbol| freeSymbol(allocator, symbol);
-    allocator.free(symbols);
-}
-
-fn freeSymbol(allocator: std.mem.Allocator, symbol: provider.CurrentSymbolEvidence) void {
-    allocator.free(symbol.path);
-    allocator.free(symbol.name);
-    if (symbol.current_line_history) |line_history| {
-        for (line_history.sample_commits) |commit| allocator.free(commit);
-        allocator.free(line_history.sample_commits);
-        for (line_history.caveats) |caveat| allocator.free(caveat);
-        allocator.free(line_history.caveats);
-    }
 }
 
 fn expectLineRange(symbol: provider.CurrentSymbolEvidence, start: u32, end: u32) !void {
