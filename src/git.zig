@@ -2,6 +2,7 @@ const std = @import("std");
 const model = @import("model.zig");
 const provider = @import("provider.zig");
 const scoring = @import("scoring.zig");
+const git_runner = @import("git_runner.zig");
 
 pub const AnalyzeError = anyerror;
 
@@ -16,29 +17,6 @@ fn freeResult(allocator: std.mem.Allocator, r: *model.Result) void {
     allocator.free(r.caveats);
     for (r.evidence) |ev| allocator.free(ev.commit);
     allocator.free(r.evidence);
-}
-
-fn runGit(allocator: std.mem.Allocator, io: std.Io, repo: []const u8, args: []const []const u8) !std.process.RunResult {
-    var argv = std.array_list.Managed([]const u8).init(allocator);
-    defer argv.deinit();
-    try argv.append("git");
-    try argv.append("-c");
-    try argv.append("core.quotePath=false");
-    try argv.append("-C");
-    try argv.append(repo);
-    for (args) |arg| try argv.append(arg);
-    return std.process.run(allocator, io, .{ .argv = argv.items, .stdout_limit = .limited(50 * 1024 * 1024), .stderr_limit = .limited(1024 * 1024) });
-}
-
-fn runGitOk(allocator: std.mem.Allocator, io: std.Io, repo: []const u8, args: []const []const u8) ![]u8 {
-    const rr = try runGit(allocator, io, repo, args);
-    allocator.free(rr.stderr);
-    switch (rr.term) {
-        .exited => |code| if (code == 0) return rr.stdout,
-        else => {},
-    }
-    allocator.free(rr.stdout);
-    return error.GitFailed;
 }
 
 const BlameRange = struct {
@@ -61,7 +39,7 @@ pub fn attachCurrentLineHistory(allocator: std.mem.Allocator, io: std.Io, analys
         return;
     }
 
-    const dirty_out = runGitOk(allocator, io, analysis.repo_root, &.{ "status", "--porcelain", "--", inspect.matched_path }) catch {
+    const dirty_out = git_runner.runGitOk(allocator, io, analysis.repo_root, &.{ "status", "--porcelain", "--", inspect.matched_path }) catch {
         try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: could not check inspected file status"});
         return;
     };
@@ -72,7 +50,7 @@ pub fn attachCurrentLineHistory(allocator: std.mem.Allocator, io: std.Io, analys
         return;
     }
 
-    const rr = runGit(allocator, io, analysis.repo_root, &.{ "blame", "--incremental", "--", inspect.matched_path }) catch {
+    const rr = git_runner.runGit(allocator, io, analysis.repo_root, &.{ "blame", "--incremental", "--", inspect.matched_path }) catch {
         try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence command failed"});
         return;
     };
@@ -682,33 +660,33 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
     var phase_started = std.Io.Clock.Timestamp.now(io, .awake);
     try writeProgress(progress, "checking repository");
 
-    const bare_out = runGitOk(allocator, io, cfg.repo_path, &.{ "rev-parse", "--is-bare-repository" }) catch return error.NotGitRepository;
+    const bare_out = git_runner.runGitOk(allocator, io, cfg.repo_path, &.{ "rev-parse", "--is-bare-repository" }) catch return error.NotGitRepository;
     defer allocator.free(bare_out);
     if (isTrueText(bare_out)) return error.BareRepository;
 
-    const inside_out = runGitOk(allocator, io, cfg.repo_path, &.{ "rev-parse", "--is-inside-work-tree" }) catch return error.NotGitRepository;
+    const inside_out = git_runner.runGitOk(allocator, io, cfg.repo_path, &.{ "rev-parse", "--is-inside-work-tree" }) catch return error.NotGitRepository;
     defer allocator.free(inside_out);
     if (!isTrueText(inside_out)) return error.NotGitRepository;
 
-    const root_out = try runGitOk(allocator, io, cfg.repo_path, &.{ "rev-parse", "--show-toplevel" });
+    const root_out = try git_runner.runGitOk(allocator, io, cfg.repo_path, &.{ "rev-parse", "--show-toplevel" });
     const repo_root = try dupTrim(allocator, root_out);
     allocator.free(root_out);
     errdefer allocator.free(repo_root);
 
-    const head_out = runGitOk(allocator, io, cfg.repo_path, &.{ "rev-parse", "HEAD" }) catch return error.EmptyRepository;
+    const head_out = git_runner.runGitOk(allocator, io, cfg.repo_path, &.{ "rev-parse", "HEAD" }) catch return error.EmptyRepository;
     const head = try dupTrim(allocator, head_out);
     allocator.free(head_out);
     errdefer allocator.free(head);
 
-    const head_ts_out = try runGitOk(allocator, io, cfg.repo_path, &.{ "show", "-s", "--format=%ct", "HEAD" });
+    const head_ts_out = try git_runner.runGitOk(allocator, io, cfg.repo_path, &.{ "show", "-s", "--format=%ct", "HEAD" });
     const head_ts = try std.fmt.parseInt(i64, trimNewline(head_ts_out), 10);
     allocator.free(head_ts_out);
 
-    const shallow_out = runGitOk(allocator, io, cfg.repo_path, &.{ "rev-parse", "--is-shallow-repository" }) catch try allocator.dupe(u8, "false");
+    const shallow_out = git_runner.runGitOk(allocator, io, cfg.repo_path, &.{ "rev-parse", "--is-shallow-repository" }) catch try allocator.dupe(u8, "false");
     const is_shallow = isTrueText(shallow_out);
     allocator.free(shallow_out);
 
-    const promisor = runGit(allocator, io, cfg.repo_path, &.{ "config", "--get", "remote.origin.promisor" }) catch null;
+    const promisor = git_runner.runGit(allocator, io, cfg.repo_path, &.{ "config", "--get", "remote.origin.promisor" }) catch null;
     var is_partial = false;
     if (promisor) |p| {
         is_partial = switch (p.term) {
@@ -719,7 +697,7 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
         allocator.free(p.stderr);
     }
 
-    const dirty_out = try runGitOk(allocator, io, cfg.repo_path, &.{ "status", "--porcelain" });
+    const dirty_out = try git_runner.runGitOk(allocator, io, cfg.repo_path, &.{ "status", "--porcelain" });
     const dirty = std.mem.trim(u8, dirty_out, "\r\n ").len != 0;
     allocator.free(dirty_out);
 
@@ -728,7 +706,7 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
     defer log_args.deinit();
     try log_args.appendSlice(&.{ "log", "--format=%H%x09%ct", "--numstat", "--find-renames=40%" });
     if (cfg.since) |since| {
-        const check = runGit(allocator, io, cfg.repo_path, &.{ "rev-parse", "--verify", since }) catch return error.InvalidSince;
+        const check = git_runner.runGit(allocator, io, cfg.repo_path, &.{ "rev-parse", "--verify", since }) catch return error.InvalidSince;
         defer allocator.free(check.stdout);
         defer allocator.free(check.stderr);
         switch (check.term) {
