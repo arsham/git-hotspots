@@ -42,3 +42,32 @@ productivity, or uses AI/LLM judgement as product truth.
 
 During alpha, do not rely on long-term API or report-schema stability beyond
 what an accepted issue or feature explicitly covers.
+
+## Architecture guide
+
+`git-hotspots` has a small deterministic core. Local Git-history evidence is
+collected first, scored into investigation prompts, and then optional
+current-file providers may attach enrichment for inspected files. Providers do
+not change score, rank, confidence, lineage, or product truth.
+
+The contributor-facing pipeline is:
+
+```text
+CLI args -> local Git evidence -> scoring/confidence -> optional enrichment -> deterministic reports
+```
+
+Use these module boundaries when changing the code:
+
+- `cli.zig` owns arguments, usage text, and user-facing CLI validation.
+- `app.zig` owns orchestration from parsed config to rendered output.
+- `git.zig` owns local Git evidence and remains the public Git-analysis facade.
+- `scoring.zig` owns deterministic ranking and confidence rules.
+- `provider.zig` owns provider evidence contracts and current-only semantics.
+- `provider_selection.zig` chooses the bounded inspect-only symbol provider for
+  a path; it is not a runtime plugin framework.
+- `tree_sitter_*.zig` modules own language-specific current-symbol semantics.
+- `report.zig` owns deterministic table, JSON, and Markdown output.
+
+Keep new abstractions boring and local. If a change needs cache, config,
+network access, runtime plugins, report schema changes, or provider influence on
+ranking, shape it as an explicit feature instead of hiding it inside cleanup.
