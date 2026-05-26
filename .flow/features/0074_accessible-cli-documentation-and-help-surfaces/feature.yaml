@@ -1,0 +1,828 @@
+schema: flow-feature.v1
+feature:
+  id: "0074"
+  slug: accessible-cli-documentation-and-help-surfaces
+  title: Accessible CLI documentation and help surfaces
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: "The alpha already has --help, README usage, and CONTRIBUTING
+    architecture notes, but the learning path is dense and incomplete: there is
+    no checked-in man page, no concise user guide, no focused developer guide,
+    and no validation contract that keeps help/docs/man claims aligned as
+    options grow."
+  outcome: "A bounded documentation and help surface makes git-hotspots easy to
+    learn from the terminal and repository: concise --help, source-controlled
+    man page, user/developer docs, and validation that protects local-first,
+    evidence-first claims without adding packaging, release, provider, cache,
+    telemetry, network, or hosted scope."
+  acceptance:
+    - --help and -h remain standalone terminal help, include the supported
+      option surface, local-first/no-telemetry boundary, and
+      investigation-prompt framing, and do not require a Git repository.
+    - A checked-in man page documents synopsis, options, examples, report
+      semantics, privacy/local-first caveats, provider boundaries, exit
+      expectations, and related docs without adding install or packaging
+      integration.
+    - A concise user guide gives source-build, first-run, common workflows,
+      inspect/symbol examples, scope/filter guidance, output-format guidance,
+      and troubleshooting/caveat notes using project-relative examples.
+    - A concise developer guide records repo structure, argument/help ownership,
+      report/provider boundaries, validation commands, documentation drift
+      rules, and public-claim guardrails without expanding architecture scope.
+    - README and CONTRIBUTING remain polished entry points and link to deeper
+      docs instead of becoming longer catch-all manuals.
+    - Validation covers help/man/docs presence and key claim consistency,
+      includes new docs/man paths in prohibited-claim or privacy scans, and
+      preserves existing deterministic validation behaviour.
+    - No runtime analysis semantics, scoring, report schemas, provider
+      extraction, cache, release packaging, CI policy, network access,
+      telemetry, upload, hosted service, commercial strategy, bug-prediction,
+      code-quality scoring, ownership, or developer-ranking claims are added.
+planning:
+  state: ready
+  summary: Shape one documentation/accessibility feature for existing CLI help, a
+    checked-in man page, concise user/developer docs, and validation
+    drift/privacy checks.
+  brief_sync:
+    status: updated
+    reason: Supports B001 by making the existing deterministic local-first alpha CLI
+      easier to learn through terminal help, a checked-in man page,
+      user/developer docs, and validation guardrails while preserving
+      evidence-first public claims.
+    checked_at: 2026-05-26T23:09:34.902Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Follow-up documentation and accessibility slice for B001. It clarifies
+      how to learn and contribute to the existing local-first CLI without
+      changing runtime hotspot evidence, provider semantics, packaging,
+      telemetry, network, or hosted scope.
+    checked_at: 2026-05-26T23:09:38.621Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-26T23:10:12.237Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-26T23:10:12.237Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-26T23:10:12.237Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-26T23:10:12.237Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Operator requested man pages, developer documents, --help, and
+    a more accessible learning path after the alpha CLI already gained
+    substantial file-level and provider surfaces.
+  depends_on_feature_ids: []
+  blocked_by: []
+design:
+  rough_shape:
+    - Treat --help as an existing surface to improve and validate, not a new
+      parser feature.
+    - Add a checked-in roff man page at man/git-hotspots.1 and keep it
+      install-agnostic.
+    - Add docs/user-guide.md for task-oriented learning and
+      docs/developer-guide.md for contributor implementation boundaries.
+    - Use README and CONTRIBUTING as entry points that point to deeper docs
+      instead of duplicating every option in prose.
+    - Extend validation narrowly so key flags, local-first/prohibited-claim
+      language, and docs/man surfaces do not drift.
+    - Keep all examples local and project-relative; do not commit private smoke
+      output, absolute local paths, remotes, or author identities.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Help surface and CLI learning cues
+      goal: Tighten existing terminal help so first-run users understand common
+        commands, option boundaries, and local-first caveats without changing
+        CLI parsing or analysis semantics.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/cli.zig, src/app.zig, tests/integration.sh,
+          tools/validate.sh, fixtures/expected/explain.txt if wording alignment
+          requires it."
+        - "In scope: improve existing --help/-h text, option grouping, brief
+          examples, local-first/no-telemetry caveat, investigation-prompt
+          framing, and validation greps for key help claims."
+        - "Out of scope: new flags, subcommands, shell completions, interactive
+          help, docs site, packaging/install integration, report schema changes,
+          provider behaviour, scoring, network, telemetry, upload, or hosted
+          service scope."
+        - "Protected: --help and -h remain standalone and repo-independent;
+          --progress --help writes no stderr progress; existing
+          invalid-combination parser contracts remain intact; hotspots remain
+          investigation prompts, not bug predictions or quality/developer
+          rankings."
+        - "Dependencies: none; this packet may run before or with docs packets
+          but must not rely on packaging work."
+        - "Validation/evidence: git diff --check; zig fmt --check build.zig src
+          tests when Zig/test files change; zig build test; targeted --help, -h,
+          --progress --help smoke; updated integration/validate help greps; no
+          prohibited claims in changed help text."
+        - "Review focus: help stays concise, accurate, easy to scan, and aligned
+          with README/man/docs while preserving existing parser behaviour."
+        - "Escalate if: making help accurate requires new runtime behaviour, new
+          flags, subcommands, output schema changes, or packaging decisions."
+        - "Done boundary: terminal help passes targeted checks, remains
+          repo-independent, and records no unsupported claims."
+      verification_commands:
+        - git diff --check
+        - zig fmt --check build.zig src tests when Zig/test files change
+        - zig build test
+        - targeted --help, -h, and --progress --help smoke
+        - updated integration and validation help checks
+        - prohibited-claim scan for changed help text
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: User guide and checked-in man page
+      goal: Add source-controlled user documentation and a man page that teach common
+        workflows and caveats without adding packaging or install integration.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: README.md, docs/user-guide.md, man/git-hotspots.1,
+          tools/validate.sh, docs/planning-handoff.md only if stale public entry
+          references must be updated."
+        - "In scope: source-build first run, examples for table/json/markdown,
+          scope/include/exclude guidance, inspect and symbols examples,
+          --explain, privacy/local-first caveats, shallow/partial history
+          caveats, provider boundaries, troubleshooting, and README links to
+          deeper docs."
+        - "Out of scope: package-manager installation, generated man-page
+          pipeline, release automation, shell completions, docs hosting,
+          screenshots, case studies, benchmark claims, remote examples,
+          commercial/hosted strategy, or private repository report dumps."
+        - "Protected: examples use project-relative paths or placeholders;
+          public docs avoid author identities, absolute local paths, remotes,
+          bug prediction, objective quality scoring, maintainer judgement,
+          ownership, or developer ranking."
+        - "Dependencies: P1 establishes current help wording; if P1 changes
+          option wording, this packet must align man/user docs before
+          completion."
+        - "Validation/evidence: git diff --check; markdown formatting review;
+          man page presence and section checks; docs greps for key flags and
+          local-first caveats; validation docs/man drift checks; zig build
+          validate after implementation."
+        - "Review focus: docs are easier to learn from than the current README,
+          avoid duplicating unnecessary option prose, and stay honest about
+          alpha/source-build status."
+        - "Escalate if: user documentation requires packaging, install
+          destinations, release tags, hosted service assumptions, network
+          behaviour, or unproven capability claims."
+        - "Done boundary: user guide and man page exist, are linked from README,
+          pass validation checks, and preserve public project boundaries."
+      verification_commands:
+        - git diff --check
+        - markdown formatting review for README.md and docs/user-guide.md
+        - man page presence and required-section checks
+        - docs/man key-claim drift checks
+        - zig build validate
+    - id: P3
+      depends_on:
+        - P1
+        - P2
+      status: planned
+      title: Developer guide and validation guardrails
+      goal: Add concise contributor-facing documentation and validation safeguards so
+        future help/docs/man changes preserve architecture, privacy, and claim
+        boundaries.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: CONTRIBUTING.md, docs/developer-guide.md, tools/validate.sh,
+          tests/integration.sh, README.md, man/git-hotspots.1."
+        - "In scope: document module ownership, argument/help ownership,
+          report/provider boundaries, validation ladder, when validate-all is
+          needed, docs drift rules, prohibited public claims,
+          local-first/no-network guardrails, and add validation coverage for new
+          docs/man paths."
+        - "Out of scope: architecture rewrite, plugin framework, provider
+          roadmap, cache design, CI/release policy expansion, package
+          publishing, docs generator dependencies, broad refactors, or
+          implementation features unrelated to docs/help accessibility."
+        - "Protected: CONTRIBUTING remains concise; developer guide does not
+          become a commercial roadmap or internal planning dump; validation
+          stays local and deterministic with no new network/toolchain
+          dependencies beyond existing project requirements."
+        - "Dependencies: P1 and P2 create the surfaces whose drift/privacy
+          checks need to be protected."
+        - "Validation/evidence: git diff --check; sh -n tools/*.sh tests/*.sh if
+          shell scripts change; zig build test; zig build validate; validation
+          proof that docs/user-guide.md, docs/developer-guide.md, and
+          man/git-hotspots.1 are scanned for prohibited claims/privacy and
+          required help/man anchors."
+        - "Review focus: contributor guidance is actionable, minimal, and
+          consistent with existing module boundaries and Flow/project
+          constraints."
+        - "Escalate if: validation needs external tools, generated docs
+          dependencies, CI/publishing work, or a broader architecture decision."
+        - "Done boundary: developer guide exists, CONTRIBUTING links to it,
+          validation protects new docs/man surfaces, and full local validation
+          passes."
+      verification_commands:
+        - git diff --check
+        - sh -n tools/*.sh tests/*.sh when shell scripts change
+        - zig build test
+        - zig build validate
+        - docs/man prohibited-claim and privacy scan proof
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: false
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-05-26T23:01:12.150Z
+  updated_at: 2026-05-26T23:10:35.273Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-26T23:10:35.273Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+      - new external documentation tooling or packaging dependency becomes
+        necessary
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance and public documentation/help claim
+      surface require stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0074"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: Accessible CLI documentation and help surfaces
+      problem: "The alpha already has --help, README usage, and CONTRIBUTING
+        architecture notes, but the learning path is dense and incomplete: there
+        is no checked-in man page, no concise user guide, no focused developer
+        guide, and no validation contract that keeps help/docs/man claims
+        aligned as options grow."
+      outcome: "A bounded documentation and help surface makes git-hotspots easy to
+        learn from the terminal and repository: concise --help,
+        source-controlled man page, user/developer docs, and validation that
+        protects local-first, evidence-first claims without adding packaging,
+        release, provider, cache, telemetry, network, or hosted scope."
+      acceptance:
+        - --help and -h remain standalone terminal help, include the supported
+          option surface, local-first/no-telemetry boundary, and
+          investigation-prompt framing, and do not require a Git repository.
+        - A checked-in man page documents synopsis, options, examples, report
+          semantics, privacy/local-first caveats, provider boundaries, exit
+          expectations, and related docs without adding install or packaging
+          integration.
+        - A concise user guide gives source-build, first-run, common workflows,
+          inspect/symbol examples, scope/filter guidance, output-format
+          guidance, and troubleshooting/caveat notes using project-relative
+          examples.
+        - A concise developer guide records repo structure, argument/help
+          ownership, report/provider boundaries, validation commands,
+          documentation drift rules, and public-claim guardrails without
+          expanding architecture scope.
+        - README and CONTRIBUTING remain polished entry points and link to
+          deeper docs instead of becoming longer catch-all manuals.
+        - Validation covers help/man/docs presence and key claim consistency,
+          includes new docs/man paths in prohibited-claim or privacy scans, and
+          preserves existing deterministic validation behaviour.
+        - No runtime analysis semantics, scoring, report schemas, provider
+          extraction, cache, release packaging, CI policy, network access,
+          telemetry, upload, hosted service, commercial strategy,
+          bug-prediction, code-quality scoring, ownership, or developer-ranking
+          claims are added.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Follow-up documentation and accessibility slice for B001. It clarifies
+        how to learn and contribute to the existing local-first CLI without
+        changing runtime hotspot evidence, provider semantics, packaging,
+        telemetry, network, or hosted scope.
+      checked_at: 2026-05-26T23:09:38.621Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0074_accessible-cli-documentation-and-help-surfaces/prd.md
+  requirements_contract:
+    source_path: .flow/features/0074_accessible-cli-documentation-and-help-surfaces/prd.md
+    source_digest: 43b4cabe905542bbbd1e738c89b6b0c9e43aced44f658a24eca0b986713ae235
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#req-007-validation-protects-docs-and-manual-surfaces[1]
+        text: Local validation must include deterministic checks that cover the new
+          documentation surfaces.
+        category: verification
+        packet_refs: []
+        verification: Local validation must include deterministic checks that cover the
+          new documentation surfaces.
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#req-007-validation-protects-docs-and-manual-surfaces[2]
+        text: "At minimum, validation should prove:"
+        category: verification
+        packet_refs: []
+        verification: "At minimum, validation should prove:"
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#req-007-validation-protects-docs-and-manual-surfaces[3]
+        text: --help still includes key flags and caveats;
+        category: verification
+        packet_refs: []
+        verification: --help still includes key flags and caveats;
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#req-007-validation-protects-docs-and-manual-surfaces[4]
+        text: man/git-hotspots.1, docs/user-guide.md, and docs/developer-guide.md exist;
+        category: verification
+        packet_refs:
+          - P3
+        verification: man/git-hotspots.1, docs/user-guide.md, and
+          docs/developer-guide.md exist;
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#req-007-validation-protects-docs-and-manual-surfaces[5]
+        text: those docs mention key user-facing discovery paths such as --help,
+          --explain, and source-build validation where appropriate;
+        category: verification
+        packet_refs:
+          - P3
+        verification: those docs mention key user-facing discovery paths such as --help,
+          --explain, and source-build validation where appropriate;
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#req-007-validation-protects-docs-and-manual-surfaces[6]
+        text: docs/man surfaces are included in prohibited-claim or privacy scans; and
+        category: verification
+        packet_refs:
+          - P3
+        verification: docs/man surfaces are included in prohibited-claim or privacy
+          scans; and
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#req-007-validation-protects-docs-and-manual-surfaces[7]
+        text: validation remains local and deterministic without adding network or
+          global documentation-tool dependencies.
+        category: verification
+        packet_refs: []
+        verification: validation remains local and deterministic without adding network
+          or global documentation-tool dependencies.
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#req-008-public-claims-stay-evidence-first[1]
+        text: All new or changed public documentation must keep hotspots framed as
+          investigation prompts from deterministic local Git-history evidence.
+        category: verification
+        packet_refs: []
+        verification: All new or changed public documentation must keep hotspots framed
+          as investigation prompts from deterministic local Git-history
+          evidence.
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#req-008-public-claims-stay-evidence-first[2]
+        text: Docs must not claim that the tool predicts bugs, measures objective code
+          quality, scores technical debt as product truth, ranks developers,
+          judges maintainers, measures productivity, uploads source, contacts
+          remotes, uses telemetry, or relies on runtime AI judgement for hotspot
+          truth.
+        category: verification
+        packet_refs: []
+        verification: Docs must not claim that the tool predicts bugs, measures
+          objective code quality, scores technical debt as product truth, ranks
+          developers, judges maintainers, measures productivity, uploads source,
+          contacts remotes, uses telemetry, or relies on runtime AI judgement
+          for hotspot truth.
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#edge-cases-and-non-goals[1]
+        text: Do not add packaging, package-manager metadata, release automation,
+          installed man-page integration, shell completions, or docs hosting.
+        category: non_goal
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: false
+      - id: REQ-011
+        source_ref: prd.md#edge-cases-and-non-goals[2]
+        text: Do not add new CLI flags or subcommands as part of this feature.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-012
+        source_ref: prd.md#edge-cases-and-non-goals[3]
+        text: Do not change runtime analysis semantics, ranking, confidence, co-change,
+          provider extraction, symbol evidence, current-line evidence, report
+          schemas, cache behaviour, or default local-first execution.
+        category: non_goal
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: false
+      - id: REQ-013
+        source_ref: prd.md#edge-cases-and-non-goals[4]
+        text: Do not add benchmarks, case studies, remote repository examples, hosted
+          dashboards, commercial strategy, pricing, or sales language.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-014
+        source_ref: prd.md#edge-cases-and-non-goals[5]
+        text: If a documentation claim requires runtime behaviour that does not
+          currently exist, stop and reshape instead of implementing the
+          behaviour inside this docs/help feature.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-015
+        source_ref: prd.md#edge-cases-and-non-goals[6]
+        text: If accessibility is interpreted as terminal accessibility standards,
+          screen-reader testing, interactive tutorials, completions, or UX
+          research, shape that as a later feature with explicit acceptance.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-016
+        source_ref: prd.md#verification-notes[1]
+        text: "Close-out evidence should include:"
+        category: verification
+        packet_refs: []
+        verification: "Close-out evidence should include:"
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#verification-notes[2]
+        text: git diff --check.
+        category: verification
+        packet_refs: []
+        verification: git diff --check.
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#verification-notes[3]
+        text: zig fmt --check build.zig src tests when Zig or test files change.
+        category: verification
+        packet_refs: []
+        verification: zig fmt --check build.zig src tests when Zig or test files change.
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#verification-notes[4]
+        text: sh -n tools/.sh tests/.sh when shell scripts change.
+        category: verification
+        packet_refs: []
+        verification: sh -n tools/.sh tests/.sh when shell scripts change.
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#verification-notes[5]
+        text: zig build test.
+        category: verification
+        packet_refs: []
+        verification: zig build test.
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#verification-notes[6]
+        text: zig build validate.
+        category: verification
+        packet_refs: []
+        verification: zig build validate.
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#verification-notes[7]
+        text: Targeted help checks for --help, -h, and --progress --help.
+        category: verification
+        packet_refs: []
+        verification: Targeted help checks for --help, -h, and --progress --help.
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#verification-notes[8]
+        text: Man-page presence and required-section checks.
+        category: verification
+        packet_refs: []
+        verification: Man-page presence and required-section checks.
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#verification-notes[9]
+        text: User-guide and developer-guide presence and key-anchor checks.
+        category: verification
+        packet_refs: []
+        verification: User-guide and developer-guide presence and key-anchor checks.
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#verification-notes[10]
+        text: Proof that docs/man surfaces are included in prohibited-claim and privacy
+          scans.
+        category: verification
+        packet_refs:
+          - P3
+        verification: Proof that docs/man surfaces are included in prohibited-claim and
+          privacy scans.
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#verification-notes[11]
+        text: Privacy-safe real-repository smoke only when executable behaviour changes
+          beyond help/docs validation, otherwise record why existing validation
+          is sufficient.
+        category: verification
+        packet_refs:
+          - P3
+        verification: Privacy-safe real-repository smoke only when executable behaviour
+          changes beyond help/docs validation, otherwise record why existing
+          validation is sufficient.
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#verification-notes[12]
+        text: Review should prove that the feature improves learnability without
+          changing runtime product truth, adding new operational dependencies,
+          or expanding public claims beyond deterministic local Git-history
+          evidence.
+        category: verification
+        packet_refs: []
+        verification: Review should prove that the feature improves learnability without
+          changing runtime product truth, adding new operational dependencies,
+          or expanding public claims beyond deterministic local Git-history
+          evidence.
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: git-hotspots has a useful alpha CLI, but its learning path is too dense
+          for new users and future contributors. The repository already has
+          --help, README usage examples, and CONTRIBUTING architecture notes,
+          yet there is no checked-in man page, no task-oriented user guide, no
+          concise developer guide, and no feature-specific validation contract
+          that keeps help, docs, and manual claims in sync as options grow.
+      - source_ref: prd.md#problem[2]
+        text: "This creates three risks:"
+      - source_ref: prd.md#problem[3]
+        text: first-time users must read a long README to learn common workflows;
+      - source_ref: prd.md#problem[4]
+        text: contributors may not know which files own CLI help, reports, providers,
+          and validation; and
+      - source_ref: prd.md#problem[5]
+        text: public docs, terminal help, and future man-page text may drift or
+          accidentally overclaim beyond deterministic local Git-history
+          evidence.
+      - source_ref: prd.md#outcome[1]
+        text: "Create a bounded documentation and help surface that makes the existing
+          alpha CLI easier to learn from the terminal and repository:"
+      - source_ref: prd.md#outcome[2]
+        text: concise terminal help for common first-run understanding;
+      - source_ref: prd.md#outcome[3]
+        text: a checked-in man page;
+      - source_ref: prd.md#outcome[4]
+        text: a task-oriented user guide;
+      - source_ref: prd.md#outcome[5]
+        text: a contributor-oriented developer guide; and
+      - source_ref: prd.md#outcome[6]
+        text: deterministic validation that protects key help/docs/man claims.
+      - source_ref: prd.md#outcome[7]
+        text: The feature must not add packaging, release automation, hosted service
+          strategy, commercial strategy, telemetry, upload, remote enrichment,
+          provider behaviour, cache behaviour, scoring changes, report schema
+          changes, or new runtime analysis semantics.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 12 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: "A bounded documentation and help surface makes git-hotspots easy to
+      learn from the terminal and repository: concise --help, source-controlled
+      man page, user/developer docs, and validation that protects local-first,
+      evidence-first claims without adding packaging, release, provider, cache,
+      telemetry, network, or hosted scope."
+    acceptance:
+      - --help and -h remain standalone terminal help, include the supported
+        option surface, local-first/no-telemetry boundary, and
+        investigation-prompt framing, and do not require a Git repository.
+      - A checked-in man page documents synopsis, options, examples, report
+        semantics, privacy/local-first caveats, provider boundaries, exit
+        expectations, and related docs without adding install or packaging
+        integration.
+      - A concise user guide gives source-build, first-run, common workflows,
+        inspect/symbol examples, scope/filter guidance, output-format guidance,
+        and troubleshooting/caveat notes using project-relative examples.
+      - A concise developer guide records repo structure, argument/help
+        ownership, report/provider boundaries, validation commands,
+        documentation drift rules, and public-claim guardrails without expanding
+        architecture scope.
+      - README and CONTRIBUTING remain polished entry points and link to deeper
+        docs instead of becoming longer catch-all manuals.
+      - Validation covers help/man/docs presence and key claim consistency,
+        includes new docs/man paths in prohibited-claim or privacy scans, and
+        preserves existing deterministic validation behaviour.
+      - No runtime analysis semantics, scoring, report schemas, provider
+        extraction, cache, release packaging, CI policy, network access,
+        telemetry, upload, hosted service, commercial strategy, bug-prediction,
+        code-quality scoring, ownership, or developer-ranking claims are added.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig fmt --check build.zig src tests when Zig/test files change
+      - zig build test
+      - targeted --help, -h, and --progress --help smoke
+      - updated integration and validation help checks
+      - prohibited-claim scan for changed help text
+      - markdown formatting review for README.md and docs/user-guide.md
+      - man page presence and required-section checks
+      - docs/man key-claim drift checks
+      - zig build validate
+      - sh -n tools/*.sh tests/*.sh when shell scripts change
+      - docs/man prohibited-claim and privacy scan proof
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+      - verify docs/man/help claims are local-first, evidence-first, and free of
+        prohibited public framing
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+      - documentation claim requires unsupported runtime behaviour
+      - packaging, release, network, telemetry, upload, hosted, or commercial
+        scope appears necessary
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: "Judge review selected one cohesive documentation/accessibility feature
+    with three serial packets: help wording, user guide/man page, and developer
+    guide/validation guardrails. Keep implementation docs/help-only and avoid
+    packaging, release, provider, cache, hosted, telemetry, network, commercial,
+    bug-prediction, quality-score, ownership, or developer-ranking scope."
