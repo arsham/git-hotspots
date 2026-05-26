@@ -4,7 +4,7 @@ feature:
   slug: rust-offline-build-proof
   title: Rust offline build proof
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Rust source import alone does not prove the vendored parser and scanner
@@ -58,7 +58,7 @@ proposal:
     materialised_at: 2026-05-26T12:45:15.981Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -134,7 +134,7 @@ design:
       goal: Prove vendored Rust parser/scanner sources build offline against the
         existing Tree-sitter core without runtime output.
       depends_on: []
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: build.zig, tests/tree_sitter_rust_build_proof.zig,
@@ -189,7 +189,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-26T12:39:51.206Z
-  updated_at: 2026-05-26T12:45:45.100Z
+  updated_at: 2026-05-26T13:50:04.021Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-26T12:45:45.100Z

@@ -39,6 +39,13 @@ fn addTreeSitterLuaGrammar(b: *std.Build, module: *std.Build.Module) void {
     module.link_libc = true;
 }
 
+fn addTreeSitterRustGrammar(b: *std.Build, module: *std.Build.Module) void {
+    module.addIncludePath(b.path("third_party/tree-sitter-rust/v0.24.2/src"));
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-rust/v0.24.2/src/parser.c"), .flags = &.{} });
+    module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-rust/v0.24.2/src/scanner.c"), .flags = &.{} });
+    module.link_libc = true;
+}
+
 fn addTreeSitterTypeScriptGrammar(b: *std.Build, module: *std.Build.Module) void {
     module.addIncludePath(b.path("third_party/tree-sitter-typescript/v0.23.2/typescript/src"));
     module.addCSourceFile(.{ .file = b.path("third_party/tree-sitter-typescript/v0.23.2/typescript/src/parser.c"), .flags = &.{} });
@@ -82,6 +89,11 @@ fn addTreeSitterJavaScript(b: *std.Build, module: *std.Build.Module) void {
 fn addTreeSitterLua(b: *std.Build, module: *std.Build.Module) void {
     addTreeSitterCore(b, module);
     addTreeSitterLuaGrammar(b, module);
+}
+
+fn addTreeSitterRust(b: *std.Build, module: *std.Build.Module) void {
+    addTreeSitterCore(b, module);
+    addTreeSitterRustGrammar(b, module);
 }
 
 fn addTreeSitterTypeScript(b: *std.Build, module: *std.Build.Module) void {
@@ -287,6 +299,22 @@ pub fn build(b: *std.Build) void {
     const run_tree_sitter_lua_build_proof = b.addRunArtifact(tree_sitter_lua_build_proof);
     const tree_sitter_lua_build_proof_step = b.step("tree-sitter-lua-build-proof", "Compile vendored Tree-sitter Lua parser/scanner sources and run tiny non-product Lua parse smokes");
     tree_sitter_lua_build_proof_step.dependOn(&run_tree_sitter_lua_build_proof.step);
+
+    const tree_sitter_rust_build_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_rust_build_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    addTreeSitterRust(b, tree_sitter_rust_build_proof_module);
+
+    const tree_sitter_rust_build_proof = b.addExecutable(.{
+        .name = "tree-sitter-rust-build-proof",
+        .root_module = tree_sitter_rust_build_proof_module,
+    });
+
+    const run_tree_sitter_rust_build_proof = b.addRunArtifact(tree_sitter_rust_build_proof);
+    const tree_sitter_rust_build_proof_step = b.step("tree-sitter-rust-build-proof", "Compile vendored Tree-sitter Rust parser/scanner sources and run tiny non-product Rust parse smokes");
+    tree_sitter_rust_build_proof_step.dependOn(&run_tree_sitter_rust_build_proof.step);
 
     const tree_sitter_lua_query_proof_module = b.createModule(.{
         .root_source_file = b.path("tests/tree_sitter_lua_query_proof.zig"),
