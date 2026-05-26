@@ -71,6 +71,17 @@ vendored paths only.
   `third_party/tree-sitter-python/v0.25.0/LICENSE`.
 - Provenance: `third_party/tree-sitter-python/v0.25.0/PROVENANCE.md`
 
+## tree-sitter-lua
+
+- Upstream: `https://github.com/tree-sitter-grammars/tree-sitter-lua`
+- Selected revision: tag `v0.5.0`, commit
+  `10fe0054734eec83049514ea2e718b2a56acd0c9`
+- Vendored path: `third_party/tree-sitter-lua/v0.5.0`
+- License: MIT
+- Notice: preserve the upstream MIT license text and copyright notice copied in
+  `third_party/tree-sitter-lua/v0.5.0/LICENSE`.
+- Provenance: `third_party/tree-sitter-lua/v0.5.0/PROVENANCE.md`
+
 ## Generated-source note
 
 `third_party/tree-sitter-zig/v1.1.2/src/parser.c` is accepted in Feature 0025
@@ -113,3 +124,13 @@ generator, package-manager fetch, build path, link path, parser runtime,
 provider behavior, TypeScript or TSX query support, package/workspace/module or
 `tsconfig` analysis, LSP support, network behavior, telemetry, or remote
 enrichment is added by this import.
+
+`third_party/tree-sitter-lua/v0.5.0/src/parser.c` and
+`third_party/tree-sitter-lua/v0.5.0/src/scanner.c` are accepted in Feature 0065
+as pinned upstream generated/scanner artefacts copied from the selected Git
+commit, with Git blobs recorded in
+`third_party/tree-sitter-lua/v0.5.0/IMPORTED_FILES.tsv`. No local parser
+generator, package-manager fetch, build path, link path, parser runtime,
+provider behavior, Lua query support, LuaRocks support, package-path or module
+resolution, LSP support, network behavior, telemetry, or remote enrichment is
+added by this import.

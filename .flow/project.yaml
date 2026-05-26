@@ -5,9 +5,9 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: "0065"
+  active_feature_id: null
   active_run_id: null
-  last_completed_feature_id: "0064"
+  last_completed_feature_id: "0065"
 defaults:
   autonomy: ask
   lane: standard
@@ -25,7 +25,6 @@ focus:
 execution_queue:
   mode: serial
   feature_ids:
-    - "0065"
     - "0066"
     - "0067"
     - "0068"
