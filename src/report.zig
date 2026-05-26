@@ -3,35 +3,7 @@ const model = @import("model.zig");
 const provider = @import("provider.zig");
 const version = @import("version.zig");
 const fmt = @import("report_format.zig");
-
-const LineDisplayRange = struct { start: u32, end: u32 };
-
-const SymbolDisplaySummary = struct {
-    total: usize,
-    shown: usize,
-    omitted: usize,
-    limit: usize,
-    explicit_limit: bool,
-
-    fn limitSource(self: SymbolDisplaySummary) []const u8 {
-        return if (self.explicit_limit) "explicit" else "default";
-    }
-};
-
-fn symbolDisplaySummary(symbols: model.SymbolReport, display: model.SymbolDisplay) SymbolDisplaySummary {
-    const shown = @min(symbols.symbols.len, display.limit);
-    return .{
-        .total = symbols.symbols.len,
-        .shown = shown,
-        .omitted = symbols.symbols.len - shown,
-        .limit = display.limit,
-        .explicit_limit = display.explicit_limit,
-    };
-}
-
-fn symbolSortBasis(symbols: model.SymbolReport) []const u8 {
-    return if (symbolsHaveLineHistory(symbols.symbols)) "current-line Git evidence summary" else "provider order";
-}
+const report_symbols = @import("report_symbols.zig");
 
 pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("git-hotspots: file-level Git-history investigation prompts\n", .{});
@@ -55,18 +27,18 @@ pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
         try writer.print("inspect: requested={s} matched={s} rank={d}\n", .{ inspect.requested_path, inspect.matched_path, inspect.rank });
     }
     if (analysis.symbol_report) |symbols| {
-        const summary = symbolDisplaySummary(symbols, analysis.symbol_display);
-        try writer.print("symbols: provider={s} state=current-only freshness={s} failure={s} confidence={s} total={d} shown={d} omitted={d} limit={d} limit_source={s} sort_basis=\"{s}\"\n", .{ symbols.provider.name, @tagName(symbols.provider.freshness), @tagName(symbols.provider.failure), @tagName(symbols.provider.confidence), summary.total, summary.shown, summary.omitted, summary.limit, summary.limitSource(), symbolSortBasis(symbols) });
+        const summary = report_symbols.displaySummary(symbols, analysis.symbol_display);
+        try writer.print("symbols: provider={s} state=current-only freshness={s} failure={s} confidence={s} total={d} shown={d} omitted={d} limit={d} limit_source={s} sort_basis=\"{s}\"\n", .{ symbols.provider.name, @tagName(symbols.provider.freshness), @tagName(symbols.provider.failure), @tagName(symbols.provider.confidence), summary.total, summary.shown, summary.omitted, summary.limit, summary.limitSource(), report_symbols.sortBasis(symbols) });
         try writer.print("symbols caveat: current working-tree enrichment only; file-level Git evidence, score, file order, lineage, and confidence are unchanged\n", .{});
     }
     try writer.print("\n{s:<5} {s:<7} {s:<7} {s:<7} {s:<10} {s:<7} {s}\n", .{ "rank", "score", "changes", "churn", "confidence", "lineage", "path" });
     for (analysis.results, 0..) |row, i| {
-        try writer.print("{d:<5} {d:<7.1} {d:<7} {d:<7} {s:<10} {s:<7} {s}\n", .{ i + 1, row.score.total, row.change_count, row.churn, row.confidence, lineageIndicator(row), row.path });
+        try writer.print("{d:<5} {d:<7.1} {d:<7} {d:<7} {s:<10} {s:<7} {s}\n", .{ i + 1, row.score.total, row.change_count, row.churn, row.confidence, report_symbols.lineageIndicator(row), row.path });
     }
     if (analysis.symbol_report) |symbols| {
-        const summary = symbolDisplaySummary(symbols, analysis.symbol_display);
-        try writer.print("\ncurrent symbols (shown first by {s}):\n", .{symbolSortBasis(symbols)});
-        try writer.print("  summary: total={d} shown={d} omitted={d} limit={d} limit_source={s} sort_basis=\"{s}\"\n", .{ summary.total, summary.shown, summary.omitted, summary.limit, summary.limitSource(), symbolSortBasis(symbols) });
+        const summary = report_symbols.displaySummary(symbols, analysis.symbol_display);
+        try writer.print("\ncurrent symbols (shown first by {s}):\n", .{report_symbols.sortBasis(symbols)});
+        try writer.print("  summary: total={d} shown={d} omitted={d} limit={d} limit_source={s} sort_basis=\"{s}\"\n", .{ summary.total, summary.shown, summary.omitted, summary.limit, summary.limitSource(), report_symbols.sortBasis(symbols) });
         if (symbols.symbols.len == 0) {
             try writer.print("  none\n", .{});
         } else {
@@ -77,12 +49,12 @@ pub fn renderTable(writer: anytype, analysis: model.Analysis) !void {
 }
 
 fn renderTableSymbolRows(writer: anytype, symbols: model.SymbolReport, display: model.SymbolDisplay) !void {
-    const indexes = try orderedHumanSymbolIndexes(symbols.symbols);
+    const indexes = try report_symbols.orderedHumanIndexes(symbols.symbols);
     defer std.heap.page_allocator.free(indexes);
     const shown = @min(indexes.len, display.limit);
     for (indexes[0..shown]) |index| {
         const symbol = symbols.symbols[index];
-        const range = displayLineRange(symbol.current_range);
+        const range = report_symbols.displayLineRange(symbol.current_range);
         try writer.print("  {s} {s} lines {d}-{d} confidence={s}\n", .{ @tagName(symbol.kind), symbol.name, range.start, range.end, @tagName(symbol.confidence) });
         if (symbol.current_line_history) |line_history| {
             try writer.print("    Current-line Git evidence: commits={d} lines={d} unblamable={d} freshness={s} failure={s} confidence={s} caveats=", .{ line_history.distinct_last_touch_commit_count, line_history.line_count, line_history.uncommitted_or_unblamable_line_count, @tagName(line_history.freshness), @tagName(line_history.failure), @tagName(line_history.confidence) });
@@ -250,7 +222,7 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
         try writer.print(" | {d:.1} | {d} | {d} | ", .{ row.score.total, row.change_count, row.churn });
         try fmt.markdownText(writer, row.confidence);
         try writer.writeAll(" | ");
-        try fmt.markdownText(writer, lineageIndicator(row));
+        try fmt.markdownText(writer, report_symbols.lineageIndicator(row));
         try writer.writeAll(" | ");
         try fmt.markdownText(writer, row.last_changed_commit);
         try writer.writeAll(" |\n");
@@ -336,21 +308,14 @@ pub fn renderMarkdown(writer: anytype, analysis: model.Analysis) !void {
     }
 }
 
-fn displayLineRange(range: provider.CurrentRange) LineDisplayRange {
-    return switch (range) {
-        .lines => |lines| .{ .start = lines.start, .end = lines.end },
-        .bytes => .{ .start = 0, .end = 0 },
-    };
-}
-
 fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport, display: model.SymbolDisplay) !void {
-    const summary = symbolDisplaySummary(symbols, display);
+    const summary = report_symbols.displaySummary(symbols, display);
     try writer.print("  \"symbols\": {{\n", .{});
     try writer.print("    \"current_only\": true,\n", .{});
     try writer.print("    \"human_display\": {{ \"total_count\": {d}, \"shown_count\": {d}, \"omitted_count\": {d}, \"default_limit\": {d}, \"active_limit\": {d}, \"limit_source\": ", .{ summary.total, summary.shown, summary.omitted, model.default_symbol_display_limit, summary.limit });
     try fmt.jsonString(writer, summary.limitSource());
     try writer.print(", \"sort_basis\": ", .{});
-    try fmt.jsonString(writer, symbolSortBasis(symbols));
+    try fmt.jsonString(writer, report_symbols.sortBasis(symbols));
     try writer.print(" }},\n", .{});
     try writer.print("    \"provider\": {{ \"name\": ", .{});
     try fmt.jsonString(writer, symbols.provider.name);
@@ -367,14 +332,14 @@ fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport, display:
     try writer.print(", \"confidence\": ", .{});
     try fmt.jsonString(writer, @tagName(symbols.provider.confidence));
     try writer.print(", \"caveats\": ", .{});
-    const has_line_history = symbolsHaveLineHistory(symbols.symbols);
+    const has_line_history = report_symbols.haveLineHistory(symbols.symbols);
     try fmt.stringArrayWithLineHistoryContext(writer, symbols.provider.caveats, has_line_history);
     try writer.print(", \"provenance\": {{ \"input\": ", .{});
     try fmt.jsonString(writer, symbols.provider.input.identity);
     try writer.print(", \"local_only\": true }} }},\n", .{});
     try writer.print("    \"items\": [\n", .{});
     for (symbols.symbols, 0..) |symbol, i| {
-        const range = displayLineRange(symbol.current_range);
+        const range = report_symbols.displayLineRange(symbol.current_range);
         try writer.print("      {{ \"path\": ", .{});
         try fmt.jsonString(writer, symbol.path);
         try writer.print(", \"name\": ", .{});
@@ -397,26 +362,26 @@ fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport, display:
 }
 
 fn renderSymbolReportMarkdown(writer: anytype, symbols: model.SymbolReport, display: model.SymbolDisplay) !void {
-    const summary = symbolDisplaySummary(symbols, display);
+    const summary = report_symbols.displaySummary(symbols, display);
     try writer.writeAll("## Symbols\n\n");
     try writer.writeAll("Symbols are opt-in current working-tree enrichment only. They do not change score, file order, lineage, confidence, or file-level Git evidence.\n\n");
     try writer.writeAll("- Provider: ");
     try fmt.markdownText(writer, symbols.provider.name);
     try writer.writeByte('\n');
     try writer.print("- State: current-only\n- Freshness: {s}\n- Failure: {s}\n- Confidence: {s}\n", .{ @tagName(symbols.provider.freshness), @tagName(symbols.provider.failure), @tagName(symbols.provider.confidence) });
-    try writer.print("- Total symbols: {d}\n- Shown symbols: {d}\n- Omitted symbols: {d}\n- Human display limit: {d} ({s})\n- Sort basis: shown first by {s}\n", .{ summary.total, summary.shown, summary.omitted, summary.limit, summary.limitSource(), symbolSortBasis(symbols) });
+    try writer.print("- Total symbols: {d}\n- Shown symbols: {d}\n- Omitted symbols: {d}\n- Human display limit: {d} ({s})\n- Sort basis: shown first by {s}\n", .{ summary.total, summary.shown, summary.omitted, summary.limit, summary.limitSource(), report_symbols.sortBasis(symbols) });
     try writer.writeAll("- Caveats:\n");
     if (symbols.provider.caveats.len == 0) {
         try writer.writeAll("  - None\n");
     } else {
-        const has_line_history = symbolsHaveLineHistory(symbols.symbols);
+        const has_line_history = report_symbols.haveLineHistory(symbols.symbols);
         for (symbols.provider.caveats) |caveat| {
             try writer.writeAll("  - ");
             try fmt.markdownText(writer, fmt.caveatForLineHistoryContext(caveat, has_line_history));
             try writer.writeByte('\n');
         }
     }
-    const has_line_history = symbolsHaveLineHistory(symbols.symbols);
+    const has_line_history = report_symbols.haveLineHistory(symbols.symbols);
     if (has_line_history) {
         try writer.writeAll("\n| Name | Kind | Lines | Confidence | Current-line Git evidence |\n| --- | --- | ---: | --- | --- |\n");
     } else {
@@ -426,11 +391,11 @@ fn renderSymbolReportMarkdown(writer: anytype, symbols: model.SymbolReport, disp
         if (has_line_history) try writer.writeAll("| None | - | - | - | - |\n\n") else try writer.writeAll("| None | - | - | - |\n\n");
         return;
     }
-    const indexes = try orderedHumanSymbolIndexes(symbols.symbols);
+    const indexes = try report_symbols.orderedHumanIndexes(symbols.symbols);
     defer std.heap.page_allocator.free(indexes);
     for (indexes[0..summary.shown]) |index| {
         const symbol = symbols.symbols[index];
-        const range = displayLineRange(symbol.current_range);
+        const range = report_symbols.displayLineRange(symbol.current_range);
         try writer.writeAll("| ");
         try fmt.markdownText(writer, symbol.name);
         try writer.print(" | {s} | {d}-{d} | {s} |", .{ @tagName(symbol.kind), range.start, range.end, @tagName(symbol.confidence) });
@@ -445,78 +410,6 @@ fn renderSymbolReportMarkdown(writer: anytype, symbols: model.SymbolReport, disp
         } else try writer.writeByte('\n');
     }
     try writer.writeByte('\n');
-}
-
-fn symbolsHaveLineHistory(symbols: []const provider.CurrentSymbolEvidence) bool {
-    for (symbols) |symbol| if (symbol.current_line_history != null) return true;
-    return false;
-}
-
-fn orderedHumanSymbolIndexes(symbols: []const provider.CurrentSymbolEvidence) ![]usize {
-    const indexes = try std.heap.page_allocator.alloc(usize, symbols.len);
-    for (indexes, 0..) |*index, i| index.* = i;
-    if (symbolsHaveLineHistory(symbols)) {
-        std.mem.sort(usize, indexes, symbols, lessHumanSymbolIndex);
-    }
-    return indexes;
-}
-
-fn lessHumanSymbolIndex(symbols: []const provider.CurrentSymbolEvidence, lhs_index: usize, rhs_index: usize) bool {
-    return switch (compareHumanSymbol(symbols[lhs_index], symbols[rhs_index])) {
-        .lt => true,
-        .gt => false,
-        .eq => lhs_index < rhs_index,
-    };
-}
-
-fn compareHumanSymbol(lhs: provider.CurrentSymbolEvidence, rhs: provider.CurrentSymbolEvidence) std.math.Order {
-    const lhs_history = lhs.current_line_history;
-    const rhs_history = rhs.current_line_history;
-    if (lhs_history != null and rhs_history == null) return .lt;
-    if (lhs_history == null and rhs_history != null) return .gt;
-    if (lhs_history) |lh| {
-        const rh = rhs_history.?;
-        if (compareDesc(usize, lh.distinct_last_touch_commit_count, rh.distinct_last_touch_commit_count)) |order| return order;
-        if (compareOptionalTimestampDesc(lh.most_recent_line_touched_timestamp, rh.most_recent_line_touched_timestamp)) |order| return order;
-        if (compareDesc(u32, lh.line_count, rh.line_count)) |order| return order;
-    }
-    inline for (.{
-        std.mem.order(u8, lhs.name, rhs.name),
-        compareRangeForSort(lhs.current_range, rhs.current_range),
-        std.mem.order(u8, lhs.provider_name, rhs.provider_name),
-        std.mem.order(u8, lhs.path, rhs.path),
-        std.mem.order(u8, @tagName(lhs.kind), @tagName(rhs.kind)),
-    }) |order| {
-        if (order != .eq) return order;
-    }
-    return .eq;
-}
-
-fn compareDesc(comptime T: type, lhs: T, rhs: T) ?std.math.Order {
-    if (lhs > rhs) return .lt;
-    if (lhs < rhs) return .gt;
-    return null;
-}
-
-fn compareOptionalTimestampDesc(lhs: ?i64, rhs: ?i64) ?std.math.Order {
-    if (lhs == null and rhs != null) return .gt;
-    if (lhs != null and rhs == null) return .lt;
-    if (lhs) |l| {
-        const r = rhs.?;
-        if (l > r) return .lt;
-        if (l < r) return .gt;
-    }
-    return null;
-}
-
-fn compareRangeForSort(lhs: provider.CurrentRange, rhs: provider.CurrentRange) std.math.Order {
-    const lhs_range = displayLineRange(lhs);
-    const rhs_range = displayLineRange(rhs);
-    if (lhs_range.start < rhs_range.start) return .lt;
-    if (lhs_range.start > rhs_range.start) return .gt;
-    if (lhs_range.end < rhs_range.end) return .lt;
-    if (lhs_range.end > rhs_range.end) return .gt;
-    return .eq;
 }
 
 fn renderCurrentLineHistoryJson(writer: anytype, line_history: provider.CurrentLineHistoryEvidence) !void {
@@ -535,43 +428,6 @@ fn renderCurrentLineHistoryJson(writer: anytype, line_history: provider.CurrentL
     try writer.print(", \"caveats\": ", .{});
     try fmt.stringArray(writer, line_history.caveats);
     try writer.print(" }}", .{});
-}
-
-fn lineageIndicator(row: model.Result) []const u8 {
-    if (row.lineage_partial) return "partial";
-    if (row.lineage_aliases.len > 0) return "yes";
-    return "no";
-}
-
-test "human symbol display limit keeps json-complete metadata separate" {
-    var symbols = [_]provider.CurrentSymbolEvidence{
-        .{ .path = "src/a.zig", .name = "alpha", .kind = .function, .current_range = .{ .lines = .{ .start = 10, .end = 12 } }, .provider_name = "tree-sitter-zig", .confidence = .high },
-        .{ .path = "src/a.zig", .name = "beta", .kind = .function, .current_range = .{ .lines = .{ .start = 20, .end = 25 } }, .provider_name = "tree-sitter-zig", .confidence = .high },
-        .{ .path = "src/a.zig", .name = "gamma", .kind = .function, .current_range = .{ .lines = .{ .start = 30, .end = 30 } }, .provider_name = "tree-sitter-zig", .confidence = .high },
-    };
-    const report_model = model.SymbolReport{ .provider = undefined, .symbols = symbols[0..] };
-    const summary = symbolDisplaySummary(report_model, .{ .limit = 2, .explicit_limit = true });
-    try std.testing.expectEqual(@as(usize, 3), summary.total);
-    try std.testing.expectEqual(@as(usize, 2), summary.shown);
-    try std.testing.expectEqual(@as(usize, 1), summary.omitted);
-    try std.testing.expectEqualStrings("explicit", summary.limitSource());
-}
-
-test "human symbols with line history sort by evidence strength then stable identity" {
-    var alpha_commits = [_][]const u8{"a"};
-    var beta_commits = [_][]const u8{ "b", "c" };
-    var gamma_commits = [_][]const u8{"d"};
-    var caveats = [_][]const u8{};
-    var symbols = [_]provider.CurrentSymbolEvidence{
-        .{ .path = "src/a.zig", .name = "alpha", .kind = .function, .current_range = .{ .lines = .{ .start = 10, .end = 12 } }, .provider_name = "tree-sitter-zig", .confidence = .high, .current_line_history = .{ .line_count = 3, .distinct_last_touch_commit_count = 1, .most_recent_line_touched_timestamp = 10, .uncommitted_or_unblamable_line_count = 0, .sample_commits = alpha_commits[0..], .freshness = .fresh, .failure = .ok, .confidence = .high, .caveats = caveats[0..] } },
-        .{ .path = "src/a.zig", .name = "beta", .kind = .function, .current_range = .{ .lines = .{ .start = 20, .end = 25 } }, .provider_name = "tree-sitter-zig", .confidence = .high, .current_line_history = .{ .line_count = 6, .distinct_last_touch_commit_count = 2, .most_recent_line_touched_timestamp = 5, .uncommitted_or_unblamable_line_count = 0, .sample_commits = beta_commits[0..], .freshness = .fresh, .failure = .ok, .confidence = .high, .caveats = caveats[0..] } },
-        .{ .path = "src/a.zig", .name = "gamma", .kind = .function, .current_range = .{ .lines = .{ .start = 30, .end = 30 } }, .provider_name = "tree-sitter-zig", .confidence = .high, .current_line_history = .{ .line_count = 1, .distinct_last_touch_commit_count = 1, .most_recent_line_touched_timestamp = 20, .uncommitted_or_unblamable_line_count = 0, .sample_commits = gamma_commits[0..], .freshness = .fresh, .failure = .ok, .confidence = .high, .caveats = caveats[0..] } },
-    };
-    const indexes = try orderedHumanSymbolIndexes(symbols[0..]);
-    defer std.heap.page_allocator.free(indexes);
-    try std.testing.expectEqual(@as(usize, 1), indexes[0]);
-    try std.testing.expectEqual(@as(usize, 2), indexes[1]);
-    try std.testing.expectEqual(@as(usize, 0), indexes[2]);
 }
 
 test "markdown report has stable sections and no raw private root" {
