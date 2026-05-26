@@ -34,8 +34,21 @@ fn dupTrim(allocator: std.mem.Allocator, s: []u8) ![]u8 {
     return allocator.dupe(u8, std.mem.trim(u8, s, "\r\n "));
 }
 
-fn isTrueText(text: []u8) bool {
+fn isTrueText(text: []const u8) bool {
     return std.mem.eql(u8, std.mem.trim(u8, text, "\r\n "), "true");
+}
+
+fn detectPartialClone(allocator: std.mem.Allocator, io: std.Io, repo_path: []const u8) !bool {
+    const promisor_out = try git_runner.runGitOk(allocator, io, repo_path, &.{ "config", "--get-regexp", "^remote\\..*\\.promisor$" });
+    defer allocator.free(promisor_out);
+    var lines = std.mem.splitScalar(u8, promisor_out, '\n');
+    while (lines.next()) |line| {
+        if (line.len == 0) continue;
+        if (std.mem.lastIndexOfScalar(u8, line, ' ')) |space| {
+            if (isTrueText(line[space + 1 ..])) return true;
+        }
+    }
+    return false;
 }
 
 fn writeProgress(progress: ?*std.Io.Writer, message: []const u8) !void {
@@ -83,16 +96,7 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
     const is_shallow = isTrueText(shallow_out);
     allocator.free(shallow_out);
 
-    const promisor = git_runner.runGit(allocator, io, cfg.repo_path, &.{ "config", "--get", "remote.origin.promisor" }) catch null;
-    var is_partial = false;
-    if (promisor) |p| {
-        is_partial = switch (p.term) {
-            .exited => |code| code == 0 and isTrueText(p.stdout),
-            else => false,
-        };
-        allocator.free(p.stdout);
-        allocator.free(p.stderr);
-    }
+    const is_partial = detectPartialClone(allocator, io, cfg.repo_path) catch false;
 
     const dirty_out = try git_runner.runGitOk(allocator, io, cfg.repo_path, &.{ "status", "--porcelain" });
     const dirty = std.mem.trim(u8, dirty_out, "\r\n ").len != 0;

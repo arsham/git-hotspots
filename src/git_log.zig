@@ -81,7 +81,7 @@ pub const LogParser = struct {
         if (line.len == 0) return;
         if (std.mem.indexOfScalar(u8, line, '\t')) |tab| {
             const first = line[0..tab];
-            if (first.len == 40 and std.mem.indexOfScalar(u8, line[tab + 1 ..], '\t') == null) {
+            if (isCommitObjectId(first) and std.mem.indexOfScalar(u8, line[tab + 1 ..], '\t') == null) {
                 try git_history.finishCommit(self.allocator, self.map, self.commit_paths.items);
                 self.commit_paths.clearRetainingCapacity();
                 if (self.cur_hash) |hash| self.allocator.free(hash);
@@ -102,6 +102,14 @@ pub const LogParser = struct {
 };
 
 const git_stderr_limit = 1024 * 1024;
+
+fn isCommitObjectId(value: []const u8) bool {
+    if (value.len != 40 and value.len != 64) return false;
+    for (value) |c| {
+        if (!std.ascii.isHex(c)) return false;
+    }
+    return true;
+}
 
 pub fn streamGitLog(
     allocator: std.mem.Allocator,
@@ -334,11 +342,12 @@ test "streaming log parser handles chunk boundaries and numstat edge cases" {
     try parser.feed("aaaaaaaaaaaaaaaaaaaa\t100\r\n");
     try parser.feed("1\t2\tsrc/{old.zig => new.zig}\r\n\r\nmalformed\r\n");
     try parser.feed("-\t-\tbin/blob.dat\n3\t4\t\"weird/tab\\tname.txt\"\n");
-    try parser.feed("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\t200\n5\t6\tunicod");
+    try parser.feed("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\t200\n5\t6\tunicod");
     try parser.feed("e/雪.zig");
     try parser.finish();
 
     try std.testing.expectEqual(@as(usize, 2), parser.commit_count);
+    try std.testing.expectEqualStrings("bbbbbbbbbbbb", map.get("unicode/雪.zig").?.last_commit);
     try std.testing.expectEqual(@as(u32, 1), map.get("src/new.zig").?.change_count);
     try std.testing.expectEqual(@as(u32, 1), map.get("bin/blob.dat").?.binary_count);
     try std.testing.expectEqual(@as(u64, 3), map.get("weird/tab\tname.txt").?.additions);
