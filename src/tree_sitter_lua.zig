@@ -1,5 +1,6 @@
 const std = @import("std");
 const provider = @import("provider.zig");
+const tree_sitter_common = @import("tree_sitter_common.zig");
 
 const c = @cImport({
     @cInclude("tree_sitter/api.h");
@@ -119,22 +120,8 @@ pub fn extractPath(allocator: std.mem.Allocator, io: std.Io, repo_root: []const 
         return extraction(allocator, repo_relative_path, .unsupported, .unknown, .unknown, &unsupported_caveats, &.{});
     }
 
-    const full_path = try std.fs.path.join(allocator, &.{ repo_root, repo_relative_path });
-    defer allocator.free(full_path);
-
-    const link_stat = std.Io.Dir.statFile(.cwd(), io, full_path, .{ .follow_symlinks = false }) catch return extraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &unavailable_caveats, &.{});
-    if (link_stat.kind != .file) return extraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &unavailable_caveats, &.{});
-
-    const file = std.Io.Dir.openFileAbsolute(io, full_path, .{}) catch return extraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &unavailable_caveats, &.{});
-    defer file.close(io);
-
-    const stat = file.stat(io) catch return extraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &unavailable_caveats, &.{});
-    if (stat.kind != .file or stat.size > max_file_bytes) return extraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &unavailable_caveats, &.{});
-
-    const source = allocator.alloc(u8, @intCast(stat.size)) catch return extraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &unavailable_caveats, &.{});
+    const source = try tree_sitter_common.readBoundedFile(allocator, io, repo_root, repo_relative_path, max_file_bytes) orelse return extraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &unavailable_caveats, &.{});
     defer allocator.free(source);
-    const bytes_read = file.readPositionalAll(io, source, 0) catch return extraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &unavailable_caveats, &.{});
-    if (bytes_read != source.len) return extraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &unavailable_caveats, &.{});
 
     return extractSource(allocator, repo_relative_path, source);
 }
