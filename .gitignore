@@ -23,6 +23,8 @@
 /fixtures/javascript-symbols-shallow/
 /fixtures/javascript-symbols-partial/
 /fixtures/lua-symbols/
+/fixtures/lua-symbols-shallow/
+/fixtures/lua-symbols-partial/
 /fixtures/typescript-symbols/
 /fixtures/typescript-symbols-shallow/
 /fixtures/typescript-symbols-partial/

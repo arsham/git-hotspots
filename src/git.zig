@@ -73,24 +73,24 @@ pub fn attachCurrentLineHistory(allocator: std.mem.Allocator, io: std.Io, analys
     }
 
     const rr = runGit(allocator, io, analysis.repo_root, &.{ "blame", "--incremental", "--", inspect.matched_path }) catch {
-        try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: blame process failed"});
+        try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence command failed"});
         return;
     };
     defer allocator.free(rr.stdout);
     defer allocator.free(rr.stderr);
     switch (rr.term) {
         .exited => |code| if (code != 0) {
-            try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: blame process failed"});
+            try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence command failed"});
             return;
         },
         else => {
-            try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: blame process failed"});
+            try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence command failed"});
             return;
         },
     }
 
     var ranges = parseIncrementalBlame(allocator, rr.stdout) catch {
-        try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: blame output could not be parsed safely"});
+        try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence output could not be parsed safely"});
         return;
     };
     defer ranges.deinit();

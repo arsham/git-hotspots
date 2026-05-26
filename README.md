@@ -81,7 +81,7 @@ provider areas include:
 - LSP data for richer language-aware relationships;
 - ctags for broad symbol discovery;
 - dependency graph data;
-- blame or history enrichers;
+- line-attribution or history enrichers;
 - test and coverage evidence.
 
 Provider output should be enrichment, not hidden truth. Providers should expose
@@ -228,8 +228,9 @@ Provider capability matrix:
 `--symbol-line-history` is a second opt-in layer that works only with
 `--inspect PATH --symbols`. It adds current-line Git evidence for current Zig,
 Go, Python, JavaScript, Lua, TypeScript, or TSX symbol line ranges using one
-local blame process only when symbol ranges are valid and the inspected file is
-clean. Current-line evidence is for the lines occupied by a symbol at HEAD;
+local current-line Git evidence command only when symbol ranges are valid and
+the inspected file is clean. Current-line evidence is for the lines occupied by
+a symbol at HEAD.
 it is not true symbol history, historical identity tracking, or `git log -L`.
 Output is summary-only: commit counts, bounded sample commit ids, timestamps,
 confidence, freshness, failure state, and caveats. It does not emit author

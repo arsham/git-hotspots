@@ -618,9 +618,42 @@ diff -u fixtures/expected/lua-symbols-rename-alias.json /tmp/git-hotspots-lua-sy
 "$EXE" --repo fixtures/lua-symbols --inspect src/other.lua --symbols --format json > /tmp/git-hotspots-lua-symbols-other.json
 ! grep -Fq -- 'local_worker' /tmp/git-hotspots-lua-symbols-other.json
 "$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history.json
-python3 - /tmp/git-hotspots-lua-symbols.json /tmp/git-hotspots-lua-symbols-limit.json /tmp/git-hotspots-lua-symbols-empty.json /tmp/git-hotspots-lua-symbols-invalid.json /tmp/git-hotspots-lua-symbols-generated.json /tmp/git-hotspots-lua-symbols-dynamic-table.json /tmp/git-hotspots-lua-symbols-metatable.json /tmp/git-hotspots-lua-symbols-embedded-dsl.json /tmp/git-hotspots-lua-symbols-symlink-unavailable.json /tmp/git-hotspots-lua-symbols-large-unavailable.json /tmp/git-hotspots-lua-symbols-missing-unavailable.json /tmp/git-hotspots-lua-symbols-rename-alias.json /tmp/git-hotspots-lua-symbols-other.json /tmp/git-hotspots-lua-line-history.json <<'PY'
+diff -u fixtures/expected/lua-line-history-success.json /tmp/git-hotspots-lua-line-history.json
+"$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-2.json
+diff -u /tmp/git-hotspots-lua-line-history.json /tmp/git-hotspots-lua-line-history-2.json
+"$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format markdown > /tmp/git-hotspots-lua-line-history.md
+diff -u fixtures/expected/lua-line-history-success.md /tmp/git-hotspots-lua-line-history.md
+"$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format table > /tmp/git-hotspots-lua-line-history.txt
+diff -u fixtures/expected/lua-line-history-success.txt /tmp/git-hotspots-lua-line-history.txt
+"$EXE" --repo fixtures/lua-symbols-shallow --inspect src/example.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-shallow.json
+grep -Fq -- 'current-line Git evidence may be incomplete: repository history is shallow; auto_fetch is false' /tmp/git-hotspots-lua-line-history-shallow.json
+"$EXE" --repo fixtures/lua-symbols-partial --inspect src/example.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-partial.json
+grep -Fq -- 'current-line Git evidence may be incomplete: repository history may be partial/promisor; auto_fetch is false' /tmp/git-hotspots-lua-line-history-partial.json
+"$EXE" --repo fixtures/lua-symbols --inspect src/empty.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-empty.json
+"$EXE" --repo fixtures/lua-symbols --inspect src/invalid_partial.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-invalid.json
+"$EXE" --repo fixtures/lua-symbols --inspect src/generated.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-generated.json
+"$EXE" --repo fixtures/lua-symbols --inspect src/dynamic_table_assignment.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-dynamic-table.json
+"$EXE" --repo fixtures/lua-symbols --inspect src/metatable_heavy.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-metatable.json
+"$EXE" --repo fixtures/lua-symbols --inspect src/embedded_dsl.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-embedded-dsl.json
+"$EXE" --repo fixtures/lua-symbols --inspect src/link.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-symlink-unavailable.json
+"$EXE" --repo fixtures/lua-symbols --inspect src/large.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-large-unavailable.json
+"$EXE" --repo fixtures/lua-symbols --inspect src/missing.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-missing-unavailable.json
+"$EXE" --repo fixtures/lua-symbols --inspect src/old-example.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-rename-alias.json
+printf 'local function untracked()\n  return true\nend\n' > fixtures/lua-symbols/src/untracked.lua
+assert_fails_with_stderr lua-line-history-untracked "--inspect target has no matching" "$EXE" --repo fixtures/lua-symbols --inspect src/untracked.lua --symbols --symbol-line-history --format json
+rm -f fixtures/lua-symbols/src/untracked.lua
+printf '%s\n' '-- dirty inspected' >> fixtures/lua-symbols/src/example.lua
+"$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-dirty-inspected.json
+grep -Fq -- 'current-line Git evidence skipped: inspected file has staged or unstaged content changes' /tmp/git-hotspots-lua-line-history-dirty-inspected.json
+git -C fixtures/lua-symbols checkout -q -- src/example.lua
+printf '%s\n' '-- dirty unrelated' >> fixtures/lua-symbols/src/other.lua
+"$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format json > /tmp/git-hotspots-lua-line-history-dirty-unrelated.json
+grep -Fq -- '"failure": "ok"' /tmp/git-hotspots-lua-line-history-dirty-unrelated.json
+git -C fixtures/lua-symbols checkout -q -- src/other.lua
+assert_fails_with_stderr lua-line-history-no-history "repository has no commits" sh -c 'tmp=$(mktemp -d); git init -q -b main "$tmp" && "$0" --repo "$tmp" --inspect src/example.lua --symbols --symbol-line-history --format json' "$EXE"
+python3 - /tmp/git-hotspots-lua-symbols.json /tmp/git-hotspots-lua-symbols-limit.json /tmp/git-hotspots-lua-symbols-empty.json /tmp/git-hotspots-lua-symbols-invalid.json /tmp/git-hotspots-lua-symbols-generated.json /tmp/git-hotspots-lua-symbols-dynamic-table.json /tmp/git-hotspots-lua-symbols-metatable.json /tmp/git-hotspots-lua-symbols-embedded-dsl.json /tmp/git-hotspots-lua-symbols-symlink-unavailable.json /tmp/git-hotspots-lua-symbols-large-unavailable.json /tmp/git-hotspots-lua-symbols-missing-unavailable.json /tmp/git-hotspots-lua-symbols-rename-alias.json /tmp/git-hotspots-lua-symbols-other.json /tmp/git-hotspots-lua-line-history.json /tmp/git-hotspots-lua-line-history-shallow.json /tmp/git-hotspots-lua-line-history-partial.json /tmp/git-hotspots-lua-line-history-empty.json /tmp/git-hotspots-lua-line-history-invalid.json /tmp/git-hotspots-lua-line-history-generated.json /tmp/git-hotspots-lua-line-history-dynamic-table.json /tmp/git-hotspots-lua-line-history-metatable.json /tmp/git-hotspots-lua-line-history-embedded-dsl.json /tmp/git-hotspots-lua-line-history-symlink-unavailable.json /tmp/git-hotspots-lua-line-history-large-unavailable.json /tmp/git-hotspots-lua-line-history-missing-unavailable.json /tmp/git-hotspots-lua-line-history-rename-alias.json /tmp/git-hotspots-lua-line-history-dirty-inspected.json /tmp/git-hotspots-lua-line-history-dirty-unrelated.json <<'PY'
 import json, sys
-success, limited, empty, invalid, generated, dynamic, metatable, embedded, symlink, large, missing, alias, other, line = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+success, limited, empty, invalid, generated, dynamic, metatable, embedded, symlink, large, missing, alias, other, line, line_shallow, line_partial, line_empty, line_invalid, line_generated, line_dynamic, line_metatable, line_embedded, line_symlink, line_large, line_missing, line_alias, line_dirty, line_unrelated = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
 assert success['symbols']['provider']['name'] == 'tree-sitter-lua', 'Lua provider missing'
 assert success['symbols']['provider']['failure'] == 'ok', 'Lua provider failure changed'
 assert [row['name'] for row in success['symbols']['items']] == ['src/example.lua', 'CONFIG', 'mutable_value', 'exports', 'answer', 'build', 'Nested', 'local_worker', 'make_thing', 'run'], 'Lua source order changed'
@@ -643,17 +676,36 @@ assert alias['inspect']['requested_path'] == 'src/old-example.lua' and alias['in
 assert all(row['path'] == 'src/example.lua' for row in alias['symbols']['items']), 'Lua alias parsed requested alias'
 assert [row['name'] for row in other['symbols']['items']] == ['src/other.lua', 'other_only'], 'two-file Lua inspect changed'
 assert all('current_line_history' in row for row in line['symbols']['items']), 'Lua current-line evidence missing'
+assert all(row['current_line_history']['basis'] == 'current-line-range-at-head' for row in line['symbols']['items']), 'Lua line-history basis changed'
+assert any(row['current_line_history']['most_recent_line_touched_timestamp'] == 1777593600 for row in line['symbols']['items']), 'Lua current-line timestamp evidence changed'
+assert any(row['current_line_history']['uncommitted_or_unblamable_line_count'] > 0 for row in line['symbols']['items']), 'Lua module range did not report unblamable lines'
+assert any('shallow' in ' '.join(row['current_line_history']['caveats']) for row in line_shallow['symbols']['items']), 'Lua shallow caveat missing'
+assert any('partial/promisor' in ' '.join(row['current_line_history']['caveats']) for row in line_partial['symbols']['items']), 'Lua partial caveat missing'
+assert any(row['current_line_history']['uncommitted_or_unblamable_line_count'] > 0 for row in line_empty['symbols']['items']), 'empty Lua line history did not degrade honestly'
+assert line_invalid['symbols']['provider']['failure'] == 'failed' and line_invalid['symbols']['items'] == [], 'invalid Lua line-history should fail closed'
+assert any('generated-file markers' in caveat for caveat in line_generated['symbols']['provider']['caveats']), 'Lua line-history generated caveat missing'
+assert any('dynamic bracket table assignments' in caveat for caveat in line_dynamic['symbols']['provider']['caveats']), 'Lua line-history dynamic table caveat missing'
+assert any('metatable-heavy Lua' in caveat for caveat in line_metatable['symbols']['provider']['caveats']), 'Lua line-history metatable caveat missing'
+assert any('embedded DSL strings' in caveat for caveat in line_embedded['symbols']['provider']['caveats']), 'Lua line-history embedded DSL caveat missing'
+for data in (line_generated, line_dynamic, line_metatable, line_embedded):
+    assert all('current_line_history' in row for row in data['symbols']['items']), 'Lua caveated file lost current-line evidence'
+for data in (line_symlink, line_large, line_missing):
+    assert data['symbols']['provider']['failure'] == 'unavailable' and data['symbols']['items'] == [], 'unavailable Lua current file changed'
+assert line_alias['inspect']['requested_path'] == 'src/old-example.lua' and line_alias['inspect']['matched_path'] == 'src/example.lua', 'Lua line-history rename alias changed'
+assert all(row['path'] == 'src/example.lua' for row in line_alias['symbols']['items']), 'Lua line-history alias parsed requested alias'
+assert all(row['current_line_history']['failure'] == 'skipped' for row in line_dirty['symbols']['items']), 'Lua dirty inspected file did not skip line history'
+assert all(row['current_line_history']['failure'] == 'ok' for row in line_unrelated['symbols']['items']), 'Lua unrelated dirty file changed line history'
 for data in (success, limited, empty, invalid, generated, dynamic, metatable, embedded, symlink, large, missing, alias, other):
     text = json.dumps(data, ensure_ascii=False)
     assert 'current_line_history' not in text, 'Lua line history unexpectedly emitted'
     for forbidden in ('Fixture Author', 'fixture@example', 'source line'):
         assert forbidden not in text, 'Lua private detail leaked'
-for data in (line,):
+for data in (line, line_shallow, line_partial, line_empty, line_invalid, line_generated, line_dynamic, line_metatable, line_embedded, line_symlink, line_large, line_missing, line_alias, line_dirty, line_unrelated):
     text = json.dumps(data, ensure_ascii=False)
-    for forbidden in ('Fixture Author', 'fixture@example', 'source line', 'ownership', 'productivity'):
+    for forbidden in ('Fixture Author', 'fixture@example', 'source line', 'previous filename', 'ownership', 'productivity', 'developer ranking'):
         assert forbidden not in text, 'Lua line-history private detail leaked'
 PY
-! grep -Eiq -- 'Fixture Author|fixture@example|source line|previous filename|ownership|productivity|developer ranking' /tmp/git-hotspots-lua-symbols.json /tmp/git-hotspots-lua-symbols.md /tmp/git-hotspots-lua-symbols.txt /tmp/git-hotspots-lua-symbols-limit.json /tmp/git-hotspots-lua-symbols-limit.md /tmp/git-hotspots-lua-symbols-limit.txt /tmp/git-hotspots-lua-symbols-empty.json /tmp/git-hotspots-lua-symbols-invalid.json /tmp/git-hotspots-lua-symbols-generated.json /tmp/git-hotspots-lua-symbols-dynamic-table.json /tmp/git-hotspots-lua-symbols-metatable.json /tmp/git-hotspots-lua-symbols-embedded-dsl.json /tmp/git-hotspots-lua-symbols-symlink-unavailable.json /tmp/git-hotspots-lua-symbols-large-unavailable.json /tmp/git-hotspots-lua-symbols-missing-unavailable.json /tmp/git-hotspots-lua-symbols-rename-alias.json /tmp/git-hotspots-lua-line-history.json fixtures/expected/lua-symbols.json fixtures/expected/lua-symbols.md fixtures/expected/lua-symbols.txt fixtures/expected/lua-symbols-limit.json fixtures/expected/lua-symbols-limit.md fixtures/expected/lua-symbols-limit.txt fixtures/expected/lua-symbols-empty.json fixtures/expected/lua-symbols-invalid.json fixtures/expected/lua-symbols-generated.json fixtures/expected/lua-symbols-dynamic-table.json fixtures/expected/lua-symbols-metatable.json fixtures/expected/lua-symbols-embedded-dsl.json fixtures/expected/lua-symbols-symlink-unavailable.json fixtures/expected/lua-symbols-large-unavailable.json fixtures/expected/lua-symbols-missing-unavailable.json fixtures/expected/lua-symbols-rename-alias.json
+! grep -Eiq -- 'Fixture Author|fixture@example|source line|previous filename|ownership|productivity|developer ranking' /tmp/git-hotspots-lua-symbols.json /tmp/git-hotspots-lua-symbols.md /tmp/git-hotspots-lua-symbols.txt /tmp/git-hotspots-lua-symbols-limit.json /tmp/git-hotspots-lua-symbols-limit.md /tmp/git-hotspots-lua-symbols-limit.txt /tmp/git-hotspots-lua-symbols-empty.json /tmp/git-hotspots-lua-symbols-invalid.json /tmp/git-hotspots-lua-symbols-generated.json /tmp/git-hotspots-lua-symbols-dynamic-table.json /tmp/git-hotspots-lua-symbols-metatable.json /tmp/git-hotspots-lua-symbols-embedded-dsl.json /tmp/git-hotspots-lua-symbols-symlink-unavailable.json /tmp/git-hotspots-lua-symbols-large-unavailable.json /tmp/git-hotspots-lua-symbols-missing-unavailable.json /tmp/git-hotspots-lua-symbols-rename-alias.json /tmp/git-hotspots-lua-line-history.json /tmp/git-hotspots-lua-line-history.md /tmp/git-hotspots-lua-line-history.txt /tmp/git-hotspots-lua-line-history-shallow.json /tmp/git-hotspots-lua-line-history-partial.json /tmp/git-hotspots-lua-line-history-empty.json /tmp/git-hotspots-lua-line-history-invalid.json /tmp/git-hotspots-lua-line-history-generated.json /tmp/git-hotspots-lua-line-history-dynamic-table.json /tmp/git-hotspots-lua-line-history-metatable.json /tmp/git-hotspots-lua-line-history-embedded-dsl.json /tmp/git-hotspots-lua-line-history-symlink-unavailable.json /tmp/git-hotspots-lua-line-history-large-unavailable.json /tmp/git-hotspots-lua-line-history-missing-unavailable.json /tmp/git-hotspots-lua-line-history-rename-alias.json /tmp/git-hotspots-lua-line-history-dirty-inspected.json /tmp/git-hotspots-lua-line-history-dirty-unrelated.json fixtures/expected/lua-symbols.json fixtures/expected/lua-symbols.md fixtures/expected/lua-symbols.txt fixtures/expected/lua-symbols-limit.json fixtures/expected/lua-symbols-limit.md fixtures/expected/lua-symbols-limit.txt fixtures/expected/lua-symbols-empty.json fixtures/expected/lua-symbols-invalid.json fixtures/expected/lua-symbols-generated.json fixtures/expected/lua-symbols-dynamic-table.json fixtures/expected/lua-symbols-metatable.json fixtures/expected/lua-symbols-embedded-dsl.json fixtures/expected/lua-symbols-symlink-unavailable.json fixtures/expected/lua-symbols-large-unavailable.json fixtures/expected/lua-symbols-missing-unavailable.json fixtures/expected/lua-symbols-rename-alias.json fixtures/expected/lua-line-history-success.json fixtures/expected/lua-line-history-success.md fixtures/expected/lua-line-history-success.txt
 "$EXE" --repo fixtures/typescript-symbols --inspect src/example.ts --symbols --format json > /tmp/git-hotspots-typescript-symbols.json
 diff -u fixtures/expected/typescript-symbols.json /tmp/git-hotspots-typescript-symbols.json
 ! grep -Fq -- 'current_line_history' /tmp/git-hotspots-typescript-symbols.json

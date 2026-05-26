@@ -713,7 +713,7 @@ PY
 
 prohibited_claim_scan() {
   have_python || return 1
-  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/python-symbols.json fixtures/expected/python-symbols.md fixtures/expected/python-symbols.txt fixtures/expected/python-symbols-limit.json fixtures/expected/python-symbols-limit.md fixtures/expected/python-symbols-limit.txt fixtures/expected/python-symbols-empty.json fixtures/expected/python-symbols-invalid.json fixtures/expected/python-symbols-generated.json fixtures/expected/python-symbols-symlink-unavailable.json fixtures/expected/python-symbols-large-unavailable.json fixtures/expected/python-symbols-missing-unavailable.json fixtures/expected/python-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt fixtures/expected/python-line-history-success.json fixtures/expected/python-line-history-success.md fixtures/expected/python-line-history-success.txt fixtures/expected/javascript-line-history-success.json fixtures/expected/javascript-line-history-success.md fixtures/expected/javascript-line-history-success.txt README.md CONTRIBUTING.md <<'PY'
+  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/python-symbols.json fixtures/expected/python-symbols.md fixtures/expected/python-symbols.txt fixtures/expected/python-symbols-limit.json fixtures/expected/python-symbols-limit.md fixtures/expected/python-symbols-limit.txt fixtures/expected/python-symbols-empty.json fixtures/expected/python-symbols-invalid.json fixtures/expected/python-symbols-generated.json fixtures/expected/python-symbols-symlink-unavailable.json fixtures/expected/python-symbols-large-unavailable.json fixtures/expected/python-symbols-missing-unavailable.json fixtures/expected/python-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt fixtures/expected/python-line-history-success.json fixtures/expected/python-line-history-success.md fixtures/expected/python-line-history-success.txt fixtures/expected/javascript-line-history-success.json fixtures/expected/javascript-line-history-success.md fixtures/expected/javascript-line-history-success.txt fixtures/expected/lua-line-history-success.json fixtures/expected/lua-line-history-success.md fixtures/expected/lua-line-history-success.txt README.md CONTRIBUTING.md <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -727,6 +727,11 @@ patterns = [
     re.compile(r'\bAI/LLM judgement\b', re.IGNORECASE),
     re.compile(r'\btechnical-debt (score|scores)\b'),
     re.compile(r'\bauthor metrics\b'),
+    re.compile(r'\bauthor ranking\b'),
+    re.compile(r'\bcode[- ]quality scoring\b'),
+    re.compile(r'\brisk prediction\b'),
+    re.compile(r'\btrue (symbol )?history\b'),
+    re.compile(r'\b(module|package|type|dependency) (meaning|understanding|analysis)\b'),
     re.compile(r'\bhosted product\b'),
     re.compile(r'\bpricing\b'),
     re.compile(r'\bsales strategy\b'),
@@ -752,8 +757,35 @@ allowed_markers = (
 )
 
 failures = []
-for path_name in sys.argv[1:]:
-    path = Path(path_name)
+line_history_public_paths = [
+    Path('README.md'),
+    Path('fixtures/expected/explain.txt'),
+]
+line_history_public_paths.extend(sorted(Path('fixtures/expected').glob('*line-history*.*')))
+src_explain_path = Path('src/explain.zig')
+src_explain_public_lines = [
+    (line_no, line)
+    for line_no, line in enumerate(src_explain_path.read_text(encoding='utf-8').splitlines(), 1)
+    if line.lstrip().startswith('\\\\')
+]
+for path in line_history_public_paths:
+    if not path.exists():
+        failures.append(f'{path}: missing from line-history public wording scan')
+        continue
+    for line_no, line in enumerate(path.read_text(encoding='utf-8').splitlines(), 1):
+        if re.search(r'\bblame\b', line, re.IGNORECASE):
+            failures.append(f'{path}:{line_no}: public current-line wording must not say blame: {line}')
+for line_no, line in src_explain_public_lines:
+    if re.search(r'\bblame\b', line, re.IGNORECASE):
+        failures.append(f'src/explain.zig:{line_no}: public current-line wording must not say blame: {line}')
+
+git_source = Path('src/git.zig').read_text(encoding='utf-8')
+for match in re.finditer(r'"([^"]*current-line Git evidence[^"]*)"', git_source):
+    if re.search(r'\bblame\b', match.group(1), re.IGNORECASE):
+        failures.append(f'src/git.zig: public caveat must not say blame: {match.group(1)}')
+
+claim_scan_paths = list(dict.fromkeys([Path(path_name) for path_name in sys.argv[1:]] + line_history_public_paths))
+for path in claim_scan_paths:
     lines = path.read_text(encoding='utf-8').splitlines()
     for line_no, line in enumerate(lines, 1):
         context = ' '.join(lines[max(0, line_no - 3):line_no])
@@ -761,6 +793,12 @@ for path_name in sys.argv[1:]:
         if any(pattern.search(line) for pattern in patterns):
             if not any(marker in normalized for marker in allowed_markers):
                 failures.append(f'{path}:{line_no}: {line}')
+for i, (line_no, line) in enumerate(src_explain_public_lines):
+    context = ' '.join(text for _, text in src_explain_public_lines[max(0, i - 2):i + 1])
+    normalized = f' {context.strip().lower()} '
+    if any(pattern.search(line) for pattern in patterns):
+        if not any(marker in normalized for marker in allowed_markers):
+            failures.append(f'src/explain.zig:{line_no}: {line}')
 
 if failures:
     raise SystemExit('positive prohibited claim(s):\n' + '\n'.join(failures))
@@ -1249,6 +1287,91 @@ for data in (line, shallow, partial, commonjs, jsx, empty, invalid, symlink, lar
     for forbidden in ('Fixture Author', 'fixture@example', 'source line', 'ownership', 'productivity', 'Node package graph'):
         assert forbidden not in text, 'JavaScript private detail leaked'
 PY
+  LUA_SYMBOLS_JSON=$ARTIFACT_DIR/lua-symbols.json
+  LUA_LINE_HISTORY_JSON=$ARTIFACT_DIR/lua-line-history.json
+  LUA_LINE_HISTORY_JSON_B=$ARTIFACT_DIR/lua-line-history-b.json
+  LUA_LINE_HISTORY_MD=$ARTIFACT_DIR/lua-line-history.md
+  LUA_LINE_HISTORY_TABLE=$ARTIFACT_DIR/lua-line-history.txt
+  LUA_LINE_HISTORY_SHALLOW_JSON=$ARTIFACT_DIR/lua-line-history-shallow.json
+  LUA_LINE_HISTORY_PARTIAL_JSON=$ARTIFACT_DIR/lua-line-history-partial.json
+  LUA_LINE_HISTORY_EMPTY_JSON=$ARTIFACT_DIR/lua-line-history-empty.json
+  LUA_LINE_HISTORY_INVALID_JSON=$ARTIFACT_DIR/lua-line-history-invalid.json
+  LUA_LINE_HISTORY_GENERATED_JSON=$ARTIFACT_DIR/lua-line-history-generated.json
+  LUA_LINE_HISTORY_DYNAMIC_JSON=$ARTIFACT_DIR/lua-line-history-dynamic.json
+  LUA_LINE_HISTORY_METATABLE_JSON=$ARTIFACT_DIR/lua-line-history-metatable.json
+  LUA_LINE_HISTORY_EMBEDDED_JSON=$ARTIFACT_DIR/lua-line-history-embedded.json
+  LUA_LINE_HISTORY_SYMLINK_JSON=$ARTIFACT_DIR/lua-line-history-symlink.json
+  LUA_LINE_HISTORY_LARGE_JSON=$ARTIFACT_DIR/lua-line-history-large.json
+  LUA_LINE_HISTORY_MISSING_JSON=$ARTIFACT_DIR/lua-line-history-missing.json
+  LUA_LINE_HISTORY_ALIAS_JSON=$ARTIFACT_DIR/lua-line-history-alias.json
+  LUA_LINE_HISTORY_DIRTY_JSON=$ARTIFACT_DIR/lua-line-history-dirty.json
+  LUA_LINE_HISTORY_UNRELATED_JSON=$ARTIFACT_DIR/lua-line-history-unrelated.json
+  "$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --format json > "$LUA_SYMBOLS_JSON" || return 1
+  diff -u fixtures/expected/lua-symbols.json "$LUA_SYMBOLS_JSON" >/dev/null || return 1
+  ! grep -Fq -- 'current_line_history' "$LUA_SYMBOLS_JSON" || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_JSON" || return 1
+  diff -u fixtures/expected/lua-line-history-success.json "$LUA_LINE_HISTORY_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_JSON_B" || return 1
+  diff -u "$LUA_LINE_HISTORY_JSON" "$LUA_LINE_HISTORY_JSON_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format markdown > "$LUA_LINE_HISTORY_MD" || return 1
+  diff -u fixtures/expected/lua-line-history-success.md "$LUA_LINE_HISTORY_MD" >/dev/null || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format table > "$LUA_LINE_HISTORY_TABLE" || return 1
+  diff -u fixtures/expected/lua-line-history-success.txt "$LUA_LINE_HISTORY_TABLE" >/dev/null || return 1
+  "$EXE" --repo fixtures/lua-symbols-shallow --inspect src/example.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_SHALLOW_JSON" || return 1
+  grep -Fq -- 'current-line Git evidence may be incomplete: repository history is shallow; auto_fetch is false' "$LUA_LINE_HISTORY_SHALLOW_JSON" || return 1
+  "$EXE" --repo fixtures/lua-symbols-partial --inspect src/example.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_PARTIAL_JSON" || return 1
+  grep -Fq -- 'current-line Git evidence may be incomplete: repository history may be partial/promisor; auto_fetch is false' "$LUA_LINE_HISTORY_PARTIAL_JSON" || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/empty.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_EMPTY_JSON" || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/invalid_partial.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_INVALID_JSON" || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/generated.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_GENERATED_JSON" || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/dynamic_table_assignment.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_DYNAMIC_JSON" || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/metatable_heavy.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_METATABLE_JSON" || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/embedded_dsl.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_EMBEDDED_JSON" || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/link.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_SYMLINK_JSON" || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/large.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_LARGE_JSON" || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/missing.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_MISSING_JSON" || return 1
+  "$EXE" --repo fixtures/lua-symbols --inspect src/old-example.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_ALIAS_JSON" || return 1
+  printf 'local function untracked()\n  return true\nend\n' > fixtures/lua-symbols/src/untracked.lua
+  if "$EXE" --repo fixtures/lua-symbols --inspect src/untracked.lua --symbols --symbol-line-history --format json > "$ARTIFACT_DIR/lua-line-history-untracked.out" 2> "$ARTIFACT_DIR/lua-line-history-untracked.err"; then return 1; fi
+  grep -q -- '--inspect target has no matching' "$ARTIFACT_DIR/lua-line-history-untracked.err" || return 1
+  rm -f fixtures/lua-symbols/src/untracked.lua
+  printf '%s\n' '-- dirty inspected' >> fixtures/lua-symbols/src/example.lua
+  "$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_DIRTY_JSON" || return 1
+  grep -Fq -- 'current-line Git evidence skipped: inspected file has staged or unstaged content changes' "$LUA_LINE_HISTORY_DIRTY_JSON" || return 1
+  git -C fixtures/lua-symbols checkout -q -- src/example.lua
+  printf '%s\n' '-- dirty unrelated' >> fixtures/lua-symbols/src/other.lua
+  "$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format json > "$LUA_LINE_HISTORY_UNRELATED_JSON" || return 1
+  grep -Fq -- '"failure": "ok"' "$LUA_LINE_HISTORY_UNRELATED_JSON" || return 1
+  git -C fixtures/lua-symbols checkout -q -- src/other.lua
+  if sh -c 'tmp=$(mktemp -d); git init -q -b main "$tmp" && "$0" --repo "$tmp" --inspect src/example.lua --symbols --symbol-line-history --format json' "$EXE" > "$ARTIFACT_DIR/lua-line-history-no-history.out" 2> "$ARTIFACT_DIR/lua-line-history-no-history.err"; then return 1; fi
+  grep -q -- 'repository has no commits' "$ARTIFACT_DIR/lua-line-history-no-history.err" || return 1
+  python3 - "$LUA_SYMBOLS_JSON" "$LUA_LINE_HISTORY_JSON" "$LUA_LINE_HISTORY_SHALLOW_JSON" "$LUA_LINE_HISTORY_PARTIAL_JSON" "$LUA_LINE_HISTORY_EMPTY_JSON" "$LUA_LINE_HISTORY_INVALID_JSON" "$LUA_LINE_HISTORY_GENERATED_JSON" "$LUA_LINE_HISTORY_DYNAMIC_JSON" "$LUA_LINE_HISTORY_METATABLE_JSON" "$LUA_LINE_HISTORY_EMBEDDED_JSON" "$LUA_LINE_HISTORY_SYMLINK_JSON" "$LUA_LINE_HISTORY_LARGE_JSON" "$LUA_LINE_HISTORY_MISSING_JSON" "$LUA_LINE_HISTORY_ALIAS_JSON" "$LUA_LINE_HISTORY_DIRTY_JSON" "$LUA_LINE_HISTORY_UNRELATED_JSON" <<'PY'
+import json, sys
+symbols, line, shallow, partial, empty, invalid, generated, dynamic, metatable, embedded, symlink, large, missing, alias, dirty, unrelated = [json.load(open(path, encoding='utf-8')) for path in sys.argv[1:]]
+assert symbols['symbols']['provider']['name'] == 'tree-sitter-lua', 'Lua provider missing'
+assert all('current_line_history' in row for row in line['symbols']['items']), 'Lua current-line evidence missing'
+assert all(row['current_line_history']['basis'] == 'current-line-range-at-head' for row in line['symbols']['items']), 'Lua line-history basis changed'
+assert any(row['current_line_history']['most_recent_line_touched_timestamp'] == 1777593600 for row in line['symbols']['items']), 'Lua timestamp changed'
+assert any('shallow' in ' '.join(row['current_line_history']['caveats']) for row in shallow['symbols']['items']), 'Lua shallow caveat missing'
+assert any('partial/promisor' in ' '.join(row['current_line_history']['caveats']) for row in partial['symbols']['items']), 'Lua partial caveat missing'
+assert any(row['current_line_history']['uncommitted_or_unblamable_line_count'] > 0 for row in empty['symbols']['items']), 'empty Lua did not degrade safely'
+assert invalid['symbols']['provider']['failure'] == 'failed' and invalid['symbols']['items'] == [], 'invalid Lua should fail closed'
+assert any('generated-file markers' in caveat for caveat in generated['symbols']['provider']['caveats']), 'Lua generated caveat missing'
+assert any('dynamic bracket table assignments' in caveat for caveat in dynamic['symbols']['provider']['caveats']), 'Lua dynamic caveat missing'
+assert any('metatable-heavy Lua' in caveat for caveat in metatable['symbols']['provider']['caveats']), 'Lua metatable caveat missing'
+assert any('embedded DSL strings' in caveat for caveat in embedded['symbols']['provider']['caveats']), 'Lua embedded DSL caveat missing'
+for data in (generated, dynamic, metatable, embedded):
+    assert all('current_line_history' in row for row in data['symbols']['items']), 'caveated Lua file lost current-line evidence'
+for data in (symlink, large, missing):
+    assert data['symbols']['provider']['failure'] == 'unavailable' and data['symbols']['items'] == [], 'unavailable Lua file changed'
+assert alias['inspect']['requested_path'] == 'src/old-example.lua' and alias['inspect']['matched_path'] == 'src/example.lua', 'Lua alias changed'
+assert all(row['current_line_history']['failure'] == 'skipped' for row in dirty['symbols']['items']), 'Lua dirty inspected file did not skip'
+assert all(row['current_line_history']['failure'] == 'ok' for row in unrelated['symbols']['items']), 'Lua unrelated dirty file changed line history'
+for data in (line, shallow, partial, empty, invalid, generated, dynamic, metatable, embedded, symlink, large, missing, alias, dirty, unrelated):
+    text = json.dumps(data, ensure_ascii=False)
+    for forbidden in ('Fixture Author', 'fixture@example', 'source line', 'previous filename', 'ownership', 'productivity', 'developer ranking'):
+        assert forbidden not in text, 'Lua private detail leaked'
+PY
   TS_LINE_HISTORY_JSON=$ARTIFACT_DIR/typescript-line-history.json
   TS_LINE_HISTORY_JSON_B=$ARTIFACT_DIR/typescript-line-history-b.json
   TS_LINE_HISTORY_MD=$ARTIFACT_DIR/typescript-line-history.md
@@ -1410,6 +1533,7 @@ real_repo_smoke() {
   tracked_go_count=$(git -C "$repo" ls-files '*.go' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
   tracked_python_count=$(git -C "$repo" ls-files '*.py' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
   tracked_javascript_count=$(git -C "$repo" ls-files '*.js' '*.mjs' '*.cjs' '*.jsx' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
+  tracked_lua_count=$(git -C "$repo" ls-files '*.lua' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
   tracked_typescript_count=$(git -C "$repo" ls-files '*.ts' '*.mts' '*.cts' '*.tsx' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
 
   if "$EXE" --repo "$repo" --scope all --format table > "$table_out" 2> "$timing_file"; then
@@ -1541,6 +1665,44 @@ PY
     done < "$javascript_candidates"
   fi
 
+  first_lua_path=$(git -C "$repo" ls-files '*.lua' 2>/dev/null | LC_ALL=C sort | head -n 1 || true)
+  lua_symbol_status=skip-no-tracked-lua-file
+  lua_line_history_status=skip-no-tracked-lua-file
+  if [ -n "$first_lua_path" ]; then
+    lua_symbol_status=skip-no-successful-lua-symbol-file
+    lua_line_history_status=skip-no-safe-tracked-lua-file
+    lua_candidates=$(mktemp "$ARTIFACT_DIR/real-lua-candidates.XXXXXX")
+    git -C "$repo" ls-files '*.lua' 2>/dev/null | LC_ALL=C sort | head -n 12 > "$lua_candidates" || true
+    while IFS= read -r lua_path; do
+      [ -n "$lua_path" ] || continue
+      lua_symbol_out=$(mktemp "$ARTIFACT_DIR/real-lua-symbol.XXXXXX.json")
+      if [ "$lua_symbol_status" != pass ] && "$EXE" --repo "$repo" --inspect "$lua_path" --symbols --format json > "$lua_symbol_out" 2> "$timing_file" && python3 -m json.tool "$lua_symbol_out" >/dev/null 2>&1; then
+        lua_symbol_status=pass
+      fi
+      lua_line_history_out=$(mktemp "$ARTIFACT_DIR/real-lua-line-history.XXXXXX.json")
+      if "$EXE" --repo "$repo" --inspect "$lua_path" --symbols --symbol-line-history --format json > "$lua_line_history_out" 2> "$timing_file" && python3 - "$lua_line_history_out" <<'PY'
+import json, sys
+with open(sys.argv[1], encoding='utf-8') as fh:
+    data = json.load(fh)
+symbols = data.get('symbols') or {}
+if (symbols.get('provider') or {}).get('failure') != 'ok':
+    raise SystemExit(2)
+items = symbols.get('items') or []
+if not items:
+    raise SystemExit(3)
+histories = [row.get('current_line_history') for row in items]
+if not all(histories):
+    raise SystemExit(4)
+if not any(history.get('failure') == 'ok' and int(history.get('distinct_last_touch_commit_count') or 0) > 0 for history in histories):
+    raise SystemExit(5)
+PY
+      then
+        lua_line_history_status=pass
+        break
+      fi
+    done < "$lua_candidates"
+  fi
+
   first_typescript_path=$(git -C "$repo" ls-files '*.ts' '*.mts' '*.cts' '*.tsx' 2>/dev/null | LC_ALL=C sort | head -n 1 || true)
   typescript_symbol_status=skip-no-tracked-typescript-file
   typescript_line_history_status=skip-no-tracked-typescript-file
@@ -1584,7 +1746,7 @@ PY
     project_summary=$(json_count_summary "$project_json_out") || project_summary='results=unknown caveats=unknown dirty=unknown'
     elapsed=${timing#*|}
     project_elapsed=${project_timing#*|}
-    printf 'real-repo label=%s commits=%s tracked_files=%s tracked_go_files=%s tracked_python_files=%s tracked_javascript_files=%s tracked_typescript_files=%s go_symbol=%s python_symbol=%s python_line_history=%s javascript_symbol=%s javascript_line_history=%s typescript_symbol=%s typescript_line_history=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$tracked_go_count" "$tracked_python_count" "$tracked_javascript_count" "$tracked_typescript_count" "$go_symbol_status" "$python_symbol_status" "$python_line_history_status" "$javascript_symbol_status" "$javascript_line_history_status" "$typescript_symbol_status" "$typescript_line_history_status" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
+    printf 'real-repo label=%s commits=%s tracked_files=%s tracked_go_files=%s tracked_python_files=%s tracked_javascript_files=%s tracked_lua_files=%s tracked_typescript_files=%s go_symbol=%s python_symbol=%s python_line_history=%s javascript_symbol=%s javascript_line_history=%s lua_symbol=%s lua_line_history=%s typescript_symbol=%s typescript_line_history=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$tracked_go_count" "$tracked_python_count" "$tracked_javascript_count" "$tracked_lua_count" "$tracked_typescript_count" "$go_symbol_status" "$python_symbol_status" "$python_line_history_status" "$javascript_symbol_status" "$javascript_line_history_status" "$lua_symbol_status" "$lua_line_history_status" "$typescript_symbol_status" "$typescript_line_history_status" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
     pass_rung "real repo smoke $label"
     return 0
   fi

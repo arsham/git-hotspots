@@ -113,10 +113,11 @@ pub const text =
     \\| Unsupported current files | all other paths | unsupported fallback | provider reports unsupported and keeps inspected file evidence | no current-line evidence | no parser diagnostics, source snippets, or parsed symbols |
     \\
     \\--symbol-line-history is opt-in and valid only with --inspect PATH
-    \\--symbols. It adds current-line Git blame evidence for current Zig, Go,
-    \\Python, JavaScript, Lua, TypeScript, or TSX symbol line ranges using one
-    \\local blame process only when current ranges are valid and the inspected file is
-    \\clean. Current-line evidence is for the lines occupied by a symbol at HEAD;
+    \\--symbols. It adds current-line Git evidence for current Zig, Go, Python,
+    \\JavaScript, Lua, TypeScript, or TSX symbol line ranges using one local
+    \\current-line Git evidence command only when current ranges are valid and the
+    \\inspected file is clean. Current-line evidence is for the lines occupied by a
+    \\symbol at HEAD.
     \\it is not true symbol history, historical identity tracking, or git log -L.
     \\It reports commit-count and timestamp summaries without author identities,
     \\commit messages, source snippets, remotes, or absolute paths. This is not

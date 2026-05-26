@@ -880,7 +880,7 @@ make_javascript_symbols
 make_lua_symbols
 make_typescript_symbols
 make_symbol_line_history
-rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked" "$FIX/symbol-line-history-shallow" "$FIX/symbol-line-history-partial" "$FIX/go-symbols-shallow" "$FIX/go-symbols-partial" "$FIX/python-symbols-shallow" "$FIX/python-symbols-partial" "$FIX/javascript-symbols-shallow" "$FIX/javascript-symbols-partial" "$FIX/typescript-symbols-shallow" "$FIX/typescript-symbols-partial"
+rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked" "$FIX/symbol-line-history-shallow" "$FIX/symbol-line-history-partial" "$FIX/go-symbols-shallow" "$FIX/go-symbols-partial" "$FIX/python-symbols-shallow" "$FIX/python-symbols-partial" "$FIX/javascript-symbols-shallow" "$FIX/javascript-symbols-partial" "$FIX/lua-symbols-shallow" "$FIX/lua-symbols-partial" "$FIX/typescript-symbols-shallow" "$FIX/typescript-symbols-partial"
 git clone -q --depth 1 "file://$FIX/basic" "$FIX/shallow"
 git clone -q "$FIX/basic" "$FIX/medium"
 printf 'local dirty note\n' >> "$FIX/medium/docs/guide.md"
@@ -901,6 +901,9 @@ git -C "$FIX/python-symbols-partial" config remote.origin.promisor true
 git clone -q --depth 1 "file://$FIX/javascript-symbols" "$FIX/javascript-symbols-shallow"
 git clone -q "$FIX/javascript-symbols" "$FIX/javascript-symbols-partial"
 git -C "$FIX/javascript-symbols-partial" config remote.origin.promisor true
+git clone -q --depth 1 "file://$FIX/lua-symbols" "$FIX/lua-symbols-shallow"
+git clone -q "$FIX/lua-symbols" "$FIX/lua-symbols-partial"
+git -C "$FIX/lua-symbols-partial" config remote.origin.promisor true
 git clone -q --depth 1 "file://$FIX/typescript-symbols" "$FIX/typescript-symbols-shallow"
 git clone -q "$FIX/typescript-symbols" "$FIX/typescript-symbols-partial"
 git -C "$FIX/typescript-symbols-partial" config remote.origin.promisor true
