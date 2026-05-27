@@ -7,7 +7,7 @@ state:
   status: active
   active_feature_id: null
   active_run_id: null
-  last_completed_feature_id: "0081"
+  last_completed_feature_id: "0082"
 defaults:
   autonomy: ask
   lane: standard

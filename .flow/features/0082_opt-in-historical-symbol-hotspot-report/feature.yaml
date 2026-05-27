@@ -4,7 +4,7 @@ feature:
   slug: opt-in-historical-symbol-hotspot-report
   title: Opt-in historical symbol hotspot report
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: git-hotspots now has current-symbol evidence and an internal historical
@@ -89,7 +89,7 @@ proposal:
     materialised_at: 2026-05-27T23:26:57.567Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -157,7 +157,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: CLI/config and orchestration flag
       goal: Add --historical-symbols as an opt-in flag requiring --symbols and wire it
         to the integrated pipeline without changing default output.
@@ -188,7 +188,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Additive report model and renderers
       goal: Render deterministic historical symbol evidence in JSON, table, and
         Markdown only when enabled.
@@ -221,7 +221,7 @@ design:
       depends_on:
         - P1
         - P2
-      status: planned
+      status: done
       title: Docs, fixtures, diagnostics, and validation synchronization
       goal: Update every public wording and validation surface required by the new
         CLI/report flag.
@@ -256,7 +256,7 @@ design:
     - id: P4
       depends_on:
         - P3
-      status: planned
+      status: done
       title: Full validation and real-repo proof
       goal: Prove enabled output, disabled-output non-regression, determinism,
         privacy, and real-repo smoke before review.
@@ -357,7 +357,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-27T23:17:59.269Z
-  updated_at: 2026-05-27T23:27:33.106Z
+  updated_at: 2026-05-28T00:32:33.960Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-27T23:27:33.106Z
