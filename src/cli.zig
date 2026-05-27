@@ -62,6 +62,11 @@ pub const usage =
     \\  git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
     \\  git-hotspots --explain
     \\
+    \\Diagnostics:
+    \\  Invalid CLI combinations exit 2 with concise stderr diagnostics and, when
+    \\  deterministic, a valid next command shape. For symbol evidence, use:
+    \\  git-hotspots --inspect src/main.zig --symbols
+    \\
     \\Local-first/no-telemetry boundaries:
     \\  Hotspots are investigation prompts from deterministic local Git history,
     \\  not bug predictions, developer rankings, or objective code-quality scores.
@@ -85,11 +90,41 @@ pub const CliMode = union(enum) {
     version,
 };
 
-pub const CliError = error{ HelpRequested, InvalidArguments, InvalidExplainCombination, InvalidVersionCombination, InvalidIncludePrefix, InvalidExcludePrefix, InvalidInspectPath, InvalidInspectLimitCombination, InvalidSymbolsCombination, InvalidSymbolLineHistoryCombination, InvalidSymbolLimitCombination, InvalidSymbolLimit, InvalidScope } || std.mem.Allocator.Error;
+pub const CliError = error{
+    HelpRequested,
+    InvalidArguments,
+    InvalidExplainCombination,
+    InvalidVersionCombination,
+    MissingRepoValue,
+    MissingLimitValue,
+    InvalidLimit,
+    MissingFormatValue,
+    InvalidFormat,
+    MissingSinceValue,
+    MissingIncludePrefixValue,
+    MissingExcludePrefixValue,
+    MissingInspectValue,
+    UnknownOption,
+    UnexpectedArgument,
+    InvalidIncludePrefix,
+    InvalidExcludePrefix,
+    InvalidInspectPath,
+    InvalidInspectLimitCombination,
+    InvalidSymbolsCombination,
+    InvalidSymbolLineHistoryCombination,
+    InvalidSymbolLimitCombination,
+    InvalidSymbolLimit,
+    InvalidScope,
+} || std.mem.Allocator.Error;
 
 pub fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliError!CliMode {
     var cfg = model.Config{ .repo_path = try allocator.dupe(u8, ".") };
     errdefer freeConfig(allocator, cfg);
+
+    for (args[1..]) |arg| {
+        if (std.mem.eql(u8, arg, "--help") or std.mem.eql(u8, arg, "-h")) return error.HelpRequested;
+    }
+
     var explain_requested = false;
     var version_requested = false;
     var analysis_flag_seen = false;
@@ -146,7 +181,7 @@ pub fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliEr
             if (explain_requested) return error.InvalidExplainCombination;
             if (version_requested) return error.InvalidVersionCombination;
             i += 1;
-            if (i >= args.len) return error.InvalidArguments;
+            if (i >= args.len) return error.MissingRepoValue;
             const v = args[i];
             allocator.free(cfg.repo_path);
             cfg.repo_path = try allocator.dupe(u8, v);
@@ -155,24 +190,24 @@ pub fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliEr
             if (explain_requested) return error.InvalidExplainCombination;
             if (version_requested) return error.InvalidVersionCombination;
             i += 1;
-            if (i >= args.len) return error.InvalidArguments;
+            if (i >= args.len) return error.MissingLimitValue;
             const v = args[i];
             limit_seen = true;
-            cfg.limit = std.fmt.parseInt(usize, v, 10) catch return error.InvalidArguments;
+            cfg.limit = std.fmt.parseInt(usize, v, 10) catch return error.InvalidLimit;
         } else if (std.mem.eql(u8, arg, "--format")) {
             analysis_flag_seen = true;
             if (explain_requested) return error.InvalidExplainCombination;
             if (version_requested) return error.InvalidVersionCombination;
             i += 1;
-            if (i >= args.len) return error.InvalidArguments;
+            if (i >= args.len) return error.MissingFormatValue;
             const v = args[i];
-            if (std.mem.eql(u8, v, "table")) cfg.format = .table else if (std.mem.eql(u8, v, "json")) cfg.format = .json else if (std.mem.eql(u8, v, "markdown")) cfg.format = .markdown else return error.InvalidArguments;
+            if (std.mem.eql(u8, v, "table")) cfg.format = .table else if (std.mem.eql(u8, v, "json")) cfg.format = .json else if (std.mem.eql(u8, v, "markdown")) cfg.format = .markdown else return error.InvalidFormat;
         } else if (std.mem.eql(u8, arg, "--since")) {
             analysis_flag_seen = true;
             if (explain_requested) return error.InvalidExplainCombination;
             if (version_requested) return error.InvalidVersionCombination;
             i += 1;
-            if (i >= args.len) return error.InvalidArguments;
+            if (i >= args.len) return error.MissingSinceValue;
             const v = args[i];
             if (cfg.since) |old| allocator.free(old);
             cfg.since = try allocator.dupe(u8, v);
@@ -191,27 +226,27 @@ pub fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliEr
             if (explain_requested) return error.InvalidExplainCombination;
             if (version_requested) return error.InvalidVersionCombination;
             i += 1;
-            if (i >= args.len) return error.InvalidArguments;
+            if (i >= args.len) return error.MissingIncludePrefixValue;
             try appendIncludePrefix(allocator, &cfg, args[i]);
         } else if (std.mem.eql(u8, arg, "--exclude-prefix")) {
             analysis_flag_seen = true;
             if (explain_requested) return error.InvalidExplainCombination;
             if (version_requested) return error.InvalidVersionCombination;
             i += 1;
-            if (i >= args.len) return error.InvalidArguments;
+            if (i >= args.len) return error.MissingExcludePrefixValue;
             try appendExcludePrefix(allocator, &cfg, args[i]);
         } else if (std.mem.eql(u8, arg, "--inspect")) {
             analysis_flag_seen = true;
             if (explain_requested) return error.InvalidExplainCombination;
             if (version_requested) return error.InvalidVersionCombination;
             i += 1;
-            if (i >= args.len) return error.InvalidArguments;
+            if (i >= args.len) return error.MissingInspectValue;
             if (cfg.inspect_path) |old| allocator.free(old);
             cfg.inspect_path = normalizeInspectPath(allocator, args[i]) catch |err| switch (err) {
                 error.InvalidPrefix => return error.InvalidInspectPath,
                 error.OutOfMemory => return error.OutOfMemory,
             };
-        } else return error.InvalidArguments;
+        } else if (std.mem.startsWith(u8, arg, "-")) return error.UnknownOption else return error.UnexpectedArgument;
     }
     if (explain_requested) {
         if (analysis_flag_seen) return error.InvalidExplainCombination;
@@ -223,7 +258,7 @@ pub fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliEr
         freeConfig(allocator, cfg);
         return .version;
     }
-    if (cfg.limit == 0) return error.InvalidArguments;
+    if (cfg.limit == 0) return error.InvalidLimit;
     if (cfg.inspect_path != null and limit_seen) return error.InvalidInspectLimitCombination;
     if (cfg.symbols and cfg.inspect_path == null) return error.InvalidSymbolsCombination;
     if (cfg.symbol_line_history and (cfg.inspect_path == null or !cfg.symbols)) return error.InvalidSymbolLineHistoryCombination;
@@ -412,6 +447,17 @@ test "parse standalone version mode" {
     try std.testing.expectEqual(std.meta.Tag(CliMode).version, mode);
 }
 
+test "parse help has high precedence independent of order" {
+    const cases = [_][]const [:0]const u8{
+        &[_][:0]const u8{ "git-hotspots", "--symbols", "--help" },
+        &[_][:0]const u8{ "git-hotspots", "--help", "--symbols" },
+        &[_][:0]const u8{ "git-hotspots", "--repo", "--help" },
+        &[_][:0]const u8{ "git-hotspots", "--format", "--help" },
+        &[_][:0]const u8{ "git-hotspots", "-h", "--symbol-limit", "0" },
+    };
+    for (cases) |args| try std.testing.expectError(error.HelpRequested, parseArgs(std.testing.allocator, args));
+}
+
 test "reject explain combined with analysis flags" {
     const cases = [_][]const [:0]const u8{
         &[_][:0]const u8{ "git-hotspots", "--explain", "--repo", "." },
@@ -482,6 +528,27 @@ test "reject invalid scope values" {
         &[_][:0]const u8{ "git-hotspots", "--scope", "all", "--scope", "project" },
     };
     for (cases) |args| try std.testing.expectError(error.InvalidScope, parseArgs(std.testing.allocator, args));
+}
+
+test "reject parser misuse with specific errors" {
+    const cases = [_]struct {
+        args: []const [:0]const u8,
+        expected: CliError,
+    }{
+        .{ .args = &[_][:0]const u8{ "git-hotspots", "--repo" }, .expected = error.MissingRepoValue },
+        .{ .args = &[_][:0]const u8{ "git-hotspots", "--limit" }, .expected = error.MissingLimitValue },
+        .{ .args = &[_][:0]const u8{ "git-hotspots", "--limit", "nope" }, .expected = error.InvalidLimit },
+        .{ .args = &[_][:0]const u8{ "git-hotspots", "--limit", "0" }, .expected = error.InvalidLimit },
+        .{ .args = &[_][:0]const u8{ "git-hotspots", "--format" }, .expected = error.MissingFormatValue },
+        .{ .args = &[_][:0]const u8{ "git-hotspots", "--format", "xml" }, .expected = error.InvalidFormat },
+        .{ .args = &[_][:0]const u8{ "git-hotspots", "--since" }, .expected = error.MissingSinceValue },
+        .{ .args = &[_][:0]const u8{ "git-hotspots", "--include-prefix" }, .expected = error.MissingIncludePrefixValue },
+        .{ .args = &[_][:0]const u8{ "git-hotspots", "--exclude-prefix" }, .expected = error.MissingExcludePrefixValue },
+        .{ .args = &[_][:0]const u8{ "git-hotspots", "--inspect" }, .expected = error.MissingInspectValue },
+        .{ .args = &[_][:0]const u8{ "git-hotspots", "--unknown" }, .expected = error.UnknownOption },
+        .{ .args = &[_][:0]const u8{ "git-hotspots", "fixtures/basic" }, .expected = error.UnexpectedArgument },
+    };
+    for (cases) |case| try std.testing.expectError(case.expected, parseArgs(std.testing.allocator, case.args));
 }
 
 test "project scope combines with prefixes independent of flag order" {

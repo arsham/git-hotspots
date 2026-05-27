@@ -599,6 +599,7 @@ pub fn build(b: *std.Build) void {
     validate_all_step.dependOn(tree_sitter_rust_query_proof_step);
 
     const run_cmd = b.addRunArtifact(exe);
+    run_cmd.stdio = .inherit;
     if (b.args) |args| run_cmd.addArgs(args);
     const run_step = b.step("run", "Run git-hotspots");
     run_step.dependOn(&run_cmd.step);

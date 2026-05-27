@@ -566,6 +566,12 @@ explain_output_checks() {
   "$EXE" --progress --help > "$ARTIFACT_DIR/help-progress.txt" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
   grep -q -- '--progress' "$ARTIFACT_DIR/help-progress.txt" || return 1
+  "$EXE" --symbols --help > "$ARTIFACT_DIR/help-symbols.txt" 2> "$explain_err" || return 1
+  [ ! -s "$explain_err" ] || return 1
+  diff -u "$help_out" "$ARTIFACT_DIR/help-symbols.txt" >/dev/null || return 1
+  "$EXE" --repo --help > "$ARTIFACT_DIR/help-repo.txt" 2> "$explain_err" || return 1
+  [ ! -s "$explain_err" ] || return 1
+  diff -u "$help_out" "$ARTIFACT_DIR/help-repo.txt" >/dev/null || return 1
   "$EXE" --version > "$version_out" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
   [ "$(cat "$version_out")" = 'git-hotspots 0.1.0-alpha.1' ] || return 1
@@ -619,6 +625,75 @@ explain_output_checks() {
     fi
     grep -q -- '--version cannot be combined' "$explain_err" || return 1
   done
+}
+
+cli_misuse_matrix_checks() {
+  assert_cli_error() {
+    label=$1
+    pattern=$2
+    shift 2
+    out=$ARTIFACT_DIR/cli-misuse-$label.out
+    err=$ARTIFACT_DIR/cli-misuse-$label.err
+    if "$EXE" "$@" > "$out" 2> "$err"; then
+      return 1
+    fi
+    grep -q -- '^error:' "$err" || return 1
+    grep -q -- "$pattern" "$err" || return 1
+    ! grep -q -- '^Usage:' "$err" || return 1
+  }
+
+  assert_cli_help() {
+    label=$1
+    shift
+    out=$ARTIFACT_DIR/cli-help-$label.out
+    err=$ARTIFACT_DIR/cli-help-$label.err
+    "$EXE" "$@" > "$out" 2> "$err" || return 1
+    [ ! -s "$err" ] || return 1
+    grep -q -- 'git-hotspots: deterministic local Git-history hotspot prompts' "$out" || return 1
+  }
+
+  assert_cli_error symbols-alone '--symbols requires --inspect PATH' --symbols || return 1
+  assert_cli_error symbol-line-history-alone '--symbol-line-history requires --inspect PATH --symbols' --symbol-line-history || return 1
+  assert_cli_error symbol-line-history-inspect-no-symbols '--symbol-line-history requires --inspect PATH --symbols' --inspect src/app.zig --symbol-line-history || return 1
+  assert_cli_error symbol-limit-alone '--symbol-limit requires --inspect PATH --symbols' --symbol-limit 1 || return 1
+  assert_cli_error symbol-limit-inspect-no-symbols '--symbol-limit requires --inspect PATH --symbols' --inspect src/app.zig --symbol-limit 1 || return 1
+  assert_cli_error symbol-limit-missing '--symbol-limit must be a positive integer' --inspect src/app.zig --symbols --symbol-limit || return 1
+  assert_cli_error symbol-limit-zero '--symbol-limit must be a positive integer' --inspect src/app.zig --symbols --symbol-limit 0 || return 1
+  assert_cli_error symbol-limit-invalid '--symbol-limit must be a positive integer' --inspect src/app.zig --symbols --symbol-limit nope || return 1
+  assert_cli_error inspect-limit '--limit cannot be combined with --inspect' --repo fixtures/basic --inspect src/app.txt --limit 1 || return 1
+
+  assert_cli_error repo-missing '--repo requires a local Git worktree path' --repo || return 1
+  assert_cli_error limit-missing '--limit requires a positive integer value' --limit || return 1
+  assert_cli_error limit-invalid '--limit must be a positive integer' --limit nope || return 1
+  assert_cli_error format-missing '--format requires a value' --format || return 1
+  assert_cli_error format-invalid '--format accepts one value' --format xml || return 1
+  assert_cli_error since-missing '--since requires a Git revision' --since || return 1
+  assert_cli_error include-missing '--include-prefix requires a repo-relative path prefix' --include-prefix || return 1
+  assert_cli_error exclude-missing '--exclude-prefix requires a repo-relative path prefix' --exclude-prefix || return 1
+  assert_cli_error inspect-missing '--inspect requires an exact repo-relative Git path' --inspect || return 1
+  assert_cli_error scope-missing '--scope accepts one lowercase value' --scope || return 1
+  assert_cli_error scope-invalid '--scope accepts one lowercase value' --scope unknown || return 1
+  assert_cli_error unknown-flag 'unknown option' --wat || return 1
+  assert_cli_error unexpected-positional 'unexpected positional argument' fixtures/basic || return 1
+
+  assert_cli_error explain-symbols '--explain cannot be combined' --explain --symbols || return 1
+  assert_cli_error symbols-explain '--explain cannot be combined' --symbols --explain || return 1
+  assert_cli_error version-symbols '--version cannot be combined' --version --symbols || return 1
+  assert_cli_error symbols-version '--version cannot be combined' --symbols --version || return 1
+
+  assert_cli_help help-symbols --help --symbols || return 1
+  assert_cli_help symbols-help --symbols --help || return 1
+  assert_cli_help repo-help --repo --help || return 1
+
+  zig_run_out=$ARTIFACT_DIR/cli-zig-run-symbols.out
+  zig_run_err=$ARTIFACT_DIR/cli-zig-run-symbols.err
+  zig_run_output=$(zig build run -- --symbols 2>&1 > "$zig_run_out")
+  zig_run_status=$?
+  printf '%s\n' "$zig_run_output" > "$zig_run_err"
+  if [ "$zig_run_status" -eq 0 ]; then
+    return 1
+  fi
+  grep -q -- '^error: --symbols requires --inspect PATH' "$zig_run_err" || return 1
 }
 
 capability_matrix_checks() {
@@ -835,12 +910,14 @@ docs_manual_checks() {
   grep -Fq -- '--include-prefix' docs/user-guide.md || return 1
   grep -Fq -- '--exclude-prefix' docs/user-guide.md || return 1
   grep -Fq 'zig build validate' docs/user-guide.md || return 1
+  grep -Fq 'error: --symbols requires --inspect PATH' docs/user-guide.md || return 1
   grep -Fq 'local-first' docs/user-guide.md || return 1
   grep -Fq 'telemetry' docs/user-guide.md || return 1
 
   grep -Fq '# git-hotspots developer guide' docs/developer-guide.md || return 1
   grep -Fq 'src/cli.zig' docs/developer-guide.md || return 1
   grep -Fq 'tools/validate.sh' docs/developer-guide.md || return 1
+  grep -Fq 'CLI misuse matrix' docs/developer-guide.md || return 1
   grep -Fq 'zig build validate-all' docs/developer-guide.md || return 1
   grep -Fq 'prohibited-claim' docs/developer-guide.md || return 1
   grep -Fq 'Local-first' docs/developer-guide.md || return 1
@@ -853,6 +930,7 @@ docs_manual_checks() {
   grep -Fq '.SH REPORT SEMANTICS' man/git-hotspots.1 || return 1
   grep -Fq '.SH PRIVACY AND LOCAL-FIRST CAVEATS' man/git-hotspots.1 || return 1
   grep -Fq '.SH PROVIDER BOUNDARIES' man/git-hotspots.1 || return 1
+  grep -Fq '.SH DIAGNOSTICS' man/git-hotspots.1 || return 1
   grep -Fq '.SH EXIT STATUS' man/git-hotspots.1 || return 1
   grep -Fq '.SH RELATED DOCUMENTS' man/git-hotspots.1 || return 1
   grep -Fq -- '--help' man/git-hotspots.1 || return 1
@@ -863,6 +941,7 @@ docs_manual_checks() {
   grep -Fq 'local-first' man/git-hotspots.1 || return 1
 
   grep -Fq 'docs/user-guide.md' README.md || return 1
+  grep -Fq 'Invalid CLI combinations exit 2' README.md || return 1
   grep -Fq 'man/git-hotspots.1' README.md || return 1
   grep -Fq 'docs/developer-guide.md' README.md || return 1
   grep -Fq 'docs/developer-guide.md' CONTRIBUTING.md || return 1
@@ -1503,7 +1582,7 @@ for data in (ts, tsx, shallow, partial):
         assert forbidden not in text, 'TypeScript private detail leaked'
 PY
   if "$EXE" --symbols > "$ARTIFACT_DIR/symbols-alone.out" 2> "$ARTIFACT_DIR/symbols-alone.err"; then return 1; fi
-  grep -q -- '--symbols can only be combined with --inspect PATH' "$ARTIFACT_DIR/symbols-alone.err" || return 1
+  grep -q -- '--symbols requires --inspect PATH' "$ARTIFACT_DIR/symbols-alone.err" || return 1
   if "$EXE" --repo fixtures/basic --inspect src/app.txt --limit 1 >/dev/null 2> "$ARTIFACT_DIR/inspect-limit.err"; then return 1; fi
   grep -q -- '--limit cannot be combined with --inspect' "$ARTIFACT_DIR/inspect-limit.err" || return 1
   if "$EXE" --repo fixtures/basic --inspect missing.txt >/dev/null 2> "$ARTIFACT_DIR/inspect-missing.err"; then return 1; fi
@@ -1957,6 +2036,13 @@ if explain_output_checks; then
   pass_rung "explain golden, determinism, standalone, and invalid combinations"
 else
   fail_rung "explain golden, determinism, standalone, and invalid combinations" "explain output or parser contract failed"
+fi
+printf 'validate: RUN CLI misuse matrix diagnostics\n'
+if cli_misuse_matrix_checks; then
+  note_fallback "cli misuse matrix: direct binary stderr checked for actionable cause, recovery shape where deterministic, help precedence, no full usage dump, and zig build run -- --symbols wrapper smoke"
+  pass_rung "CLI misuse matrix diagnostics"
+else
+  fail_rung "CLI misuse matrix diagnostics" "parser diagnostic matrix failed"
 fi
 printf 'validate: RUN provider capability matrix drift checks\n'
 if capability_matrix_checks; then

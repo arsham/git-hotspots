@@ -35,12 +35,18 @@ usage or contributor detail here or in `docs/user-guide.md`.
 When changing CLI wording or parser behaviour:
 
 1. Update `src/cli.zig` first.
-2. Keep `--help` and `-h` standalone and repository-independent.
+2. Keep `--help` and `-h` standalone, repository-independent, and
+   high-precedence when other flags are present.
 3. Preserve existing invalid-combination contracts unless the active feature
    explicitly changes them.
-4. Update `tests/integration.sh` and `tools/validate.sh` greps for new required
-   help anchors.
-5. Align `README.md`, `docs/user-guide.md`, and `man/git-hotspots.1` when public
+4. Keep diagnostics concise and actionable: name the failed flag, avoid dumping
+   full help for one error, and include a valid command shape when it is
+   deterministic.
+5. Update `tests/integration.sh` and `tools/validate.sh` greps for new required
+   help anchors and CLI misuse matrix rows covering symbol dependencies,
+   missing values, invalid enum values, unknown flags, standalone combinations,
+   help precedence, and order-sensitive variants.
+6. Align `README.md`, `docs/user-guide.md`, and `man/git-hotspots.1` when public
    option wording changes.
 
 Do not add flags, subcommands, shell completions, interactive help, install

@@ -163,6 +163,22 @@ Providers do not evaluate packages, dependency graphs, generated-source policy,
 Node or TypeScript configuration, build tags, runtime modules, metatables,
 React or DOM semantics, true symbol history, scoring, ownership, or repo-wide
 scanning.
+.SH DIAGNOSTICS
+Invalid CLI arguments exit 2 with concise stderr diagnostics that name the
+failed flag and, when deterministic, include a valid next command shape. For
+example,
+.B --symbols
+requires
+.B --inspect PATH,
+and
+.B --symbol-line-history
+requires
+.B --inspect PATH --symbols.
+Use
+.B git-hotspots --help
+or
+.B git-hotspots -h
+for the repository-independent option reference.
 .SH EXIT STATUS
 .B git-hotspots
 exits 0 after printing help, version, explain output, or a successful report. It

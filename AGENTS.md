@@ -33,6 +33,10 @@ local-first hotspot intelligence CLI.
 - Prefer project-relative paths in examples and shareable output.
 - Avoid claims that the tool predicts bugs, judges maintainers, or ranks
   developers.
+- When changing CLI parsing, help, or diagnostic wording, update
+  `tests/integration.sh`, `tools/validate.sh`, `README.md`,
+  `docs/user-guide.md`, `docs/developer-guide.md`, and `man/git-hotspots.1`
+  together.
 
 ## Working style
 

@@ -37,6 +37,10 @@ assert_fails_with_stderr() {
     echo "$label stderr did not contain $pattern" >&2
     exit 1
   fi
+  if grep -q -- '^Usage:' "$err"; then
+    echo "$label stderr unexpectedly dumped full help" >&2
+    exit 1
+  fi
 }
 
 assert_progress_stderr() {
@@ -113,6 +117,12 @@ test ! -s "$tmp_dir/git-hotspots-help-short.err"
 "$EXE" --progress --help > "$tmp_dir/git-hotspots-progress-help.txt" 2> "$tmp_dir/git-hotspots-progress-help.err"
 grep -q -- "--progress" "$tmp_dir/git-hotspots-progress-help.txt"
 test ! -s "$tmp_dir/git-hotspots-progress-help.err"
+"$EXE" --symbols --help > "$tmp_dir/git-hotspots-symbols-help.txt" 2> "$tmp_dir/git-hotspots-symbols-help.err"
+diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-symbols-help.txt"
+test ! -s "$tmp_dir/git-hotspots-symbols-help.err"
+"$EXE" --repo --help > "$tmp_dir/git-hotspots-repo-help.txt" 2> "$tmp_dir/git-hotspots-repo-help.err"
+diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-repo-help.txt"
+test ! -s "$tmp_dir/git-hotspots-repo-help.err"
 "$EXE" --version > "$tmp_dir/git-hotspots-version.txt" 2> "$tmp_dir/git-hotspots-version.err"
 test "$(cat "$tmp_dir/git-hotspots-version.txt")" = "git-hotspots 0.1.0-alpha.1"
 test ! -s "$tmp_dir/git-hotspots-version.err"
@@ -150,13 +160,31 @@ assert_fails_with_stderr version-inspect "--version cannot be combined" "$EXE" -
 assert_fails_with_stderr version-progress "--version cannot be combined" "$EXE" --version --progress
 assert_fails_with_stderr progress-version "--version cannot be combined" "$EXE" --progress --version
 assert_fails_with_stderr version-progress "--version cannot be combined" "$EXE" --version --progress
-assert_fails_with_stderr symbols-alone "--symbols can only be combined with --inspect PATH" "$EXE" --symbols
+assert_fails_with_stderr repo-missing "--repo requires a local Git worktree path" "$EXE" --repo
+assert_fails_with_stderr limit-missing "--limit requires a positive integer value" "$EXE" --limit
+assert_fails_with_stderr limit-invalid "--limit must be a positive integer" "$EXE" --limit nope
+assert_fails_with_stderr limit-zero "--limit must be a positive integer" "$EXE" --limit 0
+assert_fails_with_stderr format-missing "--format requires a value" "$EXE" --format
+assert_fails_with_stderr format-invalid "--format accepts one value" "$EXE" --format xml
+assert_fails_with_stderr since-missing "--since requires a Git revision" "$EXE" --since
+assert_fails_with_stderr scope-missing "--scope accepts one lowercase value" "$EXE" --scope
+assert_fails_with_stderr scope-invalid "--scope accepts one lowercase value" "$EXE" --scope unknown
+assert_fails_with_stderr include-missing "--include-prefix requires a repo-relative path prefix" "$EXE" --include-prefix
+assert_fails_with_stderr exclude-missing "--exclude-prefix requires a repo-relative path prefix" "$EXE" --exclude-prefix
+assert_fails_with_stderr inspect-missing "--inspect requires an exact repo-relative Git path" "$EXE" --inspect
+assert_fails_with_stderr unknown-flag "unknown option" "$EXE" --wat
+assert_fails_with_stderr unexpected-positional "unexpected positional argument" "$EXE" fixtures/basic
+assert_fails_with_stderr inspect-limit "--limit cannot be combined with --inspect" "$EXE" --repo fixtures/basic --inspect src/app.txt --limit 1
+assert_fails_with_stderr symbols-alone "--symbols requires --inspect PATH" "$EXE" --symbols
 assert_fails_with_stderr symbols-explain "--explain cannot be combined" "$EXE" --symbols --explain
 assert_fails_with_stderr symbols-version "--version cannot be combined" "$EXE" --symbols --version
+assert_fails_with_stderr symbol-line-history-alone "--symbol-line-history requires --inspect PATH --symbols" "$EXE" --symbol-line-history
+assert_fails_with_stderr symbol-line-history-no-symbols "--symbol-line-history requires --inspect PATH --symbols" "$EXE" --inspect src/app.zig --symbol-line-history
 assert_fails_with_stderr symbol-line-history-explain "--explain cannot be combined" "$EXE" --symbol-line-history --explain
 assert_fails_with_stderr symbol-line-history-version "--version cannot be combined" "$EXE" --symbol-line-history --version
-assert_fails_with_stderr symbol-limit-alone "--symbol-limit can only be combined" "$EXE" --symbol-limit 1
-assert_fails_with_stderr symbol-limit-no-symbols "--symbol-limit can only be combined" "$EXE" --inspect src/app.zig --symbol-limit 1
+assert_fails_with_stderr symbol-limit-alone "--symbol-limit requires --inspect PATH --symbols" "$EXE" --symbol-limit 1
+assert_fails_with_stderr symbol-limit-no-symbols "--symbol-limit requires --inspect PATH --symbols" "$EXE" --inspect src/app.zig --symbol-limit 1
+assert_fails_with_stderr symbol-limit-missing "--symbol-limit must be a positive integer" "$EXE" --inspect src/app.zig --symbols --symbol-limit
 assert_fails_with_stderr symbol-limit-zero "--symbol-limit must be a positive integer" "$EXE" --inspect src/app.zig --symbols --symbol-limit 0
 assert_fails_with_stderr symbol-limit-invalid "--symbol-limit must be a positive integer" "$EXE" --inspect src/app.zig --symbols --symbol-limit nope
 
@@ -260,8 +288,8 @@ printf 'dirty unrelated\n' >> fixtures/symbol-line-history/src/readme.txt
 grep -Fq -- '"failure": "ok"' "$tmp_dir/git-hotspots-line-history-dirty-unrelated.json"
 git -C fixtures/symbol-line-history checkout -q -- src/readme.txt
 ! grep -Eiq -- 'Fixture Author|fixture@example|fixture function|private|file://|raw blame|source line|previous filename|ownership|productivity|developer ranking' "$tmp_dir/git-hotspots-symbols-inspect-symbols.json" "$tmp_dir/git-hotspots-symbols-inspect-symbols.md" "$tmp_dir/git-hotspots-symbols-inspect-symbols.txt" "$tmp_dir/git-hotspots-symbols-limit-json.json" "$tmp_dir/git-hotspots-symbols-limit.md" "$tmp_dir/git-hotspots-symbols-limit.txt" "$tmp_dir/git-hotspots-line-history-success.json" "$tmp_dir/git-hotspots-line-history-success.md" "$tmp_dir/git-hotspots-line-history-success.txt" "$tmp_dir/git-hotspots-line-history-shallow.json" "$tmp_dir/git-hotspots-line-history-partial.json" "$tmp_dir/git-hotspots-line-history-unsupported.json" "$tmp_dir/git-hotspots-line-history-empty.json" "$tmp_dir/git-hotspots-line-history-broken.json" "$tmp_dir/git-hotspots-line-history-link.json" "$tmp_dir/git-hotspots-line-history-dirty-inspected.json" "$tmp_dir/git-hotspots-line-history-dirty-unrelated.json" fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt
-assert_fails_with_stderr symbol-line-history-alone "--symbol-line-history can only be combined" "$EXE" --symbol-line-history
-assert_fails_with_stderr symbol-line-history-no-symbols "--symbol-line-history can only be combined" "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbol-line-history
+assert_fails_with_stderr symbol-line-history-alone "--symbol-line-history requires --inspect PATH --symbols" "$EXE" --symbol-line-history
+assert_fails_with_stderr symbol-line-history-no-symbols "--symbol-line-history requires --inspect PATH --symbols" "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbol-line-history
 "$EXE" --repo fixtures/symbols --inspect src/readme.txt --symbols --format json > "$tmp_dir/git-hotspots-symbols-unsupported.json"
 diff -u fixtures/expected/symbols-unsupported.json "$tmp_dir/git-hotspots-symbols-unsupported.json"
 "$EXE" --repo fixtures/symbols --inspect src/link.zig --symbols --format json > "$tmp_dir/git-hotspots-symbols-symlink-unavailable.json"
@@ -964,7 +992,7 @@ git init --bare -q "$bare/repo.git"
 assert_fails_with_output bare "$EXE" --repo "$bare/repo.git"
 assert_fails_with_output invalid-since "$EXE" --repo fixtures/basic --since does-not-exist
 assert_fails_with_stderr progress-invalid-since "--since must name" "$EXE" --repo fixtures/basic --progress --since does-not-exist
-assert_fails_with_stderr invalid-format "invalid arguments" "$EXE" --repo fixtures/basic --format xml
+assert_fails_with_stderr invalid-format "--format accepts one value" "$EXE" --repo fixtures/basic --format xml
 assert_fails_with_stderr invalid-scope-missing "--scope accepts" "$EXE" --repo fixtures/basic --scope
 assert_fails_with_stderr invalid-scope-unknown "--scope accepts" "$EXE" --repo fixtures/basic --scope unknown
 assert_fails_with_stderr invalid-scope-case-title "--scope accepts" "$EXE" --repo fixtures/basic --scope Project

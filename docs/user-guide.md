@@ -172,6 +172,17 @@ the tool does not silently fetch more history.
 
 ## Troubleshooting
 
+- `error: --symbols requires --inspect PATH`: add an exact inspected path, for
+  example `git-hotspots --inspect src/main.zig --symbols`.
+- `error: --symbol-line-history requires --inspect PATH --symbols`: add both
+  required flags before requesting current-line Git evidence.
+- `error: --format accepts one value`: use `--format table`, `--format json`,
+  or `--format markdown`.
+- Missing values such as `--repo`, `--limit`, `--since`, `--include-prefix`,
+  `--exclude-prefix`, or `--inspect` produce flag-specific diagnostics with a
+  valid command shape. Run `git-hotspots --help` for the full option reference.
+- When running through `zig build run --`, the application diagnostic is emitted
+  before any Zig build wrapper failure text for invalid CLI usage.
 - `error: --repo must point to a local non-bare Git worktree`: choose a local
   worktree, not a bare repository or non-Git directory.
 - `error: repository has no commits to analyse`: create at least one commit

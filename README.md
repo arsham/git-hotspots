@@ -176,6 +176,11 @@ Supported options are `--repo`, `--limit`, `--format table|json|markdown`,
 `--since`, `--scope all|project`, repeatable `--include-prefix`, repeatable
 `--exclude-prefix`, `--inspect`, `--symbols`, `--symbol-line-history`,
 `--progress`, `--explain`, `--version`, and `--help`.
+Invalid CLI combinations exit 2 with concise stderr diagnostics that name the
+failed flag and, when deterministic, show a valid next command shape. For
+example, `--symbols` requires `--inspect PATH`, so use
+`git-hotspots --inspect src/main.zig --symbols`; `--help` and `-h` remain
+standalone, repository-independent option references.
 During the alpha, omitted `--scope` defaults to `--scope project`, which
 expands to the root literal exclude prefixes `.flow/`, `.zig-cache/`,
 `zig-out/`, `target/`, `node_modules/`, `dist/`, `build/`, and `coverage/`, in
