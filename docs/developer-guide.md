@@ -27,8 +27,14 @@ usage or contributor detail here or in `docs/user-guide.md`.
   contracts with fixtures.
 - `tools/validate.sh` owns the broader local validation ladder and privacy-safe
   evidence summary.
-- `docs/user-guide.md`, `docs/developer-guide.md`, and `man/git-hotspots.1`
-  are public documentation surfaces and must stay aligned with `--help`.
+- `tools/release-linux.sh` owns the native Linux dogfood release archive. It
+  builds a release-mode binary and stages redistributable notices under ignored
+  `dist/` output.
+- `packaging/aur/git-hotspots-bin/` owns the unpublished local Arch dogfood
+  package setup that consumes the generated release archive.
+- `docs/user-guide.md` and `docs/developer-guide.md` may cover unpublished
+  packaging workflows. `man/git-hotspots.1` is the installed CLI usage manual
+  and must stay focused on command behaviour rather than dogfood packaging.
 
 ## Argument and help ownership
 
@@ -82,6 +88,22 @@ Run shell syntax checks when shell files change:
 for file in tools/*.sh tests/*.sh; do sh -n "$file" || exit 1; done
 ```
 
+When touching packaged dogfood delivery, also run the Linux release archive
+smoke and Arch package metadata or build checks when local tools are available:
+
+```sh
+./tools/release-linux.sh
+makepkg --printsrcinfo
+makepkg -f
+pacman -Qp git-hotspots-bin-0.1.0_alpha.1-1-$(uname -m).pkg.tar*
+```
+
+Run the `makepkg` and `pacman` commands from
+`packaging/aur/git-hotspots-bin/` after copying the generated release archive
+there. If Arch tooling is unavailable, record that explicitly and keep the
+archive unpack, `--version`, and `--help` smoke evidence. Do not require root or
+system package installation for automated validation.
+
 Run `zig build validate-all` when touching provider lanes, vendored
 Tree-sitter proof wiring, language query contracts, or proof aggregate logic.
 For docs/help-only changes, `zig build validate` is the expected full local
@@ -100,6 +122,8 @@ Keep public docs accurate and source-controlled:
   identities, or commit messages into public docs.
 - Keep examples local and deterministic; do not require network access or global
   documentation generators.
+- Keep packaged dogfood wording local and unpublished until release publishing
+  or package-manager availability is explicitly implemented.
 
 `tools/validate.sh` should protect new docs and manual paths with presence,
 anchor, prohibited-claim, and privacy checks.
@@ -121,11 +145,18 @@ Also avoid commercial, hosted-service, pricing, sales, release automation, or
 package-manager promises in this public repository unless a future feature
 explicitly changes the public boundary.
 
+Local dogfood archive and Arch package files may be documented as unpublished
+validation tooling. Do not describe them as published binaries, public AUR
+availability, signed releases, official checksums, hosted automation, or
+multi-platform support until those behaviours exist.
+
 ## Local-first implementation guardrails
 
 Runtime defaults must remain deterministic and local. Do not add network access,
 remote enrichment, background upload, telemetry, cache requirements, package
 publishing, release automation, global CLI dependencies, or provider runtime
-requirements inside unrelated implementation work. If a documentation claim
-needs behaviour that does not exist, reshape the claim instead of implementing
-new runtime scope inside docs work.
+requirements inside unrelated implementation work. Local release packaging must
+not call remote APIs, upload files, fetch release metadata, create tags, or
+require credentials by default. If a documentation claim needs behaviour that
+does not exist, reshape the claim instead of implementing new runtime scope
+inside docs work.

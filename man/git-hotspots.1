@@ -19,9 +19,8 @@ investigation prompts. Hotspots are prompts from local Git-history evidence, not
 bug predictions, developer rankings, maintainer judgement, productivity
 analytics, or objective code-quality scores.
 .PP
-The current alpha is source-buildable and local-first. It reads local Git
-history and never fetches, pushes, uploads source, contacts remotes, or emits
-telemetry.
+Runtime defaults are local-first. The alpha reads local Git history and never
+fetches, pushes, uploads source, contacts remotes, or emits telemetry.
 .SH OPTIONS
 .TP
 .BI --repo " PATH"
@@ -104,33 +103,32 @@ Print the git-hotspots version without analysing a repository.
 .BR -h ", " --help
 Print help without analysing a repository.
 .SH EXAMPLES
-Build from source and inspect the local checkout:
+Inspect the local checkout:
 .PP
 .EX
-zig build
-./zig-out/bin/git-hotspots --repo . --limit 10 --format table
-./zig-out/bin/git-hotspots --repo . --format json
-./zig-out/bin/git-hotspots --repo . --format markdown
+git-hotspots --repo . --limit 10 --format table
+git-hotspots --repo . --format json
+git-hotspots --repo . --format markdown
 .EE
 .PP
 Use an exploratory project scope with progress:
 .PP
 .EX
-./zig-out/bin/git-hotspots --repo . --scope project --since HEAD~500 --progress --format markdown
+git-hotspots --repo . --scope project --since HEAD~500 --progress --format markdown
 .EE
 .PP
 Inspect one file and optionally add current symbol evidence:
 .PP
 .EX
-./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --format markdown
-./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
-./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
+git-hotspots --repo . --inspect src/main.zig --format markdown
+git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
+git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
 .EE
 .PP
 Use the static scoring explanation:
 .PP
 .EX
-./zig-out/bin/git-hotspots --explain
+git-hotspots --explain
 .EE
 .SH REPORT SEMANTICS
 The score combines frequency, churn, recency, and co-change evidence. Confidence

@@ -4,7 +4,7 @@ feature:
   slug: dogfood-linux-binary-packaging-and-local-install
   title: Dogfood Linux binary packaging and local install
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: git-hotspots is currently source-buildable but has no dogfood
@@ -77,7 +77,7 @@ proposal:
     materialised_at: 2026-05-27T15:48:02.551Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -140,7 +140,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Local Linux release archive
       goal: Create a local-only command path that builds and assembles a native Linux
         release archive for git-hotspots without publishing it.
@@ -176,7 +176,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Local AUR-compatible package setup
       goal: Add Arch/AUR package files and local dogfood instructions so Arsham can
         build and optionally install git-hotspots locally before any AUR
@@ -218,7 +218,7 @@ design:
       depends_on:
         - P1
         - P2
-      status: planned
+      status: done
       title: Documentation and validation boundary
       goal: Update public docs, man page, and validation expectations so dogfood
         packaging is discoverable but not overclaimed.
@@ -298,7 +298,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-05-27T15:32:23.730Z
-  updated_at: 2026-05-27T15:48:40.615Z
+  updated_at: 2026-05-27T16:20:07.128Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-27T15:48:40.615Z

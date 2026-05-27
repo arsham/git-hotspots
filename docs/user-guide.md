@@ -1,7 +1,9 @@
 # git-hotspots user guide
 
 This guide shows how to learn `git-hotspots` from a source checkout. The
-current alpha is local-first and source-buildable; it is not packaged yet.
+current alpha is local-first and source-buildable. Local Linux binary and Arch
+packaged dogfood files exist for unpublished use; source builds remain the
+public default until packages are published.
 
 ## Source-build setup
 
@@ -24,6 +26,50 @@ Before sharing changes to this repository, run the local validation workflow:
 ```sh
 zig build validate
 ```
+
+## Local Linux dogfood package path
+
+The local packaging path is for Linux dogfood validation only. It is not a
+published GitHub Release, AUR package, package-manager install promise, or
+multi-platform distribution.
+
+Build and smoke-test the native Linux release archive:
+
+```sh
+./tools/release-linux.sh
+mkdir -p /tmp/git-hotspots-release-smoke
+tar -xzf dist/git-hotspots-0.1.0-alpha.1-linux-$(uname -m).tar.gz -C /tmp/git-hotspots-release-smoke
+/tmp/git-hotspots-release-smoke/git-hotspots-0.1.0-alpha.1-linux-$(uname -m)/git-hotspots --version
+/tmp/git-hotspots-release-smoke/git-hotspots-0.1.0-alpha.1-linux-$(uname -m)/git-hotspots --help
+```
+
+Build the unpublished Arch dogfood package when standard Arch tooling is
+available:
+
+```sh
+cp dist/git-hotspots-0.1.0-alpha.1-linux-$(uname -m).tar.gz packaging/aur/git-hotspots-bin/
+cd packaging/aur/git-hotspots-bin
+makepkg --printsrcinfo
+makepkg -f
+pacman -Qp git-hotspots-bin-0.1.0_alpha.1-1-$(uname -m).pkg.tar*
+```
+
+To avoid overwriting an existing user-managed `git-hotspots`, smoke-test the
+package by extracting it into a temporary directory instead of installing it
+system-wide:
+
+```sh
+mkdir -p /tmp/git-hotspots-package-smoke
+bsdtar -xf git-hotspots-bin-0.1.0_alpha.1-1-$(uname -m).pkg.tar* -C /tmp/git-hotspots-package-smoke
+/tmp/git-hotspots-package-smoke/usr/bin/git-hotspots --version
+/tmp/git-hotspots-package-smoke/usr/bin/git-hotspots --help
+```
+
+If `makepkg`, `pacman`, or `bsdtar` is unavailable, record that explicit
+unavailable-tool finding and keep the release archive smoke evidence. The
+default release and package commands do not contact remotes, fetch release
+metadata, upload files, publish to AUR, create tags, emit telemetry, or require
+credentials.
 
 ## First run
 

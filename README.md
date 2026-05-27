@@ -9,8 +9,9 @@ review, onboarding, and coding-agent context.
 
 The project is intentionally early. The current public alpha is source-buildable
 and proves that a small, transparent command-line tool can surface useful
-file-level hotspots before adding deeper language-aware analysis. It is not a
-packaged release yet.
+file-level hotspots before adding deeper language-aware analysis. The public
+default remains source builds; local Linux binary and Arch package files are
+unpublished dogfood tooling.
 
 ## Why
 
@@ -102,10 +103,10 @@ not the runtime authority for hotspot findings.
 Current version: `0.1.0-alpha.1`.
 
 This repository contains a narrow public alpha for local source builds. It does
-not provide packaged binaries, package-manager installation, release tags, or a
-hosted service. Runtime behaviour is local-first: the CLI reads local Git
-history and does not fetch, push, upload source, contact remotes, or emit
-telemetry.
+not provide published packaged binaries, package-manager availability, release
+tags, or a hosted service. Runtime behaviour is local-first: the CLI reads
+local Git history and does not fetch, push, upload source, contact remotes, or
+emit telemetry.
 
 ## Install from source
 
@@ -125,8 +126,48 @@ zig build
 ```
 
 Replace `<repo-url>` with the repository URL you intend to use. Until a future
-feature adds packaging, source checkout plus `zig build` is the supported
-install path.
+feature publishes binaries or packages, source checkout plus `zig build` is the
+public install path.
+
+## Local Linux dogfood packaging
+
+The repository also contains an unpublished local-only packaging path for Linux
+dogfood use. It is intended to prove the release archive and Arch package shape
+before any manual publication work exists.
+
+Build a native Linux release archive:
+
+```sh
+./tools/release-linux.sh
+mkdir -p /tmp/git-hotspots-release-smoke
+tar -xzf dist/git-hotspots-0.1.0-alpha.1-linux-$(uname -m).tar.gz -C /tmp/git-hotspots-release-smoke
+/tmp/git-hotspots-release-smoke/git-hotspots-0.1.0-alpha.1-linux-$(uname -m)/git-hotspots --version
+/tmp/git-hotspots-release-smoke/git-hotspots-0.1.0-alpha.1-linux-$(uname -m)/git-hotspots --help
+```
+
+For local Arch dogfood packaging, copy the generated archive into the package
+directory and use standard Arch tooling:
+
+```sh
+cp dist/git-hotspots-0.1.0-alpha.1-linux-$(uname -m).tar.gz packaging/aur/git-hotspots-bin/
+cd packaging/aur/git-hotspots-bin
+makepkg --printsrcinfo
+makepkg -f
+pacman -Qp git-hotspots-bin-0.1.0_alpha.1-1-$(uname -m).pkg.tar*
+```
+
+When `makepkg`, `pacman`, or `bsdtar` is unavailable, record that explicit
+tooling gap and use the release archive smoke above as independent evidence.
+Do not require privileged package installation for automated validation; use a
+package-extracted smoke test when a local install could overwrite an existing
+user-managed `git-hotspots` binary.
+
+Generated release archives and package files stay in ignored local output
+directories. The default commands do not call GitHub APIs, upload files,
+publish to AUR, fetch remote release metadata, create tags, emit telemetry, or
+require credentials. GitHub Releases, AUR publication, signing, official
+checksums, multi-platform builds, and hosted release automation remain future
+work.
 
 ## Documentation
 
@@ -330,7 +371,8 @@ runs the fuller local ladder and prints a privacy-safe evidence summary.
 
 ## Current limitations
 
-- This alpha is source-buildable, not packaged.
+- This alpha is source-buildable, with unpublished local Linux dogfood
+  packaging for release archive and Arch package checks.
 - Report truth is deterministic file-level Git-history evidence.
 - Broad provider, cache, dependency, test, and coverage enrichers are future
   work; the current provider path supports opt-in inspect-only current
@@ -350,5 +392,5 @@ Issues and small focused pull requests are welcome during alpha. Please see
 
 ## Status
 
-This repository has an executable file-level public alpha. It is not a packaged
-release yet.
+This repository has an executable file-level public alpha. It is not a
+published packaged release yet.

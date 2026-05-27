@@ -1,0 +1,44 @@
+# Local dogfood PKGBUILD for an unpublished binary package.
+# Build ../.. with tools/release-linux.sh, copy the matching archive here, then
+# run makepkg locally. Do not publish this PKGBUILD until publication scope is
+# explicitly added.
+
+pkgname=git-hotspots-bin
+pkgver=0.1.0_alpha.1
+pkgrel=1
+pkgdesc='Deterministic local Git-history hotspot prompts, local dogfood binary package'
+arch=('x86_64' 'aarch64')
+url='https://github.com/arsham/git-hotspots'
+license=('Apache-2.0')
+depends=('git')
+provides=('git-hotspots')
+conflicts=('git-hotspots')
+
+_upstream_version=${pkgver/_/-}
+source_x86_64=("git-hotspots-${_upstream_version}-linux-x86_64.tar.gz")
+source_aarch64=("git-hotspots-${_upstream_version}-linux-aarch64.tar.gz")
+sha256sums_x86_64=('SKIP')
+sha256sums_aarch64=('SKIP')
+
+prepare() {
+  local release_dir="${srcdir}/git-hotspots-${_upstream_version}-linux-${CARCH}"
+  local actual
+  actual=$("${release_dir}/git-hotspots" --version)
+  if [[ "${actual}" != "git-hotspots ${_upstream_version}" ]]; then
+    printf 'git-hotspots-bin: version mismatch: got %s, expected git-hotspots %s\n' "${actual}" "${_upstream_version}" >&2
+    return 1
+  fi
+}
+
+package() {
+  local release_dir="${srcdir}/git-hotspots-${_upstream_version}-linux-${CARCH}"
+
+  install -Dm755 "${release_dir}/git-hotspots" "${pkgdir}/usr/bin/git-hotspots"
+  install -Dm644 "${release_dir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -Dm644 "${release_dir}/README.md" "${pkgdir}/usr/share/doc/git-hotspots/README.md"
+  install -Dm644 "${release_dir}/man/git-hotspots.1" "${pkgdir}/usr/share/man/man1/git-hotspots.1"
+
+  if [[ -f "${release_dir}/THIRDPARTYNOTICES.md" ]]; then
+    install -Dm644 "${release_dir}/THIRDPARTYNOTICES.md" "${pkgdir}/usr/share/licenses/${pkgname}/THIRDPARTYNOTICES.md"
+  fi
+}

@@ -910,6 +910,8 @@ docs_manual_checks() {
   grep -Fq -- '--include-prefix' docs/user-guide.md || return 1
   grep -Fq -- '--exclude-prefix' docs/user-guide.md || return 1
   grep -Fq 'zig build validate' docs/user-guide.md || return 1
+  grep -Fq 'tools/release-linux.sh' docs/user-guide.md || return 1
+  grep -Fq 'unpublished use' docs/user-guide.md || return 1
   grep -Fq 'error: --symbols requires --inspect PATH' docs/user-guide.md || return 1
   grep -Fq 'local-first' docs/user-guide.md || return 1
   grep -Fq 'telemetry' docs/user-guide.md || return 1
@@ -919,6 +921,8 @@ docs_manual_checks() {
   grep -Fq 'tools/validate.sh' docs/developer-guide.md || return 1
   grep -Fq 'CLI misuse matrix' docs/developer-guide.md || return 1
   grep -Fq 'zig build validate-all' docs/developer-guide.md || return 1
+  grep -Fq 'tools/release-linux.sh' docs/developer-guide.md || return 1
+  grep -Fq 'packaging/aur/git-hotspots-bin/' docs/developer-guide.md || return 1
   grep -Fq 'prohibited-claim' docs/developer-guide.md || return 1
   grep -Fq 'Local-first' docs/developer-guide.md || return 1
 
@@ -939,9 +943,12 @@ docs_manual_checks() {
   grep -Fq -- '--symbols' man/git-hotspots.1 || return 1
   grep -Fq -- '--progress' man/git-hotspots.1 || return 1
   grep -Fq 'local-first' man/git-hotspots.1 || return 1
+  ! grep -Eq 'dogfood|tools/release-linux\.sh|packaging/aur|makepkg|pacman|pkg\.tar' man/git-hotspots.1 || return 1
 
   grep -Fq 'docs/user-guide.md' README.md || return 1
   grep -Fq 'Invalid CLI combinations exit 2' README.md || return 1
+  grep -Fq 'Local Linux dogfood packaging' README.md || return 1
+  grep -Fq 'tools/release-linux.sh' README.md || return 1
   grep -Fq 'man/git-hotspots.1' README.md || return 1
   grep -Fq 'docs/developer-guide.md' README.md || return 1
   grep -Fq 'docs/developer-guide.md' CONTRIBUTING.md || return 1
@@ -969,6 +976,28 @@ for path_name in sys.argv[1:]:
 if failures:
     raise SystemExit('\n'.join(failures))
 PY
+}
+
+packaging_surface_checks() {
+  [ -x tools/release-linux.sh ] || return 1
+  [ -f packaging/aur/git-hotspots-bin/PKGBUILD ] || return 1
+  [ -f packaging/aur/git-hotspots-bin/README.md ] || return 1
+  [ -f docs/packaging-smoke-evidence.md ] || return 1
+  grep -Fq '/dist/' .gitignore || return 1
+  grep -Fq 'local Linux host required' tools/release-linux.sh || return 1
+  grep -Fq 'ReleaseSafe' tools/release-linux.sh || return 1
+  grep -Fq 'LICENSE' tools/release-linux.sh || return 1
+  grep -Fq 'THIRDPARTYNOTICES.md' tools/release-linux.sh || return 1
+  grep -Fq 'pkgname=git-hotspots-bin' packaging/aur/git-hotspots-bin/PKGBUILD || return 1
+  grep -Fq 'source_x86_64' packaging/aur/git-hotspots-bin/PKGBUILD || return 1
+  grep -Fq 'provides=(' packaging/aur/git-hotspots-bin/PKGBUILD || return 1
+  grep -Fq 'makepkg --printsrcinfo' packaging/aur/git-hotspots-bin/README.md || return 1
+  grep -Fq 'package-extracted binary smoke' docs/packaging-smoke-evidence.md || return 1
+  grep -Fq 'unpublished' README.md docs/user-guide.md docs/developer-guide.md || return 1
+  for path in README.md docs/user-guide.md docs/developer-guide.md tools/validate.sh; do
+    grep -Fq 'packaged' "$path" || return 1
+  done
+  ! grep -Eq 'dogfood|tools/release-linux\.sh|packaging/aur|makepkg|pacman|pkg\.tar' man/git-hotspots.1 || return 1
 }
 
 license_version_checks() {
@@ -2065,6 +2094,13 @@ if docs_manual_checks; then
 else
   fail_rung "docs and man surface checks" "documentation anchors or privacy surface checks failed"
 fi
+printf 'validate: RUN packaged dogfood surface checks\n'
+if packaging_surface_checks; then
+  note_fallback "packaged dogfood: local release script, ignored dist outputs, and unpublished Arch package anchors"
+  pass_rung "packaged dogfood surface checks"
+else
+  fail_rung "packaged dogfood surface checks" "local release or Arch package surface checks failed"
+fi
 printf 'validate: RUN license and version consistency\n'
 if license_version_checks; then
   pass_rung "license and version consistency"
@@ -2160,7 +2196,7 @@ else
   printf '  - none\n'
 fi
 printf 'privacy: summary uses labels and bounded counts only; raw reports and absolute private paths are not printed.\n'
-printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, packaging, or release automation; opt-in inspect-only Tree-sitter Zig, Go, Python, JavaScript, Lua, TypeScript, or TSX symbols are local current-file enrichment.\n'
+printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, package publishing, release automation, or remote release metadata; unpublished local Linux packaged dogfood uses ignored dist outputs only; opt-in inspect-only Tree-sitter Zig, Go, Python, JavaScript, Lua, TypeScript, or TSX symbols are local current-file enrichment.\n'
 
 if [ "$FAILURES" -ne 0 ]; then
   printf 'validate: %d rung(s) failed\n' "$FAILURES" >&2
