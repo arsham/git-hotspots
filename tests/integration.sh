@@ -100,9 +100,16 @@ grep -q -- "--progress" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "--symbols" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "--symbol-line-history" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "--symbol-limit N" "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "-h, --help" "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "Examples:" "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "Local-first/no-telemetry boundaries:" "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "Hotspots are investigation prompts" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "Provider capability:" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "inspect-only current working-tree symbol evidence" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "not true symbol history" "$tmp_dir/git-hotspots-help.txt"
+"$EXE" -h > "$tmp_dir/git-hotspots-help-short.txt" 2> "$tmp_dir/git-hotspots-help-short.err"
+diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-help-short.txt"
+test ! -s "$tmp_dir/git-hotspots-help-short.err"
 "$EXE" --progress --help > "$tmp_dir/git-hotspots-progress-help.txt" 2> "$tmp_dir/git-hotspots-progress-help.err"
 grep -q -- "--progress" "$tmp_dir/git-hotspots-progress-help.txt"
 test ! -s "$tmp_dir/git-hotspots-progress-help.err"
@@ -117,6 +124,10 @@ version_nongit=$(mktemp -d)
 (cd "$version_nongit" && "$EXE_ABS" --version > "$tmp_dir/git-hotspots-version-nongit.txt" 2> "$tmp_dir/git-hotspots-version-nongit.err")
 test "$(cat "$tmp_dir/git-hotspots-version-nongit.txt")" = "git-hotspots 0.1.0-alpha.1"
 test ! -s "$tmp_dir/git-hotspots-version-nongit.err"
+help_nongit=$(mktemp -d)
+(cd "$help_nongit" && "$EXE_ABS" -h > "$tmp_dir/git-hotspots-help-nongit.txt" 2> "$tmp_dir/git-hotspots-help-nongit.err")
+diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-help-nongit.txt"
+test ! -s "$tmp_dir/git-hotspots-help-nongit.err"
 assert_fails_with_stderr explain-repo "--explain cannot be combined" "$EXE" --explain --repo .
 assert_fails_with_stderr explain-limit "--explain cannot be combined" "$EXE" --explain --limit 1
 assert_fails_with_stderr explain-format "--explain cannot be combined" "$EXE" --explain --format markdown

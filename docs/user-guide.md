@@ -1,0 +1,193 @@
+# git-hotspots user guide
+
+This guide shows how to learn `git-hotspots` from a source checkout. The
+current alpha is local-first and source-buildable; it is not packaged yet.
+
+## Source-build setup
+
+Prerequisites:
+
+- Git on `PATH`.
+- Zig `0.16.0`.
+- A local Git worktree to analyse.
+
+Build from a checkout:
+
+```sh
+zig build
+./zig-out/bin/git-hotspots --version
+./zig-out/bin/git-hotspots --help
+```
+
+Before sharing changes to this repository, run the local validation workflow:
+
+```sh
+zig build validate
+```
+
+## First run
+
+Start with the default project scope, table output, and the current checkout:
+
+```sh
+./zig-out/bin/git-hotspots --repo . --limit 10 --format table
+```
+
+Use `--explain` when you want the scoring semantics without analysing a
+repository:
+
+```sh
+./zig-out/bin/git-hotspots --explain
+```
+
+Hotspots are investigation prompts from deterministic local Git-history
+evidence. Treat a row as a place to inspect, test, document, or refactor with
+more context, not as a bug prediction or a code-quality rating.
+
+## Common workflows
+
+### Table output for quick terminal review
+
+```sh
+./zig-out/bin/git-hotspots --repo . --limit 20 --format table
+```
+
+Table output is a compact human view for a first pass. Use it to choose a small
+set of files for follow-up.
+
+### JSON output for tools
+
+```sh
+./zig-out/bin/git-hotspots --repo . --limit 20 --format json
+```
+
+JSON output is deterministic and includes report metadata, caveats, scope
+metadata, ranked rows, and evidence fields suitable for downstream tools.
+
+### Markdown output for review notes
+
+```sh
+./zig-out/bin/git-hotspots --repo . --limit 20 --format markdown
+```
+
+Markdown output is useful when you want a shareable report with run summary,
+scope, caveats, ranked hotspots, and per-result evidence.
+
+### Progress for longer local runs
+
+```sh
+./zig-out/bin/git-hotspots --repo . --scope project --since HEAD~500 --progress --format markdown
+```
+
+`--progress` writes coarse phase lines to stderr only. It does not add progress
+or timing fields to table, JSON, or Markdown reports.
+
+## Scope, include, and exclude filters
+
+Omitted `--scope` is the same as `--scope project` during the alpha. Project
+scope excludes these literal repo-root prefixes before scoring:
+
+```text
+.flow/ .zig-cache/ zig-out/ target/ node_modules/ dist/ build/ coverage/
+```
+
+Use `--scope all` when you want the full tracked-path evidence universe:
+
+```sh
+./zig-out/bin/git-hotspots --repo . --scope all --limit 20 --format markdown
+```
+
+Use literal repo-relative prefixes to narrow or exclude evidence before
+scoring. Prefixes are not globs, regexes, pathspecs, or gitignore rules.
+Excludes win over includes.
+
+```sh
+./zig-out/bin/git-hotspots --repo . --include-prefix src/ --limit 20 --format markdown
+./zig-out/bin/git-hotspots --repo . --exclude-prefix docs/ --limit 20 --format markdown
+```
+
+Bounded scopes are exploratory views for a question. They are not more correct
+than a full-history run.
+
+## Inspect and symbols
+
+Use `--inspect PATH` for one exact repo-relative file within the selected scope:
+
+```sh
+./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --format markdown
+```
+
+Inspect keeps the file-level Git-history row and records the row rank in the
+full scoped evidence universe. It does not rescore, bypass scope filters, or
+combine with `--limit`.
+
+Use `--symbols` only with `--inspect PATH` when you want current working-tree
+symbol evidence for a supported file type:
+
+```sh
+./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.py --symbols --format json
+```
+
+Supported inspect-only symbol lanes are Zig, Go, Python, JavaScript, Lua,
+TypeScript, and TSX. Provider evidence is current-only enrichment for the
+matched file. It does not change score, rank, confidence, co-change evidence,
+Git rename lineage, scope, or inclusion and exclusion decisions.
+
+Use `--symbol-line-history` when you also want current-line Git evidence for
+symbol line ranges at HEAD:
+
+```sh
+./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
+```
+
+Current-line evidence is not true symbol history, historical identity tracking,
+or semantic ownership. Shallow, partial, dirty, unsupported, symlinked, missing,
+or too-large files report caveats instead of silently expanding scope.
+
+## Reading reports
+
+Reports include:
+
+- run metadata and caveats;
+- selected scope and effective prefixes;
+- ranked file-level hotspot rows;
+- frequency, churn, recency, co-change, size, confidence, and evidence fields;
+- conservative Git-detected file rename lineage when both paths are in scope;
+- optional inspect-only current provider evidence.
+
+Confidence is a caveated evidence summary, not a correctness score. Co-change
+means files changed in the same commits; it is not dependency analysis.
+
+## Privacy and local-first caveats
+
+Runtime behaviour stays local-first by default. The alpha reads local Git
+history and does not fetch, pull, push, upload source, contact remotes, emit
+telemetry, or rely on runtime AI judgement for hotspot truth.
+
+Public reports use repo-relative paths. They avoid author identities, raw
+private report dumps, remotes, source snippets from provider failures, and
+absolute local paths. Shallow or partial history is reported as a caveat because
+the tool does not silently fetch more history.
+
+## Troubleshooting
+
+- `error: --repo must point to a local non-bare Git worktree`: choose a local
+  worktree, not a bare repository or non-Git directory.
+- `error: repository has no commits to analyse`: create at least one commit
+  before running analysis.
+- `error: --since must name an existing revision`: pass a revision that Git can
+  resolve in the selected repository.
+- `error: --inspect target has no matching Git-history evidence in the selected
+  scope`: check the exact repo-relative path and active scope filters.
+- Empty reports usually mean the selected include or exclude prefixes removed
+  all tracked evidence for the chosen history range.
+- Provider caveats on unsupported files are expected; file-level evidence is
+  preserved when the provider cannot add symbols.
+
+## Related documents
+
+- `README.md` for the project overview and alpha status.
+- `man/git-hotspots.1` for a source-controlled manual page.
+- `docs/developer-guide.md` for contributor-facing boundaries and validation.
+- `CONTRIBUTING.md` for the expected pre-PR workflow.

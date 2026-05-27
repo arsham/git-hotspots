@@ -2,19 +2,22 @@ const std = @import("std");
 const model = @import("model.zig");
 
 pub const usage =
-    \\git-hotspots: deterministic file-level Git-history hotspot prompts
+    \\git-hotspots: deterministic local Git-history hotspot prompts
     \\
     \\Usage:
-    \\  git-hotspots [--repo PATH] [--limit N] [--format table|json|markdown] [--since REV] [--scope all|project] [--include-prefix PATH]... [--exclude-prefix PATH]... [--inspect PATH] [--symbols] [--symbol-line-history] [--symbol-limit N] [--progress]
+    \\  git-hotspots [OPTIONS]
     \\  git-hotspots --explain
     \\  git-hotspots --version
-    \\  git-hotspots --help
+    \\  git-hotspots --help | -h
     \\
-    \\Options:
+    \\Repository and output:
     \\  --repo PATH       Local Git worktree to analyse (default: .)
     \\  --limit N         Maximum ranked files to emit (default: 10)
     \\  --format FORMAT   table, json, or markdown (default: table)
     \\  --since REV       Analyse commits after REV through HEAD
+    \\  --progress        Write opt-in coarse analysis progress to stderr
+    \\
+    \\Scope and filters:
     \\  --scope VALUE     project (default) or all; project excludes the literal
     \\                    repo-root prefixes .flow/, .zig-cache/, zig-out/,
     \\                    target/, node_modules/, dist/, build/, and coverage/
@@ -26,6 +29,8 @@ pub const usage =
     \\  --exclude-prefix PATH
     \\                    Repeatable repo-relative literal Git path prefix to exclude
     \\                    before scoring; use / separators, not globs
+    \\
+    \\Inspect and provider evidence:
     \\  --inspect PATH    Exact repo-relative file drilldown; selects one file after
     \\                    scoring and ranking, before normal --limit truncation;
     \\                    accepted in-scope Git rename aliases may resolve to the
@@ -45,16 +50,24 @@ pub const usage =
     \\  --symbol-limit N  With --inspect PATH --symbols only, limit human table and
     \\                    Markdown symbol rows (default: 25); JSON symbols.items
     \\                    remains complete
-    \\  --progress        Write opt-in coarse analysis progress to stderr for long runs
+    \\
+    \\Standalone help:
     \\  --explain         Explain current scoring semantics without analysing a repo
     \\  --version         Show the git-hotspots version without analysing a repo
-    \\  --help            Show this help
+    \\  -h, --help        Show this help without analysing a repo
     \\
-    \\Hotspots are investigation prompts from local Git history, not bug predictions,
-    \\developer rankings, or objective code-quality scores. The alpha never fetches,
-    \\pushes, uploads source, contacts remotes, or emits telemetry.
-    \\Git-detected file renames are folded conservatively when in scope; this is
-    \\not symbol/function lineage or semantic ownership.
+    \\Examples:
+    \\  git-hotspots --repo . --limit 10 --format table
+    \\  git-hotspots --repo . --scope project --since HEAD~500 --progress --format markdown
+    \\  git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
+    \\  git-hotspots --explain
+    \\
+    \\Local-first/no-telemetry boundaries:
+    \\  Hotspots are investigation prompts from deterministic local Git history,
+    \\  not bug predictions, developer rankings, or objective code-quality scores.
+    \\  This alpha never fetches, pushes, uploads source, contacts remotes, or
+    \\  emits telemetry. Git-detected file renames are folded conservatively when
+    \\  in scope; this is not symbol/function lineage or semantic ownership.
     \\
     \\Provider capability:
     \\  --symbols is opt-in inspect-only current working-tree symbol evidence for

@@ -1,0 +1,181 @@
+.TH GIT-HOTSPOTS 1 "May 2026" "git-hotspots 0.1.0-alpha.1" "User Commands"
+.SH NAME
+git-hotspots \- deterministic local Git-history hotspot prompts
+.SH SYNOPSIS
+.B git-hotspots
+.RI [ OPTIONS ]
+.br
+.B git-hotspots --explain
+.br
+.B git-hotspots --version
+.br
+.B git-hotspots --help
+|
+.B -h
+.SH DESCRIPTION
+.B git-hotspots
+analyses a local Git worktree and emits deterministic file-level hotspot
+investigation prompts. Hotspots are prompts from local Git-history evidence, not
+bug predictions, developer rankings, maintainer judgement, productivity
+analytics, or objective code-quality scores.
+.PP
+The current alpha is source-buildable and local-first. It reads local Git
+history and never fetches, pushes, uploads source, contacts remotes, or emits
+telemetry.
+.SH OPTIONS
+.TP
+.BI --repo " PATH"
+Local Git worktree to analyse. The default is the current directory.
+.TP
+.BI --limit " N"
+Maximum ranked files to emit. The default is 10.
+.TP
+.BI --format " table|json|markdown"
+Report format. The default is table.
+.TP
+.BI --since " REV"
+Analyse commits after REV through HEAD.
+.TP
+.BI --scope " all|project"
+Select the evidence universe. The alpha default is
+.B project,
+which excludes the literal repo-root prefixes
+.BR .flow/ ,
+.BR .zig-cache/ ,
+.BR zig-out/ ,
+.BR target/ ,
+.BR node_modules/ ,
+.BR dist/ ,
+.BR build/ ,
+and
+.B coverage/
+before scoring.
+.B all
+uses the full local Git-history evidence universe.
+.TP
+.BI --include-prefix " PATH"
+Repeatable repo-relative literal Git path prefix to include before scoring. This
+narrows the evidence universe and is not a glob.
+.TP
+.BI --exclude-prefix " PATH"
+Repeatable repo-relative literal Git path prefix to exclude before scoring. Use
+slash separators. Excludes win over includes.
+.TP
+.BI --inspect " PATH"
+Exact repo-relative file drilldown within the selected scope. It selects one
+file after scoring and ranking, before normal
+.B --limit
+truncation. Accepted in-scope Git rename aliases may resolve to the canonical
+path. Use the Git-style
+.B \et
+escape to target a tab in a path.
+.TP
+.B --symbols
+With
+.B --inspect PATH
+only, add opt-in inspect-only current working-tree Tree-sitter symbol evidence
+for Zig, Go, Python, JavaScript, Lua, TypeScript, or TSX files. Symbol evidence
+does not affect score, rank, lineage, confidence, co-change evidence, or
+file-level evidence.
+.TP
+.B --symbol-line-history
+With
+.B --inspect PATH --symbols
+only, add opt-in current-line Git evidence for current supported symbol line
+ranges at HEAD. This is not true symbol history, lineage, scoring, or ownership.
+.TP
+.BI --symbol-limit " N"
+With
+.B --inspect PATH --symbols
+only, limit human table and Markdown symbol rows. JSON
+.B symbols.items
+remains complete. The default is 25.
+.TP
+.B --progress
+Write opt-in coarse analysis progress to stderr for long runs. Progress does not
+change table, JSON, or Markdown reports.
+.TP
+.B --explain
+Print the current scoring semantics without analysing a repository.
+.TP
+.B --version
+Print the git-hotspots version without analysing a repository.
+.TP
+.BR -h ", " --help
+Print help without analysing a repository.
+.SH EXAMPLES
+Build from source and inspect the local checkout:
+.PP
+.EX
+zig build
+./zig-out/bin/git-hotspots --repo . --limit 10 --format table
+./zig-out/bin/git-hotspots --repo . --format json
+./zig-out/bin/git-hotspots --repo . --format markdown
+.EE
+.PP
+Use an exploratory project scope with progress:
+.PP
+.EX
+./zig-out/bin/git-hotspots --repo . --scope project --since HEAD~500 --progress --format markdown
+.EE
+.PP
+Inspect one file and optionally add current symbol evidence:
+.PP
+.EX
+./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
+.EE
+.PP
+Use the static scoring explanation:
+.PP
+.EX
+./zig-out/bin/git-hotspots --explain
+.EE
+.SH REPORT SEMANTICS
+The score combines frequency, churn, recency, and co-change evidence. Confidence
+summarises available evidence and caveats. Co-change means files changed in the
+same commits; it is not dependency analysis.
+.PP
+Git-detected file renames are folded conservatively when both old and new paths
+are in scope. This is file-path lineage from local Git history only, not symbol
+or function lineage, semantic ownership, bug prediction, quality scoring, or
+developer ranking.
+.PP
+Reports may include caveats for shallow history, partial or promisor history,
+dirty worktrees, binary or non-text churn, large commits, rename lineage,
+scope-partial lineage, and paths deleted or missing at HEAD.
+.SH PRIVACY AND LOCAL-FIRST CAVEATS
+Runtime defaults are local-first. The alpha does not fetch more history, contact
+remotes, upload source, emit telemetry, or rely on runtime AI judgement for
+hotspot truth.
+.PP
+Public report output uses repo-relative paths and avoids author identities,
+absolute local paths, remotes, raw source snippets, and commit messages. Shallow
+or partial history is reported as a caveat instead of being repaired by network
+access.
+.SH PROVIDER BOUNDARIES
+Provider evidence is optional current-file enrichment for an inspected path. The
+supported lanes are Zig, Go, Python, JavaScript, Lua, TypeScript, and TSX.
+Unsupported files preserve inspected file evidence and report provider caveats.
+.PP
+Providers do not evaluate packages, dependency graphs, generated-source policy,
+Node or TypeScript configuration, build tags, runtime modules, metatables,
+React or DOM semantics, true symbol history, scoring, ownership, or repo-wide
+scanning.
+.SH EXIT STATUS
+.B git-hotspots
+exits 0 after printing help, version, explain output, or a successful report. It
+exits 1 for analysis failures such as non-Git repositories, bare repositories,
+empty repositories, invalid revisions, or inspect targets missing from the
+selected scope. It exits 2 for invalid CLI arguments.
+.SH RELATED DOCUMENTS
+See
+.B README.md
+for the project overview,
+.B docs/user-guide.md
+for the user guide,
+.B docs/developer-guide.md
+for contributor boundaries, and
+.B CONTRIBUTING.md
+for the pre-PR workflow.

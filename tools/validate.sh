@@ -551,9 +551,18 @@ explain_output_checks() {
   grep -q -- 'project (default) or all' "$help_out" || return 1
   grep -q -- '--progress' "$help_out" || return 1
   grep -q -- '--symbols' "$help_out" || return 1
+  grep -q -- '--symbol-line-history' "$help_out" || return 1
+  grep -q -- '--symbol-limit N' "$help_out" || return 1
+  grep -q -- '-h, --help' "$help_out" || return 1
+  grep -q -- 'Examples:' "$help_out" || return 1
+  grep -q -- 'Local-first/no-telemetry boundaries:' "$help_out" || return 1
+  grep -q -- 'Hotspots are investigation prompts' "$help_out" || return 1
   grep -q -- 'Provider capability:' "$help_out" || return 1
   grep -q -- 'inspect-only current working-tree symbol evidence' "$help_out" || return 1
   grep -q -- 'not true symbol history' "$help_out" || return 1
+  "$EXE" -h > "$ARTIFACT_DIR/help-short.txt" 2> "$explain_err" || return 1
+  [ ! -s "$explain_err" ] || return 1
+  diff -u "$help_out" "$ARTIFACT_DIR/help-short.txt" >/dev/null || return 1
   "$EXE" --progress --help > "$ARTIFACT_DIR/help-progress.txt" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
   grep -q -- '--progress' "$ARTIFACT_DIR/help-progress.txt" || return 1
@@ -568,6 +577,9 @@ explain_output_checks() {
   (cd "$nongit" && "$EXE_ABS" --version > "$version_nongit" 2> "$explain_err") || return 1
   [ ! -s "$explain_err" ] || return 1
   [ "$(cat "$version_nongit")" = 'git-hotspots 0.1.0-alpha.1' ] || return 1
+  (cd "$nongit" && "$EXE_ABS" -h > "$ARTIFACT_DIR/help-nongit.txt" 2> "$explain_err") || return 1
+  [ ! -s "$explain_err" ] || return 1
+  diff -u "$help_out" "$ARTIFACT_DIR/help-nongit.txt" >/dev/null || return 1
 
   for args in \
     '--repo .' \
@@ -713,7 +725,7 @@ PY
 
 prohibited_claim_scan() {
   have_python || return 1
-  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/python-symbols.json fixtures/expected/python-symbols.md fixtures/expected/python-symbols.txt fixtures/expected/python-symbols-limit.json fixtures/expected/python-symbols-limit.md fixtures/expected/python-symbols-limit.txt fixtures/expected/python-symbols-empty.json fixtures/expected/python-symbols-invalid.json fixtures/expected/python-symbols-generated.json fixtures/expected/python-symbols-symlink-unavailable.json fixtures/expected/python-symbols-large-unavailable.json fixtures/expected/python-symbols-missing-unavailable.json fixtures/expected/python-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt fixtures/expected/python-line-history-success.json fixtures/expected/python-line-history-success.md fixtures/expected/python-line-history-success.txt fixtures/expected/javascript-line-history-success.json fixtures/expected/javascript-line-history-success.md fixtures/expected/javascript-line-history-success.txt fixtures/expected/lua-line-history-success.json fixtures/expected/lua-line-history-success.md fixtures/expected/lua-line-history-success.txt README.md CONTRIBUTING.md <<'PY'
+  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/python-symbols.json fixtures/expected/python-symbols.md fixtures/expected/python-symbols.txt fixtures/expected/python-symbols-limit.json fixtures/expected/python-symbols-limit.md fixtures/expected/python-symbols-limit.txt fixtures/expected/python-symbols-empty.json fixtures/expected/python-symbols-invalid.json fixtures/expected/python-symbols-generated.json fixtures/expected/python-symbols-symlink-unavailable.json fixtures/expected/python-symbols-large-unavailable.json fixtures/expected/python-symbols-missing-unavailable.json fixtures/expected/python-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt fixtures/expected/python-line-history-success.json fixtures/expected/python-line-history-success.md fixtures/expected/python-line-history-success.txt fixtures/expected/javascript-line-history-success.json fixtures/expected/javascript-line-history-success.md fixtures/expected/javascript-line-history-success.txt fixtures/expected/lua-line-history-success.json fixtures/expected/lua-line-history-success.md fixtures/expected/lua-line-history-success.txt README.md CONTRIBUTING.md docs/user-guide.md docs/developer-guide.md man/git-hotspots.1 <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -762,6 +774,9 @@ line_history_public_paths = [
     Path('fixtures/expected/explain.txt'),
 ]
 line_history_public_paths.extend(sorted(Path('fixtures/expected').glob('*line-history*.*')))
+for extra_public_path in (Path('docs/user-guide.md'), Path('docs/developer-guide.md'), Path('man/git-hotspots.1')):
+    if extra_public_path.exists():
+        line_history_public_paths.append(extra_public_path)
 src_explain_path = Path('src/explain.zig')
 src_explain_public_lines = [
     (line_no, line)
@@ -802,6 +817,78 @@ for i, (line_no, line) in enumerate(src_explain_public_lines):
 
 if failures:
     raise SystemExit('positive prohibited claim(s):\n' + '\n'.join(failures))
+PY
+}
+
+docs_manual_checks() {
+  [ -f docs/user-guide.md ] || return 1
+  [ -f docs/developer-guide.md ] || return 1
+  [ -f man/git-hotspots.1 ] || return 1
+
+  grep -Fq '# git-hotspots user guide' docs/user-guide.md || return 1
+  grep -Fq -- '--help' docs/user-guide.md || return 1
+  grep -Fq -- '--explain' docs/user-guide.md || return 1
+  grep -Fq -- '--inspect' docs/user-guide.md || return 1
+  grep -Fq -- '--symbols' docs/user-guide.md || return 1
+  grep -Fq -- '--symbol-line-history' docs/user-guide.md || return 1
+  grep -Fq -- '--scope all' docs/user-guide.md || return 1
+  grep -Fq -- '--include-prefix' docs/user-guide.md || return 1
+  grep -Fq -- '--exclude-prefix' docs/user-guide.md || return 1
+  grep -Fq 'zig build validate' docs/user-guide.md || return 1
+  grep -Fq 'local-first' docs/user-guide.md || return 1
+  grep -Fq 'telemetry' docs/user-guide.md || return 1
+
+  grep -Fq '# git-hotspots developer guide' docs/developer-guide.md || return 1
+  grep -Fq 'src/cli.zig' docs/developer-guide.md || return 1
+  grep -Fq 'tools/validate.sh' docs/developer-guide.md || return 1
+  grep -Fq 'zig build validate-all' docs/developer-guide.md || return 1
+  grep -Fq 'prohibited-claim' docs/developer-guide.md || return 1
+  grep -Fq 'Local-first' docs/developer-guide.md || return 1
+
+  grep -Fq '.SH NAME' man/git-hotspots.1 || return 1
+  grep -Fq '.SH SYNOPSIS' man/git-hotspots.1 || return 1
+  grep -Fq '.SH DESCRIPTION' man/git-hotspots.1 || return 1
+  grep -Fq '.SH OPTIONS' man/git-hotspots.1 || return 1
+  grep -Fq '.SH EXAMPLES' man/git-hotspots.1 || return 1
+  grep -Fq '.SH REPORT SEMANTICS' man/git-hotspots.1 || return 1
+  grep -Fq '.SH PRIVACY AND LOCAL-FIRST CAVEATS' man/git-hotspots.1 || return 1
+  grep -Fq '.SH PROVIDER BOUNDARIES' man/git-hotspots.1 || return 1
+  grep -Fq '.SH EXIT STATUS' man/git-hotspots.1 || return 1
+  grep -Fq '.SH RELATED DOCUMENTS' man/git-hotspots.1 || return 1
+  grep -Fq -- '--help' man/git-hotspots.1 || return 1
+  grep -Fq -- '--explain' man/git-hotspots.1 || return 1
+  grep -Fq -- '--inspect' man/git-hotspots.1 || return 1
+  grep -Fq -- '--symbols' man/git-hotspots.1 || return 1
+  grep -Fq -- '--progress' man/git-hotspots.1 || return 1
+  grep -Fq 'local-first' man/git-hotspots.1 || return 1
+
+  grep -Fq 'docs/user-guide.md' README.md || return 1
+  grep -Fq 'man/git-hotspots.1' README.md || return 1
+  grep -Fq 'docs/developer-guide.md' README.md || return 1
+  grep -Fq 'docs/developer-guide.md' CONTRIBUTING.md || return 1
+
+  have_python || return 1
+  python3 - docs/user-guide.md docs/developer-guide.md man/git-hotspots.1 <<'PY'
+import os
+import re
+import sys
+from pathlib import Path
+
+failures = []
+home = os.path.expanduser('~')
+for path_name in sys.argv[1:]:
+    path = Path(path_name)
+    text = path.read_text(encoding='utf-8')
+    if home and home in text:
+        failures.append(f'{path}: home path leaked')
+    for needle in ('/home/', '/Users/', 'file://', 'https://', 'http://', 'ssh://', 'git@'):
+        if needle in text:
+            failures.append(f'{path}: private path or remote marker leaked: {needle}')
+    if re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b', text):
+        failures.append(f'{path}: email-like identity leaked')
+
+if failures:
+    raise SystemExit('\n'.join(failures))
 PY
 }
 
@@ -850,6 +937,7 @@ allowed = (
     'git clone -q --depth 1 "file://$FIX/javascript-symbols"',
     'git clone -q "$FIX/javascript-symbols"',
     'https?://|ssh://|git@',
+    "for needle in ('/home/', '/Users/', 'file://', 'https://', 'http://', 'ssh://', 'git@'):",
     "('network command', re.compile",
     "('git network command', re.compile",
     "('go toolchain command', re.compile",
@@ -1883,6 +1971,13 @@ if prohibited_claim_scan; then
   pass_rung "prohibited claim scan"
 else
   fail_rung "prohibited claim scan" "positive prohibited claim detected or python3 unavailable"
+fi
+printf 'validate: RUN docs and man surface checks\n'
+if docs_manual_checks; then
+  note_fallback "docs/man: presence, anchors, prohibited-claim coverage, and privacy scan"
+  pass_rung "docs and man surface checks"
+else
+  fail_rung "docs and man surface checks" "documentation anchors or privacy surface checks failed"
 fi
 printf 'validate: RUN license and version consistency\n'
 if license_version_checks; then

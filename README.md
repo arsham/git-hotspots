@@ -128,6 +128,22 @@ Replace `<repo-url>` with the repository URL you intend to use. Until a future
 feature adds packaging, source checkout plus `zig build` is the supported
 install path.
 
+## Documentation
+
+- [`docs/user-guide.md`](docs/user-guide.md) covers first runs, common
+  workflows, scope filters, inspect and symbol examples, and troubleshooting.
+- [`man/git-hotspots.1`](man/git-hotspots.1) is the source-controlled manual
+  page for synopsis, options, report semantics, caveats, and exit status.
+- [`docs/developer-guide.md`](docs/developer-guide.md) records contributor
+  boundaries, validation, docs drift rules, and public-claim guardrails.
+
+Terminal help remains the quickest option reference:
+
+```sh
+./zig-out/bin/git-hotspots --help
+./zig-out/bin/git-hotspots --explain
+```
+
 ## CLI usage
 
 Run the current local alpha with Zig:

@@ -56,6 +56,9 @@ collected first, scored into investigation prompts, and then optional
 current-file providers may attach enrichment for inspected files. Providers do
 not change score, rank, confidence, lineage, or product truth.
 
+For the fuller contributor reference, see
+[`docs/developer-guide.md`](docs/developer-guide.md).
+
 The contributor-facing pipeline is:
 
 ```text
