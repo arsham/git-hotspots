@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0076"
   active_run_id: null
   last_completed_feature_id: "0075"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 76
+  next_id: 77
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -329,6 +329,10 @@ features:
       slug: helpful-cli-misuse-guidance-and-ux-rule-shaping
       path: .flow/features/0075_helpful-cli-misuse-guidance-and-ux-rule-shaping
       created_at: 2026-05-27T00:18:29.044Z
+    - id: "0076"
+      slug: dogfood-linux-binary-packaging-and-local-install
+      path: .flow/features/0076_dogfood-linux-binary-packaging-and-local-install
+      created_at: 2026-05-27T15:32:23.730Z
 intake:
   mode: roadmap
   summary: null
