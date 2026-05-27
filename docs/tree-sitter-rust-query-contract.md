@@ -1,28 +1,31 @@
 # Tree-sitter Rust query contract and fixtures
 
-This is a non-product, test-only contract for a future Rust Tree-sitter symbol
-provider. It adds a project-owned query asset, fixture corpus, and proof target
-without exposing Rust symbols through the CLI, reports, provider registry,
-scoring, cache, or runtime defaults.
+This is the Rust Tree-sitter query contract for current-only Rust symbol
+evidence. It backs the product `--inspect PATH --symbols` runtime lane for
+repo-relative `.rs` files, the product query asset, fixture corpus, and proof
+targets without changing scoring, cache, report schemas, or runtime defaults.
 
 ## Scope and protected surfaces
 
 Changed implementation surfaces are limited to:
 
+- `src/queries/rust-symbols.scm`: the product Rust symbol candidate query.
+- `src/tree_sitter_rust.zig`: the inspect-only current-symbol extractor.
+- `src/provider_selection.zig`: extension-based runtime provider selection.
 - `tests/fixtures/tree_sitter_rust_query/rust-symbols.scm`: the project-owned
-  Rust symbol candidate query.
+  query proof fixture copy.
 - `tests/fixtures/tree_sitter_rust_query/*.rs` and
   `tests/fixtures/tree_sitter_rust_query/unsupported.md`: local proof fixtures.
 - `tests/tree_sitter_rust_query_proof.zig`: test-only query contract proof.
-- `build.zig`: the explicit `tree-sitter-rust-query-proof` build step.
+- `tests/tree_sitter_rust_symbol_proof.zig`: product extractor proof.
+- `build.zig`: the explicit Rust build, query, and symbol proof steps.
 - `docs/tree-sitter-rust-query-contract.md`: this evidence record.
 
-The contract does not change `src/`, fixture expected product outputs, CLI
-flags, report schemas, scoring, cache behavior, provider registration, runtime
-Rust symbol output, CI/release/package behavior, Cargo or crate/module
-resolution, macro expansion, type checking, LSP behavior, line history, network
-access, telemetry, uploads, remote enrichment, parser generation, system package
-use, or custom user query execution.
+The contract does not add new CLI flags, report schemas, scoring, cache
+behavior, CI/release/package behavior, Cargo or crate/module resolution, macro
+expansion, cfg or feature evaluation, type checking, LSP behavior, true symbol
+history, network access, telemetry, uploads, remote enrichment, parser
+generation, system package use, or custom user query execution.
 
 ## Query identity
 
@@ -31,8 +34,9 @@ use, or custom user query execution.
 | Query version | `rust-symbol-query-v1` |
 | Provider proof name | `tree-sitter-rust-query-proof` |
 | Grammar input | vendored `third_party/tree-sitter-rust/v0.24.2` |
-| Query asset | `tests/fixtures/tree_sitter_rust_query/rust-symbols.scm` |
-| Proof command | `zig build tree-sitter-rust-query-proof` |
+| Product query asset | `src/queries/rust-symbols.scm` |
+| Proof query asset | `tests/fixtures/tree_sitter_rust_query/rust-symbols.scm` |
+| Proof commands | `zig build tree-sitter-rust-query-proof`; `zig build tree-sitter-rust-symbol-proof` |
 
 The query is project-owned. It is not an upstream highlight, tags, or user query
 import.
@@ -61,15 +65,15 @@ The supported capture names are:
 | `@rust.attribute` | Attribute counted for caveat proof only. |
 | `@rust.comment` | Comment node counted for proof coverage only. |
 
-Future runtime work must stop for planning if it needs new capture names, custom
-user queries, Cargo or crate graph analysis, module path resolution, macro
-expansion, conditional compilation evaluation, type checking, LSP, line history,
-or runtime provider registry wiring.
+Future expansion work must stop for planning if it needs new capture names,
+custom user queries, Cargo or crate graph analysis, module path resolution,
+macro expansion, conditional compilation evaluation, type checking, LSP, true
+symbol history, or non-local provider inputs.
 
 ## Symbol-kind and range mapping
 
-The proof maps query candidates into the existing
-`provider.CurrentSymbolEvidence` shape only inside tests:
+The product extractor and proof map query candidates into the existing
+`provider.CurrentSymbolEvidence` shape:
 
 | Query candidate | Proof mapping |
 | --- | --- |
@@ -89,7 +93,7 @@ invocations are counted to prove coverage but are not emitted as symbols.
 
 ## Supported and caveated subset
 
-The proof-covered subset includes `.rs` files, empty files, source-file roots,
+The provider-covered subset includes `.rs` files, empty files, source-file roots,
 freestanding functions, raw identifiers, inline modules, external module
 declarations, consts, statics, structs, tuple structs, unit structs, enums, enum
 variants, traits, trait method signatures, trait methods with default bodies,
@@ -98,12 +102,12 @@ compilation attributes, macro definitions, macro invocations, invalid/partial
 files, unsupported paths, unsafe paths, monorepo-style paths, and
 Markdown-sensitive fixture text.
 
-The contract intentionally excludes runtime Rust `--symbols` output, provider
-registration, custom user queries, Cargo/package/workspace discovery, crate
-graphs, module path resolution, imports or `use` resolution, qualified name
-construction, macro expansion, generated-source policy, cfg/feature evaluation,
-type checking, parser diagnostics, source snippets in failures, LSP data,
-lineage, line history, ownership, people metrics, scoring, and bug prediction.
+The contract intentionally excludes custom user queries, Cargo/package/workspace
+discovery, crate graphs, module path resolution, imports or `use` resolution,
+qualified name construction, macro expansion output, generated-source policy
+enforcement, cfg/feature evaluation, type checking, parser diagnostics, source
+snippets in failures, LSP data, lineage, true symbol history, ownership,
+people metrics, scoring, and bug prediction.
 
 Unsupported non-`.rs` paths return `unsupported` without parsing. Unsafe paths
 are rejected before parsing. Invalid or partial Rust source returns `failed`
@@ -131,21 +135,23 @@ repositories are recorded.
 
 ## Validation evidence
 
-Fresh local validation on 2026-05-26:
+Fresh local validation on 2026-05-27:
 
 | Command | Exit status | Privacy-safe observation |
 | --- | --- | --- |
 | `zig build tree-sitter-rust-query-proof` | `0` | Query compiled, expected capture names were present, and all local fixtures passed. |
+| `zig build tree-sitter-rust-symbol-proof` | `0` | Product Rust extractor proof emitted current-only symbols and caveats from local fixtures. |
 | `zig build tree-sitter-rust-build-proof` | `0` | Existing Rust parser/scanner build proof still compiled, linked, and ran. |
-| `zig build validate` | `0` | Product validation passed without Rust runtime provider output. |
-| `zig build validate -Dcloseout -Dsmoke-label=sibling-local-repo -Dsmoke-repo=<local sibling path>` | `0` | Privacy-safe sibling-local-repo smoke passed with labels and bounded counts only. |
-| `zig build run -- --help \| rg -i 'rust\|tree-sitter-rust'` | `1` | Expected no-match result; CLI help exposed no Rust runtime provider claims. |
-| `zig build run -- --explain \| rg -i 'rust\|tree-sitter-rust'` | `1` | Expected no-match result; explain output exposed no Rust runtime provider claims. |
+| `zig build validate` | `0` | Product validation passed with Rust runtime provider output, docs, privacy scans, and matrix checks. |
+| `zig build validate-all` | `0` | Validate-all included Rust build, query, and product symbol proof steps. |
+| `zig build run -- --help` | `0` | CLI help lists Rust `.rs` support and no Cargo/crate/module/macro/cfg/type/dependency boundary. |
+| `zig build run -- --explain` | `0` | Explain output lists Rust capability and no semantic Rust boundary. |
 | `git diff --check` | `0` | No whitespace errors were reported. |
 
 The proof uses only repository-local vendored Tree-sitter core and Rust parser
 sources plus local fixtures. It performs no network access, package-manager
 resolution, parser generation, telemetry, upload, remote enrichment, background
-analysis, provider runtime registration, Cargo discovery, crate graph analysis,
-module-path analysis, macro expansion, cfg evaluation, type checking, LSP
-analysis, or line-history analysis.
+analysis, Cargo discovery, crate graph analysis, module-path analysis, macro
+expansion, cfg evaluation, type checking, LSP analysis, or true symbol-history
+analysis. Runtime `--symbol-line-history` remains current-line Git evidence for
+HEAD line ranges only.

@@ -70,8 +70,9 @@ The project should preserve trust by default:
 
 The alpha includes one narrow opt-in provider path: `--symbols` with
 `--inspect PATH` can add inspect-only current working-tree Tree-sitter syntax
-evidence for Zig, Go, Python, JavaScript, Lua, TypeScript, or TSX symbols in
-the inspected file. File-level Git evidence remains the core product truth;
+evidence for Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, or TSX
+symbols in the inspected file. File-level Git evidence remains the core
+product truth;
 provider output is optional current-only enrichment.
 
 Broader language and dependency insight should arrive through optional
@@ -204,6 +205,7 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.py --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.js --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.lua --symbols --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.rs --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.ts --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.tsx --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
@@ -247,9 +249,10 @@ and prints the alpha version without requiring a Git repository.
 
 `--symbols` is opt-in and works only with `--inspect PATH`. It adds
 inspect-only current working-tree Tree-sitter syntax evidence for Zig, Go,
-Python, JavaScript, Lua, TypeScript, or TSX symbols in the matched in-scope
-`.zig`, `.go`, `.py`, `.js`, `.mjs`, `.cjs`, admitted `.jsx`, `.lua`, `.ts`,
-`.mts`, `.cts`, or `.tsx` file, with provider freshness, failure, confidence,
+Python, JavaScript, Lua, Rust, TypeScript, or TSX symbols in the matched
+in-scope `.zig`, `.go`, `.py`, `.js`, `.mjs`, `.cjs`, admitted `.jsx`,
+`.lua`, `.rs`, `.ts`, `.mts`, `.cts`, or `.tsx` file, with provider freshness,
+failure, confidence,
 caveats, and local provenance in the report.
 Symbol evidence is current-only enrichment: it does not change file score,
 rank, confidence, co-change evidence, Git rename lineage, scope, or
@@ -268,7 +271,11 @@ scanning, or symbol history. Lua symbol output is inspect-only current syntax
 evidence for `.lua` files and does not evaluate packages, `require`, runtime
 modules, types, metatables, dynamic table keys, dependency graphs, runtime
 execution, scoring, ownership, maintainer judgement, bug prediction, code
-quality, or repo-wide scanning; symbol history is out of scope.
+quality, or repo-wide scanning; symbol history is out of scope. Rust support is
+inspect-only for `.rs` files and does not evaluate Cargo, crates, module
+resolution, macro expansion output, cfg feature selection, type checking,
+dependency graphs, scoring, ownership, or repo-wide scanning; symbol history is
+out of scope.
 TypeScript/TSX support is inspect-only for `.ts`, `.mts`, `.cts`, and `.tsx`
 files and does not evaluate packages, workspaces, tsconfig, module resolution,
 type checking, dependency graphs, scoring, ownership, cache, repo-wide
@@ -283,14 +290,15 @@ Provider capability matrix:
 | Python | `.py` | `tree-sitter-python` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no imports, packages, virtual environments, dependency graphs, generated-source policy, true symbol history, scoring, or ownership claims |
 | JavaScript | `.js`, `.mjs`, `.cjs`, admitted `.jsx` | `tree-sitter-javascript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, true symbol history, scoring, or ownership claims |
 | Lua | `.lua` | `tree-sitter-lua` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, true symbol history, scoring, or ownership claims |
+| Rust | `.rs` | `tree-sitter-rust` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no Cargo, crates, module resolution, macro expansion output, cfg feature selection, type checking, dependency graphs, true symbol history, scoring, or ownership claims |
 | TypeScript | `.ts`, `.mts`, `.cts` | `tree-sitter-typescript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, true symbol history, scoring, or ownership claims |
 | TSX | `.tsx` | `tree-sitter-tsx` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no React, DOM, packages, type analysis, dependency graphs, cache, true symbol history, scoring, or ownership claims |
 | Unsupported current files | all other paths | unsupported fallback | provider reports `unsupported` and keeps inspected file evidence | no current-line evidence | no parser diagnostics, source snippets, or parsed symbols |
 
 `--symbol-line-history` is a second opt-in layer that works only with
 `--inspect PATH --symbols`. It adds current-line Git evidence for current Zig,
-Go, Python, JavaScript, Lua, TypeScript, or TSX symbol line ranges using one
-local current-line Git evidence command only when symbol ranges are valid and
+Go, Python, JavaScript, Lua, Rust, TypeScript, or TSX symbol line ranges using
+one local current-line Git evidence command only when symbol ranges are valid and
 the inspected file is clean. Current-line evidence is for the lines occupied by
 a symbol at HEAD.
 it is not true symbol history, historical identity tracking, or `git log -L`.
@@ -377,7 +385,7 @@ runs the fuller local ladder and prints a privacy-safe evidence summary.
 - Broad provider, cache, dependency, test, and coverage enrichers are future
   work; the current provider path supports opt-in inspect-only current
   working-tree Tree-sitter syntax evidence for Zig, Go, Python, JavaScript,
-  Lua, TypeScript, and TSX symbols.
+  Lua, Rust, TypeScript, and TSX symbols.
 - Runtime defaults remain local-only and do not perform network access.
 
 ## Contributing

@@ -173,12 +173,17 @@ symbol evidence for a supported file type:
 ```sh
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.py --symbols --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.rs --symbols --format json
 ```
 
 Supported inspect-only symbol lanes are Zig, Go, Python, JavaScript, Lua,
-TypeScript, and TSX. Provider evidence is current-only enrichment for the
+Rust, TypeScript, and TSX. Provider evidence is current-only enrichment for the
 matched file. It does not change score, rank, confidence, co-change evidence,
 Git rename lineage, scope, or inclusion and exclusion decisions.
+
+Rust support is syntax-only for the inspected `.rs` file. It does not evaluate
+Cargo metadata, crates, module resolution, macro expansion output, cfg or
+feature selection, type checking, dependency graphs, or semantic Rust meaning.
 
 Use `--symbol-line-history` when you also want current-line Git evidence for
 symbol line ranges at HEAD:

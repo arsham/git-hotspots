@@ -27,6 +27,9 @@
 /fixtures/lua-symbols/
 /fixtures/lua-symbols-shallow/
 /fixtures/lua-symbols-partial/
+/fixtures/rust-symbols/
+/fixtures/rust-symbols-shallow/
+/fixtures/rust-symbols-partial/
 /fixtures/typescript-symbols/
 /fixtures/typescript-symbols-shallow/
 /fixtures/typescript-symbols-partial/

@@ -1,0 +1,20 @@
+git-hotspots: file-level Git-history investigation prompts
+commits=2 shallow=false partial=false dirty=false auto_fetch=false
+scope: selected=project include_prefixes=[] exclude_prefixes=[.flow/,.zig-cache/,zig-out/,target/,node_modules/,dist/,build/,coverage/] outside_include_paths=0 outside_include_changes=0 excluded_paths=0 excluded_changes=0
+caveats: Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked
+inspect: requested=src/example.rs matched=src/example.rs rank=1
+symbols: provider=tree-sitter-rust state=current-only freshness=fresh failure=ok confidence=high total=21 shown=5 omitted=16 limit=5 limit_source=explicit sort_basis="provider order"
+symbols caveat: current working-tree enrichment only; file-level Git evidence, score, file order, lineage, and confidence are unchanged
+
+rank  score   changes churn   confidence lineage path
+1     53.8    2       45      medium     yes     src/example.rs
+
+current symbols (shown first by provider order):
+  summary: total=21 shown=5 omitted=16 limit=5 limit_source=explicit sort_basis="provider order"
+  module src/example.rs lines 1-46 confidence=high
+  other LIMIT lines 3-3 confidence=high
+  other NAME lines 4-4 confidence=high
+  module nested lines 6-37 confidence=high
+  type Unit lines 7-7 confidence=high
+
+Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.

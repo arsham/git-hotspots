@@ -73,9 +73,9 @@ escape to target a tab in a path.
 With
 .B --inspect PATH
 only, add opt-in inspect-only current working-tree Tree-sitter symbol evidence
-for Zig, Go, Python, JavaScript, Lua, TypeScript, or TSX files. Symbol evidence
-does not affect score, rank, lineage, confidence, co-change evidence, or
-file-level evidence.
+for Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, or TSX files. Symbol
+evidence does not affect score, rank, lineage, confidence, co-change evidence,
+or file-level evidence.
 .TP
 .B --symbol-line-history
 With
@@ -154,13 +154,18 @@ or partial history is reported as a caveat instead of being repaired by network
 access.
 .SH PROVIDER BOUNDARIES
 Provider evidence is optional current-file enrichment for an inspected path. The
-supported lanes are Zig, Go, Python, JavaScript, Lua, TypeScript, and TSX.
-Unsupported files preserve inspected file evidence and report provider caveats.
+supported lanes are Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and
+TSX. Unsupported files preserve inspected file evidence and report provider
+caveats.
 .PP
-Providers do not evaluate packages, dependency graphs, generated-source policy,
-Node or TypeScript configuration, build tags, runtime modules, metatables,
-React or DOM semantics, true symbol history, scoring, ownership, or repo-wide
-scanning.
+Rust support does not evaluate Cargo, crates, module resolution, macro expansion
+output, cfg feature selection, type checking, dependency graphs, or semantic
+Rust analysis.
+.PP
+Providers do not evaluate packages, generated-source policy, Node or TypeScript
+configuration, build tags, runtime modules, metatables, React or DOM semantics.
+They make no true symbol history, scoring, ownership, or repo-wide scanning
+claims.
 .SH DIAGNOSTICS
 Invalid CLI arguments exit 2 with concise stderr diagnostics that name the
 failed flag and, when deterministic, include a valid next command shape. For

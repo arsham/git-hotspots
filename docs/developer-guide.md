@@ -73,6 +73,15 @@ explicitly shapes that scope.
 
 ## Validation ladder
 
+Enable the repository pre-commit hook in local checkouts before feature work:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+The hook runs `git diff --cached --check` and `zig build validate-all` before
+commits, so provider proof coverage stays enforced at local commit boundaries.
+
 Use the narrowest useful gate while iterating, then run the broader gate before
 hand-off:
 

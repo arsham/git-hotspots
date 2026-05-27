@@ -113,6 +113,7 @@ fn addTreeSitterProviders(b: *std.Build, module: *std.Build.Module) void {
     addTreeSitterPythonGrammar(b, module);
     addTreeSitterJavaScriptGrammar(b, module);
     addTreeSitterLuaGrammar(b, module);
+    addTreeSitterRustGrammar(b, module);
     addTreeSitterTypeScriptGrammar(b, module);
     addTreeSitterTsxGrammar(b, module);
 }
@@ -335,6 +336,30 @@ pub fn build(b: *std.Build) void {
     const run_tree_sitter_rust_query_proof = b.addRunArtifact(tree_sitter_rust_query_proof);
     const tree_sitter_rust_query_proof_step = b.step("tree-sitter-rust-query-proof", "Run test-only Rust symbol query contract proof with vendored Tree-sitter sources");
     tree_sitter_rust_query_proof_step.dependOn(&run_tree_sitter_rust_query_proof.step);
+
+    const tree_sitter_rust_symbol_proof_module = b.createModule(.{
+        .root_source_file = b.path("tests/tree_sitter_rust_symbol_proof.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    const tree_sitter_rust_provider_module = b.createModule(.{
+        .root_source_file = b.path("src/tree_sitter_rust.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    tree_sitter_rust_provider_module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
+    tree_sitter_rust_provider_module.addIncludePath(b.path("third_party/tree-sitter-rust/v0.24.2/src"));
+    tree_sitter_rust_provider_module.link_libc = true;
+    tree_sitter_rust_symbol_proof_module.addImport("tree_sitter_rust", tree_sitter_rust_provider_module);
+    addTreeSitterRust(b, tree_sitter_rust_symbol_proof_module);
+
+    const tree_sitter_rust_symbol_proof = b.addTest(.{
+        .root_module = tree_sitter_rust_symbol_proof_module,
+    });
+
+    const run_tree_sitter_rust_symbol_proof = b.addRunArtifact(tree_sitter_rust_symbol_proof);
+    const tree_sitter_rust_symbol_proof_step = b.step("tree-sitter-rust-symbol-proof", "Run internal Rust current-symbol extraction proof with vendored Tree-sitter sources");
+    tree_sitter_rust_symbol_proof_step.dependOn(&run_tree_sitter_rust_symbol_proof.step);
 
     const tree_sitter_lua_query_proof_module = b.createModule(.{
         .root_source_file = b.path("tests/tree_sitter_lua_query_proof.zig"),
@@ -597,6 +622,7 @@ pub fn build(b: *std.Build) void {
     validate_all_step.dependOn(tree_sitter_tsx_symbol_proof_step);
     validate_all_step.dependOn(tree_sitter_rust_build_proof_step);
     validate_all_step.dependOn(tree_sitter_rust_query_proof_step);
+    validate_all_step.dependOn(tree_sitter_rust_symbol_proof_step);
 
     const run_cmd = b.addRunArtifact(exe);
     run_cmd.stdio = .inherit;

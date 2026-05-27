@@ -559,6 +559,9 @@ explain_output_checks() {
   grep -q -- 'Hotspots are investigation prompts' "$help_out" || return 1
   grep -q -- 'Provider capability:' "$help_out" || return 1
   grep -q -- 'inspect-only current working-tree symbol evidence' "$help_out" || return 1
+  grep -q -- 'no Cargo, crates, module' "$help_out" || return 1
+  grep -q -- 'macro expansion, cfg/feature evaluation, type checking' "$help_out" || return 1
+  grep -q -- 'dependency graphs, or semantic Rust analysis' "$help_out" || return 1
   grep -q -- 'not true symbol history' "$help_out" || return 1
   "$EXE" -h > "$ARTIFACT_DIR/help-short.txt" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
@@ -707,6 +710,7 @@ capability_matrix_checks() {
   matrix_python=$ARTIFACT_DIR/capability-python.json
   matrix_javascript=$ARTIFACT_DIR/capability-javascript.json
   matrix_lua=$ARTIFACT_DIR/capability-lua.json
+  matrix_rust=$ARTIFACT_DIR/capability-rust.json
   matrix_typescript=$ARTIFACT_DIR/capability-typescript.json
   matrix_tsx=$ARTIFACT_DIR/capability-tsx.json
   matrix_unsupported=$ARTIFACT_DIR/capability-unsupported.json
@@ -720,11 +724,12 @@ capability_matrix_checks() {
   "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-line-history --format json > "$matrix_python" || return 1
   "$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --symbol-line-history --format json > "$matrix_javascript" || return 1
   "$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-line-history --format json > "$matrix_lua" || return 1
+  "$EXE" --repo fixtures/rust-symbols --inspect src/example.rs --symbols --symbol-line-history --format json > "$matrix_rust" || return 1
   "$EXE" --repo fixtures/typescript-symbols --inspect src/example.ts --symbols --symbol-line-history --format json > "$matrix_typescript" || return 1
   "$EXE" --repo fixtures/typescript-symbols --inspect src/component.tsx --symbols --symbol-line-history --format json > "$matrix_tsx" || return 1
   "$EXE" --repo fixtures/symbols --inspect src/readme.txt --symbols --format json > "$matrix_unsupported" || return 1
 
-  python3 - README.md "$matrix_explain" "$matrix_help" "$matrix_zig" "$matrix_go" "$matrix_python" "$matrix_javascript" "$matrix_lua" "$matrix_typescript" "$matrix_tsx" "$matrix_unsupported" <<'PY'
+  python3 - README.md "$matrix_explain" "$matrix_help" "$matrix_zig" "$matrix_go" "$matrix_python" "$matrix_javascript" "$matrix_lua" "$matrix_rust" "$matrix_typescript" "$matrix_tsx" "$matrix_unsupported" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -732,7 +737,7 @@ from pathlib import Path
 readme = Path(sys.argv[1]).read_text(encoding='utf-8')
 explain = Path(sys.argv[2]).read_text(encoding='utf-8')
 help_text = Path(sys.argv[3]).read_text(encoding='utf-8')
-zig, go, python, javascript, lua, typescript, tsx, unsupported = [json.load(open(path, encoding='utf-8')) for path in sys.argv[4:]]
+zig, go, python, javascript, lua, rust, typescript, tsx, unsupported = [json.load(open(path, encoding='utf-8')) for path in sys.argv[4:]]
 
 readme_rows = [
     '| Zig | `.zig` | `tree-sitter-zig` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no dependencies, semantic moves, true symbol history, scoring, or ownership claims |',
@@ -740,6 +745,7 @@ readme_rows = [
     '| Python | `.py` | `tree-sitter-python` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no imports, packages, virtual environments, dependency graphs, generated-source policy, true symbol history, scoring, or ownership claims |',
     '| JavaScript | `.js`, `.mjs`, `.cjs`, admitted `.jsx` | `tree-sitter-javascript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, true symbol history, scoring, or ownership claims |',
     '| Lua | `.lua` | `tree-sitter-lua` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, true symbol history, scoring, or ownership claims |',
+    '| Rust | `.rs` | `tree-sitter-rust` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no Cargo, crates, module resolution, macro expansion output, cfg feature selection, type checking, dependency graphs, true symbol history, scoring, or ownership claims |',
     '| TypeScript | `.ts`, `.mts`, `.cts` | `tree-sitter-typescript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, true symbol history, scoring, or ownership claims |',
     '| TSX | `.tsx` | `tree-sitter-tsx` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no React, DOM, packages, type analysis, dependency graphs, cache, true symbol history, scoring, or ownership claims |',
     '| Unsupported current files | all other paths | unsupported fallback | provider reports `unsupported` and keeps inspected file evidence | no current-line evidence | no parser diagnostics, source snippets, or parsed symbols |',
@@ -770,6 +776,7 @@ cases = [
     ('Python', python, 'tree-sitter-python', 'src/example.py'),
     ('JavaScript', javascript, 'tree-sitter-javascript', 'src/example.mjs'),
     ('Lua', lua, 'tree-sitter-lua', 'src/example.lua'),
+    ('Rust', rust, 'tree-sitter-rust', 'src/example.rs'),
     ('TypeScript', typescript, 'tree-sitter-typescript', 'src/example.ts'),
     ('TSX', tsx, 'tree-sitter-tsx', 'src/component.tsx'),
 ]
@@ -800,7 +807,7 @@ PY
 
 prohibited_claim_scan() {
   have_python || return 1
-  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/python-symbols.json fixtures/expected/python-symbols.md fixtures/expected/python-symbols.txt fixtures/expected/python-symbols-limit.json fixtures/expected/python-symbols-limit.md fixtures/expected/python-symbols-limit.txt fixtures/expected/python-symbols-empty.json fixtures/expected/python-symbols-invalid.json fixtures/expected/python-symbols-generated.json fixtures/expected/python-symbols-symlink-unavailable.json fixtures/expected/python-symbols-large-unavailable.json fixtures/expected/python-symbols-missing-unavailable.json fixtures/expected/python-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt fixtures/expected/python-line-history-success.json fixtures/expected/python-line-history-success.md fixtures/expected/python-line-history-success.txt fixtures/expected/javascript-line-history-success.json fixtures/expected/javascript-line-history-success.md fixtures/expected/javascript-line-history-success.txt fixtures/expected/lua-line-history-success.json fixtures/expected/lua-line-history-success.md fixtures/expected/lua-line-history-success.txt README.md CONTRIBUTING.md docs/user-guide.md docs/developer-guide.md man/git-hotspots.1 <<'PY'
+  python3 - fixtures/expected/explain.txt fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/symbols-unsupported.json fixtures/expected/symbols-symlink-unavailable.json fixtures/expected/go-symbols.json fixtures/expected/go-symbols.md fixtures/expected/go-symbols.txt fixtures/expected/go-symbols-limit.json fixtures/expected/go-symbols-limit.md fixtures/expected/go-symbols-limit.txt fixtures/expected/go-symbols-empty.json fixtures/expected/go-symbols-invalid.json fixtures/expected/go-symbols-caveated.json fixtures/expected/go-symbols-symlink-unavailable.json fixtures/expected/go-symbols-large-unavailable.json fixtures/expected/go-symbols-missing-unavailable.json fixtures/expected/go-symbols-rename-alias.json fixtures/expected/python-symbols.json fixtures/expected/python-symbols.md fixtures/expected/python-symbols.txt fixtures/expected/python-symbols-limit.json fixtures/expected/python-symbols-limit.md fixtures/expected/python-symbols-limit.txt fixtures/expected/python-symbols-empty.json fixtures/expected/python-symbols-invalid.json fixtures/expected/python-symbols-generated.json fixtures/expected/python-symbols-symlink-unavailable.json fixtures/expected/python-symbols-large-unavailable.json fixtures/expected/python-symbols-missing-unavailable.json fixtures/expected/python-symbols-rename-alias.json fixtures/expected/rust-symbols.json fixtures/expected/rust-symbols.md fixtures/expected/rust-symbols.txt fixtures/expected/rust-symbols-limit.json fixtures/expected/rust-symbols-limit.md fixtures/expected/rust-symbols-limit.txt fixtures/expected/rust-symbols-unsupported.json fixtures/expected/rust-symbols-empty.json fixtures/expected/rust-symbols-invalid.json fixtures/expected/rust-symbols-generated.json fixtures/expected/rust-symbols-macro-cfg.json fixtures/expected/rust-symbols-symlink-unavailable.json fixtures/expected/rust-symbols-large-unavailable.json fixtures/expected/rust-symbols-missing-unavailable.json fixtures/expected/rust-symbols-rename-alias.json fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt fixtures/expected/go-line-history-success.json fixtures/expected/go-line-history-success.md fixtures/expected/go-line-history-success.txt fixtures/expected/python-line-history-success.json fixtures/expected/python-line-history-success.md fixtures/expected/python-line-history-success.txt fixtures/expected/javascript-line-history-success.json fixtures/expected/javascript-line-history-success.md fixtures/expected/javascript-line-history-success.txt fixtures/expected/lua-line-history-success.json fixtures/expected/lua-line-history-success.md fixtures/expected/lua-line-history-success.txt README.md CONTRIBUTING.md docs/user-guide.md docs/developer-guide.md man/git-hotspots.1 <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -906,6 +913,8 @@ docs_manual_checks() {
   grep -Fq -- '--inspect' docs/user-guide.md || return 1
   grep -Fq -- '--symbols' docs/user-guide.md || return 1
   grep -Fq -- '--symbol-line-history' docs/user-guide.md || return 1
+  grep -Fq 'Rust support is syntax-only' docs/user-guide.md || return 1
+  grep -Fq 'Cargo metadata, crates, module resolution' docs/user-guide.md || return 1
   grep -Fq -- '--scope all' docs/user-guide.md || return 1
   grep -Fq -- '--include-prefix' docs/user-guide.md || return 1
   grep -Fq -- '--exclude-prefix' docs/user-guide.md || return 1
@@ -1730,6 +1739,7 @@ real_repo_smoke() {
   tracked_python_count=$(git -C "$repo" ls-files '*.py' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
   tracked_javascript_count=$(git -C "$repo" ls-files '*.js' '*.mjs' '*.cjs' '*.jsx' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
   tracked_lua_count=$(git -C "$repo" ls-files '*.lua' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
+  tracked_rust_count=$(git -C "$repo" ls-files '*.rs' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
   tracked_typescript_count=$(git -C "$repo" ls-files '*.ts' '*.mts' '*.cts' '*.tsx' 2>/dev/null | wc -l | tr -d ' ' || printf 'unknown')
 
   if "$EXE" --repo "$repo" --scope all --format table > "$table_out" 2> "$timing_file"; then
@@ -1899,6 +1909,44 @@ PY
     done < "$lua_candidates"
   fi
 
+  first_rust_path=$(git -C "$repo" ls-files '*.rs' 2>/dev/null | LC_ALL=C sort | head -n 1 || true)
+  rust_symbol_status=skip-no-tracked-rust-file
+  rust_line_history_status=skip-no-tracked-rust-file
+  if [ -n "$first_rust_path" ]; then
+    rust_symbol_status=skip-no-successful-rust-symbol-file
+    rust_line_history_status=skip-no-safe-tracked-rust-file
+    rust_candidates=$(mktemp "$ARTIFACT_DIR/real-rust-candidates.XXXXXX")
+    git -C "$repo" ls-files '*.rs' 2>/dev/null | LC_ALL=C sort | head -n 12 > "$rust_candidates" || true
+    while IFS= read -r rust_path; do
+      [ -n "$rust_path" ] || continue
+      rust_symbol_out=$(mktemp "$ARTIFACT_DIR/real-rust-symbol.XXXXXX.json")
+      if [ "$rust_symbol_status" != pass ] && "$EXE" --repo "$repo" --inspect "$rust_path" --symbols --format json > "$rust_symbol_out" 2> "$timing_file" && python3 -m json.tool "$rust_symbol_out" >/dev/null 2>&1; then
+        rust_symbol_status=pass
+      fi
+      rust_line_history_out=$(mktemp "$ARTIFACT_DIR/real-rust-line-history.XXXXXX.json")
+      if "$EXE" --repo "$repo" --inspect "$rust_path" --symbols --symbol-line-history --format json > "$rust_line_history_out" 2> "$timing_file" && python3 - "$rust_line_history_out" <<'PY'
+import json, sys
+with open(sys.argv[1], encoding='utf-8') as fh:
+    data = json.load(fh)
+symbols = data.get('symbols') or {}
+if (symbols.get('provider') or {}).get('failure') != 'ok':
+    raise SystemExit(2)
+items = symbols.get('items') or []
+if not items:
+    raise SystemExit(3)
+histories = [row.get('current_line_history') for row in items]
+if not all(histories):
+    raise SystemExit(4)
+if not any(history.get('failure') == 'ok' and int(history.get('distinct_last_touch_commit_count') or 0) > 0 for history in histories):
+    raise SystemExit(5)
+PY
+      then
+        rust_line_history_status=pass
+        break
+      fi
+    done < "$rust_candidates"
+  fi
+
   first_typescript_path=$(git -C "$repo" ls-files '*.ts' '*.mts' '*.cts' '*.tsx' 2>/dev/null | LC_ALL=C sort | head -n 1 || true)
   typescript_symbol_status=skip-no-tracked-typescript-file
   typescript_line_history_status=skip-no-tracked-typescript-file
@@ -1942,7 +1990,7 @@ PY
     project_summary=$(json_count_summary "$project_json_out") || project_summary='results=unknown caveats=unknown dirty=unknown'
     elapsed=${timing#*|}
     project_elapsed=${project_timing#*|}
-    printf 'real-repo label=%s commits=%s tracked_files=%s tracked_go_files=%s tracked_python_files=%s tracked_javascript_files=%s tracked_lua_files=%s tracked_typescript_files=%s go_symbol=%s python_symbol=%s python_line_history=%s javascript_symbol=%s javascript_line_history=%s lua_symbol=%s lua_line_history=%s typescript_symbol=%s typescript_line_history=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$tracked_go_count" "$tracked_python_count" "$tracked_javascript_count" "$tracked_lua_count" "$tracked_typescript_count" "$go_symbol_status" "$python_symbol_status" "$python_line_history_status" "$javascript_symbol_status" "$javascript_line_history_status" "$lua_symbol_status" "$lua_line_history_status" "$typescript_symbol_status" "$typescript_line_history_status" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
+    printf 'real-repo label=%s commits=%s tracked_files=%s tracked_go_files=%s tracked_python_files=%s tracked_javascript_files=%s tracked_lua_files=%s tracked_rust_files=%s tracked_typescript_files=%s go_symbol=%s python_symbol=%s python_line_history=%s javascript_symbol=%s javascript_line_history=%s lua_symbol=%s lua_line_history=%s rust_symbol=%s rust_line_history=%s typescript_symbol=%s typescript_line_history=%s all_table=%s all_json=%s all_markdown=%s all_%s all_elapsed=%s project_table=%s project_json=%s project_markdown=%s project_progress=%s project_%s project_elapsed=%s\n' "$label" "$commit_count" "$tracked_file_count" "$tracked_go_count" "$tracked_python_count" "$tracked_javascript_count" "$tracked_lua_count" "$tracked_rust_count" "$tracked_typescript_count" "$go_symbol_status" "$python_symbol_status" "$python_line_history_status" "$javascript_symbol_status" "$javascript_line_history_status" "$lua_symbol_status" "$lua_line_history_status" "$rust_symbol_status" "$rust_line_history_status" "$typescript_symbol_status" "$typescript_line_history_status" "$table_status" "$json_status" "$markdown_status" "$summary" "$elapsed" "$project_table_status" "$project_json_status" "$project_markdown_status" "$progress_status" "$project_summary" "$project_elapsed" >> "$SMOKES"
     pass_rung "real repo smoke $label"
     return 0
   fi
@@ -2196,7 +2244,7 @@ else
   printf '  - none\n'
 fi
 printf 'privacy: summary uses labels and bounded counts only; raw reports and absolute private paths are not printed.\n'
-printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, package publishing, release automation, or remote release metadata; unpublished local Linux packaged dogfood uses ignored dist outputs only; opt-in inspect-only Tree-sitter Zig, Go, Python, JavaScript, Lua, TypeScript, or TSX symbols are local current-file enrichment.\n'
+printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, package publishing, release automation, or remote release metadata; unpublished local Linux packaged dogfood uses ignored dist outputs only; opt-in inspect-only Tree-sitter Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, or TSX symbols are local current-file enrichment.\n'
 
 if [ "$FAILURES" -ne 0 ]; then
   printf 'validate: %d rung(s) failed\n' "$FAILURES" >&2

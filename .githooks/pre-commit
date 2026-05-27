@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+
+printf '%s\n' 'pre-commit: RUN staged whitespace check'
+git diff --cached --check
+
+# Git hooks export repository and authoring variables. The validation ladder
+# creates nested fixture repositories with deterministic authors and commit
+# hashes, so clear the parent Git context before running commands that may
+# invoke git in those fixtures.
+config_count=${GIT_CONFIG_COUNT:-0}
+i=0
+while [ "$i" -lt "$config_count" ]; do
+  unset "GIT_CONFIG_KEY_$i" "GIT_CONFIG_VALUE_$i"
+  i=$((i + 1))
+done
+unset GIT_CONFIG_COUNT GIT_CONFIG_PARAMETERS
+unset GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL GIT_AUTHOR_DATE
+unset GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL GIT_COMMITTER_DATE
+unset $(git rev-parse --local-env-vars)
+
+printf '%s\n' 'pre-commit: RUN full validation and proof aggregate'
+zig build validate-all
+
+printf '%s\n' 'pre-commit: all checks passed'

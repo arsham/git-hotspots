@@ -37,15 +37,16 @@ pub const usage =
     \\                    canonical path; use \\t to target a tab in a Git path
     \\  --symbols         With --inspect PATH only, add opt-in inspect-only current
     \\                    working-tree Tree-sitter Zig, Go, Python, JavaScript,
-    \\                    Lua, TypeScript, or TSX symbols for that file; JavaScript
-    \\                    covers .js, .mjs, .cjs, and admitted .jsx; Lua covers
-    \\                    .lua; TypeScript/TSX covers .ts, .mts, .cts, and .tsx;
+    \\                    Lua, Rust, TypeScript, or TSX symbols for that file; Rust
+    \\                    covers .rs; JavaScript covers .js, .mjs, .cjs, and
+    \\                    admitted .jsx; Lua covers .lua; TypeScript/TSX covers
+    \\                    .ts, .mts, .cts, and .tsx;
     \\                    does not affect score, rank, lineage, confidence, or
     \\                    file-level evidence
     \\  --symbol-line-history
     \\                    With --inspect PATH --symbols only, add opt-in current-line
     \\                    Git evidence for current Zig, Go, Python, JavaScript,
-    \\                    Lua, TypeScript, or TSX symbol line ranges at HEAD; not true
+    \\                    Lua, Rust, TypeScript, or TSX symbol line ranges at HEAD; not true
     \\                    symbol history, lineage, scoring, or ownership
     \\  --symbol-limit N  With --inspect PATH --symbols only, limit human table and
     \\                    Markdown symbol rows (default: 25); JSON symbols.items
@@ -77,8 +78,11 @@ pub const usage =
     \\Provider capability:
     \\  --symbols is opt-in inspect-only current working-tree symbol evidence for
     \\  Zig (.zig), Go (.go), Python (.py), JavaScript (.js/.mjs/.cjs/.jsx),
-    \\  Lua (.lua), TypeScript (.ts/.mts/.cts), and TSX (.tsx). Other current files
-    \\  report unsupported provider caveats while preserving inspected file evidence.
+    \\  Lua (.lua), Rust (.rs), TypeScript (.ts/.mts/.cts), and TSX (.tsx).
+    \\  Other current files report unsupported provider caveats while preserving inspected file evidence.
+    \\  Rust support is current syntax evidence only: no Cargo, crates, module
+    \\  resolution, macro expansion, cfg/feature evaluation, type checking,
+    \\  dependency graphs, or semantic Rust analysis.
     \\  --symbol-line-history adds current-line Git evidence for HEAD symbol
     \\  ranges only; it is not true symbol history, lineage, scoring, or ownership.
     \\

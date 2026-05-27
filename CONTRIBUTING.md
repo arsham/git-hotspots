@@ -16,6 +16,16 @@ public alpha, so issues and small focused pull requests are welcome.
 
 ## Before opening a pull request
 
+This checkout uses the repository pre-commit hook in `.githooks/pre-commit`.
+Enable it with:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+The hook runs staged whitespace checks and `zig build validate-all` before a
+commit is created.
+
 Run the local validation workflow:
 
 ```sh
