@@ -4,7 +4,7 @@ feature:
   slug: internal-historical-symbol-pipeline-integration
   title: Internal historical symbol pipeline integration
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Feature 0080 proved the internal historical hunk attribution engine in
@@ -93,7 +93,7 @@ proposal:
     materialised_at: 2026-05-27T23:26:51.168Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -161,7 +161,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Internal integration model and candidate seam
       goal: Create the internal result/candidate seam that connects completed file
         analysis to historical attribution without public output drift.
@@ -194,7 +194,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Bounded orchestration and caveat propagation
       goal: Run the historical engine from the integration seam under explicit bounds
         and carry internal partial-evidence caveats forward.
@@ -225,7 +225,7 @@ design:
       depends_on:
         - P1
         - P2
-      status: planned
+      status: done
       title: Fixture, real-repo, and public non-regression proof
       goal: Prove the integrated path with fixtures and privacy-safe real-repo smoke
         while showing public output remains unchanged.
@@ -258,7 +258,7 @@ design:
     - id: P4
       depends_on:
         - P3
-      status: planned
+      status: done
       title: Close-out review boundary
       goal: Package final evidence and ensure the feature is ready for independent
         review before the public report feature starts.
@@ -348,7 +348,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-27T23:17:54.505Z
-  updated_at: 2026-05-27T23:27:23.133Z
+  updated_at: 2026-05-27T23:47:07.903Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-27T23:27:23.133Z

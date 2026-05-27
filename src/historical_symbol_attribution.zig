@@ -477,7 +477,11 @@ test "generated local repository proves historical hunk attribution cases" {
 }
 
 fn makeHistoricalFixtureRepo(allocator: std.mem.Allocator, io: std.Io) ![]u8 {
-    const repo = try allocator.dupe(u8, ".zig-cache/historical-attribution-fixture");
+    return makeHistoricalFixtureRepoForTests(allocator, io, ".zig-cache/historical-attribution-fixture");
+}
+
+pub fn makeHistoricalFixtureRepoForTests(allocator: std.mem.Allocator, io: std.Io, fixture_path: []const u8) ![]u8 {
+    const repo = try allocator.dupe(u8, fixture_path);
     errdefer allocator.free(repo);
     std.Io.Dir.cwd().deleteTree(io, repo) catch {};
     try std.Io.Dir.cwd().createDirPath(io, repo);

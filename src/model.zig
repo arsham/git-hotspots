@@ -1,5 +1,6 @@
 const std = @import("std");
 const provider = @import("provider.zig");
+const historical_symbol_attribution = @import("historical_symbol_attribution.zig");
 
 pub const Format = enum { table, json, markdown };
 
@@ -117,6 +118,21 @@ pub const ProjectSymbolReport = struct {
     }
 };
 
+pub const HistoricalSymbolReport = struct {
+    candidate_path_count: usize,
+    retained_candidate_path_count: usize,
+    aggregate_record_bound: usize,
+    aggregate_record_bound_exceeded: bool,
+    aggregates: []historical_symbol_attribution.AggregateRecord,
+    caveats: [][]const u8,
+
+    pub fn deinit(self: HistoricalSymbolReport, allocator: std.mem.Allocator) void {
+        historical_symbol_attribution.deinitAggregateRecords(allocator, self.aggregates);
+        for (self.caveats) |caveat| allocator.free(caveat);
+        allocator.free(self.caveats);
+    }
+};
+
 pub const default_symbol_display_limit: usize = 25;
 
 pub const SymbolDisplay = struct {
@@ -132,6 +148,7 @@ pub const Analysis = struct {
     inspect: ?Inspect = null,
     symbol_report: ?SymbolReport = null,
     project_symbol_report: ?ProjectSymbolReport = null,
+    historical_symbol_report: ?HistoricalSymbolReport = null,
     symbol_display: SymbolDisplay = .{},
     results: []Result,
     caveats: [][]const u8,
@@ -182,6 +199,7 @@ pub const Analysis = struct {
             }
             self.allocator.free(project_symbols.files);
         }
+        if (self.historical_symbol_report) |historical_symbols| historical_symbols.deinit(self.allocator);
         if (self.inspect) |inspect| {
             self.allocator.free(inspect.requested_path);
             self.allocator.free(inspect.matched_path);

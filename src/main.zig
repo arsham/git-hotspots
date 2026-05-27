@@ -38,6 +38,7 @@ test {
     _ = @import("git.zig");
     _ = @import("git_hunks.zig");
     _ = @import("historical_symbol_attribution.zig");
+    _ = @import("historical_symbol_pipeline.zig");
     _ = @import("provider.zig");
     _ = @import("provider_selection.zig");
     _ = @import("report.zig");

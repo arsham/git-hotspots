@@ -156,6 +156,8 @@ pub fn readHistory(
                 changed_file_bound_exceeded = true;
                 break;
             }
+            const pathspec = change.new_path orelse change.old_path orelse continue;
+            if (bounded_paths.len > 0 and !pathMatchesCandidate(change, bounded_paths)) continue;
             var caveat_list: std.ArrayList([]const u8) = .empty;
             errdefer caveat_list.deinit(allocator);
             if (candidate_paths.len > bounds.max_candidate_files) try caveat_list.append(allocator, "candidate file bound exceeded; trailing paths skipped");
@@ -164,8 +166,6 @@ pub fn readHistory(
             if (commit.parent_count > 1) try caveat_list.append(allocator, "merge commit simplified to first parent; additional parents not expanded");
             if (commit.parent == null) try caveat_list.append(allocator, "root commit has no parent pre-image");
 
-            const pathspec = change.new_path orelse change.old_path orelse continue;
-            if (bounded_paths.len > 0 and !pathMatchesCandidate(change, bounded_paths)) continue;
             var hunks_owned: ?[]Hunk = try readPatchHunks(allocator, io, repo, commit.parent, commit.id, pathspec, bounds.max_hunks_per_file, &caveat_list);
             errdefer if (hunks_owned) |hunks| allocator.free(hunks);
 
