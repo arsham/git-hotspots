@@ -59,6 +59,17 @@ pub fn makeExtractionWithConfig(
     };
 }
 
+pub fn retargetHistoricalInput(
+    allocator: std.mem.Allocator,
+    extraction: *Extraction,
+    input: provider.HistoricalProviderInput,
+) !void {
+    const identity = try provider.historicalIdentity(allocator, input);
+    allocator.free(extraction.provider.input.identity);
+    extraction.provider.input.identity = identity;
+    extraction.provider.provenance.input_identity = identity;
+}
+
 pub fn freeCandidateSymbols(allocator: std.mem.Allocator, candidates: anytype) void {
     for (candidates) |candidate| freeSymbol(allocator, candidate.symbol);
 }

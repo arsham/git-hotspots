@@ -7,10 +7,11 @@ const tree_sitter_javascript = @import("tree_sitter_javascript.zig");
 const tree_sitter_lua = @import("tree_sitter_lua.zig");
 const tree_sitter_rust = @import("tree_sitter_rust.zig");
 const tree_sitter_typescript = @import("tree_sitter_typescript.zig");
+const builtin = @import("builtin");
 
 const Extraction = tree_sitter_zig.Extraction;
 
-fn isSupportedPath(path: []const u8) bool {
+pub fn isSupportedPath(path: []const u8) bool {
     return std.mem.endsWith(u8, path, ".zig") or
         std.mem.endsWith(u8, path, ".go") or
         std.mem.endsWith(u8, path, ".py") or
@@ -28,6 +29,37 @@ fn extractPath(allocator: std.mem.Allocator, io: std.Io, repo_root: []const u8, 
     if (tree_sitter_javascript.isSupportedJavaScriptPath(path)) return tree_sitter_javascript.extractPath(allocator, io, repo_root, path);
     if (tree_sitter_typescript.isSupportedPath(path)) return tree_sitter_typescript.extractPath(allocator, io, repo_root, path);
     return tree_sitter_zig.extractPath(allocator, io, repo_root, path);
+}
+
+pub fn extractHistoricalSource(
+    allocator: std.mem.Allocator,
+    repo_relative_path: []const u8,
+    commit_id: []const u8,
+    blob_id: []const u8,
+    source: []const u8,
+) !Extraction {
+    const input: @import("provider.zig").HistoricalProviderInput = .{
+        .path = repo_relative_path,
+        .commit_id = commit_id,
+        .blob_id = blob_id,
+    };
+    var extraction = if (std.mem.endsWith(u8, repo_relative_path, ".go"))
+        try tree_sitter_go.extractSource(allocator, repo_relative_path, source)
+    else if (std.mem.endsWith(u8, repo_relative_path, ".py"))
+        try tree_sitter_python.extractSource(allocator, repo_relative_path, source)
+    else if (tree_sitter_lua.isSupportedPath(repo_relative_path))
+        try tree_sitter_lua.extractSource(allocator, repo_relative_path, source)
+    else if (!builtin.is_test and tree_sitter_rust.isSupportedPath(repo_relative_path))
+        try tree_sitter_rust.extractSource(allocator, repo_relative_path, source)
+    else if (tree_sitter_javascript.isSupportedJavaScriptPath(repo_relative_path))
+        try tree_sitter_javascript.extractSource(allocator, repo_relative_path, source)
+    else if (tree_sitter_typescript.isSupportedPath(repo_relative_path))
+        try tree_sitter_typescript.extractSource(allocator, repo_relative_path, source)
+    else
+        try tree_sitter_zig.extractSource(allocator, repo_relative_path, source);
+    errdefer extraction.deinit(allocator);
+    try @import("tree_sitter_common.zig").retargetHistoricalInput(allocator, &extraction, input);
+    return extraction;
 }
 
 pub fn attachInspectSymbols(allocator: std.mem.Allocator, io: std.Io, analysis: *model.Analysis) !void {

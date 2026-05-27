@@ -36,6 +36,8 @@ test {
     _ = @import("cli.zig");
     _ = @import("explain.zig");
     _ = @import("git.zig");
+    _ = @import("git_hunks.zig");
+    _ = @import("historical_symbol_attribution.zig");
     _ = @import("provider.zig");
     _ = @import("provider_selection.zig");
     _ = @import("report.zig");

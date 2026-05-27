@@ -41,6 +41,38 @@ pub const LocalInput = struct {
     identity: []const u8,
 };
 
+pub const HistoricalProviderInput = struct {
+    /// Repo-relative path at the revision being parsed.
+    path: []const u8,
+    /// Local commit object id that supplied the revision-local blob.
+    commit_id: []const u8,
+    /// Local blob object id parsed without checking out the worktree.
+    blob_id: []const u8,
+};
+
+pub const RevisionSymbolStatus = enum {
+    current,
+    historical,
+    deleted,
+    unknown,
+};
+
+pub const RevisionSymbolEvidence = struct {
+    input: HistoricalProviderInput,
+    name: []const u8,
+    kind: SymbolKind,
+    revision_range: LineRange,
+    provider_name: []const u8,
+    status: RevisionSymbolStatus,
+    confidence: Confidence,
+    caveats: []const []const u8 = &.{},
+};
+
+pub fn historicalIdentity(allocator: std.mem.Allocator, input: HistoricalProviderInput) ![]u8 {
+    try validateRepoRelativePath(input.path);
+    return std.fmt.allocPrint(allocator, "commit:{s}:blob:{s}:path:{s}", .{ input.commit_id, input.blob_id, input.path });
+}
+
 pub const ProviderEvidence = struct {
     name: []const u8,
     kind: ProviderKind,
