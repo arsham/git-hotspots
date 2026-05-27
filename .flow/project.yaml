@@ -7,7 +7,7 @@ state:
   status: active
   active_feature_id: null
   active_run_id: null
-  last_completed_feature_id: "0076"
+  last_completed_feature_id: "0077"
 defaults:
   autonomy: ask
   lane: standard
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 77
+  next_id: 78
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -333,6 +333,10 @@ features:
       slug: dogfood-linux-binary-packaging-and-local-install
       path: .flow/features/0076_dogfood-linux-binary-packaging-and-local-install
       created_at: 2026-05-27T15:32:23.730Z
+    - id: "0077"
+      slug: rust-provider-completion-batch
+      path: .flow/features/0077_rust-provider-completion-batch
+      created_at: 2026-05-27T16:54:54.469Z
 intake:
   mode: roadmap
   summary: null
