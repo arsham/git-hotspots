@@ -115,10 +115,19 @@ durable_decisions:
     analysis, scoring replacement, cache, or provider plugin infrastructure;
     those remain later capability work after current-symbol evidence is
     trustworthy."
+  - "Successor architecture spike selected for feature 0079: define true
+    historical hunk-to-symbol attribution before runtime implementation. The
+    spike is architecture-only and should produce
+    docs/historical-symbol-attribution-architecture.md, comparing approaches and
+    selecting a deterministic no-checkout local pipeline over historical blobs,
+    changed hunks, and revision-local provider symbols. It deliberately does not
+    add a user-facing historical symbol engine, scoring changes, semantic
+    lineage, reference analysis, cache truth, or remote/provider dependencies."
 links:
   roadmap_item_id: null
   feature_ids:
     - "0078"
+    - "0079"
 timestamps:
   created_at: 2026-05-27T19:12:06.269Z
-  updated_at: 2026-05-27T19:31:04.311Z
+  updated_at: 2026-05-27T21:28:55.808Z
