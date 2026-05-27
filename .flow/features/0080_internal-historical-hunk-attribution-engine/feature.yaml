@@ -4,7 +4,7 @@ feature:
   slug: internal-historical-hunk-attribution-engine
   title: Internal historical hunk attribution engine and fixture proof
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Feature 0079 selected a no-checkout historical blob plus
@@ -102,7 +102,7 @@ proposal:
     materialised_at: 2026-05-27T22:27:54.727Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -180,7 +180,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Internal model and provider byte-input seam
       goal: Create revision-local historical symbol data structures and a
         provider-neutral source-byte parsing seam without changing current
@@ -221,7 +221,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: No-checkout Git hunk/blob reader
       goal: Read bounded local Git changed-file, hunk, and blob identity evidence for
         candidate files without checking out historical commits.
@@ -258,7 +258,7 @@ design:
       depends_on:
         - P1
         - P2
-      status: planned
+      status: done
       title: Attribution and aggregate engine
       goal: Intersect pre/post hunk line intervals with revision-local symbols and
         produce deterministic caveated internal aggregate evidence.
@@ -295,7 +295,7 @@ design:
         - P1
         - P2
         - P3
-      status: planned
+      status: done
       title: Fixture proof and validation harness
       goal: Add generated local fixture repositories and proof tests/build integration
         for the first internal historical attribution slice.
@@ -334,7 +334,7 @@ design:
     - id: P5
       depends_on:
         - P4
-      status: planned
+      status: done
       title: Close-out public-surface and validation proof
       goal: Run the full close-out ladder and prove the feature remains internal,
         local-first, deterministic, and public-surface safe.
@@ -432,7 +432,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-27T22:20:44.385Z
-  updated_at: 2026-05-27T22:28:30.434Z
+  updated_at: 2026-05-27T23:09:10.578Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-27T22:28:30.434Z
