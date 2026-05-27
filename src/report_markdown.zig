@@ -65,6 +65,9 @@ pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: m
     if (analysis.symbol_report) |symbols| {
         try renderSymbolReportMarkdown(allocator, writer, symbols, analysis.symbol_display);
     }
+    if (analysis.project_symbol_report) |project_symbols| {
+        try renderProjectSymbolReportMarkdown(allocator, writer, project_symbols, analysis.symbol_display);
+    }
 
     try writer.writeAll("## Caveats\n\n");
     try fmt.renderMarkdownStringList(writer, analysis.caveats);
@@ -162,6 +165,54 @@ pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: m
             }
         }
     }
+}
+
+fn renderProjectSymbolReportMarkdown(allocator: std.mem.Allocator, writer: anytype, project_symbols: model.ProjectSymbolReport, display: model.SymbolDisplay) !void {
+    const total = project_symbols.totalSymbols();
+    const shown_total = @min(total, display.limit);
+    try writer.writeAll("## Project symbols\n\n");
+    try writer.writeAll("Symbols are opt-in current working-tree enrichment for retained ranked file hotspots only. They do not change score, file order, lineage, confidence, or file-level Git evidence.\n\n");
+    try writer.print("- Files with supported provider reports: {d}\n- Total symbols: {d}\n- Shown symbols: {d}\n- Omitted symbols: {d}\n- Human display limit: {d} ({s})\n", .{ project_symbols.files.len, total, shown_total, total - shown_total, display.limit, if (display.explicit_limit) "explicit" else "default" });
+    try writer.print("- Unsupported ranked files: {d}\n- Unavailable ranked files: {d}\n- Provider failures: {d}\n- Provider skipped: {d}\n", .{ project_symbols.unsupported_count, project_symbols.unavailable_count, project_symbols.failed_count, project_symbols.skipped_count });
+    try writer.writeAll("- Sort basis: parent file rank, then current-line Git evidence/provider order\n\n");
+    try writer.writeAll("| File rank | File | Score | Provider | Failure | Name | Kind | Lines | Confidence | Current-line Git evidence |\n");
+    try writer.writeAll("| ---: | --- | ---: | --- | --- | --- | --- | ---: | --- | --- |\n");
+    var remaining = display.limit;
+    for (project_symbols.files) |file| {
+        if (remaining == 0) break;
+        if (file.symbols.len == 0) {
+            try writer.print("| {d} | ", .{file.parent_rank});
+            try fmt.markdownText(writer, file.file_path);
+            try writer.print(" | {d:.1} | ", .{file.parent_score});
+            try fmt.markdownText(writer, file.provider.name);
+            try writer.print(" | {s} | None | - | - | - | - |\n", .{@tagName(file.provider.failure)});
+            continue;
+        }
+        const indexes = try report_symbols.orderedHumanIndexes(allocator, file.symbols);
+        defer allocator.free(indexes);
+        const shown = @min(indexes.len, remaining);
+        for (indexes[0..shown]) |index| {
+            const symbol = file.symbols[index];
+            const range = report_symbols.displayLineRange(symbol.current_range);
+            try writer.print("| {d} | ", .{file.parent_rank});
+            try fmt.markdownText(writer, file.file_path);
+            try writer.print(" | {d:.1} | ", .{file.parent_score});
+            try fmt.markdownText(writer, file.provider.name);
+            try writer.print(" | {s} | ", .{@tagName(file.provider.failure)});
+            try fmt.markdownText(writer, symbol.name);
+            try writer.print(" | {s} | {d}-{d} | {s} |", .{ @tagName(symbol.kind), range.start, range.end, @tagName(symbol.confidence) });
+            if (symbol.current_line_history) |line_history| {
+                try writer.print(" commits={d}; lines={d}; unblamable={d}; freshness={s}; failure={s}; confidence={s}; caveats=", .{ line_history.distinct_last_touch_commit_count, line_history.line_count, line_history.uncommitted_or_unblamable_line_count, @tagName(line_history.freshness), @tagName(line_history.failure), @tagName(line_history.confidence) });
+                try fmt.renderMarkdownCaveatInline(writer, line_history.caveats);
+                try writer.writeAll(" |\n");
+            } else {
+                try writer.writeAll(" - |\n");
+            }
+        }
+        remaining -= shown;
+    }
+    if (total == 0 and project_symbols.files.len == 0) try writer.writeAll("| - | None | - | - | - | - | - | - | - | - |\n");
+    try writer.writeByte('\n');
 }
 
 fn renderSymbolReportMarkdown(allocator: std.mem.Allocator, writer: anytype, symbols: model.SymbolReport, display: model.SymbolDisplay) !void {

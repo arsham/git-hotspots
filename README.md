@@ -68,12 +68,11 @@ The project should preserve trust by default:
 
 ## Provider direction
 
-The alpha includes one narrow opt-in provider path: `--symbols` with
-`--inspect PATH` can add inspect-only current working-tree Tree-sitter syntax
-evidence for Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, or TSX
-symbols in the inspected file. File-level Git evidence remains the core
-product truth;
-provider output is optional current-only enrichment.
+The alpha includes one narrow opt-in provider path: `--symbols` can add
+current working-tree Tree-sitter syntax evidence for retained ranked files, or
+for one inspected file when combined with `--inspect PATH`. File-level Git
+evidence remains the core product truth; provider output is optional
+current-only enrichment.
 
 Broader language and dependency insight should arrive through optional
 providers rather than become the foundation of the project. Possible future
@@ -200,6 +199,7 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --include-prefix src/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --exclude-prefix .flow/ --limit 10 --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --format markdown
+./zig-out/bin/git-hotspots --repo . --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.go --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.py --symbols --format markdown
@@ -221,9 +221,9 @@ Supported options are `--repo`, `--limit`, `--format table|json|markdown`,
 `--progress`, `--explain`, `--version`, and `--help`.
 Invalid CLI combinations exit 2 with concise stderr diagnostics that name the
 failed flag and, when deterministic, show a valid next command shape. For
-example, `--symbols` requires `--inspect PATH`, so use
-`git-hotspots --inspect src/main.zig --symbols`; `--help` and `-h` remain
-standalone, repository-independent option references.
+example, `--symbol-line-history` requires `--symbols`, so use
+`git-hotspots --repo . --symbols --symbol-line-history`; `--help` and `-h`
+remain standalone, repository-independent option references.
 During the alpha, omitted `--scope` defaults to `--scope project`, which
 expands to the root literal exclude prefixes `.flow/`, `.zig-cache/`,
 `zig-out/`, `target/`, `node_modules/`, `dist/`, `build/`, and `coverage/`, in
@@ -247,39 +247,35 @@ Markdown output is a deterministic stdout report with run summary, scope,
 caveats, ranked hotspots, and per-result evidence. `--version` is standalone
 and prints the alpha version without requiring a Git repository.
 
-`--symbols` is opt-in and works only with `--inspect PATH`. It adds
-inspect-only current working-tree Tree-sitter syntax evidence for Zig, Go,
-Python, JavaScript, Lua, Rust, TypeScript, or TSX symbols in the matched
-in-scope `.zig`, `.go`, `.py`, `.js`, `.mjs`, `.cjs`, admitted `.jsx`,
-`.lua`, `.rs`, `.ts`, `.mts`, `.cts`, or `.tsx` file, with provider freshness,
-failure, confidence,
-caveats, and local provenance in the report.
+`--symbols` is opt-in. Without `--inspect`, it adds current working-tree
+Tree-sitter syntax evidence for supported files among the retained ranked
+hotspots. With `--inspect PATH`, it keeps the existing one-file drilldown and
+adds symbols for the matched in-scope file. Supported paths are `.zig`, `.go`,
+`.py`, `.js`, `.mjs`, `.cjs`, admitted `.jsx`, `.lua`, `.rs`, `.ts`, `.mts`,
+`.cts`, and `.tsx`, with provider freshness, failure, confidence, caveats, and
+local provenance in the report.
 Symbol evidence is current-only enrichment: it does not change file score,
 rank, confidence, co-change evidence, Git rename lineage, scope, or
-inclusion/exclusion decisions. Unsupported or unavailable current files
-preserve the inspected file evidence and report provider caveats without parser
-diagnostics, source snippets, absolute paths, remotes, author identities, or
-commit messages. Go support is inspect-only for the matched file and does not
+inclusion/exclusion decisions. Unsupported ranked current files are counted;
+unsupported or unavailable inspected current files preserve file evidence and
+report provider caveats without parser diagnostics, source snippets, absolute
+paths, remotes, author identities, or commit messages. Go support does not
 evaluate packages, build tags, cgo, dependency graphs, symbol lineage, scoring,
-ranking, or true symbol history. Python support is inspect-only for the matched
-file and does not evaluate imports, packages, virtual environments, dependency
-graphs, generated-source policy, scoring, ownership, or semantic moves.
-JavaScript support is inspect-only for `.js`, `.mjs`, `.cjs`, and admitted
-`.jsx` files and does not evaluate Node, packages, workspaces, module
-resolution, TypeScript, TSX, dependency graphs, scoring, ownership, repo-wide
-scanning, or symbol history. Lua symbol output is inspect-only current syntax
-evidence for `.lua` files and does not evaluate packages, `require`, runtime
-modules, types, metatables, dynamic table keys, dependency graphs, runtime
-execution, scoring, ownership, maintainer judgement, bug prediction, code
-quality, or repo-wide scanning; symbol history is out of scope. Rust support is
-inspect-only for `.rs` files and does not evaluate Cargo, crates, module
-resolution, macro expansion output, cfg feature selection, type checking,
-dependency graphs, scoring, ownership, or repo-wide scanning; symbol history is
-out of scope.
-TypeScript/TSX support is inspect-only for `.ts`, `.mts`, `.cts`, and `.tsx`
-files and does not evaluate packages, workspaces, tsconfig, module resolution,
-type checking, dependency graphs, scoring, ownership, cache, repo-wide
-scanning, or symbol history.
+ranking, or true symbol history. Python support does not evaluate imports,
+packages, virtual environments, dependency graphs, generated-source policy,
+scoring, ownership, or semantic moves. JavaScript support for `.js`, `.mjs`,
+`.cjs`, and admitted `.jsx` files does not evaluate Node, packages, workspaces,
+module resolution, TypeScript, TSX, dependency graphs, scoring, ownership, or
+symbol history. Lua symbol output for `.lua` files does not evaluate packages,
+`require`, runtime modules, types, metatables, dynamic table keys, dependency
+graphs, runtime execution, scoring, ownership, maintainer judgement, bug
+prediction, or code quality; symbol history is out of scope. Rust support for
+`.rs` files does not evaluate Cargo, crates, module resolution, macro expansion
+output, cfg feature selection, type checking, dependency graphs, scoring, or
+ownership; symbol history is out of scope. TypeScript/TSX support for `.ts`,
+`.mts`, `.cts`, and `.tsx` files does not evaluate packages, workspaces,
+tsconfig, module resolution, type checking, dependency graphs, scoring,
+ownership, cache, or symbol history.
 
 Provider capability matrix:
 
@@ -295,12 +291,13 @@ Provider capability matrix:
 | TSX | `.tsx` | `tree-sitter-tsx` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no React, DOM, packages, type analysis, dependency graphs, cache, true symbol history, scoring, or ownership claims |
 | Unsupported current files | all other paths | unsupported fallback | provider reports `unsupported` and keeps inspected file evidence | no current-line evidence | no parser diagnostics, source snippets, or parsed symbols |
 
-`--symbol-line-history` is a second opt-in layer that works only with
-`--inspect PATH --symbols`. It adds current-line Git evidence for current Zig,
-Go, Python, JavaScript, Lua, Rust, TypeScript, or TSX symbol line ranges using
-one local current-line Git evidence command only when symbol ranges are valid and
-the inspected file is clean. Current-line evidence is for the lines occupied by
-a symbol at HEAD.
+`--symbol-line-history` is a second opt-in layer that requires `--symbols`. It
+adds current-line Git evidence for current Zig, Go, Python, JavaScript, Lua,
+Rust, TypeScript, or TSX symbol line ranges using one local current-line Git
+evidence command per supported retained ranked file, or for the inspected file
+when `--inspect PATH` is present. Current-line evidence is collected only when
+symbol ranges are valid and the current file is clean. Current-line evidence is
+for the lines occupied by a symbol at HEAD;
 it is not true symbol history, historical identity tracking, or `git log -L`.
 Output is summary-only: commit counts, bounded sample commit ids, timestamps,
 confidence, freshness, failure state, and caveats. It does not emit author
@@ -383,9 +380,9 @@ runs the fuller local ladder and prints a privacy-safe evidence summary.
   packaging for release archive and Arch package checks.
 - Report truth is deterministic file-level Git-history evidence.
 - Broad provider, cache, dependency, test, and coverage enrichers are future
-  work; the current provider path supports opt-in inspect-only current
-  working-tree Tree-sitter syntax evidence for Zig, Go, Python, JavaScript,
-  Lua, Rust, TypeScript, and TSX symbols.
+  work; the current provider path supports opt-in current working-tree
+  Tree-sitter syntax evidence for retained ranked files or one inspected file
+  across Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and TSX symbols.
 - Runtime defaults remain local-only and do not perform network access.
 
 ## Contributing

@@ -558,7 +558,7 @@ explain_output_checks() {
   grep -q -- 'Local-first/no-telemetry boundaries:' "$help_out" || return 1
   grep -q -- 'Hotspots are investigation prompts' "$help_out" || return 1
   grep -q -- 'Provider capability:' "$help_out" || return 1
-  grep -q -- 'inspect-only current working-tree symbol evidence' "$help_out" || return 1
+  grep -q -- 'current working-tree symbol evidence' "$help_out" || return 1
   grep -q -- 'no Cargo, crates, module' "$help_out" || return 1
   grep -q -- 'macro expansion, cfg/feature evaluation, type checking' "$help_out" || return 1
   grep -q -- 'dependency graphs, or semantic Rust analysis' "$help_out" || return 1
@@ -655,11 +655,10 @@ cli_misuse_matrix_checks() {
     grep -q -- 'git-hotspots: deterministic local Git-history hotspot prompts' "$out" || return 1
   }
 
-  assert_cli_error symbols-alone '--symbols requires --inspect PATH' --symbols || return 1
-  assert_cli_error symbol-line-history-alone '--symbol-line-history requires --inspect PATH --symbols' --symbol-line-history || return 1
-  assert_cli_error symbol-line-history-inspect-no-symbols '--symbol-line-history requires --inspect PATH --symbols' --inspect src/app.zig --symbol-line-history || return 1
-  assert_cli_error symbol-limit-alone '--symbol-limit requires --inspect PATH --symbols' --symbol-limit 1 || return 1
-  assert_cli_error symbol-limit-inspect-no-symbols '--symbol-limit requires --inspect PATH --symbols' --inspect src/app.zig --symbol-limit 1 || return 1
+    assert_cli_error symbol-line-history-alone '--symbol-line-history requires --symbols' --symbol-line-history || return 1
+  assert_cli_error symbol-line-history-inspect-no-symbols '--symbol-line-history requires --symbols' --inspect src/app.zig --symbol-line-history || return 1
+  assert_cli_error symbol-limit-alone '--symbol-limit requires --symbols' --symbol-limit 1 || return 1
+  assert_cli_error symbol-limit-inspect-no-symbols '--symbol-limit requires --symbols' --inspect src/app.zig --symbol-limit 1 || return 1
   assert_cli_error symbol-limit-missing '--symbol-limit must be a positive integer' --inspect src/app.zig --symbols --symbol-limit || return 1
   assert_cli_error symbol-limit-zero '--symbol-limit must be a positive integer' --inspect src/app.zig --symbols --symbol-limit 0 || return 1
   assert_cli_error symbol-limit-invalid '--symbol-limit must be a positive integer' --inspect src/app.zig --symbols --symbol-limit nope || return 1
@@ -688,15 +687,15 @@ cli_misuse_matrix_checks() {
   assert_cli_help symbols-help --symbols --help || return 1
   assert_cli_help repo-help --repo --help || return 1
 
-  zig_run_out=$ARTIFACT_DIR/cli-zig-run-symbols.out
-  zig_run_err=$ARTIFACT_DIR/cli-zig-run-symbols.err
-  zig_run_output=$(zig build run -- --symbols 2>&1 > "$zig_run_out")
+  zig_run_out=$ARTIFACT_DIR/cli-zig-run-symbol-line-history.out
+  zig_run_err=$ARTIFACT_DIR/cli-zig-run-symbol-line-history.err
+  zig_run_output=$(zig build run -- --symbol-line-history 2>&1 > "$zig_run_out")
   zig_run_status=$?
   printf '%s\n' "$zig_run_output" > "$zig_run_err"
   if [ "$zig_run_status" -eq 0 ]; then
     return 1
   fi
-  grep -q -- '^error: --symbols requires --inspect PATH' "$zig_run_err" || return 1
+  grep -q -- '^error: --symbol-line-history requires --symbols' "$zig_run_err" || return 1
 }
 
 capability_matrix_checks() {
@@ -764,8 +763,8 @@ for text, label in ((readme, 'README'), (explain, 'explain')):
 
 for needle in (
     'Provider capability:',
-    'inspect-only current working-tree symbol evidence',
-    'unsupported provider caveats while preserving inspected file evidence',
+    'current working-tree symbol evidence',
+    'Other ranked current files are counted as unsupported while preserving file evidence.',
     'not true symbol history, lineage, scoring, or ownership',
 ):
     assert needle in help_text, f'help capability text missing: {needle}'
@@ -921,7 +920,7 @@ docs_manual_checks() {
   grep -Fq 'zig build validate' docs/user-guide.md || return 1
   grep -Fq 'tools/release-linux.sh' docs/user-guide.md || return 1
   grep -Fq 'unpublished use' docs/user-guide.md || return 1
-  grep -Fq 'error: --symbols requires --inspect PATH' docs/user-guide.md || return 1
+  grep -Fq 'error: --symbol-line-history requires --symbols' docs/user-guide.md || return 1
   grep -Fq 'local-first' docs/user-guide.md || return 1
   grep -Fq 'telemetry' docs/user-guide.md || return 1
 
@@ -1619,8 +1618,15 @@ for data in (ts, tsx, shallow, partial):
     for forbidden in ('Fixture Author', 'fixture@example', 'source line', 'ownership', 'productivity', 'tsconfig path', 'Node package graph'):
         assert forbidden not in text, 'TypeScript private detail leaked'
 PY
-  if "$EXE" --symbols > "$ARTIFACT_DIR/symbols-alone.out" 2> "$ARTIFACT_DIR/symbols-alone.err"; then return 1; fi
-  grep -q -- '--symbols requires --inspect PATH' "$ARTIFACT_DIR/symbols-alone.err" || return 1
+  "$EXE" --repo fixtures/symbols --symbols --format json > "$ARTIFACT_DIR/symbols-project.json" || return 1
+  python3 - "$ARTIFACT_DIR/symbols-project.json" <<'PY2'
+import json, sys
+with open(sys.argv[1], encoding='utf-8') as fh:
+    data = json.load(fh)
+assert 'project_symbols' in data and 'symbols' not in data
+assert data['project_symbols']['summary']['file_count'] >= 1
+assert data['project_symbols']['human_display']['total_count'] >= 1
+PY2
   if "$EXE" --repo fixtures/basic --inspect src/app.txt --limit 1 >/dev/null 2> "$ARTIFACT_DIR/inspect-limit.err"; then return 1; fi
   grep -q -- '--limit cannot be combined with --inspect' "$ARTIFACT_DIR/inspect-limit.err" || return 1
   if "$EXE" --repo fixtures/basic --inspect missing.txt >/dev/null 2> "$ARTIFACT_DIR/inspect-missing.err"; then return 1; fi
@@ -2116,7 +2122,7 @@ else
 fi
 printf 'validate: RUN CLI misuse matrix diagnostics\n'
 if cli_misuse_matrix_checks; then
-  note_fallback "cli misuse matrix: direct binary stderr checked for actionable cause, recovery shape where deterministic, help precedence, no full usage dump, and zig build run -- --symbols wrapper smoke"
+  note_fallback "cli misuse matrix: direct binary stderr checked for actionable cause, recovery shape where deterministic, help precedence, no full usage dump, and zig build run -- --symbol-line-history wrapper smoke"
   pass_rung "CLI misuse matrix diagnostics"
 else
   fail_rung "CLI misuse matrix diagnostics" "parser diagnostic matrix failed"
@@ -2244,7 +2250,7 @@ else
   printf '  - none\n'
 fi
 printf 'privacy: summary uses labels and bounded counts only; raw reports and absolute private paths are not printed.\n'
-printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, package publishing, release automation, or remote release metadata; unpublished local Linux packaged dogfood uses ignored dist outputs only; opt-in inspect-only Tree-sitter Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, or TSX symbols are local current-file enrichment.\n'
+printf 'local-only: no fetch, pull, push, upload, telemetry, remote enrichment, CI service, default provider runtime, cache requirement, package publishing, release automation, or remote release metadata; unpublished local Linux packaged dogfood uses ignored dist outputs only; opt-in Tree-sitter Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, or TSX symbols are local current-file enrichment.\n'
 
 if [ "$FAILURES" -ne 0 ]; then
   printf 'validate: %d rung(s) failed\n' "$FAILURES" >&2

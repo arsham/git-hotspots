@@ -12,8 +12,8 @@ pub fn renderTable(allocator: std.mem.Allocator, writer: anytype, analysis: mode
     return report_table.renderTable(allocator, writer, analysis);
 }
 
-pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
-    return report_json.renderJson(writer, analysis);
+pub fn renderJson(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
+    return report_json.renderJson(allocator, writer, analysis);
 }
 
 pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {

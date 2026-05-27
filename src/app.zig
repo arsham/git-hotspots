@@ -31,10 +31,10 @@ pub fn run(allocator: std.mem.Allocator, io: std.Io, args: []const [:0]const u8,
             error.InvalidInspectPath => try stderr.print("error: --inspect must be a non-empty exact repo-relative Git path without absolute roots, '..' segments, or control characters; use git-hotspots --inspect src/main.zig\n", .{}),
             error.InvalidScope => try stderr.print("error: --scope accepts one lowercase value: all or project; use git-hotspots --scope project or git-hotspots --scope all\n", .{}),
             error.InvalidInspectLimitCombination => try stderr.print("error: --limit cannot be combined with --inspect; use git-hotspots --inspect PATH or git-hotspots --limit N\n", .{}),
-            error.InvalidSymbolsCombination => try stderr.print("error: --symbols requires --inspect PATH; use git-hotspots --inspect src/main.zig --symbols\n", .{}),
-            error.InvalidSymbolLineHistoryCombination => try stderr.print("error: --symbol-line-history requires --inspect PATH --symbols; use git-hotspots --inspect src/main.zig --symbols --symbol-line-history\n", .{}),
-            error.InvalidSymbolLimitCombination => try stderr.print("error: --symbol-limit requires --inspect PATH --symbols; use git-hotspots --inspect src/main.zig --symbols --symbol-limit N\n", .{}),
-            error.InvalidSymbolLimit => try stderr.print("error: --symbol-limit must be a positive integer; use git-hotspots --inspect src/main.zig --symbols --symbol-limit 25\n", .{}),
+            error.InvalidSymbolsCombination => try stderr.print("error: --symbols can be used with project analysis or --inspect PATH; use git-hotspots --repo . --symbols or git-hotspots --inspect src/main.zig --symbols\n", .{}),
+            error.InvalidSymbolLineHistoryCombination => try stderr.print("error: --symbol-line-history requires --symbols; use git-hotspots --repo . --symbols --symbol-line-history\n", .{}),
+            error.InvalidSymbolLimitCombination => try stderr.print("error: --symbol-limit requires --symbols; use git-hotspots --repo . --symbols --symbol-limit N\n", .{}),
+            error.InvalidSymbolLimit => try stderr.print("error: --symbol-limit must be a positive integer; use git-hotspots --symbols --symbol-limit 25\n", .{}),
             error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags; use git-hotspots --explain\n", .{}),
             error.InvalidVersionCombination => try stderr.print("error: --version cannot be combined with --explain or analysis flags; use git-hotspots --version\n", .{}),
             error.InvalidArguments => try stderr.print("error: invalid arguments; run git-hotspots --help for supported options\n", .{}),
@@ -75,7 +75,11 @@ pub fn run(allocator: std.mem.Allocator, io: std.Io, args: []const [:0]const u8,
     defer analysis.deinit();
 
     if (cfg.symbols) {
-        try provider_selection.attachInspectSymbols(allocator, io, &analysis);
+        if (analysis.inspect != null) {
+            try provider_selection.attachInspectSymbols(allocator, io, &analysis);
+        } else {
+            try provider_selection.attachProjectSymbols(allocator, io, &analysis);
+        }
         if (cfg.symbol_line_history) try git.attachCurrentLineHistory(allocator, io, &analysis);
         analysis.symbol_display = .{ .limit = cfg.symbol_limit orelse model.default_symbol_display_limit, .explicit_limit = cfg.symbol_limit != null };
     }
@@ -84,7 +88,7 @@ pub fn run(allocator: std.mem.Allocator, io: std.Io, args: []const [:0]const u8,
 
     switch (cfg.format) {
         .table => try report.renderTable(allocator, stdout, analysis),
-        .json => try report.renderJson(stdout, analysis),
+        .json => try report.renderJson(allocator, stdout, analysis),
         .markdown => try report.renderMarkdown(allocator, stdout, analysis),
     }
     if (progress) |writer| {

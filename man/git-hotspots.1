@@ -70,25 +70,24 @@ path. Use the Git-style
 escape to target a tab in a path.
 .TP
 .B --symbols
-With
-.B --inspect PATH
-only, add opt-in inspect-only current working-tree Tree-sitter symbol evidence
-for Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, or TSX files. Symbol
-evidence does not affect score, rank, lineage, confidence, co-change evidence,
-or file-level evidence.
+Add opt-in current working-tree Tree-sitter symbol evidence for Zig, Go,
+Python, JavaScript, Lua, Rust, TypeScript, or TSX files among retained ranked
+hotspots. With
+.B --inspect PATH,
+add symbols only for the inspected file. Symbol evidence does not affect score,
+rank, lineage, confidence, co-change evidence, or file-level evidence.
 .TP
 .B --symbol-line-history
 With
-.B --inspect PATH --symbols
-only, add opt-in current-line Git evidence for current supported symbol line
-ranges at HEAD. This is not true symbol history, lineage, scoring, or ownership.
+.B --symbols,
+add opt-in current-line Git evidence for current supported symbol line ranges at
+HEAD. This is not true symbol history, lineage, scoring, or ownership.
 .TP
 .BI --symbol-limit " N"
 With
-.B --inspect PATH --symbols
-only, limit human table and Markdown symbol rows. JSON
-.B symbols.items
-remains complete. The default is 25.
+.B --symbols,
+limit human table and Markdown symbol rows. JSON symbol item arrays remain
+complete. The default is 25.
 .TP
 .B --progress
 Write opt-in coarse analysis progress to stderr for long runs. Progress does not
@@ -117,11 +116,13 @@ Use an exploratory project scope with progress:
 git-hotspots --repo . --scope project --since HEAD~500 --progress --format markdown
 .EE
 .PP
-Inspect one file and optionally add current symbol evidence:
+Optionally add current symbol evidence for ranked files or one inspected file:
 .PP
 .EX
+git-hotspots --repo . --symbols --format markdown
 git-hotspots --repo . --inspect src/main.zig --format markdown
 git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
+git-hotspots --repo . --symbols --symbol-line-history --format markdown
 git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
 .EE
 .PP
@@ -153,10 +154,10 @@ absolute local paths, remotes, raw source snippets, and commit messages. Shallow
 or partial history is reported as a caveat instead of being repaired by network
 access.
 .SH PROVIDER BOUNDARIES
-Provider evidence is optional current-file enrichment for an inspected path. The
-supported lanes are Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and
-TSX. Unsupported files preserve inspected file evidence and report provider
-caveats.
+Provider evidence is optional current-file enrichment for retained ranked files
+or for one inspected path. The supported lanes are Zig, Go, Python, JavaScript,
+Lua, Rust, TypeScript, and TSX. Unsupported files preserve file-level evidence
+and are counted without parser diagnostics.
 .PP
 Rust support does not evaluate Cargo, crates, module resolution, macro expansion
 output, cfg feature selection, type checking, dependency graphs, or semantic
@@ -164,19 +165,14 @@ Rust analysis.
 .PP
 Providers do not evaluate packages, generated-source policy, Node or TypeScript
 configuration, build tags, runtime modules, metatables, React or DOM semantics.
-They make no true symbol history, scoring, ownership, or repo-wide scanning
-claims.
+They make no true symbol history, scoring, or ownership claims.
 .SH DIAGNOSTICS
 Invalid CLI arguments exit 2 with concise stderr diagnostics that name the
 failed flag and, when deterministic, include a valid next command shape. For
 example,
-.B --symbols
-requires
-.B --inspect PATH,
-and
 .B --symbol-line-history
 requires
-.B --inspect PATH --symbols.
+.B --symbols.
 Use
 .B git-hotspots --help
 or

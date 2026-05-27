@@ -17,8 +17,8 @@ usage or contributor detail here or in `docs/user-guide.md`.
 - `src/scoring.zig` owns deterministic ranking and confidence rules.
 - `src/provider.zig` owns provider evidence contracts and current-only
   semantics.
-- `src/provider_selection.zig` chooses the bounded inspect-only symbol provider
-  for a matched path; it is not a runtime plugin framework.
+- `src/provider_selection.zig` chooses bounded symbol providers for retained
+  ranked files or for one inspected path; it is not a runtime plugin framework.
 - `src/tree_sitter_*.zig` modules own language-specific current-symbol
   extraction.
 - `src/report*.zig` owns deterministic table, JSON, Markdown, and symbol report
@@ -61,9 +61,10 @@ hooks, or packaging work as part of a docs/help-only change.
 ## Report and provider boundaries
 
 File-level local Git-history evidence is the product truth. Provider output is
-optional current-file enrichment for `--inspect PATH --symbols` and must not
-change score, rank, confidence, co-change evidence, Git rename lineage, scope,
-or inclusion and exclusion decisions.
+optional current-file enrichment for ranked files with `--symbols`, or for one
+inspected file with `--inspect PATH --symbols`, and must not change score, rank,
+confidence, co-change evidence, Git rename lineage, scope, or inclusion and
+exclusion decisions.
 
 Provider changes should expose source, freshness, confidence, failure state, and
 caveats. They should not emit parser diagnostics, source snippets, author

@@ -5,7 +5,7 @@ const version = @import("version.zig");
 const fmt = @import("report_format.zig");
 const report_symbols = @import("report_symbols.zig");
 
-pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
+pub fn renderJson(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
     try writer.print("{{\n", .{});
     try writer.print("  \"schema_version\": \"1\",\n", .{});
     try writer.print("  \"tool\": {{ \"name\": \"git-hotspots\", \"version\": \"{s}\" }},\n", .{version.value});
@@ -29,6 +29,10 @@ pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
     try writer.print("  }},\n", .{});
     if (analysis.symbol_report) |symbols| {
         try renderSymbolReportJson(writer, symbols, analysis.symbol_display);
+        try writer.print(",\n", .{});
+    }
+    if (analysis.project_symbol_report) |project_symbols| {
+        try renderProjectSymbolReportJson(allocator, writer, project_symbols, analysis.symbol_display);
         try writer.print(",\n", .{});
     }
     if (analysis.inspect) |inspect| {
@@ -87,6 +91,69 @@ pub fn renderJson(writer: anytype, analysis: model.Analysis) !void {
     }
     try writer.print("  ]\n", .{});
     try writer.print("}}\n", .{});
+}
+
+fn renderProjectSymbolReportJson(allocator: std.mem.Allocator, writer: anytype, project_symbols: model.ProjectSymbolReport, display: model.SymbolDisplay) !void {
+    const total = project_symbols.totalSymbols();
+    try writer.print("  \"project_symbols\": {{\n", .{});
+    try writer.print("    \"current_only\": true,\n", .{});
+    try writer.print("    \"human_display\": {{ \"total_count\": {d}, \"shown_count\": {d}, \"omitted_count\": {d}, \"default_limit\": {d}, \"active_limit\": {d}, \"limit_source\": ", .{ total, @min(total, display.limit), total - @min(total, display.limit), model.default_symbol_display_limit, display.limit });
+    try fmt.jsonString(writer, if (display.explicit_limit) "explicit" else "default");
+    try writer.print(", \"sort_basis\": ", .{});
+    try fmt.jsonString(writer, "parent file rank, then current-line Git evidence/provider order");
+    try writer.print(" }},\n", .{});
+    try writer.print("    \"summary\": {{ \"file_count\": {d}, \"unsupported_count\": {d}, \"unavailable_count\": {d}, \"failed_count\": {d}, \"skipped_count\": {d} }},\n", .{ project_symbols.files.len, project_symbols.unsupported_count, project_symbols.unavailable_count, project_symbols.failed_count, project_symbols.skipped_count });
+    try writer.print("    \"files\": [\n", .{});
+    for (project_symbols.files, 0..) |file, file_i| {
+        try writer.print("      {{ \"path\": ", .{});
+        try fmt.jsonString(writer, file.file_path);
+        try writer.print(", \"parent_rank\": {d}, \"parent_score\": {d:.3}, \"provider\": {{ \"name\": ", .{ file.parent_rank, file.parent_score });
+        try fmt.jsonString(writer, file.provider.name);
+        try writer.print(", \"kind\": ", .{});
+        try fmt.jsonString(writer, @tagName(file.provider.kind));
+        try writer.print(", \"version\": ", .{});
+        try fmt.jsonString(writer, file.provider.version);
+        try writer.print(", \"contract_version\": ", .{});
+        try fmt.jsonString(writer, file.provider.contract_version);
+        try writer.print(", \"freshness\": ", .{});
+        try fmt.jsonString(writer, @tagName(file.provider.freshness));
+        try writer.print(", \"failure\": ", .{});
+        try fmt.jsonString(writer, @tagName(file.provider.failure));
+        try writer.print(", \"confidence\": ", .{});
+        try fmt.jsonString(writer, @tagName(file.provider.confidence));
+        try writer.print(", \"caveats\": ", .{});
+        try fmt.stringArrayWithLineHistoryContext(writer, file.provider.caveats, report_symbols.haveLineHistory(file.symbols));
+        try writer.print(", \"provenance\": {{ \"input\": ", .{});
+        try fmt.jsonString(writer, file.provider.input.identity);
+        try writer.print(", \"local_only\": true }} }}, \"items\": [", .{});
+        const indexes = try report_symbols.orderedHumanIndexes(allocator, file.symbols);
+        defer allocator.free(indexes);
+        for (indexes, 0..) |symbol_index, symbol_i| {
+            const symbol = file.symbols[symbol_index];
+            if (symbol_i != 0) try writer.print(", ", .{});
+            try writer.print("{{ \"path\": ", .{});
+            try fmt.jsonString(writer, symbol.path);
+            try writer.print(", \"parent_rank\": {d}, \"parent_score\": {d:.3}, \"name\": ", .{ file.parent_rank, file.parent_score });
+            try fmt.jsonString(writer, symbol.name);
+            try writer.print(", \"kind\": ", .{});
+            try fmt.jsonString(writer, @tagName(symbol.kind));
+            try writer.print(", \"range\": ", .{});
+            try renderRangeJson(writer, symbol.current_range);
+            try writer.print(", \"provider\": ", .{});
+            try fmt.jsonString(writer, symbol.provider_name);
+            try writer.print(", \"confidence\": ", .{});
+            try fmt.jsonString(writer, @tagName(symbol.confidence));
+            try writer.print(", \"current_only\": true, \"caveats\": ", .{});
+            try fmt.stringArrayWithLineHistoryContext(writer, symbol.caveats, symbol.current_line_history != null);
+            if (symbol.current_line_history) |line_history| {
+                try writer.print(", \"current_line_history\": ", .{});
+                try renderCurrentLineHistoryJson(writer, line_history);
+            }
+            try writer.print(" }}", .{});
+        }
+        try writer.print("] }}{s}\n", .{if (file_i + 1 == project_symbols.files.len) "" else ","});
+    }
+    try writer.print("    ]\n  }}", .{});
 }
 
 fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport, display: model.SymbolDisplay) !void {

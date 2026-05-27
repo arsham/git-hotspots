@@ -95,6 +95,28 @@ pub const SymbolReport = struct {
     symbols: []provider.CurrentSymbolEvidence,
 };
 
+pub const ProjectSymbolFile = struct {
+    file_path: []const u8,
+    parent_rank: usize,
+    parent_score: f64,
+    provider: provider.ProviderEvidence,
+    symbols: []provider.CurrentSymbolEvidence,
+};
+
+pub const ProjectSymbolReport = struct {
+    files: []ProjectSymbolFile,
+    unsupported_count: usize,
+    unavailable_count: usize,
+    failed_count: usize,
+    skipped_count: usize,
+
+    pub fn totalSymbols(self: ProjectSymbolReport) usize {
+        var total: usize = 0;
+        for (self.files) |file| total += file.symbols.len;
+        return total;
+    }
+};
+
 pub const default_symbol_display_limit: usize = 25;
 
 pub const SymbolDisplay = struct {
@@ -109,6 +131,7 @@ pub const Analysis = struct {
     scope: Scope,
     inspect: ?Inspect = null,
     symbol_report: ?SymbolReport = null,
+    project_symbol_report: ?ProjectSymbolReport = null,
     symbol_display: SymbolDisplay = .{},
     results: []Result,
     caveats: [][]const u8,
@@ -140,6 +163,24 @@ pub const Analysis = struct {
                 }
             }
             self.allocator.free(symbols.symbols);
+        }
+        if (self.project_symbol_report) |project_symbols| {
+            for (project_symbols.files) |file| {
+                self.allocator.free(file.file_path);
+                self.allocator.free(file.provider.input.identity);
+                for (file.symbols) |symbol| {
+                    self.allocator.free(symbol.path);
+                    self.allocator.free(symbol.name);
+                    if (symbol.current_line_history) |line_history| {
+                        for (line_history.sample_commits) |commit| self.allocator.free(commit);
+                        self.allocator.free(line_history.sample_commits);
+                        for (line_history.caveats) |caveat| self.allocator.free(caveat);
+                        self.allocator.free(line_history.caveats);
+                    }
+                }
+                self.allocator.free(file.symbols);
+            }
+            self.allocator.free(project_symbols.files);
         }
         if (self.inspect) |inspect| {
             self.allocator.free(inspect.requested_path);

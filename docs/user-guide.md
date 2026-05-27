@@ -167,19 +167,22 @@ Inspect keeps the file-level Git-history row and records the row rank in the
 full scoped evidence universe. It does not rescore, bypass scope filters, or
 combine with `--limit`.
 
-Use `--symbols` only with `--inspect PATH` when you want current working-tree
-symbol evidence for a supported file type:
+Use `--symbols` when you want current working-tree symbol evidence for supported
+file types. Without `--inspect`, provider output is attached to supported files
+among the retained ranked hotspots. With `--inspect PATH`, provider output stays
+focused on the matched inspected file:
 
 ```sh
+./zig-out/bin/git-hotspots --repo . --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.py --symbols --format json
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.rs --symbols --format json
 ```
 
-Supported inspect-only symbol lanes are Zig, Go, Python, JavaScript, Lua,
-Rust, TypeScript, and TSX. Provider evidence is current-only enrichment for the
-matched file. It does not change score, rank, confidence, co-change evidence,
-Git rename lineage, scope, or inclusion and exclusion decisions.
+Supported symbol lanes are Zig, Go, Python, JavaScript, Lua, Rust, TypeScript,
+and TSX. Provider evidence is current-only enrichment. It does not change score,
+rank, confidence, co-change evidence, Git rename lineage, scope, or inclusion
+and exclusion decisions.
 
 Rust support is syntax-only for the inspected `.rs` file. It does not evaluate
 Cargo metadata, crates, module resolution, macro expansion output, cfg or
@@ -189,6 +192,7 @@ Use `--symbol-line-history` when you also want current-line Git evidence for
 symbol line ranges at HEAD:
 
 ```sh
+./zig-out/bin/git-hotspots --repo . --symbols --symbol-line-history --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
 ```
 
@@ -205,7 +209,7 @@ Reports include:
 - ranked file-level hotspot rows;
 - frequency, churn, recency, co-change, size, confidence, and evidence fields;
 - conservative Git-detected file rename lineage when both paths are in scope;
-- optional inspect-only current provider evidence.
+- optional current provider evidence for ranked files or one inspected file.
 
 Confidence is a caveated evidence summary, not a correctness score. Co-change
 means files changed in the same commits; it is not dependency analysis.
@@ -223,10 +227,8 @@ the tool does not silently fetch more history.
 
 ## Troubleshooting
 
-- `error: --symbols requires --inspect PATH`: add an exact inspected path, for
-  example `git-hotspots --inspect src/main.zig --symbols`.
-- `error: --symbol-line-history requires --inspect PATH --symbols`: add both
-  required flags before requesting current-line Git evidence.
+- `error: --symbol-line-history requires --symbols`: add `--symbols` before
+  requesting current-line Git evidence.
 - `error: --format accepts one value`: use `--format table`, `--format json`,
   or `--format markdown`.
 - Missing values such as `--repo`, `--limit`, `--since`, `--include-prefix`,

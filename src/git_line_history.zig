@@ -15,48 +15,57 @@ const LineTouch = struct { commit: []const u8, timestamp: ?i64 };
 const CommitTouch = struct { commit: []const u8, timestamp: ?i64 };
 
 pub fn attachCurrentLineHistory(allocator: std.mem.Allocator, io: std.Io, analysis: *model.Analysis) !void {
-    const inspect = analysis.inspect orelse return;
-    if (analysis.symbol_report == null) return;
-    if (analysis.symbol_report.?.symbols.len == 0) return;
-    if (!symbolsHaveValidLineRanges(analysis.symbol_report.?.symbols)) {
-        try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .skipped, .low, &.{"current-line Git evidence skipped: no valid current symbol line ranges"});
+    if (analysis.inspect) |inspect| {
+        if (analysis.symbol_report == null) return;
+        try attachCurrentLineHistoryForPath(allocator, io, analysis, inspect.matched_path, analysis.symbol_report.?.symbols, "inspected file");
+    } else if (analysis.project_symbol_report) |project_symbols| {
+        for (project_symbols.files) |file| {
+            try attachCurrentLineHistoryForPath(allocator, io, analysis, file.file_path, file.symbols, "ranked file");
+        }
+    }
+}
+
+fn attachCurrentLineHistoryForPath(allocator: std.mem.Allocator, io: std.Io, analysis: *model.Analysis, path: []const u8, symbols: []provider.CurrentSymbolEvidence, file_label: []const u8) !void {
+    if (symbols.len == 0) return;
+    if (!symbolsHaveValidLineRanges(symbols)) {
+        try attachFailureLineHistory(allocator, symbols, .unknown, .skipped, .low, &.{"current-line Git evidence skipped: no valid current symbol line ranges"});
         return;
     }
 
-    const dirty_out = git_runner.runGitOk(allocator, io, analysis.repo_root, &.{ "status", "--porcelain", "--", inspect.matched_path }) catch {
-        try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: could not check inspected file status"});
+    const dirty_out = git_runner.runGitOk(allocator, io, analysis.repo_root, &.{ "status", "--porcelain", "--", path }) catch {
+        try attachFailureLineHistoryFmt(allocator, symbols, .unknown, .failed, .low, "current-line Git evidence unavailable: could not check {s} status", .{file_label});
         return;
     };
     const inspected_dirty = std.mem.trim(u8, dirty_out, "\r\n ").len != 0;
     allocator.free(dirty_out);
     if (inspected_dirty) {
-        try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .skipped, .low, &.{"current-line Git evidence skipped: inspected file has staged or unstaged content changes"});
+        try attachFailureLineHistoryFmt(allocator, symbols, .unknown, .skipped, .low, "current-line Git evidence skipped: {s} has staged or unstaged content changes", .{file_label});
         return;
     }
 
-    const rr = git_runner.runGit(allocator, io, analysis.repo_root, &.{ "blame", "--incremental", "--", inspect.matched_path }) catch {
-        try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence command failed"});
+    const rr = git_runner.runGit(allocator, io, analysis.repo_root, &.{ "blame", "--incremental", "--", path }) catch {
+        try attachFailureLineHistory(allocator, symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence command failed"});
         return;
     };
     defer allocator.free(rr.stdout);
     defer allocator.free(rr.stderr);
     switch (rr.term) {
         .exited => |code| if (code != 0) {
-            try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence command failed"});
+            try attachFailureLineHistory(allocator, symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence command failed"});
             return;
         },
         else => {
-            try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence command failed"});
+            try attachFailureLineHistory(allocator, symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence command failed"});
             return;
         },
     }
 
     var ranges = parseIncrementalBlame(allocator, rr.stdout) catch {
-        try attachFailureLineHistory(allocator, analysis.symbol_report.?.symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence output could not be parsed safely"});
+        try attachFailureLineHistory(allocator, symbols, .unknown, .failed, .low, &.{"current-line Git evidence unavailable: local evidence output could not be parsed safely"});
         return;
     };
     defer ranges.deinit();
-    try attachAggregatedLineHistory(allocator, analysis.symbol_report.?.symbols, ranges.items, analysis.history.is_shallow, analysis.history.is_partial);
+    try attachAggregatedLineHistory(allocator, symbols, ranges.items, analysis.history.is_shallow, analysis.history.is_partial);
 }
 
 fn attachFailureLineHistory(allocator: std.mem.Allocator, symbols: []provider.CurrentSymbolEvidence, freshness: provider.Freshness, failure: provider.Failure, confidence: provider.Confidence, caveats: []const []const u8) !void {
@@ -75,6 +84,12 @@ fn attachFailureLineHistory(allocator: std.mem.Allocator, symbols: []provider.Cu
             .caveats = try dupeStringList(allocator, caveats),
         };
     }
+}
+
+fn attachFailureLineHistoryFmt(allocator: std.mem.Allocator, symbols: []provider.CurrentSymbolEvidence, freshness: provider.Freshness, failure: provider.Failure, confidence: provider.Confidence, comptime template: []const u8, args: anytype) !void {
+    const caveat = try std.fmt.allocPrint(allocator, template, args);
+    defer allocator.free(caveat);
+    try attachFailureLineHistory(allocator, symbols, freshness, failure, confidence, &.{caveat});
 }
 
 fn addCaveat(allocator: std.mem.Allocator, list: *std.array_list.Managed([]const u8), text: []const u8) !void {

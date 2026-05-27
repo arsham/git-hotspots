@@ -68,40 +68,38 @@ pub const text =
     \\function lineage, semantic ownership, bug prediction, quality scoring, or
     \\developer ranking.
     \\
-    \\## Inspect symbols
+    \\## Current symbols
     \\
-    \\The --symbols flag is opt-in and valid only with --inspect PATH. It adds
-    \\current working-tree Tree-sitter Zig, Go, Python, JavaScript, Lua, Rust,
-    \\TypeScript, or TSX symbols for the matched in-scope .zig, .go, .py, .js,
-    \\.mjs, .cjs, admitted .jsx, .lua, .rs, .ts, .mts, .cts, or .tsx file. Provider
-    \\output is current-only enrichment with freshness, failure, confidence,
-    \\caveats, and local provenance.
+    \\The --symbols flag is opt-in. Without --inspect, it adds current
+    \\working-tree Tree-sitter Zig, Go, Python, JavaScript, Lua, Rust,
+    \\TypeScript, or TSX symbols for supported files among the retained ranked
+    \\hotspots. With --inspect PATH, it keeps the one-file drilldown and adds
+    \\symbols for the matched in-scope .zig, .go, .py, .js, .mjs, .cjs,
+    \\admitted .jsx, .lua, .rs, .ts, .mts, .cts, or .tsx file. Provider output is
+    \\current-only enrichment with freshness, failure, confidence, caveats, and
+    \\local provenance.
     \\
     \\Symbol evidence does not change file score, rank, confidence, co-change
     \\evidence, Git rename lineage, scope, or inclusion/exclusion decisions.
-    \\Unsupported or unavailable current files preserve inspected file evidence
-    \\and report provider caveats without parser diagnostics or source snippets.
-    \\Go support is inspect-only and does not evaluate packages, build tags,
-    \\cgo, dependency graphs, symbol lineage, scoring, or true symbol history.
-    \\Python support is inspect-only and does not evaluate imports, packages,
-    \\virtual environments, generated-source policy, dependency graphs,
-    \\scoring, ownership, or semantic moves.
-    \\JavaScript support is inspect-only for .js, .mjs, .cjs, and admitted
-    \\.jsx files. It does not evaluate Node, packages, workspaces, module
-    \\resolution, TypeScript, TSX, dependency graphs, scoring, ownership,
-    \\repo-wide scanning, or symbol history.
-    \\Lua support is inspect-only for .lua files. It does not evaluate package,
+    \\Unsupported ranked current files are counted; unsupported or unavailable
+    \\inspected current files preserve file evidence and report provider caveats
+    \\without parser diagnostics or source snippets. Go support does not evaluate
+    \\packages, build tags, cgo, dependency graphs, symbol lineage, scoring, or
+    \\true symbol history. Python support does not evaluate imports, packages,
+    \\virtual environments, generated-source policy, dependency graphs, scoring,
+    \\ownership, or semantic moves. JavaScript support for .js, .mjs, .cjs, and
+    \\admitted .jsx files does not evaluate Node, packages, workspaces, module
+    \\resolution, TypeScript, TSX, dependency graphs, scoring, ownership, or
+    \\symbol history. Lua support for .lua files does not evaluate package,
     \\require, runtime module resolution, metatables, dynamic table keys,
-    \\dependency graphs, runtime execution, scoring, ownership, or repo-wide
-    \\scanning; symbol history is out of scope.
-    \\Rust support is inspect-only for .rs files. It does not evaluate Cargo,
-    \\crates, module resolution, macro expansion output, cfg feature selection,
-    \\type checking, dependency graphs, scoring, ownership, or repo-wide
-    \\scanning; symbol history is out of scope.
-    \\TypeScript/TSX support is inspect-only for .ts, .mts, .cts, and .tsx
-    \\files. It does not evaluate packages, workspaces, tsconfig, module
-    \\resolution, type checking, dependency graphs, scoring, ownership, cache,
-    \\repo-wide scanning, or symbol history.
+    \\dependency graphs, runtime execution, scoring, ownership, maintainer
+    \\judgement, bug prediction, or code quality; symbol history is out of scope.
+    \\Rust support for .rs files does not evaluate Cargo, crates, module
+    \\resolution, macro expansion output, cfg feature selection, type checking,
+    \\dependency graphs, scoring, or ownership; symbol history is out of scope.
+    \\TypeScript/TSX support for .ts, .mts, .cts, and .tsx files does not
+    \\evaluate packages, workspaces, tsconfig, module resolution, type checking,
+    \\dependency graphs, scoring, ownership, cache, or symbol history.
     \\
     \\### Provider capability matrix
     \\
@@ -117,12 +115,13 @@ pub const text =
     \\| TSX | .tsx | tree-sitter-tsx | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no React, DOM, packages, type analysis, dependency graphs, cache, true symbol history, scoring, or ownership claims |
     \\| Unsupported current files | all other paths | unsupported fallback | provider reports unsupported and keeps inspected file evidence | no current-line evidence | no parser diagnostics, source snippets, or parsed symbols |
     \\
-    \\--symbol-line-history is opt-in and valid only with --inspect PATH
-    \\--symbols. It adds current-line Git evidence for current Zig, Go, Python,
-    \\JavaScript, Lua, Rust, TypeScript, or TSX symbol line ranges using one local
-    \\current-line Git evidence command only when current ranges are valid and the
-    \\inspected file is clean. Current-line evidence is for the lines occupied by a
-    \\symbol at HEAD.
+    \\--symbol-line-history is opt-in and requires --symbols. It adds
+    \\current-line Git evidence for current Zig, Go, Python, JavaScript, Lua,
+    \\Rust, TypeScript, or TSX symbol line ranges using one local current-line
+    \\Git evidence command per supported retained ranked file, or for the
+    \\inspected file when --inspect PATH is present. Current-line evidence is
+    \\collected only when current ranges are valid and the current file is clean.
+    \\Current-line evidence is for the lines occupied by a symbol at HEAD.
     \\It is not true symbol history, historical identity tracking, or git log -L.
     \\It reports commit-count and timestamp summaries without author identities,
     \\commit messages, source snippets, remotes, or absolute paths. This is not
@@ -166,14 +165,15 @@ test "explanation includes confidence and non-claim boundaries" {
         "semantic ownership",
         "productivity analytics",
         "AI/LLM judgement",
-        "--symbols flag is opt-in and valid only with --inspect PATH",
-        "--symbol-line-history is opt-in and valid only with --inspect PATH",
+        "--symbols flag is opt-in",
+        "supported files among the retained ranked",
+        "--symbol-line-history is opt-in and requires --symbols",
         "Tree-sitter Zig, Go, Python, JavaScript, Lua, Rust",
         "Symbol evidence does not change file score",
-        "JavaScript support is inspect-only for .js, .mjs, .cjs, and admitted",
-        "Lua support is inspect-only for .lua files",
-        "Rust support is inspect-only for .rs files",
-        "TypeScript/TSX support is inspect-only for .ts, .mts, .cts, and .tsx",
+        "JavaScript support for .js, .mjs, .cjs, and",
+        "Lua support for .lua files",
+        "Rust support for .rs files",
+        "TypeScript/TSX support for .ts, .mts, .cts, and .tsx",
         "Provider capability matrix",
         "| Zig | .zig |",
         "| Lua | .lua |",

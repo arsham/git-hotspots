@@ -35,22 +35,22 @@ pub const usage =
     \\                    scoring and ranking, before normal --limit truncation;
     \\                    accepted in-scope Git rename aliases may resolve to the
     \\                    canonical path; use \\t to target a tab in a Git path
-    \\  --symbols         With --inspect PATH only, add opt-in inspect-only current
-    \\                    working-tree Tree-sitter Zig, Go, Python, JavaScript,
-    \\                    Lua, Rust, TypeScript, or TSX symbols for that file; Rust
-    \\                    covers .rs; JavaScript covers .js, .mjs, .cjs, and
+    \\  --symbols         Add opt-in current working-tree Tree-sitter Zig, Go,
+    \\                    Python, JavaScript, Lua, Rust, TypeScript, or TSX
+    \\                    symbols for retained ranked files, or one inspected file;
+    \\                    Rust covers .rs; JavaScript covers .js, .mjs, .cjs, and
     \\                    admitted .jsx; Lua covers .lua; TypeScript/TSX covers
     \\                    .ts, .mts, .cts, and .tsx;
     \\                    does not affect score, rank, lineage, confidence, or
     \\                    file-level evidence
     \\  --symbol-line-history
-    \\                    With --inspect PATH --symbols only, add opt-in current-line
+    \\                    With --symbols, add opt-in current-line
     \\                    Git evidence for current Zig, Go, Python, JavaScript,
     \\                    Lua, Rust, TypeScript, or TSX symbol line ranges at HEAD; not true
     \\                    symbol history, lineage, scoring, or ownership
-    \\  --symbol-limit N  With --inspect PATH --symbols only, limit human table and
-    \\                    Markdown symbol rows (default: 25); JSON symbols.items
-    \\                    remains complete
+    \\  --symbol-limit N  With --symbols, limit human table and
+    \\                    Markdown symbol rows (default: 25); JSON symbol item
+    \\                    arrays remain complete
     \\
     \\Standalone help:
     \\  --explain         Explain current scoring semantics without analysing a repo
@@ -60,13 +60,14 @@ pub const usage =
     \\Examples:
     \\  git-hotspots --repo . --limit 10 --format table
     \\  git-hotspots --repo . --scope project --since HEAD~500 --progress --format markdown
+    \\  git-hotspots --repo . --limit 5 --symbols --format markdown
     \\  git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
     \\  git-hotspots --explain
     \\
     \\Diagnostics:
     \\  Invalid CLI combinations exit 2 with concise stderr diagnostics and, when
     \\  deterministic, a valid next command shape. For symbol evidence, use:
-    \\  git-hotspots --inspect src/main.zig --symbols
+    \\  git-hotspots --repo . --symbols
     \\
     \\Local-first/no-telemetry boundaries:
     \\  Hotspots are investigation prompts from deterministic local Git history,
@@ -76,10 +77,11 @@ pub const usage =
     \\  in scope; this is not symbol/function lineage or semantic ownership.
     \\
     \\Provider capability:
-    \\  --symbols is opt-in inspect-only current working-tree symbol evidence for
-    \\  Zig (.zig), Go (.go), Python (.py), JavaScript (.js/.mjs/.cjs/.jsx),
+    \\  --symbols is opt-in current working-tree symbol evidence for retained
+    \\  ranked files, or for one inspected file when --inspect PATH is present.
+    \\  Supported lanes are Zig (.zig), Go (.go), Python (.py), JavaScript (.js/.mjs/.cjs/.jsx),
     \\  Lua (.lua), Rust (.rs), TypeScript (.ts/.mts/.cts), and TSX (.tsx).
-    \\  Other current files report unsupported provider caveats while preserving inspected file evidence.
+    \\  Other ranked current files are counted as unsupported while preserving file evidence.
     \\  Rust support is current syntax evidence only: no Cargo, crates, module
     \\  resolution, macro expansion, cfg/feature evaluation, type checking,
     \\  dependency graphs, or semantic Rust analysis.
@@ -264,9 +266,8 @@ pub fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliEr
     }
     if (cfg.limit == 0) return error.InvalidLimit;
     if (cfg.inspect_path != null and limit_seen) return error.InvalidInspectLimitCombination;
-    if (cfg.symbols and cfg.inspect_path == null) return error.InvalidSymbolsCombination;
-    if (cfg.symbol_line_history and (cfg.inspect_path == null or !cfg.symbols)) return error.InvalidSymbolLineHistoryCombination;
-    if (cfg.symbol_limit != null and (cfg.inspect_path == null or !cfg.symbols)) return error.InvalidSymbolLimitCombination;
+    if (cfg.symbol_line_history and !cfg.symbols) return error.InvalidSymbolLineHistoryCombination;
+    if (cfg.symbol_limit != null and !cfg.symbols) return error.InvalidSymbolLimitCombination;
     try applyScopePreset(allocator, &cfg);
     return .{ .analyze = cfg };
 }
@@ -625,17 +626,30 @@ test "parse inspect path decodes git-style tab escape" {
     try std.testing.expectEqualStrings("weird/tab\tname.txt", cfg.inspect_path.?);
 }
 
-test "parse symbols requires inspect" {
+test "parse symbols works for project and inspect" {
+    const project_args = [_][:0]const u8{ "git-hotspots", "--symbols" };
+    const project_mode = try parseArgs(std.testing.allocator, &project_args);
+    const project_cfg = project_mode.analyze;
+    defer freeConfig(std.testing.allocator, project_cfg);
+    try std.testing.expect(project_cfg.symbols);
+    try std.testing.expect(project_cfg.inspect_path == null);
+
     const args = [_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbols" };
     const mode = try parseArgs(std.testing.allocator, &args);
     const cfg = mode.analyze;
     defer freeConfig(std.testing.allocator, cfg);
     try std.testing.expect(cfg.symbols);
     try std.testing.expectEqualStrings("src/app.zig", cfg.inspect_path.?);
-    try std.testing.expectError(error.InvalidSymbolsCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--symbols" }));
 }
 
-test "parse symbol line history requires inspect and symbols" {
+test "parse symbol line history requires symbols" {
+    const project_args = [_][:0]const u8{ "git-hotspots", "--symbols", "--symbol-line-history" };
+    const project_mode = try parseArgs(std.testing.allocator, &project_args);
+    const project_cfg = project_mode.analyze;
+    defer freeConfig(std.testing.allocator, project_cfg);
+    try std.testing.expect(project_cfg.symbols);
+    try std.testing.expect(project_cfg.symbol_line_history);
+
     const args = [_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbols", "--symbol-line-history" };
     const mode = try parseArgs(std.testing.allocator, &args);
     const cfg = mode.analyze;
@@ -647,7 +661,14 @@ test "parse symbol line history requires inspect and symbols" {
     try std.testing.expectError(error.InvalidSymbolLineHistoryCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbol-line-history" }));
 }
 
-test "parse symbol limit is human display only with inspect symbols" {
+test "parse symbol limit is human display only with symbols" {
+    const project_args = [_][:0]const u8{ "git-hotspots", "--symbols", "--symbol-limit", "7" };
+    const project_mode = try parseArgs(std.testing.allocator, &project_args);
+    const project_cfg = project_mode.analyze;
+    defer freeConfig(std.testing.allocator, project_cfg);
+    try std.testing.expect(project_cfg.symbols);
+    try std.testing.expectEqual(@as(?usize, 7), project_cfg.symbol_limit);
+
     const args = [_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbols", "--symbol-limit", "7" };
     const mode = try parseArgs(std.testing.allocator, &args);
     const cfg = mode.analyze;
