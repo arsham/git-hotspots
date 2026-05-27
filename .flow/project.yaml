@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0080"
   active_run_id: null
   last_completed_feature_id: "0079"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 80
+  next_id: 81
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -345,6 +345,10 @@ features:
       slug: historical-symbol-attribution-architecture-spike
       path: .flow/features/0079_historical-symbol-attribution-architecture-spike
       created_at: 2026-05-27T21:23:30.241Z
+    - id: "0080"
+      slug: internal-historical-hunk-attribution-engine
+      path: .flow/features/0080_internal-historical-hunk-attribution-engine
+      created_at: 2026-05-27T22:20:44.385Z
 intake:
   mode: roadmap
   summary: null
