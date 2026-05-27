@@ -1,0 +1,1105 @@
+schema: flow-feature.v1
+feature:
+  id: "0082"
+  slug: opt-in-historical-symbol-hotspot-report
+  title: Opt-in historical symbol hotspot report
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: git-hotspots now has current-symbol evidence and an internal historical
+    hunk attribution engine, but users still cannot opt into true historical
+    symbol hotspot evidence. The public surface must be additive and careful so
+    it does not confuse current-line blame, current symbols, or file-level
+    scoring with true historical symbol attribution.
+  outcome: Add an opt-in public historical symbol hotspot report using
+    --historical-symbols with --symbols after feature 0081 is complete. The
+    report should render additive deterministic table, JSON, and Markdown
+    evidence from the integrated historical pipeline while preserving existing
+    output without the flag and updating CLI/docs/man/tests/fixtures together.
+  acceptance:
+    - A public opt-in --historical-symbols flag is added after feature 0081 is
+      done; it requires --symbols and invalid use exits 2 with a concise
+      diagnostic and valid command shape.
+    - Runs without --historical-symbols preserve existing CLI behaviour,
+      table/JSON/Markdown output, explain text, current project-symbol reports,
+      current-line history reports, scoring/ranking, and golden fixtures.
+    - When enabled, the report uses the feature 0081 integrated historical
+      pipeline over retained ranked-file candidates and respects existing
+      repo/range/scope/include/exclude/inspect/limit semantics without checkout
+      or network access.
+    - JSON adds an optional historical-symbol evidence object only when enabled,
+      with basis metadata, local-only provenance, candidate/bound summaries,
+      caveats, deterministic sort basis, and evidence-only item fields.
+    - Table and Markdown add clearly labelled historical symbol sections only
+      when enabled; human rows use the existing --symbol-limit display limit
+      unless reshaped, while JSON completeness/boundedness is explicit.
+    - Public wording distinguishes current working-tree symbols, current-line
+      Git evidence for HEAD ranges, and true historical hunk attribution; it
+      does not claim semantic lineage, references, ownership, bug prediction,
+      code-quality scoring, or developer ranking.
+    - Documentation, man page, help, diagnostics, README, user/developer guides,
+      integration tests, tools/validate.sh, expected fixtures, provider
+      capability/prohibited-claim checks, and examples are updated together
+      where public wording or output changes.
+    - Real-repository smoke evidence covers this repo and one suitable
+      sibling/local repo when available with privacy-safe labels and bounded
+      counts; absence of a sibling is caveated rather than invented.
+    - Close-out validation includes git diff whitespace checks, Zig formatting,
+      zig build test, zig build validate, deterministic fixture proof, JSON
+      validity, default-output non-regression, and independent review.
+planning:
+  state: ready
+  summary: B002 primary public-report batch slice after 0081. Add opt-in
+    --historical-symbols public report evidence, keep file-level scoring as
+    ranking truth, distinguish current symbols/current-line history/true
+    historical hunk attribution, and update
+    CLI/help/docs/man/integration/fixtures/validation together.
+  brief_sync:
+    status: updated
+    reason: Feature 0082 is linked to B002 and captures the primary opt-in public
+      historical symbol hotspot report slice, including PRD requirements,
+      CLI/report/docs/test surfaces, and serial dependency on 0081.
+    checked_at: 2026-05-27T23:24:44.291Z
+  brief_alignment:
+    status: aligned
+    role: primary
+    summary: Feature 0082 is the primary B002 user-facing slice after 0081; it
+      exposes opt-in historical symbol hotspot evidence while preserving
+      file-level scoring truth, local-first behaviour, and evidence-only public
+      wording.
+    checked_at: 2026-05-27T23:26:06.789Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - multi_packet_scope
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-27T23:26:57.567Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-27T23:26:57.567Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-27T23:26:57.567Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-27T23:26:57.567Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: false
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: "B002 successor batch after internal integration: expose
+    historical symbol hotspot evidence through an opt-in user-facing
+    CLI/report/docs surface only after feature 0081 proves the internal
+    pipeline."
+  depends_on_feature_ids:
+    - "0081"
+  blocked_by: []
+design:
+  rough_shape:
+    - Add --historical-symbols to CLI parsing and model.Config, requiring
+      --symbols and preserving --symbol-line-history as a separate current-line
+      layer.
+    - Wire the flag through app orchestration to the feature 0081 integrated
+      historical pipeline after file analysis and current symbol attachment,
+      without changing file scores or file order.
+    - Extend model.Analysis with an optional public historical symbol report
+      only when enabled; render additive table, JSON, and Markdown sections with
+      explicit caveats and bounded display.
+    - Update README, docs/user-guide.md, docs/developer-guide.md,
+      man/git-hotspots.1, help, explain/provider capability wording,
+      tests/integration.sh, tools/validate.sh, and expected fixtures together.
+    - Add deterministic fixture and real-repo smoke proof for enabled output and
+      non-regression proof for disabled/default output.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: CLI/config and orchestration flag
+      goal: Add --historical-symbols as an opt-in flag requiring --symbols and wire it
+        to the integrated pipeline without changing default output.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/cli.zig, src/app.zig, src/model.zig,
+          src/historical_symbol_attribution.zig or integration module from
+          0081."
+        - "In scope: CLI parse/config flag, invalid-combination diagnostic, help
+          text, app orchestration, dependency on --symbols, no default
+          execution, no score/rank changes."
+        - "Out of scope: new cache flags, reference/use analysis, semantic
+          lineage flags, broad tuning flags unless planner-approved."
+        - "Protected: --symbol-line-history remains current-line HEAD evidence
+          and must not be renamed or conflated with --historical-symbols."
+        - "Dependencies: feature 0081 must be done before implementation starts."
+        - "Validation/evidence: zig fmt --check build.zig src tests; zig build
+          test; targeted CLI misuse tests."
+        - "Review focus: opt-in semantics and diagnostics are clear,
+          local-first, and backward-compatible."
+        - "Escalate if: a different public flag name or dependency model is
+          needed."
+        - "Done boundary: --historical-symbols is parsed, gated by --symbols,
+          and invokes no public output without explicit use."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: Additive report model and renderers
+      goal: Render deterministic historical symbol evidence in JSON, table, and
+        Markdown only when enabled.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/model.zig, src/report_json.zig, src/report_table.zig,
+          src/report_markdown.zig, src/report_format.zig,
+          src/report_symbols.zig."
+        - "In scope: optional historical report model, JSON object,
+          table/Markdown sections, display counts, --symbol-limit human
+          limiting, caveats, sort basis, provider/fallback summaries,
+          privacy-safe evidence fields."
+        - "Out of scope: file score replacement, default report schema changes
+          without flag, author/commit-message/source-snippet fields, semantic
+          lineage or references."
+        - "Protected: existing output byte-for-byte without --historical-symbols
+          unless an explicitly approved fixture harness update is required."
+        - "Dependencies: P1 flag and integrated pipeline call."
+        - "Validation/evidence: targeted renderer tests; JSON validity;
+          deterministic repeated output."
+        - "Review focus: additive schema, evidence-only tone, deterministic
+          ordering, bounded output size."
+        - "Escalate if: public JSON schema needs a breaking version change."
+        - "Done boundary: enabled reports expose historical symbols across all
+          formats with clear caveats and disabled reports remain unchanged."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+    - id: P3
+      depends_on:
+        - P1
+        - P2
+      status: planned
+      title: Docs, fixtures, diagnostics, and validation synchronization
+      goal: Update every public wording and validation surface required by the new
+        CLI/report flag.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: README.md, docs/user-guide.md, docs/developer-guide.md,
+          man/git-hotspots.1, src/explain.zig, tests/integration.sh,
+          tools/validate.sh, fixtures/expected."
+        - "In scope: help/explain/docs/man wording, misuse diagnostics, expected
+          table/JSON/Markdown fixtures, provider capability matrix,
+          prohibited-claim/privacy checks, examples with project-relative
+          paths."
+        - "Out of scope: marketing claims, bug prediction/quality
+          scoring/developer ranking language, raw private reports, B002
+          close-out."
+        - "Protected: AGENTS.md rule requiring CLI parsing/help/diagnostic
+          wording changes to update tests, validate, README, user/developer
+          guides, and man page together."
+        - "Dependencies: P1-P2 public behaviour settled."
+        - "Validation/evidence: tests/integration.sh via zig build validate;
+          docs/man surface checks; prohibited-claim scan."
+        - "Review focus: no stale wording says symbol history is out of scope
+          without mentioning the new opt-in true historical layer; current-line
+          caveats remain clear."
+        - "Escalate if: docs need broad repositioning beyond this feature."
+        - "Done boundary: all public surfaces agree on flag semantics, evidence
+          meaning, limits, and caveats."
+      verification_commands:
+        - git diff --check
+        - zig fmt --check build.zig src tests
+        - zig build validate
+    - id: P4
+      depends_on:
+        - P3
+      status: planned
+      title: Full validation and real-repo proof
+      goal: Prove enabled output, disabled-output non-regression, determinism,
+        privacy, and real-repo smoke before review.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: tools/validate.sh, docs/real-repo-validation.md if updated,
+          fixtures/expected, feature PRD, B002."
+        - "In scope: full validation ladder, this-repo and sibling/local repo
+          smoke with privacy-safe labels, deterministic repeated-run proof, JSON
+          validity, acceptance mapping."
+        - "Out of scope: publishing, package release, history cleanup,
+          relation/reference feature work."
+        - "Protected: no absolute local paths, raw private reports, remotes,
+          authors/emails, commit messages, source snippets, or parser
+          diagnostics in committed artefacts."
+        - "Dependencies: P1-P3 complete."
+        - "Validation/evidence: git diff --check; zig fmt --check build.zig src
+          tests; zig build test; zig build validate; real-repo smoke summaries."
+        - "Review focus: user-facing surface is ready, deterministic, additive,
+          local-first, and honest about limits."
+        - "Escalate if: performance or output size suggests reshaping bounds or
+          public flags."
+        - "Done boundary: independent reviewer can verify all public and privacy
+          acceptance rows without planner chat."
+      verification_commands:
+        - git diff --check
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build validate
+  output_contract:
+    primary_deliverable: Opt-in public historical symbol hotspot report exposed by
+      --historical-symbols with --symbols
+    storage: Additive CLI/report/docs/test artefacts in repository; no default-on
+      runtime behaviour and no cache product truth.
+    public_surfaces:
+      - src/cli.zig help and parser
+      - src/app.zig diagnostics and orchestration
+      - src/model.zig optional historical symbol report model
+      - src/report_table.zig
+      - src/report_json.zig
+      - src/report_markdown.zig
+      - README.md
+      - docs/user-guide.md
+      - docs/developer-guide.md
+      - man/git-hotspots.1
+      - tests/integration.sh
+      - tools/validate.sh
+      - fixtures/expected
+    json_shape: Optional top-level historical symbol evidence object emitted only
+      when --historical-symbols is enabled; includes
+      basis/current_only=false/local_only=true, summary, bounds/caveats,
+      deterministic sort basis, and bounded evidence items.
+    human_display: Table and Markdown sections emitted only when enabled; existing
+      --symbol-limit limits human historical symbol rows unless shaping is
+      revised.
+    privacy_prohibited:
+      - absolute local paths
+      - remotes
+      - authors or emails
+      - commit messages
+      - private repository names
+      - source snippets from private repositories
+      - parser diagnostics
+      - raw private reports
+      - ownership/productivity metrics
+      - bug prediction
+      - code-quality scoring
+      - developer ranking
+    consumers:
+      - human CLI users
+      - user-chosen coding agents consuming JSON/Markdown
+      - future relation/reference analysis features
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B002
+timestamps:
+  created_at: 2026-05-27T23:17:59.269Z
+  updated_at: 2026-05-27T23:27:33.106Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-27T23:27:33.106Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0082"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+      - P4
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B002
+    feature:
+      title: Opt-in historical symbol hotspot report
+      problem: git-hotspots now has current-symbol evidence and an internal historical
+        hunk attribution engine, but users still cannot opt into true historical
+        symbol hotspot evidence. The public surface must be additive and careful
+        so it does not confuse current-line blame, current symbols, or
+        file-level scoring with true historical symbol attribution.
+      outcome: Add an opt-in public historical symbol hotspot report using
+        --historical-symbols with --symbols after feature 0081 is complete. The
+        report should render additive deterministic table, JSON, and Markdown
+        evidence from the integrated historical pipeline while preserving
+        existing output without the flag and updating
+        CLI/docs/man/tests/fixtures together.
+      acceptance:
+        - A public opt-in --historical-symbols flag is added after feature 0081
+          is done; it requires --symbols and invalid use exits 2 with a concise
+          diagnostic and valid command shape.
+        - Runs without --historical-symbols preserve existing CLI behaviour,
+          table/JSON/Markdown output, explain text, current project-symbol
+          reports, current-line history reports, scoring/ranking, and golden
+          fixtures.
+        - When enabled, the report uses the feature 0081 integrated historical
+          pipeline over retained ranked-file candidates and respects existing
+          repo/range/scope/include/exclude/inspect/limit semantics without
+          checkout or network access.
+        - JSON adds an optional historical-symbol evidence object only when
+          enabled, with basis metadata, local-only provenance, candidate/bound
+          summaries, caveats, deterministic sort basis, and evidence-only item
+          fields.
+        - Table and Markdown add clearly labelled historical symbol sections
+          only when enabled; human rows use the existing --symbol-limit display
+          limit unless reshaped, while JSON completeness/boundedness is
+          explicit.
+        - Public wording distinguishes current working-tree symbols,
+          current-line Git evidence for HEAD ranges, and true historical hunk
+          attribution; it does not claim semantic lineage, references,
+          ownership, bug prediction, code-quality scoring, or developer ranking.
+        - Documentation, man page, help, diagnostics, README, user/developer
+          guides, integration tests, tools/validate.sh, expected fixtures,
+          provider capability/prohibited-claim checks, and examples are updated
+          together where public wording or output changes.
+        - Real-repository smoke evidence covers this repo and one suitable
+          sibling/local repo when available with privacy-safe labels and bounded
+          counts; absence of a sibling is caveated rather than invented.
+        - Close-out validation includes git diff whitespace checks, Zig
+          formatting, zig build test, zig build validate, deterministic fixture
+          proof, JSON validity, default-output non-regression, and independent
+          review.
+    brief_alignment:
+      status: aligned
+      role: primary
+      summary: Feature 0082 is the primary B002 user-facing slice after 0081; it
+        exposes opt-in historical symbol hotspot evidence while preserving
+        file-level scoring truth, local-first behaviour, and evidence-only
+        public wording.
+      checked_at: 2026-05-27T23:26:06.789Z
+    briefs:
+      - id: B002
+        title: Symbol-aware hotspot intelligence
+        summary: "Capability brief for symbol-aware hotspot intelligence: extend
+          git-hotspots beyond file-level evidence to identify historically
+          active code symbols (functions, methods, types, modules, or other
+          language-provider symbols) from local Git history using a
+          language-agnostic pipeline. The capability must stay deterministic,
+          local-first, and performant, while making new language support
+          automatically benefit from the same history attribution, scoring,
+          explanation, and future relationship analysis surfaces."
+        desired_capability:
+          - Report hotspot evidence at symbol granularity, not just file
+            granularity, so users can investigate historically volatile
+            functions, methods, types, modules, or provider-defined symbols.
+          - "Use a normalized symbol-provider contract: language-specific
+            providers only expose symbol identity, kind, file path, source
+            range/span, and optional nesting/context; the Git-history
+            attribution, scoring, output, and explanation pipeline remains
+            language-agnostic."
+          - Attribute local Git history to symbols by intersecting changed
+            ranges, file revisions, and symbol spans in a deterministic way,
+            with enough evidence for users to understand why a symbol appears
+            hot.
+          - Design the symbol model so future enrichers can ask which symbols
+            are referenced by, used by, or related to hot places without
+            redesigning hotspot evidence from scratch.
+          - "Keep runtime defaults local-first: no network, telemetry, remote
+            enrichment, or non-deterministic service dependency for symbol
+            hotspot analysis."
+        why:
+          - File-level hotspots are useful but too coarse when a large file
+            contains one volatile function or type and many stable neighbours.
+          - A language-agnostic symbol pipeline prevents each future language
+            provider from needing bespoke hotspot scoring and history-search
+            logic.
+          - Symbol-level evidence gives agents and humans a more precise
+            investigation prompt while preserving the project rule that hotspots
+            are evidence, not blame, predictions, or code-quality scores.
+          - Future relationship analysis, such as symbols used by hot places,
+            needs stable symbol identities and relation-ready output contracts
+            from the beginning.
+        in_scope:
+          - Capability-level planning for extracting or receiving symbols
+            through providers, normalizing symbol records, and mapping
+            Git-history changes onto those records.
+          - "Performance-sensitive history traversal strategy: batch Git
+            queries, stream/limit revision data, parse only relevant file
+            revisions where possible, and avoid naive full-repository reparsing
+            for every commit."
+          - "Deterministic evidence fields for symbol hotspots: churn/change
+            frequency/recency/confidence/explanation inputs at symbol level,
+            with links back to file path, symbol kind, range/source context, and
+            relevant commits or changed hunks where feasible."
+          - "Language-extensibility rule: adding a new symbol provider should
+            make that language eligible for symbol hotspot reports without
+            changing the scoring, history attribution, CLI report, or export
+            logic except for provider registration and provider-specific tests."
+          - "Forward-compatible seams for reference/use analysis: symbol
+            identifiers, nesting/ownership, and relation-provider hooks should
+            be planned even if reference graph support is deferred."
+        out_of_scope:
+          - Predicting bugs, judging code quality, ranking developers, or
+            treating symbol hotspots as accusations rather than investigation
+            prompts.
+          - Network-backed code intelligence, hosted enrichment, telemetry, or
+            remote index upload by default.
+          - Implementing full semantic reference graphs, call graphs, or
+            cross-language dependency intelligence in the first symbol-hotspot
+            slice; those are future enrichers that should consume stable symbol
+            evidence.
+          - Requiring cache as product truth. Caches may improve performance
+            later, but symbol analysis must have a correct no-cache path.
+          - Browser-visible UI design is out of scope for this brief unless a
+            future feature adds visual symbol hotspot exploration; if that
+            happens, UX tone, visual constraints, and approval decisions must be
+            captured in feature/PRD artefacts.
+        durable_decisions:
+          - Treat symbol hotspots as an extension of deterministic Git-history
+            evidence, not as semantic judgement or prediction.
+          - "Make the core symbol-hotspot pipeline provider-neutral: providers
+            supply symbols; the shared engine maps history to symbols and
+            produces common reports/exports."
+          - Design for performance from the first feature by avoiding per-commit
+            whole-tree parsing and by batching Git/history work.
+          - Plan relation-aware output seams now, but defer reference/use
+            analysis until after symbol hotspot evidence is trustworthy.
+          - No feature-level PRD or implementation packet is created yet from
+            this intake; the next shaping step should decide whether to create a
+            feature for the first symbol-provider/history-attribution slice and
+            push detailed acceptance and packet plans into feature.yaml/prd.md.
+          - "First implementation slice selected during shaping for feature
+            0078: project-level current-symbol hotspot evidence over retained
+            ranked file hotspots using existing current symbol providers and
+            optional HEAD current-line Git evidence. This deliberately is not
+            true historical hunk-to-symbol attribution, symbol rename/move
+            lineage, reference/use analysis, scoring replacement, cache, or
+            provider plugin infrastructure; those remain later capability work
+            after current-symbol evidence is trustworthy."
+          - "Successor architecture spike selected for feature 0079: define true
+            historical hunk-to-symbol attribution before runtime implementation.
+            The spike is architecture-only and should produce
+            docs/historical-symbol-attribution-architecture.md, comparing
+            approaches and selecting a deterministic no-checkout local pipeline
+            over historical blobs, changed hunks, and revision-local provider
+            symbols. It deliberately does not add a user-facing historical
+            symbol engine, scoring changes, semantic lineage, reference
+            analysis, cache truth, or remote/provider dependencies."
+          - "Successor batch selected after feature 0080: feature 0081 is the
+            prerequisite internal pipeline integration that wires historical
+            hunk attribution into bounded ranked-file analysis without public
+            output drift; feature 0082 is the primary user-facing opt-in
+            historical symbol hotspot report that should execute serially after
+            0081 and update CLI/report/docs/tests/validation together.
+            Reference/use analysis remains deferred until the public historical
+            symbol report contract is stable."
+    prd_path: .flow/features/0082_opt-in-historical-symbol-hotspot-report/prd.md
+  requirements_contract:
+    source_path: .flow/features/0082_opt-in-historical-symbol-hotspot-report/prd.md
+    source_digest: 94d5c53fd96bd47b8c9a931d1a0101b4130d3e829a5dbfa67cc143095bef878b
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: "R1: Add a public opt-in --historical-symbols CLI flag after feature 0081
+          is complete. The flag must require --symbols and must have a concise
+          diagnostic that points to a valid command shape when used alone."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: "R2: --historical-symbols must not run by default. Runs without the flag
+          must preserve existing CLI behaviour, public table/JSON/Markdown
+          output, explain text, current project-symbol output, current-line
+          history output, file-level scoring, and golden fixtures."
+        category: requirement
+        packet_refs:
+          - P1
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: "R3: --historical-symbols must use the feature 0081 integrated pipeline
+          and retained ranked-file candidates. It must not rescore files, widen
+          the evidence universe, ignore scope/include/exclude/inspect/range
+          semantics, or checkout historical commits."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: "R4: The report must clearly distinguish three layers: current
+          working-tree symbols, current-line Git evidence for HEAD ranges, and
+          true historical hunk attribution. It must not relabel one layer as
+          another."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: "R5: Public JSON output must add an optional top-level historical symbol
+          evidence object only when --historical-symbols is enabled. The object
+          must be additive and include schema/basis metadata, local-only
+          provenance, candidate and bound summary, caveats, deterministic sort
+          basis, and item arrays with evidence-only fields."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: "R6: Public historical symbol item fields must include parent file path,
+          parent rank/score, symbol name/kind when available, revision-local or
+          report-level range where available, status, change count,
+          added/deleted line pressure, latest timestamp where available, bounded
+          sample commit ids, provider state, confidence, caveats,
+          fallback/unattributed counts, and deterministic sort inputs or
+          documented sort basis."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: "R7: Public output must never include commit messages, authors, emails,
+          remotes, absolute local paths, source snippets, parser diagnostics,
+          private repository names, ownership/productivity metrics,
+          bug-prediction claims, code-quality scores, or developer rankings."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: "R8: Table and Markdown output must add a clearly labelled historical
+          symbol section only when the flag is enabled. Human rows should use
+          the existing --symbol-limit display limit unless shaping is explicitly
+          revised; JSON may include the complete bounded internal item set."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: "R9: Historical symbol report caveats must include current limitations:
+          provider-supported languages only, no semantic symbol lineage, no
+          reference/use analysis, no ownership, no bug prediction, no scoring
+          replacement, shallow/partial history caveats, and explicit fallback
+          for unsupported, binary, large, missing, provider-failed, merge, or
+          unattributed evidence."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: "R10: The current file-level score remains product truth for ranking in
+          this feature. Historical symbol evidence is investigation evidence
+          attached to retained file hotspots; it must not replace file scoring
+          or reorder file hotspots unless a later feature explicitly reshapes
+          scoring."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: "R11: The CLI parser, help text, app diagnostics, README,
+          docs/user-guide.md, docs/developer-guide.md, man/git-hotspots.1,
+          tests/integration.sh, tools/validate.sh, expected fixtures, and
+          explain/prohibited-claim validation must be updated together where
+          wording or output changes."
+        category: requirement
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: "R12: The implementation must keep runtime defaults local-first: no
+          network, telemetry, background upload, remote enrichment, runtime LLM
+          judgement, or mandatory cache. Shallow/partial history must be
+          reported rather than repaired by auto-fetch."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: "R13: The report must be deterministic across repeated runs over the same
+          repo, range, scope, provider versions, and bounds. Sorting and sample
+          commits must not depend on hash-map or process iteration order."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: "R14: Feature 0082 must not start unless feature 0081 is done or the
+          orchestrator explicitly reshapes the dependency. Dispatch should keep
+          0082 serially after 0081 in the batch."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#requirements[15]
+        text: "R15: Close-out validation must include real-repository smoke evidence for
+          this repository and one suitable sibling/local repository when
+          available, with privacy-safe labels and bounded counts only. If no
+          sibling is suitable, the runner must record a caveated reason rather
+          than inventing evidence."
+        category: requirement
+        packet_refs:
+          - P2
+          - P4
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#requirements[16]
+        text: "R16: If output examples are added to public docs, they must use
+          project-relative paths or fixture paths and must not include raw
+          private report output."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#non-goals[1]
+        text: No public default-on historical symbol analysis.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-018
+        source_ref: prd.md#non-goals[2]
+        text: No scoring replacement, bug prediction, code-quality scoring, developer
+          ranking, author productivity metric, semantic ownership, or blame
+          assignment.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-019
+        source_ref: prd.md#non-goals[3]
+        text: No reference graph, call graph, dependency graph, package graph, type
+          checking, macro expansion, cross-language resolution, or relation/use
+          analysis.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-020
+        source_ref: prd.md#non-goals[4]
+        text: No semantic proof of symbol rename, move, split, or merge lineage.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-021
+        source_ref: prd.md#non-goals[5]
+        text: No persistent cache as product truth.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-022
+        source_ref: prd.md#non-goals[6]
+        text: No hosted service, network provider, LSP/ctags dependency, runtime LLM, or
+          remote index.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-023
+        source_ref: prd.md#non-goals[7]
+        text: No B002 close-out unless a later operator explicitly asks for capability
+          closure.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-024
+        source_ref: prd.md#edge-cases[1]
+        text: "E1: --historical-symbols is passed without --symbols. The CLI must fail
+          with exit 2 and a concise diagnostic that points to git-hotspots
+          --repo . --symbols --historical-symbols."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#edge-cases[2]
+        text: "E2: --historical-symbols is combined with --inspect. The report should
+          stay bounded to the inspected ranked file and document whether
+          project-level or inspect-level historical symbol sections are
+          emitted."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#edge-cases[3]
+        text: "E3: --historical-symbols is combined with --symbol-line-history. The
+          report must render both layers without implying that current-line
+          blame is true historical symbol attribution."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#edge-cases[4]
+        text: "E4: No historical symbols can be attributed for retained files. The
+          report must emit an empty/caveated historical-symbol section rather
+          than failing or choosing nearest symbols."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#edge-cases[5]
+        text: "E5: Some candidates are unsupported, binary, missing, too large, shallow,
+          partial, or provider-failed. The report must preserve successful
+          evidence and summarise skipped/fallback counts."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#edge-cases[6]
+        text: "E6: A renamed file contributes historical evidence. The report may show
+          file lineage context, but must not claim semantic symbol lineage from
+          the rename."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#edge-cases[7]
+        text: "E7: Human output is limited by --symbol-limit. The report must state
+          shown and omitted counts; JSON must make its completeness or
+          boundedness explicit."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#edge-cases[8]
+        text: "E8: Public report size or runtime becomes too large for common
+          repositories. The runner may tighten documented internal bounds and
+          caveats, but adding broad new public tuning flags requires planner
+          approval."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#verification-notes[1]
+        text: "Close-out evidence should include:"
+        category: verification
+        packet_refs: []
+        verification: "Close-out evidence should include:"
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#verification-notes[2]
+        text: git diff --check.
+        category: verification
+        packet_refs: []
+        verification: git diff --check.
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#verification-notes[3]
+        text: zig fmt --check build.zig src tests.
+        category: verification
+        packet_refs: []
+        verification: zig fmt --check build.zig src tests.
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#verification-notes[4]
+        text: zig build test.
+        category: verification
+        packet_refs: []
+        verification: zig build test.
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#verification-notes[5]
+        text: zig build validate.
+        category: verification
+        packet_refs: []
+        verification: zig build validate.
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#verification-notes[6]
+        text: CLI misuse diagnostics for --historical-symbols without --symbols and
+          invalid combinations discovered during implementation.
+        category: verification
+        packet_refs: []
+        verification: CLI misuse diagnostics for --historical-symbols without --symbols
+          and invalid combinations discovered during implementation.
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#verification-notes[7]
+        text: Golden fixture updates for table, JSON, and Markdown with the new flag.
+        category: verification
+        packet_refs:
+          - P2
+        verification: Golden fixture updates for table, JSON, and Markdown with the new flag.
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#verification-notes[8]
+        text: Golden non-regression proof for default runs without the flag.
+        category: verification
+        packet_refs: []
+        verification: Golden non-regression proof for default runs without the flag.
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#verification-notes[9]
+        text: Documentation/man/help/explain consistency checks.
+        category: verification
+        packet_refs: []
+        verification: Documentation/man/help/explain consistency checks.
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#verification-notes[10]
+        text: JSON validity and deterministic repeated-run proof.
+        category: verification
+        packet_refs:
+          - P2
+        verification: JSON validity and deterministic repeated-run proof.
+        required_for_close_out: true
+      - id: REQ-042
+        source_ref: prd.md#verification-notes[11]
+        text: Provider capability matrix/prohibited-claim/privacy validation updates.
+        category: verification
+        packet_refs: []
+        verification: Provider capability matrix/prohibited-claim/privacy validation updates.
+        required_for_close_out: true
+      - id: REQ-043
+        source_ref: prd.md#verification-notes[12]
+        text: Real-repository smoke summaries with privacy-safe labels and bounded
+          counts.
+        category: verification
+        packet_refs:
+          - P4
+        verification: Real-repository smoke summaries with privacy-safe labels and
+          bounded counts.
+        required_for_close_out: true
+      - id: REQ-044
+        source_ref: prd.md#verification-notes[13]
+        text: Independent reviewer verification of additive output, local-first
+          behaviour, deterministic evidence, and no prohibited claims.
+        category: verification
+        packet_refs:
+          - P2
+        verification: Independent reviewer verification of additive output, local-first
+          behaviour, deterministic evidence, and no prohibited claims.
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: The project can now parse historical hunks internally and should next
+          expose the capability to users, but only after the internal pipeline
+          integration from feature 0081 proves bounded performance and
+          public-output neutrality. The public surface must be opt-in, additive,
+          deterministic, local-first, and careful about what historical symbol
+          evidence means.
+      - source_ref: prd.md#problem[2]
+        text: Existing --symbols output is current working-tree enrichment, and
+          --symbol-line-history is current-line Git evidence for HEAD ranges.
+          Users need a clearly separate report surface for true historical
+          hunk-to-symbol evidence, without changing file-level scoring truth or
+          implying semantic lineage, bug prediction, ownership, or code-quality
+          judgement.
+      - source_ref: prd.md#outcome[1]
+        text: Add an opt-in public historical symbol hotspot report surface. The planned
+          user shape is --historical-symbols used with --symbols; it should run
+          the integrated historical symbol pipeline over retained ranked-file
+          candidates and render additive table, JSON, and Markdown evidence.
+          Existing output without the new flag must remain unchanged.
+          Documentation, man page, help, diagnostics, fixtures, integration
+          tests, and validation must move together.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 3 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: Add an opt-in public historical symbol hotspot report using
+      --historical-symbols with --symbols after feature 0081 is complete. The
+      report should render additive deterministic table, JSON, and Markdown
+      evidence from the integrated historical pipeline while preserving existing
+      output without the flag and updating CLI/docs/man/tests/fixtures together.
+    acceptance:
+      - A public opt-in --historical-symbols flag is added after feature 0081 is
+        done; it requires --symbols and invalid use exits 2 with a concise
+        diagnostic and valid command shape.
+      - Runs without --historical-symbols preserve existing CLI behaviour,
+        table/JSON/Markdown output, explain text, current project-symbol
+        reports, current-line history reports, scoring/ranking, and golden
+        fixtures.
+      - When enabled, the report uses the feature 0081 integrated historical
+        pipeline over retained ranked-file candidates and respects existing
+        repo/range/scope/include/exclude/inspect/limit semantics without
+        checkout or network access.
+      - JSON adds an optional historical-symbol evidence object only when
+        enabled, with basis metadata, local-only provenance, candidate/bound
+        summaries, caveats, deterministic sort basis, and evidence-only item
+        fields.
+      - Table and Markdown add clearly labelled historical symbol sections only
+        when enabled; human rows use the existing --symbol-limit display limit
+        unless reshaped, while JSON completeness/boundedness is explicit.
+      - Public wording distinguishes current working-tree symbols, current-line
+        Git evidence for HEAD ranges, and true historical hunk attribution; it
+        does not claim semantic lineage, references, ownership, bug prediction,
+        code-quality scoring, or developer ranking.
+      - Documentation, man page, help, diagnostics, README, user/developer
+        guides, integration tests, tools/validate.sh, expected fixtures,
+        provider capability/prohibited-claim checks, and examples are updated
+        together where public wording or output changes.
+      - Real-repository smoke evidence covers this repo and one suitable
+        sibling/local repo when available with privacy-safe labels and bounded
+        counts; absence of a sibling is caveated rather than invented.
+      - Close-out validation includes git diff whitespace checks, Zig
+        formatting, zig build test, zig build validate, deterministic fixture
+        proof, JSON validity, default-output non-regression, and independent
+        review.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig fmt --check build.zig src tests
+      - zig build test
+      - git diff --check
+      - zig build validate
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+      - verify additive opt-in semantics and default-output non-regression
+      - verify docs/help/man/tests/fixtures stay synchronized
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+      - execution before feature 0081 is done
+      - breaking JSON schema change
+      - default-output drift without explicit contract update
+    protected_surfaces:
+      - default CLI behaviour without --historical-symbols
+      - table JSON and Markdown output without --historical-symbols
+      - file-level score and rank semantics
+      - --symbol-line-history current-line semantics
+      - README docs/user-guide.md docs/developer-guide.md man/git-hotspots.1
+        tests/integration.sh tools/validate.sh fixtures/expected
+      - privacy-safe real-repo validation evidence
+  fallback_path: deferred_reconcile_decision
+  notes: Feature 0082 is the primary public B002 report slice but must execute
+    only after feature 0081 is done. Public changes must be additive, opt-in,
+    deterministic, local-first, evidence-only, and synchronized across
+    CLI/docs/man/tests/fixtures/validation.
