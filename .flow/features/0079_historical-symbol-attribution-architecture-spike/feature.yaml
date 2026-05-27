@@ -4,7 +4,7 @@ feature:
   slug: historical-symbol-attribution-architecture-spike
   title: Historical symbol attribution architecture spike
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: "B002 needs true historical symbol attribution, but current symbol
@@ -101,7 +101,7 @@ proposal:
     materialised_at: 2026-05-27T21:29:21.475Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -179,7 +179,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Architecture document and decision record
       goal: Create the public-safe architecture document that selects and explains the
         first true historical symbol attribution path.
@@ -220,7 +220,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Fixture and proof plan hardening
       goal: Add or refine the architecture document's future validation matrix and
         close-out proof obligations so implementation can be dispatched safely
@@ -257,7 +257,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Ready and dispatch proof
       goal: Validate the architecture-only spike artefacts, run ready/dispatch checks,
         and prepare a bounded dispatch package if implementation of the spike
@@ -354,7 +354,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-27T21:23:30.241Z
-  updated_at: 2026-05-27T21:29:38.265Z
+  updated_at: 2026-05-27T22:16:22.287Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-27T21:29:38.265Z
