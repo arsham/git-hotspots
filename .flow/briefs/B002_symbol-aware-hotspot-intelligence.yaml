@@ -1,0 +1,124 @@
+schema: flow-brief.v1
+brief:
+  id: B002
+  slug: symbol-aware-hotspot-intelligence
+  title: Symbol-aware hotspot intelligence
+  theme_id: null
+summary: "Capability brief for symbol-aware hotspot intelligence: extend
+  git-hotspots beyond file-level evidence to identify historically active code
+  symbols (functions, methods, types, modules, or other language-provider
+  symbols) from local Git history using a language-agnostic pipeline. The
+  capability must stay deterministic, local-first, and performant, while making
+  new language support automatically benefit from the same history attribution,
+  scoring, explanation, and future relationship analysis surfaces."
+intent:
+  desired_capability:
+    - Report hotspot evidence at symbol granularity, not just file granularity,
+      so users can investigate historically volatile functions, methods, types,
+      modules, or provider-defined symbols.
+    - "Use a normalized symbol-provider contract: language-specific providers
+      only expose symbol identity, kind, file path, source range/span, and
+      optional nesting/context; the Git-history attribution, scoring, output,
+      and explanation pipeline remains language-agnostic."
+    - Attribute local Git history to symbols by intersecting changed ranges,
+      file revisions, and symbol spans in a deterministic way, with enough
+      evidence for users to understand why a symbol appears hot.
+    - Design the symbol model so future enrichers can ask which symbols are
+      referenced by, used by, or related to hot places without redesigning
+      hotspot evidence from scratch.
+    - "Keep runtime defaults local-first: no network, telemetry, remote
+      enrichment, or non-deterministic service dependency for symbol hotspot
+      analysis."
+  why:
+    - File-level hotspots are useful but too coarse when a large file contains
+      one volatile function or type and many stable neighbours.
+    - A language-agnostic symbol pipeline prevents each future language provider
+      from needing bespoke hotspot scoring and history-search logic.
+    - Symbol-level evidence gives agents and humans a more precise investigation
+      prompt while preserving the project rule that hotspots are evidence, not
+      blame, predictions, or code-quality scores.
+    - Future relationship analysis, such as symbols used by hot places, needs
+      stable symbol identities and relation-ready output contracts from the
+      beginning.
+constraints:
+  - Symbol identity must be stable enough across revisions for useful evidence,
+    but the design must handle renames, moves, nested symbols, generated files,
+    deleted files, and provider-missing symbols as confidence-lowering cases
+    rather than silent truth loss.
+  - The history engine should not require checking out every commit into the
+    working tree. Prefer Git plumbing, diffs, blobs, revision ranges, and
+    per-file/per-revision parsing strategies that keep IO and CPU bounded.
+  - Provider output must be normalized so tree-sitter, LSP, ctags, or simpler
+    parsers can be swapped or added later without changing hotspot scoring
+    semantics.
+  - Evidence must remain explainable and reproducible from local repository
+    data; synthetic-only validation is not enough for claims about real
+    Git-history behaviour.
+  - Large repositories require bounded memory, cancellable/streaming processing
+    where practical, clear progress or limits, and deterministic fallback
+    behaviour when providers fail or files are too large.
+  - When symbol extraction is unavailable for a changed file or revision, the
+    tool should degrade to file-level evidence or mark symbol confidence clearly
+    rather than fabricating symbol precision.
+scope:
+  in_scope:
+    - Capability-level planning for extracting or receiving symbols through
+      providers, normalizing symbol records, and mapping Git-history changes
+      onto those records.
+    - "Performance-sensitive history traversal strategy: batch Git queries,
+      stream/limit revision data, parse only relevant file revisions where
+      possible, and avoid naive full-repository reparsing for every commit."
+    - "Deterministic evidence fields for symbol hotspots: churn/change
+      frequency/recency/confidence/explanation inputs at symbol level, with
+      links back to file path, symbol kind, range/source context, and relevant
+      commits or changed hunks where feasible."
+    - "Language-extensibility rule: adding a new symbol provider should make
+      that language eligible for symbol hotspot reports without changing the
+      scoring, history attribution, CLI report, or export logic except for
+      provider registration and provider-specific tests."
+    - "Forward-compatible seams for reference/use analysis: symbol identifiers,
+      nesting/ownership, and relation-provider hooks should be planned even if
+      reference graph support is deferred."
+  out_of_scope:
+    - Predicting bugs, judging code quality, ranking developers, or treating
+      symbol hotspots as accusations rather than investigation prompts.
+    - Network-backed code intelligence, hosted enrichment, telemetry, or remote
+      index upload by default.
+    - Implementing full semantic reference graphs, call graphs, or
+      cross-language dependency intelligence in the first symbol-hotspot slice;
+      those are future enrichers that should consume stable symbol evidence.
+    - Requiring cache as product truth. Caches may improve performance later,
+      but symbol analysis must have a correct no-cache path.
+    - Browser-visible UI design is out of scope for this brief unless a future
+      feature adds visual symbol hotspot exploration; if that happens, UX tone,
+      visual constraints, and approval decisions must be captured in feature/PRD
+      artefacts.
+durable_decisions:
+  - Treat symbol hotspots as an extension of deterministic Git-history evidence,
+    not as semantic judgement or prediction.
+  - "Make the core symbol-hotspot pipeline provider-neutral: providers supply
+    symbols; the shared engine maps history to symbols and produces common
+    reports/exports."
+  - Design for performance from the first feature by avoiding per-commit
+    whole-tree parsing and by batching Git/history work.
+  - Plan relation-aware output seams now, but defer reference/use analysis until
+    after symbol hotspot evidence is trustworthy.
+  - No feature-level PRD or implementation packet is created yet from this
+    intake; the next shaping step should decide whether to create a feature for
+    the first symbol-provider/history-attribution slice and push detailed
+    acceptance and packet plans into feature.yaml/prd.md.
+  - "First implementation slice selected during shaping for feature 0078:
+    project-level current-symbol hotspot evidence over retained ranked file
+    hotspots using existing current symbol providers and optional HEAD
+    current-line Git evidence. This deliberately is not true historical
+    hunk-to-symbol attribution, symbol rename/move lineage, reference/use
+    analysis, scoring replacement, cache, or provider plugin infrastructure;
+    those remain later capability work after current-symbol evidence is
+    trustworthy."
+links:
+  roadmap_item_id: null
+  feature_ids:
+    - "0078"
+timestamps:
+  created_at: 2026-05-27T19:12:06.269Z
+  updated_at: 2026-05-27T19:31:04.311Z

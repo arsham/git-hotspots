@@ -1,0 +1,1196 @@
+schema: flow-feature.v1
+feature:
+  id: "0078"
+  slug: symbol-provider-history-attribution
+  title: Project-level current-symbol hotspot evidence
+  lane: standard
+  status: done
+  autonomy_default: ask
+intent:
+  problem: Current symbol evidence exists only behind --inspect PATH --symbols, so
+    users must already know which hot file to drill into before seeing
+    symbol-level investigation prompts. B002 needs the first project-level
+    symbol slice, but the current code and provider contract are current-only;
+    this feature must avoid overclaiming true historical symbol attribution
+    while making current symbols visible for the ranked hot files.
+  outcome: Project analysis may request --symbols, optionally with
+    --symbol-line-history and --symbol-limit, without --inspect. The CLI keeps
+    file-level Git-history ranking as product truth, then extracts current
+    working-tree symbols for the retained ranked file hotspots through the
+    shared provider seam, reports deterministic project-level current-symbol
+    evidence across table, JSON, and Markdown, and caveats unsupported,
+    unavailable, dirty, shallow, partial, or provider-failed cases without
+    private data or semantic overclaiming.
+  acceptance:
+    - Project analysis accepts --symbols without --inspect and keeps the same
+      ranked file result universe that the same command would produce without
+      --symbols.
+    - Project analysis accepts --symbols --symbol-line-history and attaches
+      current-line Git evidence for eligible current symbol line ranges;
+      --symbol-line-history without --symbols remains invalid.
+    - Project analysis accepts --symbol-limit with --symbols; table and Markdown
+      apply the human display limit and JSON preserves complete analysed symbol
+      evidence unless a separately documented machine cap is accepted.
+    - Existing inspect-mode --inspect PATH --symbols, --symbol-line-history, and
+      --symbol-limit behaviour remains compatible and current-only.
+    - Provider extraction runs only for retained ranked result rows after scope,
+      since, include/exclude, and limit selection; the feature does not parse
+      every tracked file before ranking or parse historical Git blobs.
+    - Project-level symbol output is deterministic, local-only,
+      provider-neutral, and additive; it does not change file score, rank,
+      confidence, co-change evidence, rename lineage, or no-symbol output.
+    - Unsupported paths, unavailable files, provider failures, byte-only ranges,
+      dirty files, shallow history, and partial history degrade with visible
+      caveats and never fabricate symbol precision.
+    - Reports expose project-level current-symbol evidence across table,
+      Markdown, and JSON with parent file linkage, provider state, symbol
+      identity, current range, confidence, caveats, and optional current-line
+      history fields.
+    - CLI help, diagnostics, README, user guide, developer guide, manual page,
+      explain text, tests, and validation checks are updated together to remove
+      inspect-only wording and preserve current-only/non-goal wording.
+    - Validation includes unit tests, integration fixtures for
+      table/Markdown/JSON, no-symbol regression checks, privacy/prohibited-claim
+      scans, zig build validate-all, and privacy-safe real-repository smoke
+      evidence.
+planning:
+  state: ready
+  summary: "Implement project-level current-symbol hotspot evidence as the first
+    bounded B002 slice: normal file ranking first, current provider extraction
+    only for retained ranked files, optional HEAD current-line Git evidence,
+    deterministic additive reports, docs/tests/validation updated, and true
+    historical hunk-to-symbol attribution deferred."
+  brief_sync:
+    status: updated
+    reason: Feature 0078 now carries PRD, acceptance, packet plan, and output
+      contract for the selected first B002 slice; B002 was updated with the
+      durable slice decision.
+    checked_at: 2026-05-27T19:31:10.599Z
+  brief_alignment:
+    status: aligned
+    role: primary
+    summary: "Feature 0078 is the primary first implementation slice for B002: it
+      turns existing current symbol providers plus optional current-line Git
+      evidence into project-level symbol hotspot prompts for retained ranked
+      files while deferring true historical symbol attribution and relation
+      analysis."
+    checked_at: 2026-05-27T19:31:16.937Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: sensitive
+    reasons:
+      - topology=serial_feature
+      - assurance=sensitive
+      - review_mode=delegated_reviewer
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+      - multi_packet_scope
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-05-27T19:31:41.171Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: done
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-27T19:31:41.171Z
+  quality_plan:
+    assurance_band: sensitive
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-27T19:31:41.171Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-27T19:31:41.171Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: User-approved shaping for B002 symbol-aware hotspot
+    intelligence; no active roadmap item exists.
+  depends_on_feature_ids: []
+  blocked_by: []
+design:
+  rough_shape:
+    - Run the existing file-level analysis and scope/limit filtering first; only
+      then attach project-level symbol evidence for the ranked result rows that
+      remain.
+    - Refactor provider selection into a shared path usable by inspect and
+      project mode so future language providers automatically become eligible
+      for project-level symbol evidence after provider registration and tests.
+    - Extend the analysis model with a project-level current-symbol aggregate
+      separate from the existing one-file inspect symbol report, preserving
+      inspect compatibility.
+    - Represent each project symbol with repo-relative file path, parent file
+      rank and score/evidence reference, symbol identity fields, current range,
+      provider state, confidence, caveats, and optional current-line Git
+      evidence.
+    - Keep human table and Markdown symbol rows bounded by
+      --symbol-limit/default display limit while JSON remains complete for
+      analysed ranked files unless an explicit machine cap is separately shaped.
+    - Treat unsupported ranked paths as summary counts/caveats, not noisy
+      per-file failures; report provider failures only for supported files that
+      could reasonably have emitted symbols.
+    - Update help, README, user guide, developer guide, man page, explain text,
+      integration fixtures, and validation checks together because symbol flag
+      semantics change.
+    - Defer true historical hunk-to-symbol attribution, symbol rename/move
+      lineage, reference graphs, dependency propagation, scoring changes, cache,
+      and provider plugin infrastructure.
+  packets:
+    - id: P1
+      depends_on: []
+      status: done
+      title: Shared project-symbol model and collection
+      goal: Add the internal model and collection pipeline for project-level
+        current-symbol evidence over retained ranked file results while
+        preserving inspect compatibility.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/model.zig, src/app.zig, src/provider_selection.zig,
+          src/git_line_history.zig, src/provider.zig."
+        - "In scope: add a project-level symbol aggregate, share provider
+          extraction between inspect and project mode, collect symbols only for
+          retained ranked rows, attach optional current-line evidence per file,
+          and track supported/unsupported/provider-failed summary counts."
+        - "Out of scope: report rendering polish, public docs, new language
+          providers, historical blob parsing, full-repository pre-ranking scans,
+          scoring changes, cache, LSP, ctags, or relation graphs."
+        - "Protected: existing file-level ranking, scope/include/exclude
+          semantics, inspect-mode symbols, provider current-only semantics,
+          local-first/no-telemetry boundary, privacy-safe provider caveats."
+        - "Dependencies: none beyond current provider and line-history
+          substrate."
+        - "Validation/evidence: focused unit tests for aggregate shape, provider
+          selection reuse, unsupported skip counts, provider failure caveats,
+          and line-history degradation; run zig fmt --check build.zig src tests
+          and zig build test."
+        - "Review focus: no score/rank mutation, no historical-symbol claims,
+          bounded extraction after file ranking, memory cleanup for new
+          aggregate ownership."
+        - "Escalate if: the implementation needs a machine-output cap,
+          persistent cache/index, new provider language, changed report schema
+          version, or full-repository symbol scan before ranking."
+        - "Done boundary: project analysis can build an in-memory current-symbol
+          aggregate for ranked files and inspect mode remains compatible."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+    - id: P2
+      depends_on:
+        - P1
+      status: done
+      title: CLI and report surfaces
+      goal: Expose project-level --symbols command shapes and render deterministic
+        current-symbol reports in table, Markdown, and JSON.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/cli.zig, src/report_table.zig, src/report_markdown.zig,
+          src/report_json.zig, src/report_symbols.zig, src/explain.zig,
+          tests/integration.sh."
+        - "In scope: relax symbol flag validation for project mode, keep
+          --symbol-line-history and --symbol-limit tied to --symbols, render
+          project symbol summaries/items with parent file linkage, preserve
+          inspect-mode output, and keep no-symbol output unchanged."
+        - "Out of scope: docs beyond source help/explain anchors, new scoring
+          fields, JSON schema version bump unless unavoidable and explicitly
+          justified, reference/use relationships, ownership, or semantic
+          dependency output."
+        - "Protected: existing CLI diagnostics style, standalone
+          help/version/explain precedence, privacy-safe output, current-only
+          caveats, JSON completeness for analysed symbols, table/Markdown human
+          display limits."
+        - "Dependencies: P1 project-symbol aggregate available."
+        - "Validation/evidence: integration rows for project --symbols,
+          --symbols --symbol-line-history, --symbol-limit, invalid no-symbol
+          combinations, inspect compatibility, and no-symbol byte-stability
+          where fixture harness supports it."
+        - "Review focus: command semantics are clear and diagnostics actionable;
+          output is deterministic and does not imply true symbol history."
+        - "Escalate if: report output needs a breaking schema/version decision,
+          if --limit semantics become ambiguous, or if project symbol extraction
+          materially slows basic no-symbol runs."
+        - "Done boundary: users can run project-level symbol commands and all
+          three report formats expose bounded current-symbol evidence."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build validate
+    - id: P3
+      depends_on:
+        - P2
+      status: done
+      title: Documentation, fixtures, and validation harness
+      goal: Align public docs, manual, fixtures, tests, and validation with
+        project-level current-symbol semantics.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: README.md, docs/user-guide.md, docs/developer-guide.md,
+          man/git-hotspots.1, tests/integration.sh, tools/validate.sh, fixture
+          expected outputs."
+        - "In scope: remove inspect-only-only wording for --symbols, add
+          project-level examples and caveats, update provider/current-line
+          validation anchors, add table/Markdown/JSON fixtures, add
+          privacy/prohibited-claim checks, and document real-repo smoke
+          expectations."
+        - "Out of scope: commercial claims, hosted/service roadmap, package
+          publishing, UI/browser work, new provider capability claims, or raw
+          private smoke output."
+        - "Protected: hotspots remain investigation prompts, provider output
+          remains optional enrichment, no bug
+          prediction/code-quality/developer-ranking language, no absolute
+          paths/remotes/author identities/source snippets/parser diagnostics."
+        - "Dependencies: P2 output and CLI wording are stable enough to
+          document."
+        - "Validation/evidence: sh -n for shell files if touched, zig build
+          validate, and validation anchors proving README/user guide/developer
+          guide/man/help/explain agree."
+        - "Review focus: public documentation does not overclaim project-level
+          current-symbol evidence as historical attribution."
+        - "Escalate if: docs need to promise behaviour not implemented in P1/P2
+          or validation would require network/global tooling."
+        - "Done boundary: docs, CLI text, fixtures, and validation checks agree
+          on the project-level current-only symbol boundary."
+      verification_commands:
+        - for file in tools/*.sh tests/*.sh; do sh -n "$file" || exit 1; done
+        - zig build validate
+    - id: P4
+      depends_on:
+        - P3
+      status: done
+      title: Full validation and real-repository proof
+      goal: Prove the completed slice with full local validation and privacy-safe
+        real-repository smoke evidence.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: tools/validate.sh, tests/integration.sh, runtime smoke
+          commands, final evidence summary in Flow/run state."
+        - "In scope: run git diff --check, zig
+          fmt/check/test/validate/validate-all, project-level symbol smokes on
+          this repository, and one suitable sibling/local repo when available
+          using labels and bounded counts only."
+        - "Out of scope: committing raw private reports, absolute paths, private
+          repo names, remote fetching, package publishing, or fixing unrelated
+          repository issues outside the feature boundary."
+        - "Protected: evidence-before-claim; fixture-only evidence is not enough
+          for real-repo behaviour; validation output must remain privacy-safe."
+        - "Dependencies: P1-P3 complete."
+        - "Validation/evidence: full close-out command ladder plus privacy-safe
+          smoke summaries for table/Markdown/JSON and --symbol-line-history."
+        - "Review focus: every PRD requirement and acceptance item has fresh
+          evidence or a documented not-applicable finding."
+        - "Escalate if: no suitable sibling/local repo is available,
+          validate-all fails from unrelated pre-existing issues, or smoke
+          evidence would expose private paths or report content."
+        - "Done boundary: feature is ready for independent verify/reconcile with
+          complete local validation and privacy-safe real-repo smoke evidence."
+      verification_commands:
+        - git diff --check
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build validate
+        - zig build validate-all
+  output_contract:
+    storage: Runtime report output only; no persistent cache or project index in
+      this feature.
+    surfaces:
+      - table
+      - json
+      - markdown
+    project_symbol_report:
+      semantics:
+        - current working-tree symbol evidence for retained ranked file hotspots
+        - additive provider evidence only
+        - file-level Git-history score/rank/confidence/lineage remain product
+          truth
+        - not true historical symbol attribution, ownership, bug prediction,
+          code-quality scoring, or reference analysis
+      item_fields:
+        - path
+        - parent_file_rank
+        - parent_file_score_or_reference
+        - symbol.name
+        - symbol.kind
+        - symbol.current_range
+        - provider.name
+        - provider.failure/freshness/confidence
+        - symbol.confidence
+        - caveats
+        - current_only
+        - optional current_line_history
+      summary_fields:
+        - ranked_file_count_considered
+        - supported_file_count
+        - unsupported_file_count
+        - provider_failure_count
+        - symbol_count
+        - shown_count
+        - omitted_count
+        - display_limit
+        - limit_source
+        - sort_basis
+    privacy_prohibited:
+      - absolute local paths
+      - remotes
+      - author identities
+      - commit messages
+      - source snippets
+      - parser diagnostics
+      - raw private report dumps
+      - private repository names
+    consumers:
+      - human terminal readers
+      - JSON/Markdown downstream tools and user-chosen agents
+      - Flow verification and real-repo smoke summaries
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B002
+timestamps:
+  created_at: 2026-05-27T19:19:02.866Z
+  updated_at: 2026-05-27T20:34:17.696Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-27T19:32:18.178Z
+  assurance_level: sensitive
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Balanced
+    runner_model: Balanced
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level sensitive requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0078"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+      - P4
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B002
+    feature:
+      title: Project-level current-symbol hotspot evidence
+      problem: Current symbol evidence exists only behind --inspect PATH --symbols, so
+        users must already know which hot file to drill into before seeing
+        symbol-level investigation prompts. B002 needs the first project-level
+        symbol slice, but the current code and provider contract are
+        current-only; this feature must avoid overclaiming true historical
+        symbol attribution while making current symbols visible for the ranked
+        hot files.
+      outcome: Project analysis may request --symbols, optionally with
+        --symbol-line-history and --symbol-limit, without --inspect. The CLI
+        keeps file-level Git-history ranking as product truth, then extracts
+        current working-tree symbols for the retained ranked file hotspots
+        through the shared provider seam, reports deterministic project-level
+        current-symbol evidence across table, JSON, and Markdown, and caveats
+        unsupported, unavailable, dirty, shallow, partial, or provider-failed
+        cases without private data or semantic overclaiming.
+      acceptance:
+        - Project analysis accepts --symbols without --inspect and keeps the
+          same ranked file result universe that the same command would produce
+          without --symbols.
+        - Project analysis accepts --symbols --symbol-line-history and attaches
+          current-line Git evidence for eligible current symbol line ranges;
+          --symbol-line-history without --symbols remains invalid.
+        - Project analysis accepts --symbol-limit with --symbols; table and
+          Markdown apply the human display limit and JSON preserves complete
+          analysed symbol evidence unless a separately documented machine cap is
+          accepted.
+        - Existing inspect-mode --inspect PATH --symbols, --symbol-line-history,
+          and --symbol-limit behaviour remains compatible and current-only.
+        - Provider extraction runs only for retained ranked result rows after
+          scope, since, include/exclude, and limit selection; the feature does
+          not parse every tracked file before ranking or parse historical Git
+          blobs.
+        - Project-level symbol output is deterministic, local-only,
+          provider-neutral, and additive; it does not change file score, rank,
+          confidence, co-change evidence, rename lineage, or no-symbol output.
+        - Unsupported paths, unavailable files, provider failures, byte-only
+          ranges, dirty files, shallow history, and partial history degrade with
+          visible caveats and never fabricate symbol precision.
+        - Reports expose project-level current-symbol evidence across table,
+          Markdown, and JSON with parent file linkage, provider state, symbol
+          identity, current range, confidence, caveats, and optional
+          current-line history fields.
+        - CLI help, diagnostics, README, user guide, developer guide, manual
+          page, explain text, tests, and validation checks are updated together
+          to remove inspect-only wording and preserve current-only/non-goal
+          wording.
+        - Validation includes unit tests, integration fixtures for
+          table/Markdown/JSON, no-symbol regression checks,
+          privacy/prohibited-claim scans, zig build validate-all, and
+          privacy-safe real-repository smoke evidence.
+    brief_alignment:
+      status: aligned
+      role: primary
+      summary: "Feature 0078 is the primary first implementation slice for B002: it
+        turns existing current symbol providers plus optional current-line Git
+        evidence into project-level symbol hotspot prompts for retained ranked
+        files while deferring true historical symbol attribution and relation
+        analysis."
+      checked_at: 2026-05-27T19:31:16.937Z
+    briefs:
+      - id: B002
+        title: Symbol-aware hotspot intelligence
+        summary: "Capability brief for symbol-aware hotspot intelligence: extend
+          git-hotspots beyond file-level evidence to identify historically
+          active code symbols (functions, methods, types, modules, or other
+          language-provider symbols) from local Git history using a
+          language-agnostic pipeline. The capability must stay deterministic,
+          local-first, and performant, while making new language support
+          automatically benefit from the same history attribution, scoring,
+          explanation, and future relationship analysis surfaces."
+        desired_capability:
+          - Report hotspot evidence at symbol granularity, not just file
+            granularity, so users can investigate historically volatile
+            functions, methods, types, modules, or provider-defined symbols.
+          - "Use a normalized symbol-provider contract: language-specific
+            providers only expose symbol identity, kind, file path, source
+            range/span, and optional nesting/context; the Git-history
+            attribution, scoring, output, and explanation pipeline remains
+            language-agnostic."
+          - Attribute local Git history to symbols by intersecting changed
+            ranges, file revisions, and symbol spans in a deterministic way,
+            with enough evidence for users to understand why a symbol appears
+            hot.
+          - Design the symbol model so future enrichers can ask which symbols
+            are referenced by, used by, or related to hot places without
+            redesigning hotspot evidence from scratch.
+          - "Keep runtime defaults local-first: no network, telemetry, remote
+            enrichment, or non-deterministic service dependency for symbol
+            hotspot analysis."
+        why:
+          - File-level hotspots are useful but too coarse when a large file
+            contains one volatile function or type and many stable neighbours.
+          - A language-agnostic symbol pipeline prevents each future language
+            provider from needing bespoke hotspot scoring and history-search
+            logic.
+          - Symbol-level evidence gives agents and humans a more precise
+            investigation prompt while preserving the project rule that hotspots
+            are evidence, not blame, predictions, or code-quality scores.
+          - Future relationship analysis, such as symbols used by hot places,
+            needs stable symbol identities and relation-ready output contracts
+            from the beginning.
+        in_scope:
+          - Capability-level planning for extracting or receiving symbols
+            through providers, normalizing symbol records, and mapping
+            Git-history changes onto those records.
+          - "Performance-sensitive history traversal strategy: batch Git
+            queries, stream/limit revision data, parse only relevant file
+            revisions where possible, and avoid naive full-repository reparsing
+            for every commit."
+          - "Deterministic evidence fields for symbol hotspots: churn/change
+            frequency/recency/confidence/explanation inputs at symbol level,
+            with links back to file path, symbol kind, range/source context, and
+            relevant commits or changed hunks where feasible."
+          - "Language-extensibility rule: adding a new symbol provider should
+            make that language eligible for symbol hotspot reports without
+            changing the scoring, history attribution, CLI report, or export
+            logic except for provider registration and provider-specific tests."
+          - "Forward-compatible seams for reference/use analysis: symbol
+            identifiers, nesting/ownership, and relation-provider hooks should
+            be planned even if reference graph support is deferred."
+        out_of_scope:
+          - Predicting bugs, judging code quality, ranking developers, or
+            treating symbol hotspots as accusations rather than investigation
+            prompts.
+          - Network-backed code intelligence, hosted enrichment, telemetry, or
+            remote index upload by default.
+          - Implementing full semantic reference graphs, call graphs, or
+            cross-language dependency intelligence in the first symbol-hotspot
+            slice; those are future enrichers that should consume stable symbol
+            evidence.
+          - Requiring cache as product truth. Caches may improve performance
+            later, but symbol analysis must have a correct no-cache path.
+          - Browser-visible UI design is out of scope for this brief unless a
+            future feature adds visual symbol hotspot exploration; if that
+            happens, UX tone, visual constraints, and approval decisions must be
+            captured in feature/PRD artefacts.
+        durable_decisions:
+          - Treat symbol hotspots as an extension of deterministic Git-history
+            evidence, not as semantic judgement or prediction.
+          - "Make the core symbol-hotspot pipeline provider-neutral: providers
+            supply symbols; the shared engine maps history to symbols and
+            produces common reports/exports."
+          - Design for performance from the first feature by avoiding per-commit
+            whole-tree parsing and by batching Git/history work.
+          - Plan relation-aware output seams now, but defer reference/use
+            analysis until after symbol hotspot evidence is trustworthy.
+          - No feature-level PRD or implementation packet is created yet from
+            this intake; the next shaping step should decide whether to create a
+            feature for the first symbol-provider/history-attribution slice and
+            push detailed acceptance and packet plans into feature.yaml/prd.md.
+          - "First implementation slice selected during shaping for feature
+            0078: project-level current-symbol hotspot evidence over retained
+            ranked file hotspots using existing current symbol providers and
+            optional HEAD current-line Git evidence. This deliberately is not
+            true historical hunk-to-symbol attribution, symbol rename/move
+            lineage, reference/use analysis, scoring replacement, cache, or
+            provider plugin infrastructure; those remain later capability work
+            after current-symbol evidence is trustworthy."
+    prd_path: .flow/features/0078_symbol-provider-history-attribution/prd.md
+  requirements_contract:
+    source_path: .flow/features/0078_symbol-provider-history-attribution/prd.md
+    source_digest: 5b9b99ac98366c0d0b7a8a5ff522ff67fd0f30fb71e5d2fe755fd1c87da1bbbe
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: "R1: Permit --symbols in normal project analysis without requiring
+          --inspect. The command shape git-hotspots --repo . --limit N --symbols
+          must be valid and must keep the same file-level result set that would
+          have been produced without --symbols."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: "R2: Permit --symbol-line-history with project-level --symbols. The
+          command shape git-hotspots --repo . --symbols --symbol-line-history
+          must attach current-line Git evidence to current symbol ranges for
+          eligible ranked files. It must still reject --symbol-line-history when
+          --symbols is absent."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: "R3: Permit --symbol-limit N with project-level --symbols. The limit
+          remains a human display limit for table and Markdown output; JSON must
+          keep complete machine-readable symbol evidence for the analysed ranked
+          files unless the implementation adds an explicit and documented
+          machine-output cap in this feature."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: "R4: Preserve existing inspect behaviour. --inspect PATH --symbols,
+          --inspect PATH --symbols --symbol-line-history, and --symbol-limit in
+          inspect mode must continue to work with the existing current-only
+          semantics and without changing file score, rank, lineage, confidence,
+          scope, or evidence."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: "R5: Run provider extraction only after normal file-level analysis and
+          only for the ranked result rows that remain after --limit, --since,
+          scope, include, and exclude filters. The feature must not scan the
+          full repository for symbols before ranking and must not parse every
+          commit or checkout historical trees."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: "R6: Reuse one shared provider selection and extraction seam for inspect
+          and project-level symbol reports. A new language provider added to
+          that seam should become eligible for project-level symbol evidence
+          without changing scoring, history attribution, or report logic beyond
+          provider registration and provider specific tests."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: "R7: Treat supported and unsupported paths differently in project mode.
+          Unsupported ranked files may be counted and caveated in the project
+          symbol summary, but they must not produce noisy per-file provider
+          failure rows. Ranked files with supported extensions whose current
+          file is missing, unreadable, symlinked, too large, or parser-failed
+          should produce bounded provider caveats without source snippets,
+          parser diagnostics, absolute local paths, remotes, author identities,
+          commit messages, or private repository names."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: "R8: Report a project-level current-symbol hotspot section for table,
+          Markdown, and JSON. Each symbol item must carry at least repo-relative
+          file path, parent file rank, parent file score or evidence reference,
+          symbol name, kind, current range, provider name, confidence, caveats,
+          and current-only status. When current-line history is requested,
+          include line count, distinct last-touch commit count, most recent line
+          touch timestamp when available, unblamable line count, sample commit
+          ids, freshness, failure, confidence, and caveats."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: "R9: Keep project-level symbol ordering deterministic. The default sort
+          should start from parent file hotspot rank and then use existing
+          provider order. When current-line history is present, symbols within
+          the same parent file should sort by the existing current-line evidence
+          summary before stable symbol identity. No new semantic risk score, bug
+          prediction, code-quality rating, ownership metric, or developer
+          ranking may be introduced."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: "R10: Preserve local-first runtime boundaries. The feature must not add
+          network access, telemetry, background upload, remote enrichment, cache
+          requirements, provider plugin loading, LSP server requirements, ctags
+          requirements, package manager calls, or runtime AI judgement."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: "R11: Preserve current file-level output contracts when --symbols is not
+          requested. Normal table, Markdown, and JSON reports without symbol
+          flags should remain byte-stable except for intentional fixture changes
+          caused by validation harness setup."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: "R12: Update CLI help, diagnostics, examples, README, user guide,
+          developer guide, manual page, and validation checks anywhere they
+          currently say --symbols, --symbol-line-history, or --symbol-limit are
+          inspect-only. The replacement wording must say project-level symbols
+          are current working-tree evidence for ranked file hotspots and not
+          true symbol history, lineage, scoring, ownership, reference analysis,
+          or semantic dependency analysis."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: "R13: Preserve privacy-safe reporting. Public docs, fixture output, and
+          real-repo smoke summaries must not include absolute local paths,
+          remotes, author identities, commit messages, raw private reports,
+          parser diagnostics, source snippets, or private repository names."
+        category: requirement
+        packet_refs:
+          - P4
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: "R14: Leave forward-compatible seams for later relation analysis. Output
+          should carry stable-enough current symbol identity fields (path,
+          provider, kind, name, current range) and explicit caveats, but this
+          feature must not implement reference graphs, call graphs, dependency
+          propagation, cross-language symbol resolution, or related-symbol
+          ranking."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#non-goals[1]
+        text: No true historical hunk-to-symbol attribution across commits.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-016
+        source_ref: prd.md#non-goals[2]
+        text: No historical symbol renames, moves, splits, merges, nesting lineage, or
+          semantic ownership.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-017
+        source_ref: prd.md#non-goals[3]
+        text: No parsing of Git blobs across every commit, no worktree checkout per
+          commit, and no full-repository symbol indexing before file ranking.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-018
+        source_ref: prd.md#non-goals[4]
+        text: No new language provider implementation unless required only for test
+          fixture support; existing supported Tree-sitter providers are the
+          provider base.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-019
+        source_ref: prd.md#non-goals[5]
+        text: No LSP, ctags, Cargo, package graph, module resolution, dependency graph,
+          macro expansion, cfg or feature evaluation, type checking, or relation
+          graph.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-020
+        source_ref: prd.md#non-goals[6]
+        text: No scoring replacement and no change to file hotspot score, rank,
+          confidence, co-change evidence, file lineage, include or exclude
+          filters, or default no-symbol output.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-021
+        source_ref: prd.md#non-goals[7]
+        text: No network, telemetry, upload, remote enrichment, cache requirement,
+          hosted service, or runtime model judgement.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-022
+        source_ref: prd.md#edge-cases[1]
+        text: "E1: A ranked result is an unsupported file type, such as Markdown.
+          Project symbol reporting skips per-file provider output for that row,
+          increments an unsupported count, and keeps the file hotspot row
+          unchanged."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#edge-cases[2]
+        text: "E2: A supported ranked result is deleted at HEAD or missing from the
+          working tree. The project symbol section reports bounded provider
+          caveats for that path and emits no symbols for it."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#edge-cases[3]
+        text: "E3: A supported ranked result is larger than the provider bounded-file
+          policy, not a regular file, symlinked, or unreadable. The provider
+          reports unavailable or skipped evidence with caveats and no private
+          path or source detail."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#edge-cases[4]
+        text: "E4: The worktree is dirty globally or the specific file is dirty.
+          File-level ranking still uses committed history. Current-line Git
+          evidence is skipped or lower-confidence for affected symbol ranges
+          with visible caveats."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#edge-cases[5]
+        text: "E5: Repository history is shallow or partial. File-level caveats remain,
+          and current-line symbol evidence is marked partial or lower-confidence
+          where the existing line-history rules require it."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#edge-cases[6]
+        text: "E6: A provider succeeds but emits zero symbols. The report keeps provider
+          state and caveats so the absence of symbols is distinguishable from
+          unsupported language or provider failure."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#edge-cases[7]
+        text: "E7: A provider returns byte ranges instead of line ranges. Current-line
+          Git evidence is skipped for that symbol or provider with caveats
+          rather than inventing line history."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#edge-cases[8]
+        text: "E8: The user combines --inspect PATH --symbols with project-level flags.
+          The presence of --inspect selects inspect mode; existing inspect
+          output semantics remain the compatibility baseline."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#edge-cases[9]
+        text: "E9: A future provider is added to the shared provider selection path.
+          Project symbol reports should pick it up through the shared path, but
+          provider-specific fixtures and docs still need to be added with that
+          provider feature."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-031
+        source_ref: prd.md#edge-cases[10]
+        text: "E10: Project mode produces many symbols across the selected ranked files.
+          Human output applies the display limit and reports omitted counts;
+          JSON keeps the complete analysed evidence unless an explicit machine
+          cap is accepted in this feature."
+        category: edge_case
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-032
+        source_ref: prd.md#verification-notes[1]
+        text: "Close-out evidence should include:"
+        category: verification
+        packet_refs: []
+        verification: "Close-out evidence should include:"
+        required_for_close_out: true
+      - id: REQ-033
+        source_ref: prd.md#verification-notes[2]
+        text: git diff --check.
+        category: verification
+        packet_refs: []
+        verification: git diff --check.
+        required_for_close_out: true
+      - id: REQ-034
+        source_ref: prd.md#verification-notes[3]
+        text: zig fmt --check build.zig src tests.
+        category: verification
+        packet_refs: []
+        verification: zig fmt --check build.zig src tests.
+        required_for_close_out: true
+      - id: REQ-035
+        source_ref: prd.md#verification-notes[4]
+        text: zig build test.
+        category: verification
+        packet_refs: []
+        verification: zig build test.
+        required_for_close_out: true
+      - id: REQ-036
+        source_ref: prd.md#verification-notes[5]
+        text: zig build validate.
+        category: verification
+        packet_refs: []
+        verification: zig build validate.
+        required_for_close_out: true
+      - id: REQ-037
+        source_ref: prd.md#verification-notes[6]
+        text: zig build validate-all because provider lanes, CLI contracts, docs, and
+          proof aggregation are affected.
+        category: verification
+        packet_refs: []
+        verification: zig build validate-all because provider lanes, CLI contracts,
+          docs, and proof aggregation are affected.
+        required_for_close_out: true
+      - id: REQ-038
+        source_ref: prd.md#verification-notes[7]
+        text: Focused unit tests for project-level symbol collection, shared provider
+          selection, unsupported-path skip counts, provider failure caveats,
+          dirty-file line-history degradation, and deterministic symbol
+          ordering.
+        category: verification
+        packet_refs:
+          - P1
+        verification: Focused unit tests for project-level symbol collection, shared
+          provider selection, unsupported-path skip counts, provider failure
+          caveats, dirty-file line-history degradation, and deterministic symbol
+          ordering.
+        required_for_close_out: true
+      - id: REQ-039
+        source_ref: prd.md#verification-notes[8]
+        text: Integration tests for valid project-level --symbols, --symbols
+          --symbol-line-history, and --symbol-limit command shapes in table,
+          Markdown, and JSON formats.
+        category: verification
+        packet_refs:
+          - P2
+        verification: Integration tests for valid project-level --symbols, --symbols
+          --symbol-line-history, and --symbol-limit command shapes in table,
+          Markdown, and JSON formats.
+        required_for_close_out: true
+      - id: REQ-040
+        source_ref: prd.md#verification-notes[9]
+        text: Regression tests proving old invalid combinations remain invalid,
+          especially --symbol-line-history without --symbols and --symbol-limit
+          without --symbols.
+        category: verification
+        packet_refs: []
+        verification: Regression tests proving old invalid combinations remain invalid,
+          especially --symbol-line-history without --symbols and --symbol-limit
+          without --symbols.
+        required_for_close_out: true
+      - id: REQ-041
+        source_ref: prd.md#verification-notes[10]
+        text: Fixture checks proving no-symbol output is unchanged when symbol flags are
+          not used.
+        category: verification
+        packet_refs: []
+        verification: Fixture checks proving no-symbol output is unchanged when symbol
+          flags are not used.
+        required_for_close_out: true
+      - id: REQ-042
+        source_ref: prd.md#verification-notes[11]
+        text: Documentation and help validation proving README, user guide, developer
+          guide, man page, --help, and --explain agree on the current-only,
+          project-level symbol boundary.
+        category: verification
+        packet_refs: []
+        verification: Documentation and help validation proving README, user guide,
+          developer guide, man page, --help, and --explain agree on the
+          current-only, project-level symbol boundary.
+        required_for_close_out: true
+      - id: REQ-043
+        source_ref: prd.md#verification-notes[12]
+        text: Privacy and prohibited-claim scans over new fixtures, docs, and expected
+          outputs.
+        category: verification
+        packet_refs: []
+        verification: Privacy and prohibited-claim scans over new fixtures, docs, and
+          expected outputs.
+        required_for_close_out: true
+      - id: REQ-044
+        source_ref: prd.md#verification-notes[13]
+        text: Real-repository smoke evidence on this repository and one suitable sibling
+          or local repository when available, recorded with privacy-safe labels,
+          bounded counts, and no raw private report dump.
+        category: verification
+        packet_refs:
+          - P4
+        verification: Real-repository smoke evidence on this repository and one suitable
+          sibling or local repository when available, recorded with privacy-safe
+          labels, bounded counts, and no raw private report dump.
+        required_for_close_out: true
+      - id: REQ-045
+        source_ref: prd.md#verification-notes[14]
+        text: Review should prove that project-level symbol evidence is useful,
+          deterministic, bounded, local-only, and additive to file hotspots,
+          while clearly not claiming true historical symbol attribution or
+          semantic relationship analysis.
+        category: verification
+        packet_refs: []
+        verification: Review should prove that project-level symbol evidence is useful,
+          deterministic, bounded, local-only, and additive to file hotspots,
+          while clearly not claiming true historical symbol attribution or
+          semantic relationship analysis.
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: "git-hotspots can already report deterministic file hotspots and can
+          enrich one inspected file with current working-tree Tree-sitter
+          symbols. That leaves symbol evidence useful but too local: users must
+          first know which hot file to inspect, then run a second command for
+          one path."
+      - source_ref: prd.md#problem[2]
+        text: The next step should make symbol evidence available from the normal ranked
+          hotspot report while staying honest about the current implementation
+          boundary. The feature should not claim true historical symbol lineage
+          or hunk-to-symbol attribution yet. It should surface current symbols
+          inside the already-ranked hot files, and when requested, attach
+          current-line Git evidence from HEAD line ranges. This gives humans and
+          agents symbol-level investigation prompts without making provider
+          output the product truth.
+      - source_ref: prd.md#outcome[1]
+        text: Allow project analysis commands to use --symbols, optionally with
+          --symbol-line-history, without --inspect. The command first computes
+          the normal file-level hotspot ranking, then extracts current symbols
+          only for the ranked file results that have supported providers.
+          Reports expose a project-level current-symbol hotspot section that is
+          sorted from deterministic local evidence and clearly tied back to the
+          parent file hotspot row.
+      - source_ref: prd.md#outcome[2]
+        text: "The result is a bounded first implementation slice for B002:"
+      - source_ref: prd.md#outcome[3]
+        text: file-level Git history remains the scoring and ranking source of truth;
+      - source_ref: prd.md#outcome[4]
+        text: current symbols are additive evidence for the ranked hot files;
+      - source_ref: prd.md#outcome[5]
+        text: current-line Git evidence is derived from local git blame --incremental
+          over current HEAD symbol line ranges when requested;
+      - source_ref: prd.md#outcome[6]
+        text: unsupported languages, provider failures, large files, dirty files,
+          shallow history, and partial history degrade with caveats rather than
+          fabricated precision;
+      - source_ref: prd.md#outcome[7]
+        text: adding a future language provider to the shared current-symbol provider
+          selection path automatically makes project-level symbol reports
+          eligible for that language; and
+      - source_ref: prd.md#outcome[8]
+        text: true historical hunk-to-symbol attribution, rename or move lineage,
+          reference graphs, and symbol relationship analysis remain later
+          features.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 10 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: Project analysis may request --symbols, optionally with
+      --symbol-line-history and --symbol-limit, without --inspect. The CLI keeps
+      file-level Git-history ranking as product truth, then extracts current
+      working-tree symbols for the retained ranked file hotspots through the
+      shared provider seam, reports deterministic project-level current-symbol
+      evidence across table, JSON, and Markdown, and caveats unsupported,
+      unavailable, dirty, shallow, partial, or provider-failed cases without
+      private data or semantic overclaiming.
+    acceptance:
+      - Project analysis accepts --symbols without --inspect and keeps the same
+        ranked file result universe that the same command would produce without
+        --symbols.
+      - Project analysis accepts --symbols --symbol-line-history and attaches
+        current-line Git evidence for eligible current symbol line ranges;
+        --symbol-line-history without --symbols remains invalid.
+      - Project analysis accepts --symbol-limit with --symbols; table and
+        Markdown apply the human display limit and JSON preserves complete
+        analysed symbol evidence unless a separately documented machine cap is
+        accepted.
+      - Existing inspect-mode --inspect PATH --symbols, --symbol-line-history,
+        and --symbol-limit behaviour remains compatible and current-only.
+      - Provider extraction runs only for retained ranked result rows after
+        scope, since, include/exclude, and limit selection; the feature does not
+        parse every tracked file before ranking or parse historical Git blobs.
+      - Project-level symbol output is deterministic, local-only,
+        provider-neutral, and additive; it does not change file score, rank,
+        confidence, co-change evidence, rename lineage, or no-symbol output.
+      - Unsupported paths, unavailable files, provider failures, byte-only
+        ranges, dirty files, shallow history, and partial history degrade with
+        visible caveats and never fabricate symbol precision.
+      - Reports expose project-level current-symbol evidence across table,
+        Markdown, and JSON with parent file linkage, provider state, symbol
+        identity, current range, confidence, caveats, and optional current-line
+        history fields.
+      - CLI help, diagnostics, README, user guide, developer guide, manual page,
+        explain text, tests, and validation checks are updated together to
+        remove inspect-only wording and preserve current-only/non-goal wording.
+      - Validation includes unit tests, integration fixtures for
+        table/Markdown/JSON, no-symbol regression checks,
+        privacy/prohibited-claim scans, zig build validate-all, and privacy-safe
+        real-repository smoke evidence.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig fmt --check build.zig src tests
+      - zig build test
+      - zig build validate
+      - for file in tools/*.sh tests/*.sh; do sh -n "$file" || exit 1; done
+      - git diff --check
+      - zig build validate-all
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces: []
+  fallback_path: deferred_reconcile_decision
+  notes: null
