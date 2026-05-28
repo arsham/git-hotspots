@@ -350,6 +350,46 @@ grep -Fq -- 'Unresolved target' "$tmp_dir/git-hotspots-symbol-relationships.md"
 diff -u fixtures/expected/symbol-relationships.txt "$tmp_dir/git-hotspots-symbol-relationships.txt"
 grep -Fq -- 'symbol relationships for retained ranked files:' "$tmp_dir/git-hotspots-symbol-relationships.txt"
 grep -Fq -- 'records=' "$tmp_dir/git-hotspots-symbol-relationships.txt"
+"$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-javascript.json"
+diff -u fixtures/expected/symbol-relationships-javascript.json "$tmp_dir/git-hotspots-symbol-relationships-javascript.json"
+"$EXE" --repo fixtures/typescript-symbols --inspect src/example.ts --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-typescript.json"
+diff -u fixtures/expected/symbol-relationships-typescript.json "$tmp_dir/git-hotspots-symbol-relationships-typescript.json"
+"$EXE" --repo fixtures/typescript-symbols --inspect src/component.tsx --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-tsx.json"
+diff -u fixtures/expected/symbol-relationships-tsx.json "$tmp_dir/git-hotspots-symbol-relationships-tsx.json"
+python3 - "$tmp_dir/git-hotspots-symbol-relationships-javascript.json" "$tmp_dir/git-hotspots-symbol-relationships-typescript.json" "$tmp_dir/git-hotspots-symbol-relationships-tsx.json" <<'PY'
+import json, sys
+cases = [
+    (sys.argv[1], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}),
+    (sys.argv[2], 'tree-sitter-typescript-relations', {'contains', 'call', 'unresolved', 'unknown'}),
+    (sys.argv[3], 'tree-sitter-tsx-relations', {'contains', 'reference', 'unresolved', 'unknown'}),
+]
+for path, provider_name, expected_kinds in cases:
+    with open(path, encoding='utf-8') as fh:
+        data = json.load(fh)
+    relationships = data['symbol_relationships']
+    assert relationships['basis']['requires_symbols_flag'] is True
+    assert relationships['basis']['scoring_effect'] == 'none'
+    assert relationships['provenance']['local_only'] is True
+    assert relationships['providers'][0]['provider']['name'] == provider_name
+    assert relationships['summary']['relation_record_count'] == len(relationships['records'])
+    assert expected_kinds.issubset({item['kind'] for item in relationships['records']}), path
+    assert any(item['target_unresolved'] for item in relationships['records']), path
+    assert all(item['provider']['input'].startswith('working-tree:') for item in relationships['records'])
+    assert 'call-graph truth' not in json.dumps(data)
+PY
+for lane in javascript typescript tsx; do
+  case "$lane" in
+    javascript) repo=fixtures/javascript-symbols; inspect=src/example.mjs ;;
+    typescript) repo=fixtures/typescript-symbols; inspect=src/example.ts ;;
+    tsx) repo=fixtures/typescript-symbols; inspect=src/component.tsx ;;
+  esac
+  "$EXE" --repo "$repo" --inspect "$inspect" --symbols --symbol-relationships --symbol-limit 6 --format markdown > "$tmp_dir/git-hotspots-symbol-relationships-$lane.md"
+  diff -u "fixtures/expected/symbol-relationships-$lane.md" "$tmp_dir/git-hotspots-symbol-relationships-$lane.md"
+  grep -Fq -- '## Symbol relationships' "$tmp_dir/git-hotspots-symbol-relationships-$lane.md"
+  "$EXE" --repo "$repo" --inspect "$inspect" --symbols --symbol-relationships --symbol-limit 6 --format table > "$tmp_dir/git-hotspots-symbol-relationships-$lane.txt"
+  diff -u "fixtures/expected/symbol-relationships-$lane.txt" "$tmp_dir/git-hotspots-symbol-relationships-$lane.txt"
+  grep -Fq -- 'symbol relationships for retained ranked files:' "$tmp_dir/git-hotspots-symbol-relationships-$lane.txt"
+done
 "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-line-history --format json > "$tmp_dir/git-hotspots-symbols-line-history.json"
 python3 -m json.tool "$tmp_dir/git-hotspots-symbols-line-history.json" >/dev/null
 grep -Fq -- '"current_line_history"' "$tmp_dir/git-hotspots-symbols-line-history.json"

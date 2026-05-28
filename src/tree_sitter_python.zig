@@ -91,18 +91,7 @@ pub const RelationOptions = struct {
     force_provider_unavailable: bool = false,
 };
 
-pub const RelationExtraction = struct {
-    provider: provider.ProviderEvidence,
-    candidates: []provider.RelationCandidate,
-    cap_reached: bool = false,
-    omitted_count: usize = 0,
-
-    pub fn deinit(self: *RelationExtraction, allocator: std.mem.Allocator) void {
-        freeRelationProvider(allocator, self.provider);
-        freeRelationCandidates(allocator, self.candidates);
-        self.* = undefined;
-    }
-};
+pub const RelationExtraction = provider.RelationExtraction;
 const DefinitionKind = enum {
     class,
     function,

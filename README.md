@@ -317,13 +317,13 @@ caveats. It is local-only evidence, not semantic symbol lineage, reference/use
 analysis, ownership, bug prediction, scoring replacement, or a ranking input.
 
 `--symbol-relationships` is an opt-in relationship layer that requires
-`--symbols`. It currently adds bounded local Python Tree-sitter relation
-evidence for retained ranked-file candidates and reports source and target
-endpoints, unresolved targets, provider identity, freshness, failure,
-confidence, caveats, record bounds, and omitted counts. Relationship evidence
-is caveated investigation context only: it is not call-graph truth, dependency
-proof, ownership, developer metrics, bug prediction, scoring replacement, or a
-ranking input.
+`--symbols`. It currently adds bounded local Tree-sitter relation evidence for
+retained ranked-file candidates in Python, JavaScript, TypeScript, and TSX
+lanes, and reports source and target endpoints, unresolved targets, provider
+identity, freshness, failure, confidence, caveats, record bounds, and omitted
+counts. Relationship evidence is caveated investigation context only: it is not
+call-graph truth, dependency proof, ownership, developer metrics, bug
+prediction, scoring replacement, or a ranking input.
 
 Git-detected file renames are folded conservatively when both the old and new
 paths are in scope. This is file-path lineage from local Git history only, not

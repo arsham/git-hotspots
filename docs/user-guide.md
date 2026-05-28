@@ -219,14 +219,17 @@ for retained ranked-file candidates:
 ```sh
 ./zig-out/bin/git-hotspots --repo . --symbols --symbol-relationships --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.py --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.js --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.ts --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.tsx --symbols --symbol-relationships --format json
 ```
 
-Relationship evidence currently comes from the local Python Tree-sitter lane. It
-reports source and target endpoints, unresolved targets, provider identity,
-freshness, failure, confidence, caveats, record bounds, and omitted counts. It
-is caveated investigation context only, not call-graph truth, dependency proof,
-ownership, developer metrics, bug prediction, scoring replacement, or a ranking
-input.
+Relationship evidence currently comes from local Python, JavaScript,
+TypeScript, and TSX Tree-sitter lanes. It reports source and target endpoints,
+unresolved targets, provider identity, freshness, failure, confidence, caveats,
+record bounds, and omitted counts. It is caveated investigation context only,
+not call-graph truth, dependency proof, ownership, developer metrics, bug
+prediction, scoring replacement, or a ranking input.
 
 ## Reading reports
 
@@ -238,7 +241,8 @@ Reports include:
 - frequency, churn, recency, co-change, size, confidence, and evidence fields;
 - conservative Git-detected file rename lineage when both paths are in scope;
 - optional current provider evidence for ranked files or one inspected file;
-- optional historical hunk attribution for retained ranked-file candidates.
+- optional historical hunk attribution for retained ranked-file candidates;
+- optional relationship evidence for retained ranked-file candidates.
 
 Confidence is a caveated evidence summary, not a correctness score. Co-change
 means files changed in the same commits; it is not dependency analysis.

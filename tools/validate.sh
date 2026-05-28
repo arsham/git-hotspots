@@ -958,6 +958,8 @@ docs_manual_checks() {
   grep -Fq -- '--symbol-line-history' docs/user-guide.md || return 1
   grep -Fq -- '--historical-symbols' docs/user-guide.md || return 1
   grep -Fq -- '--symbol-relationships' docs/user-guide.md || return 1
+  grep -Fq 'Python, JavaScript,' docs/user-guide.md || return 1
+  grep -Fq 'TypeScript, and TSX Tree-sitter lanes' docs/user-guide.md || return 1
   grep -Fq 'Rust support is syntax-only' docs/user-guide.md || return 1
   grep -Fq 'Cargo metadata, crates, module resolution' docs/user-guide.md || return 1
   grep -Fq -- '--scope all' docs/user-guide.md || return 1
@@ -999,11 +1001,14 @@ docs_manual_checks() {
   grep -Fq -- '--symbols' man/git-hotspots.1 || return 1
   grep -Fq -- '--historical-symbols' man/git-hotspots.1 || return 1
   grep -Fq -- '--symbol-relationships' man/git-hotspots.1 || return 1
+  grep -Fq 'Python, JavaScript, TypeScript, and TSX lanes' man/git-hotspots.1 || return 1
   grep -Fq -- '--progress' man/git-hotspots.1 || return 1
   grep -Fq 'local-first' man/git-hotspots.1 || return 1
   ! grep -Eq 'dogfood|tools/release-linux\.sh|packaging/aur|makepkg|pacman|pkg\.tar' man/git-hotspots.1 || return 1
 
   grep -Fq 'docs/user-guide.md' README.md || return 1
+  grep -Fq 'Python, JavaScript, TypeScript, and TSX' README.md || return 1
+  grep -Fq 'retained ranked-file candidates in Python' README.md || return 1
   grep -Fq 'Invalid CLI combinations exit 2' README.md || return 1
   grep -Fq 'Local Linux dogfood packaging' README.md || return 1
   grep -Fq 'tools/release-linux.sh' README.md || return 1
@@ -1270,6 +1275,57 @@ fixture_json_checks() {
   grep -q -- '## Symbol relationships' "$SYMBOL_RELATIONSHIPS_MD" || return 1
   grep -q -- 'symbol relationships for retained ranked files:' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   ! grep -Eiq -- 'Fixture Author|fixture@example|https?://|ssh://|git@|/home/|/Users/|source snippet|commit message' "$SYMBOL_RELATIONSHIPS_JSON" "$SYMBOL_RELATIONSHIPS_MD" "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
+  for lane in javascript typescript tsx; do
+    case "$lane" in
+      javascript) repo=fixtures/javascript-symbols; inspect=src/example.mjs ;;
+      typescript) repo=fixtures/typescript-symbols; inspect=src/example.ts ;;
+      tsx) repo=fixtures/typescript-symbols; inspect=src/component.tsx ;;
+    esac
+    lane_json="$ARTIFACT_DIR/symbol-relationships-$lane.json"
+    lane_json_b="$ARTIFACT_DIR/symbol-relationships-$lane-b.json"
+    lane_md="$ARTIFACT_DIR/symbol-relationships-$lane.md"
+    lane_md_b="$ARTIFACT_DIR/symbol-relationships-$lane-b.md"
+    lane_table="$ARTIFACT_DIR/symbol-relationships-$lane.txt"
+    lane_table_b="$ARTIFACT_DIR/symbol-relationships-$lane-b.txt"
+    "$EXE" --repo "$repo" --inspect "$inspect" --symbols --symbol-relationships --symbol-limit 6 --format json > "$lane_json" || return 1
+    "$EXE" --repo "$repo" --inspect "$inspect" --symbols --symbol-relationships --symbol-limit 6 --format json > "$lane_json_b" || return 1
+    diff -u "fixtures/expected/symbol-relationships-$lane.json" "$lane_json" >/dev/null || return 1
+    diff -u "$lane_json" "$lane_json_b" >/dev/null || return 1
+    "$EXE" --repo "$repo" --inspect "$inspect" --symbols --symbol-relationships --symbol-limit 6 --format markdown > "$lane_md" || return 1
+    "$EXE" --repo "$repo" --inspect "$inspect" --symbols --symbol-relationships --symbol-limit 6 --format markdown > "$lane_md_b" || return 1
+    diff -u "fixtures/expected/symbol-relationships-$lane.md" "$lane_md" >/dev/null || return 1
+    diff -u "$lane_md" "$lane_md_b" >/dev/null || return 1
+    "$EXE" --repo "$repo" --inspect "$inspect" --symbols --symbol-relationships --symbol-limit 6 --format table > "$lane_table" || return 1
+    "$EXE" --repo "$repo" --inspect "$inspect" --symbols --symbol-relationships --symbol-limit 6 --format table > "$lane_table_b" || return 1
+    diff -u "fixtures/expected/symbol-relationships-$lane.txt" "$lane_table" >/dev/null || return 1
+    diff -u "$lane_table" "$lane_table_b" >/dev/null || return 1
+    grep -q -- '"symbol_relationships"' "$lane_json" || return 1
+    grep -q -- '## Symbol relationships' "$lane_md" || return 1
+    grep -q -- 'symbol relationships for retained ranked files:' "$lane_table" || return 1
+    ! grep -Eiq -- 'Fixture Author|fixture@example|https?://|ssh://|git@|/home/|/Users/|source snippet|commit message' "$lane_json" "$lane_md" "$lane_table" || return 1
+  done
+  have_python || return 1
+  python3 - "$ARTIFACT_DIR/symbol-relationships-javascript.json" "$ARTIFACT_DIR/symbol-relationships-typescript.json" "$ARTIFACT_DIR/symbol-relationships-tsx.json" <<'PY' || return 1
+import json, sys
+cases = [
+    (sys.argv[1], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}),
+    (sys.argv[2], 'tree-sitter-typescript-relations', {'contains', 'call', 'unresolved', 'unknown'}),
+    (sys.argv[3], 'tree-sitter-tsx-relations', {'contains', 'reference', 'unresolved', 'unknown'}),
+]
+for path, provider_name, expected_kinds in cases:
+    with open(path, encoding='utf-8') as fh:
+        data = json.load(fh)
+    relationships = data['symbol_relationships']
+    assert relationships['basis']['requires_symbols_flag'] is True
+    assert relationships['basis']['scoring_effect'] == 'none'
+    assert relationships['provenance']['local_only'] is True and relationships['provenance']['network'] is False
+    assert relationships['providers'][0]['provider']['name'] == provider_name
+    assert relationships['summary']['relation_record_count'] == len(relationships['records'])
+    assert expected_kinds.issubset({item['kind'] for item in relationships['records']}), path
+    assert any(item['target_unresolved'] for item in relationships['records']), path
+    assert all(item['provider']['input'].startswith('working-tree:') for item in relationships['records'])
+    assert 'call-graph truth' not in json.dumps(data)
+PY
   "$EXE" --repo fixtures/symbols --inspect src/readme.txt --symbols --format json > "$SYMBOLS_UNSUPPORTED_JSON" || return 1
   diff -u fixtures/expected/symbols-unsupported.json "$SYMBOLS_UNSUPPORTED_JSON" >/dev/null || return 1
   "$EXE" --repo fixtures/symbols --inspect src/link.zig --symbols --format json > "$SYMBOLS_SYMLINK_JSON" || return 1

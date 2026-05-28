@@ -213,6 +213,53 @@ pub const RelationCandidate = struct {
     order_key: RelationOrderKey,
 };
 
+pub const RelationExtraction = struct {
+    provider: ProviderEvidence,
+    candidates: []RelationCandidate,
+    cap_reached: bool = false,
+    omitted_count: usize = 0,
+
+    pub fn deinit(self: *RelationExtraction, allocator: std.mem.Allocator) void {
+        freeRelationProvider(allocator, self.provider);
+        freeRelationCandidates(allocator, self.candidates);
+        self.* = undefined;
+    }
+};
+
+pub fn freeRelationProvider(allocator: std.mem.Allocator, evidence: ProviderEvidence) void {
+    allocator.free(evidence.input.identity);
+}
+
+pub fn freeRelationCandidates(allocator: std.mem.Allocator, candidates: []RelationCandidate) void {
+    for (candidates) |candidate| freeRelationCandidate(allocator, candidate);
+    if (candidates.len > 0) allocator.free(candidates);
+}
+
+pub fn freeRelationCandidate(allocator: std.mem.Allocator, candidate: RelationCandidate) void {
+    freeRelationEndpoint(allocator, candidate.source);
+    freeRelationEndpoint(allocator, candidate.target);
+    allocator.free(candidate.evidence_basis);
+    freeRelationProvider(allocator, candidate.provider);
+    allocator.free(candidate.order_key.path);
+    allocator.free(candidate.order_key.relation);
+    allocator.free(candidate.order_key.target);
+}
+
+pub fn freeRelationEndpoint(allocator: std.mem.Allocator, endpoint: RelationEndpoint) void {
+    switch (endpoint) {
+        .file => |file| allocator.free(file.path),
+        .current_symbol => |symbol| {
+            allocator.free(symbol.path);
+            allocator.free(symbol.name);
+        },
+        .report_symbol => |symbol| {
+            allocator.free(symbol.path);
+            allocator.free(symbol.name);
+        },
+        .unresolved, .external_string => |named| allocator.free(named.value),
+    }
+}
+
 pub fn validateRelationEndpoint(endpoint: RelationEndpoint) PathError!void {
     switch (endpoint) {
         .file => |file| try validateRepoRelativePath(file.path),

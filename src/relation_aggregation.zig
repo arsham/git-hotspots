@@ -2,7 +2,9 @@ const std = @import("std");
 const model = @import("model.zig");
 const provider = @import("provider.zig");
 const tree_sitter_common = @import("tree_sitter_common.zig");
+const tree_sitter_javascript = @import("tree_sitter_javascript.zig");
 const tree_sitter_python = @import("tree_sitter_python.zig");
+const tree_sitter_typescript = @import("tree_sitter_typescript.zig");
 
 const invalid_path_caveats = [_][]const u8{
     "relation provider skipped candidate with invalid repo-relative path; retained provider failure for internal diagnostics",
@@ -118,25 +120,60 @@ fn extractRelationsPath(
     path: []const u8,
     options: Options,
 ) !tree_sitter_python.RelationExtraction {
+    if (std.mem.endsWith(u8, path, ".py")) {
+        const relation_options: tree_sitter_python.RelationOptions = .{
+            .max_source_bytes = options.max_source_bytes,
+            .max_candidates = options.max_candidates_per_file,
+            .force_provider_unavailable = options.force_provider_unavailable,
+        };
+        const source = try tree_sitter_common.readBoundedFile(allocator, io, repo_root, path, options.max_source_bytes) orelse
+            return tree_sitter_python.extractRelationsSource(allocator, path, "", .{
+                .max_source_bytes = options.max_source_bytes,
+                .max_candidates = options.max_candidates_per_file,
+                .force_provider_unavailable = true,
+            });
+        defer allocator.free(source);
+        return tree_sitter_python.extractRelationsSource(allocator, path, source, relation_options);
+    }
+
+    if (tree_sitter_javascript.isSupportedJavaScriptPath(path)) {
+        const relation_options: tree_sitter_javascript.RelationOptions = .{
+            .max_source_bytes = options.max_source_bytes,
+            .max_candidates = options.max_candidates_per_file,
+            .force_provider_unavailable = options.force_provider_unavailable,
+        };
+        const source = try tree_sitter_common.readBoundedFile(allocator, io, repo_root, path, options.max_source_bytes) orelse
+            return tree_sitter_javascript.extractRelationsSource(allocator, path, "", .{
+                .max_source_bytes = options.max_source_bytes,
+                .max_candidates = options.max_candidates_per_file,
+                .force_provider_unavailable = true,
+            });
+        defer allocator.free(source);
+        return tree_sitter_javascript.extractRelationsSource(allocator, path, source, relation_options);
+    }
+
+    if (tree_sitter_typescript.isSupportedPath(path)) {
+        const relation_options: tree_sitter_typescript.RelationOptions = .{
+            .max_source_bytes = options.max_source_bytes,
+            .max_candidates = options.max_candidates_per_file,
+            .force_provider_unavailable = options.force_provider_unavailable,
+        };
+        const source = try tree_sitter_common.readBoundedFile(allocator, io, repo_root, path, options.max_source_bytes) orelse
+            return tree_sitter_typescript.extractRelationsSource(allocator, path, "", .{
+                .max_source_bytes = options.max_source_bytes,
+                .max_candidates = options.max_candidates_per_file,
+                .force_provider_unavailable = true,
+            });
+        defer allocator.free(source);
+        return tree_sitter_typescript.extractRelationsSource(allocator, path, source, relation_options);
+    }
+
     const relation_options: tree_sitter_python.RelationOptions = .{
         .max_source_bytes = options.max_source_bytes,
         .max_candidates = options.max_candidates_per_file,
         .force_provider_unavailable = options.force_provider_unavailable,
     };
-
-    if (!std.mem.endsWith(u8, path, ".py")) {
-        return tree_sitter_python.extractRelationsSource(allocator, path, "", relation_options);
-    }
-
-    const source = try tree_sitter_common.readBoundedFile(allocator, io, repo_root, path, options.max_source_bytes) orelse
-        return tree_sitter_python.extractRelationsSource(allocator, path, "", .{
-            .max_source_bytes = options.max_source_bytes,
-            .max_candidates = options.max_candidates_per_file,
-            .force_provider_unavailable = true,
-        });
-    defer allocator.free(source);
-
-    return tree_sitter_python.extractRelationsSource(allocator, path, source, relation_options);
+    return tree_sitter_python.extractRelationsSource(allocator, path, "", relation_options);
 }
 
 fn candidateFiles(allocator: std.mem.Allocator, results: []const model.Result) ![]CandidateFile {
