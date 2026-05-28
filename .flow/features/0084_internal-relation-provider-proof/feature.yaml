@@ -1,0 +1,742 @@
+schema: flow-feature.v1
+feature:
+  id: "0084"
+  slug: internal-relation-provider-proof
+  title: Internal relation provider proof
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: The relationship architecture exists, but git-hotspots has no runtime
+    proof that a local provider can emit relation candidates safely. Without a
+    narrow internal proof, public relation output would risk overclaiming
+    call-graph truth, widening runtime cost, or duplicating provider-specific
+    aggregation logic.
+  outcome: Add an internal/test-only provider-neutral relation model and one
+    bounded local Tree-sitter-backed provider proof. It must emit caveated
+    relation candidates for a small set of relation kinds while preserving all
+    public CLI/report/scoring surfaces.
+  acceptance:
+    - Internal provider-neutral relation model and one syntax provider proof
+      exist with test-only or inspect-internal access.
+    - Relation kinds cover contains, reference, call, import_include,
+      unresolved, and unknown where honestly supported by the selected provider
+      proof.
+    - Unresolved targets remain explicit unresolved endpoints with caveats
+      rather than fabricated mappings.
+    - Unsupported language, parser failure, oversized input, cap reached, and
+      provider unavailable cases degrade without breaking existing hotspot
+      analysis.
+    - Existing public CLI flags, help, report schemas, explain output, scoring,
+      ranking, docs, packaging, and cache truth do not change.
+    - Fixtures prove relation kinds, unresolved targets, nested contains,
+      import/include, unsupported/failure/cap cases, and deterministic ordering.
+    - B002 is linked and validates; independent delegated review is required for
+      close-out.
+planning:
+  state: ready
+  summary: "B002 successor slice 1 of the relation batch: internal relation
+    provider proof only. Prove the provider seam, endpoint identities, relation
+    kinds, caveats, unsupported/failure behaviour, caps, and deterministic
+    ordering before pipeline aggregation or public output."
+  brief_sync:
+    status: updated
+    reason: "Feature 0084 is linked to B002 as the first relation runtime successor:
+      internal provider proof only, no public output."
+    checked_at: 2026-05-28T01:14:41.748Z
+  brief_alignment:
+    status: aligned
+    role: primary
+    summary: "Feature 0084 is the primary first implementation slice for B002
+      relation evidence after the 0083 architecture spike: provider proof before
+      aggregation or public reports."
+    checked_at: 2026-05-28T01:14:41.766Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-28T01:17:05.308Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-28T01:17:05.308Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-28T01:17:05.308Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-28T01:17:05.308Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Detached B002 successor batch after feature 0083 selected a
+    narrow internal relation proof as the first runtime successor.
+  depends_on_feature_ids: []
+  blocked_by: []
+design:
+  rough_shape:
+    - Add internal relation model/seam and one local syntax provider proof using
+      an existing Tree-sitter-backed provider family.
+    - Keep relation evidence test-only or inspect-internal; no public
+      CLI/report/docs/schema/scoring/cache changes.
+    - Prove relation kinds, unresolved targets, failure/cap behaviour, and
+      deterministic ordering with fixtures.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Internal relation model and provider seam
+      goal: Define provider-neutral relation endpoint/candidate structures and
+        integration points without public output.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: docs/symbol-relationship-architecture.md, src/provider.zig,
+          src/model.zig, existing tree-sitter provider modules."
+        - "In scope: internal structs, endpoint categories, relation kinds,
+          provider envelope/caveat fields."
+        - "Out of scope: public CLI/report fields, scoring, cache, whole-repo
+          graph discovery."
+        - "Protected: relation evidence remains optional evidence context, not
+          truth or ranking input."
+        - "Dependencies: feature 0083 architecture."
+        - "Validation/evidence: zig fmt --check build.zig src tests; zig build
+          test."
+        - "Review focus: provider-neutral model and no public-surface drift."
+        - "Escalate if: design requires LSP/global tooling/network/cache/public
+          output."
+        - "Done boundary: model/seam compiles and is used by tests or provider
+          proof."
+      verification_commands:
+        - zig fmt --check build.zig src tests
+        - zig build test
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: One local syntax provider proof
+      goal: Emit caveated relation candidates for one existing tree-sitter-backed
+        provider family.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: selected existing tree-sitter provider, relation model from
+          P1, relation fixtures."
+        - "In scope: contains/reference/call/import_include/unresolved/unknown
+          where honestly supported."
+        - "Out of scope: full semantic resolution, cross-language resolver,
+          historical relation parsing, public output."
+        - "Protected: unresolved targets must not be fabricated."
+        - "Dependencies: P1."
+        - "Validation/evidence: targeted unit/fixture tests and zig build test."
+        - "Review focus: honest caveats and deterministic candidate identities."
+        - "Escalate if: selected language cannot cheaply prove a representative
+          subset."
+        - "Done boundary: provider proof emits relation candidates and
+          failure/cap states."
+      verification_commands:
+        - zig build test
+    - id: P3
+      depends_on:
+        - P2
+      status: planned
+      title: Fixture proof and validation
+      goal: Prove edge cases, public-surface protection, and Flow readiness for
+        close-out.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: tests/fixtures, validation scripts, B002/feature state."
+        - "In scope: resolved, unresolved, nested contains, import/include,
+          unsupported, failure, cap, deterministic ordering tests."
+        - "Out of scope: real public golden output changes."
+        - "Protected: existing public output compatibility."
+        - "Dependencies: P1-P2."
+        - "Validation/evidence: git diff --check; zig fmt --check build.zig src
+          tests; zig build test; zig build validate; flow validate
+          feature/brief."
+        - "Review focus: close-out rows proven and no public report drift."
+        - "Escalate if: validation requires public output changes."
+        - "Done boundary: all validation passes and reviewer can independently
+          verify."
+      verification_commands:
+        - git diff --check
+        - zig fmt --check build.zig src tests
+        - zig build test
+        - zig build validate
+        - flow validate --target feature:0084
+        - flow validate --target brief:B002
+  output_contract:
+    public_runtime_changes: none
+    primary_deliverables:
+      - internal relation model/provider proof
+      - fixture/unit tests
+    protected_surfaces:
+      - CLI flags and help
+      - table/JSON/Markdown reports
+      - explain output
+      - scoring/ranking
+      - README/user guide/man page
+      - cache schema
+      - network/telemetry/runtime LLM absence
+  packet_contract:
+    version: v1
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B002
+timestamps:
+  created_at: 2026-05-28T01:10:31.823Z
+  updated_at: 2026-05-28T01:17:30.959Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-28T01:17:30.959Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0084"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B002
+    feature:
+      title: Internal relation provider proof
+      problem: The relationship architecture exists, but git-hotspots has no runtime
+        proof that a local provider can emit relation candidates safely. Without
+        a narrow internal proof, public relation output would risk overclaiming
+        call-graph truth, widening runtime cost, or duplicating
+        provider-specific aggregation logic.
+      outcome: Add an internal/test-only provider-neutral relation model and one
+        bounded local Tree-sitter-backed provider proof. It must emit caveated
+        relation candidates for a small set of relation kinds while preserving
+        all public CLI/report/scoring surfaces.
+      acceptance:
+        - Internal provider-neutral relation model and one syntax provider proof
+          exist with test-only or inspect-internal access.
+        - Relation kinds cover contains, reference, call, import_include,
+          unresolved, and unknown where honestly supported by the selected
+          provider proof.
+        - Unresolved targets remain explicit unresolved endpoints with caveats
+          rather than fabricated mappings.
+        - Unsupported language, parser failure, oversized input, cap reached,
+          and provider unavailable cases degrade without breaking existing
+          hotspot analysis.
+        - Existing public CLI flags, help, report schemas, explain output,
+          scoring, ranking, docs, packaging, and cache truth do not change.
+        - Fixtures prove relation kinds, unresolved targets, nested contains,
+          import/include, unsupported/failure/cap cases, and deterministic
+          ordering.
+        - B002 is linked and validates; independent delegated review is required
+          for close-out.
+    brief_alignment:
+      status: aligned
+      role: primary
+      summary: "Feature 0084 is the primary first implementation slice for B002
+        relation evidence after the 0083 architecture spike: provider proof
+        before aggregation or public reports."
+      checked_at: 2026-05-28T01:14:41.766Z
+    briefs:
+      - id: B002
+        title: Symbol-aware hotspot intelligence
+        summary: "Capability brief for symbol-aware hotspot intelligence: extend
+          git-hotspots beyond file-level evidence to identify historically
+          active code symbols (functions, methods, types, modules, or other
+          language-provider symbols) from local Git history using a
+          language-agnostic pipeline. The capability must stay deterministic,
+          local-first, and performant, while making new language support
+          automatically benefit from the same history attribution, scoring,
+          explanation, and future relationship analysis surfaces."
+        desired_capability:
+          - Report hotspot evidence at symbol granularity, not just file
+            granularity, so users can investigate historically volatile
+            functions, methods, types, modules, or provider-defined symbols.
+          - "Use a normalized symbol-provider contract: language-specific
+            providers only expose symbol identity, kind, file path, source
+            range/span, and optional nesting/context; the Git-history
+            attribution, scoring, output, and explanation pipeline remains
+            language-agnostic."
+          - Attribute local Git history to symbols by intersecting changed
+            ranges, file revisions, and symbol spans in a deterministic way,
+            with enough evidence for users to understand why a symbol appears
+            hot.
+          - Design the symbol model so future enrichers can ask which symbols
+            are referenced by, used by, or related to hot places without
+            redesigning hotspot evidence from scratch.
+          - "Keep runtime defaults local-first: no network, telemetry, remote
+            enrichment, or non-deterministic service dependency for symbol
+            hotspot analysis."
+        why:
+          - File-level hotspots are useful but too coarse when a large file
+            contains one volatile function or type and many stable neighbours.
+          - A language-agnostic symbol pipeline prevents each future language
+            provider from needing bespoke hotspot scoring and history-search
+            logic.
+          - Symbol-level evidence gives agents and humans a more precise
+            investigation prompt while preserving the project rule that hotspots
+            are evidence, not blame, predictions, or code-quality scores.
+          - Future relationship analysis, such as symbols used by hot places,
+            needs stable symbol identities and relation-ready output contracts
+            from the beginning.
+        in_scope:
+          - Capability-level planning for extracting or receiving symbols
+            through providers, normalizing symbol records, and mapping
+            Git-history changes onto those records.
+          - "Performance-sensitive history traversal strategy: batch Git
+            queries, stream/limit revision data, parse only relevant file
+            revisions where possible, and avoid naive full-repository reparsing
+            for every commit."
+          - "Deterministic evidence fields for symbol hotspots: churn/change
+            frequency/recency/confidence/explanation inputs at symbol level,
+            with links back to file path, symbol kind, range/source context, and
+            relevant commits or changed hunks where feasible."
+          - "Language-extensibility rule: adding a new symbol provider should
+            make that language eligible for symbol hotspot reports without
+            changing the scoring, history attribution, CLI report, or export
+            logic except for provider registration and provider-specific tests."
+          - "Forward-compatible seams for reference/use analysis: symbol
+            identifiers, nesting/ownership, and relation-provider hooks should
+            be planned even if reference graph support is deferred."
+        out_of_scope:
+          - Predicting bugs, judging code quality, ranking developers, or
+            treating symbol hotspots as accusations rather than investigation
+            prompts.
+          - Network-backed code intelligence, hosted enrichment, telemetry, or
+            remote index upload by default.
+          - Implementing full semantic reference graphs, call graphs, or
+            cross-language dependency intelligence in the first symbol-hotspot
+            slice; those are future enrichers that should consume stable symbol
+            evidence.
+          - Requiring cache as product truth. Caches may improve performance
+            later, but symbol analysis must have a correct no-cache path.
+          - Browser-visible UI design is out of scope for this brief unless a
+            future feature adds visual symbol hotspot exploration; if that
+            happens, UX tone, visual constraints, and approval decisions must be
+            captured in feature/PRD artefacts.
+        durable_decisions:
+          - Treat symbol hotspots as an extension of deterministic Git-history
+            evidence, not as semantic judgement or prediction.
+          - "Make the core symbol-hotspot pipeline provider-neutral: providers
+            supply symbols; the shared engine maps history to symbols and
+            produces common reports/exports."
+          - Design for performance from the first feature by avoiding per-commit
+            whole-tree parsing and by batching Git/history work.
+          - Plan relation-aware output seams now, but defer reference/use
+            analysis until after symbol hotspot evidence is trustworthy.
+          - No feature-level PRD or implementation packet is created yet from
+            this intake; the next shaping step should decide whether to create a
+            feature for the first symbol-provider/history-attribution slice and
+            push detailed acceptance and packet plans into feature.yaml/prd.md.
+          - "First implementation slice selected during shaping for feature
+            0078: project-level current-symbol hotspot evidence over retained
+            ranked file hotspots using existing current symbol providers and
+            optional HEAD current-line Git evidence. This deliberately is not
+            true historical hunk-to-symbol attribution, symbol rename/move
+            lineage, reference/use analysis, scoring replacement, cache, or
+            provider plugin infrastructure; those remain later capability work
+            after current-symbol evidence is trustworthy."
+          - "Successor architecture spike selected for feature 0079: define true
+            historical hunk-to-symbol attribution before runtime implementation.
+            The spike is architecture-only and should produce
+            docs/historical-symbol-attribution-architecture.md, comparing
+            approaches and selecting a deterministic no-checkout local pipeline
+            over historical blobs, changed hunks, and revision-local provider
+            symbols. It deliberately does not add a user-facing historical
+            symbol engine, scoring changes, semantic lineage, reference
+            analysis, cache truth, or remote/provider dependencies."
+          - "Successor batch selected after feature 0080: feature 0081 is the
+            prerequisite internal pipeline integration that wires historical
+            hunk attribution into bounded ranked-file analysis without public
+            output drift; feature 0082 is the primary user-facing opt-in
+            historical symbol hotspot report that should execute serially after
+            0081 and update CLI/report/docs/tests/validation together.
+            Reference/use analysis remains deferred until the public historical
+            symbol report contract is stable."
+          - "Successor architecture spike selected for feature 0083: define
+            symbol relationship evidence before runtime implementation. The
+            spike is documentation-only and should produce
+            docs/symbol-relationship-architecture.md, comparing provider
+            approaches and defining relation endpoints, kinds, confidence,
+            caveats, deterministic aggregation, performance limits, and a narrow
+            local-first implementation successor. It deliberately does not add
+            relation runtime analysis, CLI/report output, scoring changes, cache
+            truth, dependencies, or public claim expansion."
+          - "Relation evidence successor batch selected: 0084 internal relation
+            provider proof, then 0085 internal relation aggregation integration,
+            then 0086 opt-in public symbol relationship report. The batch
+            remains serial: 0085 depends on 0084, and 0086 depends on 0084 and
+            0085. Public relation output must wait until internal provider and
+            aggregation proof are closed. Relation evidence stays local-first,
+            deterministic, caveated, evidence-only, and must not alter
+            file/symbol scoring or imply call-graph truth, dependency proof,
+            ownership, code-quality judgement, developer metrics, or bug
+            prediction."
+    prd_path: .flow/features/0084_internal-relation-provider-proof/prd.md
+  requirements_contract:
+    source_path: .flow/features/0084_internal-relation-provider-proof/prd.md
+    source_digest: 93eed5c9993be14b00632523af05e8ff3e3a9c4a594e1b10538e28b68547660b
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: "REQ-001: Add an internal provider-neutral relation endpoint/candidate
+          model that can represent file, current-symbol, report-symbol,
+          unresolved, and external-string endpoints needed by the selected
+          provider proof."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: "REQ-002: Relation candidates must carry relation kind, direction when
+          meaningful, evidence basis, provider envelope,
+          confidence/freshness/failure state, caveats, and deterministic
+          ordering keys."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: "REQ-003: Implement one local syntax-provider proof using an existing
+          Tree-sitter-backed provider family or a bounded equivalent already
+          supported by the repository."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: "REQ-004: The provider proof must emit contains, reference, call,
+          import_include, unresolved, and unknown candidates where the selected
+          language can support them honestly."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: "REQ-005: Unsupported or ambiguous relation targets must remain unresolved
+          endpoints with explicit caveats; the implementation must not fabricate
+          target mappings."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: "REQ-006: Unsupported languages, parser failures, provider unavailable
+          states, oversized inputs, and cap-reached cases must degrade to
+          caveated absent or partial relation evidence without breaking existing
+          hotspot analysis."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: "REQ-007: Relation evidence must remain internal/test-only or
+          inspect-internal; no public table, JSON, Markdown, explain, help,
+          README, man page, or user guide relation output may be added in this
+          feature."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: "REQ-008: Existing file and symbol scoring, ranking, sorting, and public
+          output defaults must not change."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: "REQ-009: The feature must not add network access, telemetry, remote
+          enrichment, runtime LLM judgement, hosted services, mandatory cache
+          truth, or global LSP service requirements."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: "REQ-010: Fixture or unit tests must prove resolved syntax relation,
+          unresolved target, nested contains, import_include, unsupported
+          language, provider failure, cap reached, and deterministic ordering
+          behaviour."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: "REQ-011: Provider diagnostics, source snippets, author names, emails,
+          remotes, absolute local paths, commit messages, and raw private report
+          output must not be emitted in public or committed validation
+          artefacts."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: "REQ-012: B002 must remain linked and valid; this feature must be recorded
+          as the first runtime successor after the relationship architecture
+          spike."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: "REQ-013: zig fmt --check build.zig src tests, zig build test, and zig
+          build validate must pass before close-out."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: "REQ-014: flow validate --target feature:0084 and flow validate --target
+          brief:B002 must pass before close-out."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#edge-cases[1]
+        text: Provider can parse a file but cannot resolve a target name.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#edge-cases[2]
+        text: Relation-like syntax is present but cannot be classified safely.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#edge-cases[3]
+        text: Nested symbols produce multiple containment candidates.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#edge-cases[4]
+        text: Import/include syntax names a module or path-like string without a safe
+          local endpoint.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#edge-cases[5]
+        text: Selected provider fails, times out, or is unavailable.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#edge-cases[6]
+        text: Unsupported language is included in the candidate set.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#edge-cases[7]
+        text: Candidate or edge cap truncates output.
+        category: edge_case
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#edge-cases[8]
+        text: Source is oversized, binary-like, or skipped by policy.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#edge-cases[9]
+        text: Hash-map or provider iteration order would otherwise make results
+          unstable.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#verification-notes[1]
+        text: Close-out requires independent review. The reviewer should verify that
+          only internal/test-facing relation surfaces changed, public outputs
+          did not drift, fixture coverage proves the edge cases above, and all
+          relation wording remains caveated evidence rather than semantic truth.
+        category: verification
+        packet_refs:
+          - P3
+        verification: Close-out requires independent review. The reviewer should verify
+          that only internal/test-facing relation surfaces changed, public
+          outputs did not drift, fixture coverage proves the edge cases above,
+          and all relation wording remains caveated evidence rather than
+          semantic truth.
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: Add an internal/test-only provider-neutral relation model and one
+      bounded local Tree-sitter-backed provider proof. It must emit caveated
+      relation candidates for a small set of relation kinds while preserving all
+      public CLI/report/scoring surfaces.
+    acceptance:
+      - Internal provider-neutral relation model and one syntax provider proof
+        exist with test-only or inspect-internal access.
+      - Relation kinds cover contains, reference, call, import_include,
+        unresolved, and unknown where honestly supported by the selected
+        provider proof.
+      - Unresolved targets remain explicit unresolved endpoints with caveats
+        rather than fabricated mappings.
+      - Unsupported language, parser failure, oversized input, cap reached, and
+        provider unavailable cases degrade without breaking existing hotspot
+        analysis.
+      - Existing public CLI flags, help, report schemas, explain output,
+        scoring, ranking, docs, packaging, and cache truth do not change.
+      - Fixtures prove relation kinds, unresolved targets, nested contains,
+        import/include, unsupported/failure/cap cases, and deterministic
+        ordering.
+      - B002 is linked and validates; independent delegated review is required
+        for close-out.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig fmt --check build.zig src tests
+      - zig build test
+      - git diff --check
+      - zig build validate
+      - flow validate --target feature:0084
+      - flow validate --target brief:B002
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+      - confirm relation evidence remains internal and caveated
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+      - public output change
+      - semantic certainty or ownership claim
+    protected_surfaces:
+      - no public CLI flags or help changes
+      - no table JSON Markdown report schema changes
+      - no explain output changes
+      - no scoring ranking or cache truth changes
+      - no network telemetry remote enrichment runtime LLM or hosted service
+  fallback_path: deferred_reconcile_decision
+  notes: null
