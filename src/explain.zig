@@ -84,36 +84,37 @@ pub const text =
     \\Unsupported ranked current files are counted; unsupported or unavailable
     \\inspected current files preserve file evidence and report provider caveats
     \\without parser diagnostics or source snippets. Go support does not evaluate
-    \\packages, build tags, cgo, dependency graphs, symbol lineage, scoring, or
-    \\true symbol history. Python support does not evaluate imports, packages,
+    \\packages, build tags, cgo, dependency graphs, semantic symbol lineage,
+    \\scoring, or ranking. Python support does not evaluate imports, packages,
     \\virtual environments, generated-source policy, dependency graphs, scoring,
     \\ownership, or semantic moves. JavaScript support for .js, .mjs, .cjs, and
     \\admitted .jsx files does not evaluate Node, packages, workspaces, module
-    \\resolution, TypeScript, TSX, dependency graphs, scoring, ownership, or
-    \\symbol history. Lua support for .lua files does not evaluate package,
+    \\resolution, TypeScript, TSX, dependency graphs, semantic symbol lineage,
+    \\scoring, or ownership. Lua support for .lua files does not evaluate package,
     \\require, runtime module resolution, metatables, dynamic table keys,
-    \\dependency graphs, runtime execution, scoring, ownership, maintainer
-    \\judgement, bug prediction, or code quality; symbol history is out of scope.
-    \\Rust support for .rs files does not evaluate Cargo, crates, module
-    \\resolution, macro expansion output, cfg feature selection, type checking,
-    \\dependency graphs, scoring, or ownership; symbol history is out of scope.
-    \\TypeScript/TSX support for .ts, .mts, .cts, and .tsx files does not
-    \\evaluate packages, workspaces, tsconfig, module resolution, type checking,
-    \\dependency graphs, scoring, ownership, cache, or symbol history.
+    \\dependency graphs, runtime execution, semantic symbol lineage, scoring,
+    \\or ownership; it makes no maintainer judgement, bug prediction, or
+    \\code-quality claim. Rust support for .rs files does not evaluate Cargo,
+    \\crates, module resolution, macro expansion output, cfg feature selection,
+    \\type checking, or dependency graphs; it makes no semantic symbol lineage,
+    \\scoring, or ownership claim. TypeScript/TSX support for .ts, .mts, .cts,
+    \\and .tsx files does not evaluate packages, workspaces, tsconfig, module
+    \\resolution, type checking, dependency graphs, or cache; it makes no
+    \\semantic symbol lineage, scoring, or ownership claim.
     \\
     \\### Provider capability matrix
     \\
-    \\| Language lane | Inspected paths | --symbols provider | --symbols evidence | --symbol-line-history evidence | Explicit boundary |
-    \\| --- | --- | --- | --- | --- | --- |
-    \\| Zig | .zig | tree-sitter-zig | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no dependencies, semantic moves, true symbol history, scoring, or ownership claims |
-    \\| Go | .go | tree-sitter-go | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, build tags, cgo, dependency graphs, true symbol history, scoring, or ownership claims |
-    \\| Python | .py | tree-sitter-python | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no imports, packages, virtual environments, dependency graphs, generated-source policy, true symbol history, scoring, or ownership claims |
-    \\| JavaScript | .js, .mjs, .cjs, admitted .jsx | tree-sitter-javascript | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, true symbol history, scoring, or ownership claims |
-    \\| Lua | .lua | tree-sitter-lua | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, true symbol history, scoring, or ownership claims |
-    \\| Rust | .rs | tree-sitter-rust | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no Cargo, crates, module resolution, macro expansion output, cfg feature selection, type checking, dependency graphs, true symbol history, scoring, or ownership claims |
-    \\| TypeScript | .ts, .mts, .cts | tree-sitter-typescript | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, true symbol history, scoring, or ownership claims |
-    \\| TSX | .tsx | tree-sitter-tsx | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no React, DOM, packages, type analysis, dependency graphs, cache, true symbol history, scoring, or ownership claims |
-    \\| Unsupported current files | all other paths | unsupported fallback | provider reports unsupported and keeps inspected file evidence | no current-line evidence | no parser diagnostics, source snippets, or parsed symbols |
+    \\| Language lane | Inspected paths | --symbols provider | --symbols evidence | --symbol-line-history evidence | --historical-symbols evidence | --symbol-relationships evidence | Explicit boundary |
+    \\| --- | --- | --- | --- | --- | --- | --- | --- |
+    \\| Zig | .zig | tree-sitter-zig | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-zig when parsing succeeds | unsupported | no dependencies, semantic moves, relationship support, true semantic lineage, scoring, or ownership claims |
+    \\| Go | .go | tree-sitter-go | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-go when parsing succeeds | unsupported | no packages, build tags, cgo, dependency graphs, relationship support, true semantic lineage, scoring, or ownership claims |
+    \\| Python | .py | tree-sitter-python | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-python when parsing succeeds | public opt-in tree-sitter-python-relations syntax evidence | no imports, packages, virtual environments, dependency graphs, generated-source policy, call-graph truth, scoring, or ownership claims |
+    \\| JavaScript | .js, .mjs, .cjs, admitted .jsx | tree-sitter-javascript | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-javascript when parsing succeeds | public opt-in tree-sitter-javascript-relations syntax evidence | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, call-graph truth, scoring, or ownership claims |
+    \\| Lua | .lua | tree-sitter-lua | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-lua when parsing succeeds | unsupported | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, relationship support, scoring, or ownership claims |
+    \\| Rust | .rs | tree-sitter-rust | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-rust when parsing succeeds | public opt-in tree-sitter-rust-relations syntax evidence | no Cargo, crates, module resolution, macro expansion output, cfg feature selection, type checking, dependency graphs, call-graph truth, scoring, or ownership claims |
+    \\| TypeScript | .ts, .mts, .cts | tree-sitter-typescript | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-typescript when parsing succeeds | public opt-in tree-sitter-typescript-relations syntax evidence | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, call-graph truth, scoring, or ownership claims |
+    \\| TSX | .tsx | tree-sitter-tsx | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-tsx when parsing succeeds | public opt-in tree-sitter-tsx-relations syntax evidence | no React, DOM, packages, type analysis, dependency graphs, cache, call-graph truth, scoring, or ownership claims |
+    \\| Unsupported current files | all other paths | unsupported fallback | provider reports unsupported and keeps inspected file evidence | no current-line evidence | file-level fallback only when retained by historical attribution | unsupported | no parser diagnostics, source snippets, parsed symbols, relationship support, or scoring claims |
     \\
     \\--symbol-line-history is opt-in and requires --symbols. It adds
     \\current-line Git evidence for current Zig, Go, Python, JavaScript, Lua,
@@ -126,6 +127,15 @@ pub const text =
     \\It reports commit-count and timestamp summaries without author identities,
     \\commit messages, source snippets, remotes, or absolute paths. This is not
     \\symbol lineage, ownership, scoring input, or semantic history.
+    \\
+    \\--historical-symbols is opt-in and requires --symbols. It adds bounded
+    \\true historical hunk attribution for retained ranked-file candidates and
+    \\reports revision-local symbols when the provider can parse a historical
+    \\blob, with file-level fallback rows when it cannot. It uses the same
+    \\current symbol provider lanes and does not change score, rank, confidence,
+    \\co-change evidence, scope, lineage, or file-level evidence. This is not
+    \\semantic symbol lineage, reference/use analysis, ownership, bug prediction,
+    \\scoring replacement, or a ranking input.
     \\
     \\--symbol-relationships is opt-in and requires --symbols. It adds bounded
     \\local Tree-sitter relation evidence for Python, JavaScript, Rust,
@@ -181,8 +191,8 @@ test "explanation includes confidence and non-claim boundaries" {
         "Symbol evidence does not change file score",
         "JavaScript support for .js, .mjs, .cjs, and",
         "Lua support for .lua files",
-        "Rust support for .rs files",
-        "TypeScript/TSX support for .ts, .mts, .cts, and .tsx",
+        "support for .rs files",
+        "support for .ts, .mts, .cts,",
         "Provider capability matrix",
         "| Zig | .zig |",
         "| Lua | .lua |",
@@ -190,10 +200,14 @@ test "explanation includes confidence and non-claim boundaries" {
         "| TSX | .tsx |",
         "Unsupported current files",
         "current-line Git evidence for HEAD line ranges",
+        "--historical-symbols evidence",
+        "--symbol-relationships evidence",
         "not true symbol history, historical identity tracking, or git log -L",
         "--symbol-relationships is opt-in and requires --symbols",
         "local Tree-sitter relation evidence for Python, JavaScript, Rust",
         "Rust relation evidence is syntax-only",
+        "public opt-in tree-sitter-typescript-relations syntax evidence",
+        "| Zig | .zig | tree-sitter-zig | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-zig when parsing succeeds | unsupported |",
     }) |snippet| {
         try std.testing.expect(std.mem.indexOf(u8, text, snippet) != null);
     }

@@ -263,36 +263,37 @@ inclusion/exclusion decisions. Unsupported ranked current files are counted;
 unsupported or unavailable inspected current files preserve file evidence and
 report provider caveats without parser diagnostics, source snippets, absolute
 paths, remotes, author identities, or commit messages. Go support does not
-evaluate packages, build tags, cgo, dependency graphs, symbol lineage, scoring,
-ranking, or true symbol history. Python support does not evaluate imports,
-packages, virtual environments, dependency graphs, generated-source policy,
-scoring, ownership, or semantic moves. JavaScript support for `.js`, `.mjs`,
-`.cjs`, and admitted `.jsx` files does not evaluate Node, packages, workspaces,
-module resolution, TypeScript, TSX, dependency graphs, scoring, ownership, or
-symbol history. Lua symbol output for `.lua` files does not evaluate packages,
-`require`, runtime modules, types, metatables, dynamic table keys, dependency
-graphs, runtime execution, scoring, ownership, maintainer judgement, bug
-prediction, or code quality; symbol history is out of scope. Rust support for
-`.rs` files does not evaluate Cargo, crates, module resolution, macro expansion
-output, cfg feature selection, type checking, dependency graphs, scoring, or
-ownership; symbol history is out of scope. TypeScript/TSX support for `.ts`,
-`.mts`, `.cts`, and `.tsx` files does not evaluate packages, workspaces,
-tsconfig, module resolution, type checking, dependency graphs, scoring,
-ownership, cache, or symbol history.
+evaluate packages, build tags, cgo, dependency graphs, semantic symbol lineage,
+scoring, or ranking. Python support does not evaluate imports, packages,
+virtual environments, dependency graphs, generated-source policy, scoring,
+ownership, or semantic moves. JavaScript support for `.js`, `.mjs`, `.cjs`,
+and admitted `.jsx` files does not evaluate Node, packages, workspaces, module
+resolution, TypeScript, TSX, dependency graphs, semantic symbol lineage,
+scoring, or ownership. Lua symbol output for `.lua` files does not evaluate
+packages, `require`, runtime modules, types, metatables, dynamic table keys,
+dependency graphs, runtime execution, semantic symbol lineage, scoring,
+or ownership; it makes no maintainer judgement, bug prediction, or code-quality
+claim. Rust support for `.rs` files does not evaluate Cargo, crates, module
+resolution, macro expansion output, cfg feature selection, type checking, or
+dependency graphs; it makes no semantic symbol lineage, scoring, or ownership
+claim. TypeScript/TSX support for
+`.ts`, `.mts`, `.cts`, and `.tsx` files does not evaluate packages,
+workspaces, tsconfig, module resolution, type checking, dependency graphs, or
+cache; it makes no semantic symbol lineage, scoring, or ownership claim.
 
 Provider capability matrix:
 
-| Language lane | Inspected paths | `--symbols` provider | `--symbols` evidence | `--symbol-line-history` evidence | Explicit boundary |
-| --- | --- | --- | --- | --- | --- |
-| Zig | `.zig` | `tree-sitter-zig` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no dependencies, semantic moves, true symbol history, scoring, or ownership claims |
-| Go | `.go` | `tree-sitter-go` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, build tags, cgo, dependency graphs, true symbol history, scoring, or ownership claims |
-| Python | `.py` | `tree-sitter-python` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no imports, packages, virtual environments, dependency graphs, generated-source policy, true symbol history, scoring, or ownership claims |
-| JavaScript | `.js`, `.mjs`, `.cjs`, admitted `.jsx` | `tree-sitter-javascript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, true symbol history, scoring, or ownership claims |
-| Lua | `.lua` | `tree-sitter-lua` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, true symbol history, scoring, or ownership claims |
-| Rust | `.rs` | `tree-sitter-rust` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no Cargo, crates, module resolution, macro expansion output, cfg feature selection, type checking, dependency graphs, true symbol history, scoring, or ownership claims |
-| TypeScript | `.ts`, `.mts`, `.cts` | `tree-sitter-typescript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, true symbol history, scoring, or ownership claims |
-| TSX | `.tsx` | `tree-sitter-tsx` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | no React, DOM, packages, type analysis, dependency graphs, cache, true symbol history, scoring, or ownership claims |
-| Unsupported current files | all other paths | unsupported fallback | provider reports `unsupported` and keeps inspected file evidence | no current-line evidence | no parser diagnostics, source snippets, or parsed symbols |
+| Language lane | Inspected paths | `--symbols` provider | `--symbols` evidence | `--symbol-line-history` evidence | `--historical-symbols` evidence | `--symbol-relationships` evidence | Explicit boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Zig | `.zig` | `tree-sitter-zig` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-zig` when parsing succeeds | unsupported | no dependencies, semantic moves, relationship support, true semantic lineage, scoring, or ownership claims |
+| Go | `.go` | `tree-sitter-go` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-go` when parsing succeeds | unsupported | no packages, build tags, cgo, dependency graphs, relationship support, true semantic lineage, scoring, or ownership claims |
+| Python | `.py` | `tree-sitter-python` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-python` when parsing succeeds | public opt-in `tree-sitter-python-relations` syntax evidence | no imports, packages, virtual environments, dependency graphs, generated-source policy, call-graph truth, scoring, or ownership claims |
+| JavaScript | `.js`, `.mjs`, `.cjs`, admitted `.jsx` | `tree-sitter-javascript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-javascript` when parsing succeeds | public opt-in `tree-sitter-javascript-relations` syntax evidence | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, call-graph truth, scoring, or ownership claims |
+| Lua | `.lua` | `tree-sitter-lua` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-lua` when parsing succeeds | unsupported | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, relationship support, scoring, or ownership claims |
+| Rust | `.rs` | `tree-sitter-rust` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-rust` when parsing succeeds | public opt-in `tree-sitter-rust-relations` syntax evidence | no Cargo, crates, module resolution, macro expansion output, cfg feature selection, type checking, dependency graphs, call-graph truth, scoring, or ownership claims |
+| TypeScript | `.ts`, `.mts`, `.cts` | `tree-sitter-typescript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-typescript` when parsing succeeds | public opt-in `tree-sitter-typescript-relations` syntax evidence | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, call-graph truth, scoring, or ownership claims |
+| TSX | `.tsx` | `tree-sitter-tsx` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-tsx` when parsing succeeds | public opt-in `tree-sitter-tsx-relations` syntax evidence | no React, DOM, packages, type analysis, dependency graphs, cache, call-graph truth, scoring, or ownership claims |
+| Unsupported current files | all other paths | unsupported fallback | provider reports `unsupported` and keeps inspected file evidence | no current-line evidence | file-level fallback only when retained by historical attribution | unsupported | no parser diagnostics, source snippets, parsed symbols, relationship support, or scoring claims |
 
 `--symbol-line-history` is a second opt-in layer that requires `--symbols`. It
 adds current-line Git evidence for current Zig, Go, Python, JavaScript, Lua,
@@ -313,8 +314,10 @@ adds bounded true historical hunk attribution for retained ranked-file
 candidates and reports parent file rank/score, revision-local symbol
 name/kind/range where available, status, change counts, line-pressure
 aggregates, sample commits, provider state, confidence, fallback counts, and
-caveats. It is local-only evidence, not semantic symbol lineage, reference/use
-analysis, ownership, bug prediction, scoring replacement, or a ranking input.
+caveats. It uses the same current symbol provider lanes, with file-level
+fallback rows when a historical blob cannot be parsed. It is local-only
+evidence, not semantic symbol lineage, reference/use analysis, ownership, bug
+prediction, scoring replacement, or a ranking input.
 
 `--symbol-relationships` is an opt-in relationship layer that requires
 `--symbols`. It currently adds bounded local Tree-sitter relation evidence for

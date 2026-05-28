@@ -116,6 +116,10 @@ grep -q -- "no Cargo, crates, module" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "macro expansion, cfg/feature evaluation, type checking" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "dependency graphs, or semantic Rust analysis" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "not true symbol history" "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "Zig, Go, Lua, and unsupported current" "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "Python, JavaScript, Rust," "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "Zig, Go, Lua, and unsupported current" "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "no public relationship support" "$tmp_dir/git-hotspots-help.txt"
 "$EXE" -h > "$tmp_dir/git-hotspots-help-short.txt" 2> "$tmp_dir/git-hotspots-help-short.err"
 diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-help-short.txt"
 test ! -s "$tmp_dir/git-hotspots-help-short.err"
@@ -209,6 +213,15 @@ assert_fails_with_stderr symbol-limit-invalid "--symbol-limit must be a positive
 "$EXE" --repo fixtures/basic --format json > "$tmp_dir/git-hotspots-basic.json" 2> "$tmp_dir/git-hotspots-basic.err"
 test ! -s "$tmp_dir/git-hotspots-basic.err"
 diff -u fixtures/expected/basic.json "$tmp_dir/git-hotspots-basic.json"
+python3 - "$tmp_dir/git-hotspots-basic.json" <<'PY'
+import json, sys
+with open(sys.argv[1], encoding='utf-8') as fh:
+    data = json.load(fh)
+assert 'symbols' not in data
+assert 'project_symbols' not in data
+assert 'historical_symbols' not in data
+assert 'symbol_relationships' not in data
+PY
 "$EXE" --repo fixtures/basic --progress --format json > "$tmp_dir/git-hotspots-basic-progress.json" 2> "$tmp_dir/git-hotspots-basic-progress.err"
 diff -u "$tmp_dir/git-hotspots-basic.json" "$tmp_dir/git-hotspots-basic-progress.json"
 assert_progress_stderr basic-json "$tmp_dir/git-hotspots-basic-progress.err"

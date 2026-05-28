@@ -2,10 +2,12 @@
 
 This document defines the relationship-evidence layer for `git-hotspots`. The
 first public runtime surface is `--symbol-relationships`, an opt-in report layer
-that requires `--symbols` and currently exposes bounded local Python
-Tree-sitter relation evidence for retained ranked-file candidates. It remains
-additive to file-level Git-history evidence and changes no scoring, ranking,
-cache behaviour, network behaviour, or telemetry defaults.
+that requires `--symbols` and currently exposes bounded local Tree-sitter
+relation evidence for Python, JavaScript, Rust, TypeScript, and TSX retained
+ranked-file candidates. Zig, Go, Lua, and unsupported current files have no
+public relationship provider. The layer remains additive to file-level
+Git-history evidence and changes no scoring, ranking, cache behaviour, network
+behaviour, or telemetry defaults.
 
 Relationship evidence is optional investigation context attached to existing
 file, current-symbol, and historical-symbol hotspot evidence. It helps a user
@@ -24,7 +26,7 @@ it.
 | File hotspot evidence | `src/model.zig` `Result` and Git analysis | File-level Git-history ranking remains the product truth. | Relations may attach to retained file results, but must not change file scores or ranking. |
 | Current symbol evidence | `src/provider.zig` `CurrentSymbolEvidence` | Current working-tree symbol spans from optional providers. | Relations may point at current symbols when the provider can identify an endpoint, but current symbols are not lineage proof. |
 | Current-line history | `CurrentLineHistoryEvidence` | Local blame-style evidence for current symbol line ranges. | Relations may reuse caveats and freshness, but must not infer authorship, ownership, or productivity. |
-| Historical symbol evidence | `src/historical_symbol_attribution.zig` `AggregateRecord` | Caveated hunk-to-symbol attribution over local Git blobs. | Relations may point at historical observations, including deleted symbols, while preserving historical-only caveats. |
+| Historical symbol evidence | `src/historical_symbol_attribution.zig` `AggregateRecord` | Caveated hunk-to-symbol attribution over local Git blobs. | Current public relations do not emit historical endpoints; future relation providers may point at historical observations only with explicit caveats. |
 
 File-level ranking stays authoritative. Symbol and relation evidence enriches the
 explanation for a retained result and can be absent without breaking existing

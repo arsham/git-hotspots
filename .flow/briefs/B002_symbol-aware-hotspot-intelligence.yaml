@@ -157,6 +157,15 @@ durable_decisions:
     evidence-only, and must not imply call-graph truth, type-aware dependency
     proof, ownership, code-quality judgement, developer metrics, bug prediction,
     scoring changes, cache truth, network access, or telemetry."
+  - "Feature 0090 closed the public provider capability decision: current
+    symbols, current-line history, and historical-symbol hunk attribution use
+    the Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and TSX provider
+    lanes, with file-level fallback for unsupported historical blobs;
+    symbol-relationship evidence is public only for Python, JavaScript, Rust,
+    TypeScript, and TSX. Zig, Go, Lua, and unsupported current files have no
+    public relationship provider. Documentation, help/explain text, man page,
+    integration checks, and validation anchors must stay aligned with that
+    matrix until a later feature explicitly admits another relationship lane."
 links:
   roadmap_item_id: null
   feature_ids:
@@ -174,4 +183,4 @@ links:
     - "0090"
 timestamps:
   created_at: 2026-05-27T19:12:06.269Z
-  updated_at: 2026-05-28T21:03:00.000Z
+  updated_at: 2026-05-29T00:00:00.000Z

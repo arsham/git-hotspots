@@ -176,6 +176,62 @@ or for one inspected path. The supported lanes are Zig, Go, Python, JavaScript,
 Lua, Rust, TypeScript, and TSX. Unsupported files preserve file-level evidence
 and are counted without parser diagnostics.
 .PP
+Capability by language:
+.IP \[bu] 2
+Zig
+.B .zig
+supports current symbols, current-line history, and historical-symbol fallback;
+public relationships are unsupported.
+.IP \[bu]
+Go
+.B .go
+supports current symbols, current-line history, and historical-symbol fallback;
+public relationships are unsupported.
+.IP \[bu]
+Python
+.B .py
+supports current symbols, current-line history, historical-symbol fallback, and
+public opt-in
+.B tree-sitter-python-relations
+relationship evidence.
+.IP \[bu]
+JavaScript
+.B .js/.mjs/.cjs/.jsx
+supports current symbols, current-line history, historical-symbol fallback, and
+public opt-in
+.B tree-sitter-javascript-relations
+relationship evidence.
+.IP \[bu]
+Lua
+.B .lua
+supports current symbols, current-line history, and historical-symbol fallback;
+public relationships are unsupported.
+.IP \[bu]
+Rust
+.B .rs
+supports current symbols, current-line history, historical-symbol fallback, and
+public opt-in
+.B tree-sitter-rust-relations
+relationship evidence.
+.IP \[bu]
+TypeScript
+.B .ts/.mts/.cts
+supports current symbols, current-line history, historical-symbol fallback, and
+public opt-in
+.B tree-sitter-typescript-relations
+relationship evidence.
+.IP \[bu]
+TSX
+.B .tsx
+supports current symbols, current-line history, historical-symbol fallback, and
+public opt-in
+.B tree-sitter-tsx-relations
+relationship evidence.
+.IP \[bu]
+Other current files preserve file evidence with unsupported current-symbol and
+relationship status, no current-line evidence, and file-level fallback only when
+retained by historical attribution.
+.PP
 Rust support does not evaluate Cargo, crates, module resolution, macro expansion
 output, cfg feature selection, type checking, dependency graphs, or semantic
 Rust analysis.
