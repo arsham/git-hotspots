@@ -130,6 +130,15 @@ durable_decisions:
     report that should execute serially after 0081 and update
     CLI/report/docs/tests/validation together. Reference/use analysis remains
     deferred until the public historical symbol report contract is stable."
+  - "Successor architecture spike selected for feature 0083: define symbol
+    relationship evidence before runtime implementation. The spike is
+    documentation-only and should produce
+    docs/symbol-relationship-architecture.md, comparing provider approaches and
+    defining relation endpoints, kinds, confidence, caveats, deterministic
+    aggregation, performance limits, and a narrow local-first implementation
+    successor. It deliberately does not add relation runtime analysis,
+    CLI/report output, scoring changes, cache truth, dependencies, or public
+    claim expansion."
 links:
   roadmap_item_id: null
   feature_ids:
@@ -137,6 +146,7 @@ links:
     - "0079"
     - "0080"
     - "0081"
+    - "0083"
 timestamps:
   created_at: 2026-05-27T19:12:06.269Z
-  updated_at: 2026-05-27T23:24:33.832Z
+  updated_at: 2026-05-28T00:43:31.531Z
