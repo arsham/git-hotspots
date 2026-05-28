@@ -6,6 +6,7 @@ pub const PathError = error{InvalidRepoRelativePath};
 
 pub const ProviderKind = enum {
     symbol,
+    relation,
     dependency,
     @"test",
     coverage,
@@ -146,6 +147,85 @@ pub const CurrentLineHistoryEvidence = struct {
     caveats: [][]const u8,
 };
 
+pub const RelationKind = enum {
+    contains,
+    reference,
+    call,
+    import_include,
+    unresolved,
+    unknown,
+};
+
+pub const RelationDirection = enum {
+    source_to_target,
+    target_to_source,
+    none,
+};
+
+pub const FileEndpoint = struct {
+    path: []const u8,
+};
+
+pub const CurrentSymbolEndpoint = struct {
+    path: []const u8,
+    name: []const u8,
+    kind: SymbolKind,
+    current_range: CurrentRange,
+};
+
+pub const ReportSymbolEndpoint = struct {
+    path: []const u8,
+    name: []const u8,
+    rank: ?usize = null,
+};
+
+pub const NamedRelationEndpoint = struct {
+    value: []const u8,
+};
+
+pub const RelationEndpoint = union(enum) {
+    file: FileEndpoint,
+    current_symbol: CurrentSymbolEndpoint,
+    report_symbol: ReportSymbolEndpoint,
+    unresolved: NamedRelationEndpoint,
+    external_string: NamedRelationEndpoint,
+};
+
+pub const RelationOrderKey = struct {
+    path: []const u8,
+    start_byte: u64,
+    end_byte: u64,
+    relation: []const u8,
+    target: []const u8,
+};
+
+pub const RelationCandidate = struct {
+    kind: RelationKind,
+    direction: RelationDirection,
+    source: RelationEndpoint,
+    target: RelationEndpoint,
+    evidence_basis: []const u8,
+    provider: ProviderEvidence,
+    freshness: Freshness,
+    failure: Failure,
+    confidence: Confidence,
+    caveats: []const []const u8 = &.{},
+    order_key: RelationOrderKey,
+};
+
+pub fn validateRelationEndpoint(endpoint: RelationEndpoint) PathError!void {
+    switch (endpoint) {
+        .file => |file| try validateRepoRelativePath(file.path),
+        .current_symbol => |symbol| try validateRepoRelativePath(symbol.path),
+        .report_symbol => |symbol| try validateRepoRelativePath(symbol.path),
+        .unresolved, .external_string => {},
+    }
+}
+
+pub fn lessRelation(_: void, lhs: RelationCandidate, rhs: RelationCandidate) bool {
+    return compareRelation(lhs, rhs) == .lt;
+}
+
 pub fn validateRepoRelativePath(path: []const u8) PathError!void {
     if (path.len == 0) return error.InvalidRepoRelativePath;
     if (std.fs.path.isAbsolute(path) or path[0] == '\\') return error.InvalidRepoRelativePath;
@@ -195,6 +275,73 @@ fn compareSymbol(lhs: CurrentSymbolEvidence, rhs: CurrentSymbolEvidence) std.mat
     return .eq;
 }
 
+fn compareRelation(lhs: RelationCandidate, rhs: RelationCandidate) std.math.Order {
+    inline for (.{
+        std.mem.order(u8, lhs.order_key.path, rhs.order_key.path),
+        compareU64(lhs.order_key.start_byte, rhs.order_key.start_byte) orelse .eq,
+        compareU64(lhs.order_key.end_byte, rhs.order_key.end_byte) orelse .eq,
+        std.mem.order(u8, lhs.order_key.relation, rhs.order_key.relation),
+        std.mem.order(u8, lhs.order_key.target, rhs.order_key.target),
+        std.mem.order(u8, @tagName(lhs.kind), @tagName(rhs.kind)),
+        std.mem.order(u8, @tagName(lhs.direction), @tagName(rhs.direction)),
+        compareEndpoint(lhs.source, rhs.source),
+        compareEndpoint(lhs.target, rhs.target),
+    }) |order| {
+        if (order != .eq) return order;
+    }
+    return .eq;
+}
+
+fn compareEndpoint(lhs: RelationEndpoint, rhs: RelationEndpoint) std.math.Order {
+    const tag_order = std.mem.order(u8, @tagName(lhs), @tagName(rhs));
+    if (tag_order != .eq) return tag_order;
+    return switch (lhs) {
+        .file => |lhs_file| std.mem.order(u8, lhs_file.path, switch (rhs) {
+            .file => |rhs_file| rhs_file.path,
+            else => unreachable,
+        }),
+        .current_symbol => |lhs_symbol| compareCurrentSymbolEndpoint(lhs_symbol, switch (rhs) {
+            .current_symbol => |rhs_symbol| rhs_symbol,
+            else => unreachable,
+        }),
+        .report_symbol => |lhs_symbol| compareReportSymbolEndpoint(lhs_symbol, switch (rhs) {
+            .report_symbol => |rhs_symbol| rhs_symbol,
+            else => unreachable,
+        }),
+        .unresolved => |lhs_named| std.mem.order(u8, lhs_named.value, switch (rhs) {
+            .unresolved => |rhs_named| rhs_named.value,
+            else => unreachable,
+        }),
+        .external_string => |lhs_named| std.mem.order(u8, lhs_named.value, switch (rhs) {
+            .external_string => |rhs_named| rhs_named.value,
+            else => unreachable,
+        }),
+    };
+}
+
+fn compareCurrentSymbolEndpoint(lhs: CurrentSymbolEndpoint, rhs: CurrentSymbolEndpoint) std.math.Order {
+    inline for (.{
+        std.mem.order(u8, lhs.path, rhs.path),
+        std.mem.order(u8, lhs.name, rhs.name),
+        std.mem.order(u8, @tagName(lhs.kind), @tagName(rhs.kind)),
+        compareRange(lhs.current_range, rhs.current_range),
+    }) |order| {
+        if (order != .eq) return order;
+    }
+    return .eq;
+}
+
+fn compareReportSymbolEndpoint(lhs: ReportSymbolEndpoint, rhs: ReportSymbolEndpoint) std.math.Order {
+    inline for (.{
+        std.mem.order(u8, lhs.path, rhs.path),
+        std.mem.order(u8, lhs.name, rhs.name),
+        compareOptionalUsize(lhs.rank, rhs.rank),
+    }) |order| {
+        if (order != .eq) return order;
+    }
+    return .eq;
+}
+
 fn compareRange(lhs: CurrentRange, rhs: CurrentRange) std.math.Order {
     const lhs_tag = @tagName(lhs);
     const rhs_tag = @tagName(rhs);
@@ -218,6 +365,13 @@ fn compareRange(lhs: CurrentRange, rhs: CurrentRange) std.math.Order {
                 else => unreachable,
             }) orelse .eq),
     };
+}
+
+fn compareOptionalUsize(lhs: ?usize, rhs: ?usize) std.math.Order {
+    if (lhs == null and rhs == null) return .eq;
+    if (lhs == null) return .lt;
+    if (rhs == null) return .gt;
+    return compareU64(lhs.?, rhs.?) orelse .eq;
 }
 
 fn compareU64(lhs: u64, rhs: u64) ?std.math.Order {
@@ -291,6 +445,88 @@ test "provider and symbol ordering is deterministic" {
     try std.testing.expectEqualStrings("main", symbols[0].name);
     try std.testing.expectEqualStrings("parseArgs", symbols[1].name);
     try std.testing.expectEqualStrings("src/provider.zig", symbols[2].path);
+}
+
+fn relationProviderFixture(input_identity: []const u8) ProviderEvidence {
+    return .{
+        .name = "tree-sitter-python-relations",
+        .kind = .relation,
+        .version = "synthetic-relation-1",
+        .input = .{ .identity = input_identity },
+        .freshness = .fresh,
+        .failure = .ok,
+        .confidence = .medium,
+        .caveats = &.{ "candidate relation evidence only", "not used for scoring or ranking" },
+        .provenance = .{ .provider_name = "tree-sitter-python-relations", .input_identity = input_identity },
+    };
+}
+
+fn relationFixture(kind: RelationKind, start_byte: u64, target: RelationEndpoint, target_key: []const u8) RelationCandidate {
+    return .{
+        .kind = kind,
+        .direction = .source_to_target,
+        .source = .{ .file = .{ .path = "pkg/example.py" } },
+        .target = target,
+        .evidence_basis = "synthetic Tree-sitter relation proof",
+        .provider = relationProviderFixture("working-tree:pkg/example.py"),
+        .freshness = .fresh,
+        .failure = .ok,
+        .confidence = .medium,
+        .caveats = &.{ "candidate relation evidence only", "target mappings are unresolved unless syntactically local" },
+        .order_key = .{
+            .path = "pkg/example.py",
+            .start_byte = start_byte,
+            .end_byte = start_byte + 1,
+            .relation = @tagName(kind),
+            .target = target_key,
+        },
+    };
+}
+
+test "relation model represents provider-neutral endpoints and caveated states" {
+    const relation = relationFixture(
+        .call,
+        42,
+        .{ .unresolved = .{ .value = "missing_helper" } },
+        "missing_helper",
+    );
+
+    try validateRelationEndpoint(relation.source);
+    try validateRelationEndpoint(relation.target);
+    try std.testing.expectEqual(RelationKind.call, relation.kind);
+    try std.testing.expectEqual(RelationDirection.source_to_target, relation.direction);
+    try std.testing.expectEqual(ProviderKind.relation, relation.provider.kind);
+    try std.testing.expectEqual(Freshness.fresh, relation.freshness);
+    try std.testing.expectEqual(Failure.ok, relation.failure);
+    try std.testing.expectEqual(Confidence.medium, relation.confidence);
+    try std.testing.expectEqualStrings("call", relation.order_key.relation);
+    try std.testing.expectEqualStrings("missing_helper", relation.order_key.target);
+    switch (relation.target) {
+        .unresolved => |endpoint| try std.testing.expectEqualStrings("missing_helper", endpoint.value),
+        else => return error.ExpectedUnresolvedEndpoint,
+    }
+
+    const endpoints = [_]RelationEndpoint{
+        .{ .file = .{ .path = "pkg/example.py" } },
+        .{ .current_symbol = .{ .path = "pkg/example.py", .name = "helper", .kind = .function, .current_range = .{ .lines = .{ .start = 1, .end = 2 } } } },
+        .{ .report_symbol = .{ .path = "pkg/example.py", .name = "reported", .rank = 7 } },
+        .{ .unresolved = .{ .value = "missing_helper" } },
+        .{ .external_string = .{ .value = "package.module" } },
+    };
+    for (endpoints) |endpoint| try validateRelationEndpoint(endpoint);
+}
+
+test "relation candidate ordering is deterministic" {
+    var relations = [_]RelationCandidate{
+        relationFixture(.reference, 30, .{ .current_symbol = .{ .path = "pkg/example.py", .name = "helper", .kind = .function, .current_range = .{ .lines = .{ .start = 1, .end = 2 } } } }, "helper"),
+        relationFixture(.contains, 10, .{ .current_symbol = .{ .path = "pkg/example.py", .name = "Container", .kind = .class, .current_range = .{ .lines = .{ .start = 3, .end = 8 } } } }, "Container"),
+        relationFixture(.import_include, 20, .{ .external_string = .{ .value = "os.path" } }, "os.path"),
+    };
+
+    std.mem.sort(RelationCandidate, &relations, {}, lessRelation);
+    try std.testing.expectEqual(RelationKind.contains, relations[0].kind);
+    try std.testing.expectEqual(RelationKind.import_include, relations[1].kind);
+    try std.testing.expectEqual(RelationKind.reference, relations[2].kind);
 }
 
 test "repo-relative path validation rejects unsafe paths but allows bounded metadata" {
