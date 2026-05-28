@@ -104,6 +104,7 @@ grep -q -- "--progress" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "--symbols" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "--symbol-line-history" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "--historical-symbols" "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "--symbol-relationships" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "--symbol-limit N" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "-h, --help" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "Examples:" "$tmp_dir/git-hotspots-help.txt"
@@ -127,6 +128,9 @@ test ! -s "$tmp_dir/git-hotspots-symbols-help.err"
 "$EXE" --historical-symbols --help > "$tmp_dir/git-hotspots-historical-symbols-help.txt" 2> "$tmp_dir/git-hotspots-historical-symbols-help.err"
 diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-historical-symbols-help.txt"
 test ! -s "$tmp_dir/git-hotspots-historical-symbols-help.err"
+"$EXE" --symbol-relationships --help > "$tmp_dir/git-hotspots-symbol-relationships-help.txt" 2> "$tmp_dir/git-hotspots-symbol-relationships-help.err"
+diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-symbol-relationships-help.txt"
+test ! -s "$tmp_dir/git-hotspots-symbol-relationships-help.err"
 "$EXE" --repo --help > "$tmp_dir/git-hotspots-repo-help.txt" 2> "$tmp_dir/git-hotspots-repo-help.err"
 diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-repo-help.txt"
 test ! -s "$tmp_dir/git-hotspots-repo-help.err"
@@ -192,6 +196,10 @@ assert_fails_with_stderr historical-symbols-alone "--historical-symbols requires
 assert_fails_with_stderr historical-symbols-no-symbols "--historical-symbols requires --symbols" "$EXE" --inspect src/app.zig --historical-symbols
 assert_fails_with_stderr historical-symbols-explain "--explain cannot be combined" "$EXE" --historical-symbols --explain
 assert_fails_with_stderr historical-symbols-version "--version cannot be combined" "$EXE" --historical-symbols --version
+assert_fails_with_stderr symbol-relationships-alone "--symbol-relationships requires --symbols" "$EXE" --symbol-relationships
+assert_fails_with_stderr symbol-relationships-no-symbols "--symbol-relationships requires --symbols" "$EXE" --inspect src/app.zig --symbol-relationships
+assert_fails_with_stderr symbol-relationships-explain "--explain cannot be combined" "$EXE" --symbol-relationships --explain
+assert_fails_with_stderr symbol-relationships-version "--version cannot be combined" "$EXE" --symbol-relationships --version
 assert_fails_with_stderr symbol-limit-alone "--symbol-limit requires --symbols" "$EXE" --symbol-limit 1
 assert_fails_with_stderr symbol-limit-no-symbols "--symbol-limit requires --symbols" "$EXE" --inspect src/app.zig --symbol-limit 1
 assert_fails_with_stderr symbol-limit-missing "--symbol-limit must be a positive integer" "$EXE" --inspect src/app.zig --symbols --symbol-limit
@@ -307,6 +315,41 @@ diff -u fixtures/expected/historical-symbols.txt "$tmp_dir/git-hotspots-historic
 diff -u "$tmp_dir/git-hotspots-historical-symbols.txt" "$tmp_dir/git-hotspots-historical-symbols-2.txt"
 grep -Fq -- 'historical symbols for retained ranked files:' "$tmp_dir/git-hotspots-historical-symbols.txt"
 grep -Fq -- 'provider_states:' "$tmp_dir/git-hotspots-historical-symbols.txt"
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-relationships --symbol-limit 4 --format json > "$tmp_dir/git-hotspots-symbol-relationships.json"
+diff -u fixtures/expected/symbol-relationships.json "$tmp_dir/git-hotspots-symbol-relationships.json"
+python3 - "$tmp_dir/git-hotspots-symbol-relationships.json" <<'PY'
+import json, sys
+with open(sys.argv[1], encoding='utf-8') as fh:
+    data = json.load(fh)
+relationships = data['symbol_relationships']
+assert 'symbols' in data and 'project_symbols' not in data
+assert relationships['basis']['kind'] == 'bounded-local-relation-evidence'
+assert relationships['basis']['requires_symbols_flag'] is True
+assert relationships['basis']['scoring_effect'] == 'none'
+assert relationships['provenance']['local_only'] is True
+assert relationships['human_display']['active_limit'] == 4
+assert relationships['human_display']['limit_source'] == 'explicit'
+assert relationships['summary']['candidate_file_count'] == 1
+assert relationships['summary']['retained_candidate_file_count'] == 1
+assert relationships['summary']['current_symbol_candidate_count'] >= 1
+assert relationships['summary']['relation_record_count'] == len(relationships['records'])
+assert relationships['records'], 'expected Python relation records'
+assert any(item['target_unresolved'] for item in relationships['records'])
+assert all('source_endpoint' in item and 'target_endpoint' in item for item in relationships['records'])
+assert all(item['provider']['input'].startswith('working-tree:') for item in relationships['records'])
+assert 'call-graph truth' not in json.dumps(data)
+PY
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-relationships --symbol-limit 4 --format json > "$tmp_dir/git-hotspots-symbol-relationships-2.json"
+diff -u "$tmp_dir/git-hotspots-symbol-relationships.json" "$tmp_dir/git-hotspots-symbol-relationships-2.json"
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-relationships --symbol-limit 4 --format markdown > "$tmp_dir/git-hotspots-symbol-relationships.md"
+diff -u fixtures/expected/symbol-relationships.md "$tmp_dir/git-hotspots-symbol-relationships.md"
+grep -Fq -- '## Symbol relationships' "$tmp_dir/git-hotspots-symbol-relationships.md"
+grep -Fq -- 'Symbol relationships are opt-in bounded local provider evidence' "$tmp_dir/git-hotspots-symbol-relationships.md"
+grep -Fq -- 'Unresolved target' "$tmp_dir/git-hotspots-symbol-relationships.md"
+"$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-relationships --symbol-limit 4 --format table > "$tmp_dir/git-hotspots-symbol-relationships.txt"
+diff -u fixtures/expected/symbol-relationships.txt "$tmp_dir/git-hotspots-symbol-relationships.txt"
+grep -Fq -- 'symbol relationships for retained ranked files:' "$tmp_dir/git-hotspots-symbol-relationships.txt"
+grep -Fq -- 'records=' "$tmp_dir/git-hotspots-symbol-relationships.txt"
 "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-line-history --format json > "$tmp_dir/git-hotspots-symbols-line-history.json"
 python3 -m json.tool "$tmp_dir/git-hotspots-symbols-line-history.json" >/dev/null
 grep -Fq -- '"current_line_history"' "$tmp_dir/git-hotspots-symbols-line-history.json"

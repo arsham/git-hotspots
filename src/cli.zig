@@ -53,9 +53,15 @@ pub const usage =
     \\                    for retained ranked-file candidates; separate from current
     \\                    working-tree symbols and current-line HEAD evidence; does not
     \\                    affect score, rank, lineage, confidence, or file-level evidence
+    \\  --symbol-relationships
+    \\                    With --symbols, add opt-in bounded local relation evidence for
+    \\                    retained ranked-file candidates; caveated investigation
+    \\                    context only, not call-graph truth, dependency proof,
+    \\                    scoring, ownership, developer metrics, or bug prediction
     \\  --symbol-limit N  With --symbols, limit human table and
-    \\                    Markdown current and historical symbol rows (default: 25);
-    \\                    JSON symbol item arrays remain complete within internal bounds
+    \\                    Markdown current, historical, and relationship rows
+    \\                    (default: 25); JSON item arrays remain complete within
+    \\                    internal bounds
     \\
     \\Standalone help:
     \\  --explain         Explain current scoring semantics without analysing a repo
@@ -67,6 +73,7 @@ pub const usage =
     \\  git-hotspots --repo . --scope project --since HEAD~500 --progress --format markdown
     \\  git-hotspots --repo . --limit 5 --symbols --format markdown
     \\  git-hotspots --repo . --limit 5 --symbols --historical-symbols --format markdown
+    \\  git-hotspots --repo . --limit 5 --symbols --symbol-relationships --format markdown
     \\  git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
     \\  git-hotspots --explain
     \\
@@ -96,6 +103,10 @@ pub const usage =
     \\  --historical-symbols adds true historical hunk attribution for retained
     \\  ranked-file candidates only; it is not semantic lineage, reference/use
     \\  analysis, ownership, bug prediction, scoring replacement, or ranking input.
+    \\  --symbol-relationships adds bounded local relation evidence for retained
+    \\  ranked-file candidates only; it is caveated syntax/provider evidence, not
+    \\  call-graph truth, dependency proof, scoring replacement, ownership,
+    \\  developer metrics, or bug prediction.
     \\
 ;
 
@@ -128,6 +139,7 @@ pub const CliError = error{
     InvalidSymbolsCombination,
     InvalidSymbolLineHistoryCombination,
     InvalidHistoricalSymbolsCombination,
+    InvalidSymbolRelationshipsCombination,
     InvalidSymbolLimitCombination,
     InvalidSymbolLimit,
     InvalidScope,
@@ -187,6 +199,13 @@ pub fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliEr
             if (explain_requested) return error.InvalidExplainCombination;
             if (version_requested) return error.InvalidVersionCombination;
             cfg.historical_symbols = true;
+            continue;
+        }
+        if (std.mem.eql(u8, arg, "--symbol-relationships")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
+            cfg.symbol_relationships = true;
             continue;
         }
         if (std.mem.eql(u8, arg, "--symbol-limit")) {
@@ -285,6 +304,7 @@ pub fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliEr
     if (cfg.inspect_path != null and limit_seen) return error.InvalidInspectLimitCombination;
     if (cfg.symbol_line_history and !cfg.symbols) return error.InvalidSymbolLineHistoryCombination;
     if (cfg.historical_symbols and !cfg.symbols) return error.InvalidHistoricalSymbolsCombination;
+    if (cfg.symbol_relationships and !cfg.symbols) return error.InvalidSymbolRelationshipsCombination;
     if (cfg.symbol_limit != null and !cfg.symbols) return error.InvalidSymbolLimitCombination;
     try applyScopePreset(allocator, &cfg);
     return .{ .analyze = cfg };
@@ -430,6 +450,7 @@ test "parse defaults are documented through config shape" {
     try std.testing.expect(!cfg.symbols);
     try std.testing.expect(!cfg.symbol_line_history);
     try std.testing.expect(!cfg.historical_symbols);
+    try std.testing.expect(!cfg.symbol_relationships);
     try std.testing.expectEqual(@as(?usize, null), cfg.symbol_limit);
 }
 
@@ -476,6 +497,7 @@ test "parse help has high precedence independent of order" {
         &[_][:0]const u8{ "git-hotspots", "--symbols", "--help" },
         &[_][:0]const u8{ "git-hotspots", "--help", "--symbols" },
         &[_][:0]const u8{ "git-hotspots", "--historical-symbols", "--help" },
+        &[_][:0]const u8{ "git-hotspots", "--symbol-relationships", "--help" },
         &[_][:0]const u8{ "git-hotspots", "--repo", "--help" },
         &[_][:0]const u8{ "git-hotspots", "--format", "--help" },
         &[_][:0]const u8{ "git-hotspots", "-h", "--symbol-limit", "0" },
@@ -501,6 +523,8 @@ test "reject explain combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--symbols", "--explain" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--historical-symbols" },
         &[_][:0]const u8{ "git-hotspots", "--historical-symbols", "--explain" },
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--symbol-relationships" },
+        &[_][:0]const u8{ "git-hotspots", "--symbol-relationships", "--explain" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--symbol-limit", "1" },
         &[_][:0]const u8{ "git-hotspots", "--symbol-limit", "1", "--explain" },
     };
@@ -526,6 +550,8 @@ test "reject version combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--symbols", "--version" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--historical-symbols" },
         &[_][:0]const u8{ "git-hotspots", "--historical-symbols", "--version" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--symbol-relationships" },
+        &[_][:0]const u8{ "git-hotspots", "--symbol-relationships", "--version" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--symbol-limit", "1" },
         &[_][:0]const u8{ "git-hotspots", "--symbol-limit", "1", "--version" },
     };
@@ -703,6 +729,26 @@ test "parse historical symbols requires symbols" {
 
     try std.testing.expectError(error.InvalidHistoricalSymbolsCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--historical-symbols" }));
     try std.testing.expectError(error.InvalidHistoricalSymbolsCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--historical-symbols" }));
+}
+
+test "parse symbol relationships requires symbols" {
+    const project_args = [_][:0]const u8{ "git-hotspots", "--symbols", "--symbol-relationships" };
+    const project_mode = try parseArgs(std.testing.allocator, &project_args);
+    const project_cfg = project_mode.analyze;
+    defer freeConfig(std.testing.allocator, project_cfg);
+    try std.testing.expect(project_cfg.symbols);
+    try std.testing.expect(project_cfg.symbol_relationships);
+
+    const args = [_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbols", "--symbol-relationships" };
+    const mode = try parseArgs(std.testing.allocator, &args);
+    const cfg = mode.analyze;
+    defer freeConfig(std.testing.allocator, cfg);
+    try std.testing.expect(cfg.symbols);
+    try std.testing.expect(cfg.symbol_relationships);
+    try std.testing.expectEqualStrings("src/app.zig", cfg.inspect_path.?);
+
+    try std.testing.expectError(error.InvalidSymbolRelationshipsCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--symbol-relationships" }));
+    try std.testing.expectError(error.InvalidSymbolRelationshipsCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbol-relationships" }));
 }
 
 test "parse symbol limit is human display only with symbols" {

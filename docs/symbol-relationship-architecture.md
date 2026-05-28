@@ -1,8 +1,11 @@
 # Symbol relationship architecture
 
-This spike defines a future relationship-evidence layer for `git-hotspots`.
-It is documentation only: it changes no CLI flags, report schemas, scoring,
-runtime provider execution, fixtures, dependencies, cache behaviour, or output.
+This document defines the relationship-evidence layer for `git-hotspots`. The
+first public runtime surface is `--symbol-relationships`, an opt-in report layer
+that requires `--symbols` and currently exposes bounded local Python
+Tree-sitter relation evidence for retained ranked-file candidates. It remains
+additive to file-level Git-history evidence and changes no scoring, ranking,
+cache behaviour, network behaviour, or telemetry defaults.
 
 Relationship evidence is optional investigation context attached to existing
 file, current-symbol, and historical-symbol hotspot evidence. It helps a user
@@ -41,9 +44,6 @@ reports.
 
 ## Non-goals
 
-- No runtime relation provider implementation in this feature.
-- No public CLI flag, JSON field, table column, Markdown section, explain output,
-  fixture, dependency, cache, or release packaging change.
 - No full call graph, dependency graph, package graph, type checker, macro
   expansion, cross-language resolver, or dynamic-dispatch proof.
 - No semantic proof of references, usage, ownership, blame, lineage, impact, or

@@ -19,6 +19,7 @@ pub const Config = struct {
     symbols: bool = false,
     symbol_line_history: bool = false,
     historical_symbols: bool = false,
+    symbol_relationships: bool = false,
     since: ?[]const u8 = null,
     inspect_path: ?[]const u8 = null,
     scope: ScopePreset = .project,
@@ -150,6 +151,7 @@ pub const RelationRecord = struct {
     target_key: []const u8,
     evidence_basis: []const u8,
     provider_name: []const u8,
+    provider_input_identity: []const u8,
     freshness: provider.Freshness,
     failure: provider.Failure,
     confidence: provider.Confidence,
@@ -179,6 +181,7 @@ pub const RelationAggregationReport = struct {
             allocator.free(record.target_key);
             allocator.free(record.evidence_basis);
             allocator.free(record.provider_name);
+            allocator.free(record.provider_input_identity);
             for (record.caveats) |caveat| allocator.free(caveat);
             allocator.free(record.caveats);
             allocator.free(record.sort_key);

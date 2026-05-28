@@ -72,6 +72,9 @@ pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: m
     if (analysis.historical_symbol_report) |historical_symbols| {
         try renderHistoricalSymbolReportMarkdown(writer, analysis, historical_symbols);
     }
+    if (analysis.relation_report) |relation_report| {
+        try renderSymbolRelationshipReportMarkdown(writer, analysis, relation_report);
+    }
 
     try writer.writeAll("## Caveats\n\n");
     try fmt.renderMarkdownStringList(writer, analysis.caveats);
@@ -233,6 +236,47 @@ fn renderMarkdownInlineStrings(writer: anytype, values: []const []const u8) !voi
         if (i != 0) try writer.writeAll(", ");
         try fmt.markdownText(writer, value);
     }
+}
+
+fn renderSymbolRelationshipReportMarkdown(writer: anytype, analysis: model.Analysis, report: model.RelationAggregationReport) !void {
+    const shown = @min(report.records.len, analysis.symbol_display.limit);
+    try writer.writeAll("## Symbol relationships\n\n");
+    try writer.writeAll("Symbol relationships are opt-in bounded local provider evidence for retained ranked-file candidates only. They do not change score, file order, lineage, confidence, or file-level Git evidence, and they are not call-graph truth, dependency proof, ownership, developer metrics, or bug prediction.\n\n");
+    try writer.print("- Candidate files: {d}\n- Retained candidate files: {d}\n- Current symbol candidates: {d}\n- Provider reports: {d}\n- Relation records: {d}\n- Shown records: {d}\n- Omitted records: {d}\n- Human display limit: {d} ({s})\n", .{ report.candidate_file_count, report.retained_candidate_file_count, report.current_symbol_candidate_count, report.providers.len, report.records.len, shown, report.records.len - shown, analysis.symbol_display.limit, if (analysis.symbol_display.explicit_limit) "explicit" else "default" });
+    try writer.print("- Relation record bound: {d}\n- Relation record bound exceeded: {}\n- Bound-omitted records: {d}\n", .{ report.relation_record_bound, report.relation_record_bound_exceeded, report.omitted_record_count });
+    try writer.writeAll("- Sort basis: source endpoint, target endpoint, kind, direction, provider, evidence basis\n- Caveats:\n");
+    if (report.caveats.len == 0) {
+        try writer.writeAll("  - None\n");
+    } else {
+        for (report.caveats) |caveat| {
+            try writer.writeAll("  - ");
+            try fmt.markdownText(writer, caveat);
+            try writer.writeByte('\n');
+        }
+    }
+    try writer.writeByte('\n');
+    try writer.writeAll("| Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveats |\n");
+    try writer.writeAll("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
+    if (report.records.len == 0) {
+        try writer.writeAll("| None | - | - | - | - | - | - | - | - | - | - | - |\n\n");
+        return;
+    }
+    for (report.records[0..shown]) |record| {
+        try writer.print("| {s} | {s} | ", .{ @tagName(record.kind), @tagName(record.direction) });
+        try fmt.markdownText(writer, record.source_key);
+        try writer.writeAll(" | ");
+        try fmt.markdownText(writer, record.target_key);
+        try writer.print(" | {} | ", .{std.mem.startsWith(u8, record.target_key, "unresolved:")});
+        try fmt.markdownText(writer, record.provider_name);
+        try writer.writeAll(" | ");
+        try fmt.markdownText(writer, record.provider_input_identity);
+        try writer.print(" | {s} | {s} | {s} | ", .{ @tagName(record.freshness), @tagName(record.failure), @tagName(record.confidence) });
+        try fmt.markdownText(writer, record.evidence_basis);
+        try writer.writeAll(" | ");
+        try fmt.renderMarkdownCaveatInline(writer, record.caveats);
+        try writer.writeAll(" |\n");
+    }
+    try writer.writeByte('\n');
 }
 
 fn renderProjectSymbolReportMarkdown(allocator: std.mem.Allocator, writer: anytype, project_symbols: model.ProjectSymbolReport, display: model.SymbolDisplay) !void {

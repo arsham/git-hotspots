@@ -211,6 +211,7 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.ts --symbols --symbol-line-history --format markdown
 ./zig-out/bin/git-hotspots --repo . --symbols --historical-symbols --format markdown
+./zig-out/bin/git-hotspots --repo . --symbols --symbol-relationships --format markdown
 ./zig-out/bin/git-hotspots --repo . --progress --format json
 ./zig-out/bin/git-hotspots --explain
 ./zig-out/bin/git-hotspots --version
@@ -219,7 +220,8 @@ zig build
 Supported options are `--repo`, `--limit`, `--format table|json|markdown`,
 `--since`, `--scope all|project`, repeatable `--include-prefix`, repeatable
 `--exclude-prefix`, `--inspect`, `--symbols`, `--symbol-line-history`,
-`--historical-symbols`, `--progress`, `--explain`, `--version`, and `--help`.
+`--historical-symbols`, `--symbol-relationships`, `--progress`, `--explain`,
+`--version`, and `--help`.
 Invalid CLI combinations exit 2 with concise stderr diagnostics that name the
 failed flag and, when deterministic, show a valid next command shape. For
 example, `--symbol-line-history` requires `--symbols`, so use
@@ -313,6 +315,15 @@ name/kind/range where available, status, change counts, line-pressure
 aggregates, sample commits, provider state, confidence, fallback counts, and
 caveats. It is local-only evidence, not semantic symbol lineage, reference/use
 analysis, ownership, bug prediction, scoring replacement, or a ranking input.
+
+`--symbol-relationships` is an opt-in relationship layer that requires
+`--symbols`. It currently adds bounded local Python Tree-sitter relation
+evidence for retained ranked-file candidates and reports source and target
+endpoints, unresolved targets, provider identity, freshness, failure,
+confidence, caveats, record bounds, and omitted counts. Relationship evidence
+is caveated investigation context only: it is not call-graph truth, dependency
+proof, ownership, developer metrics, bug prediction, scoring replacement, or a
+ranking input.
 
 Git-detected file renames are folded conservatively when both the old and new
 paths are in scope. This is file-path lineage from local Git history only, not

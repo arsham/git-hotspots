@@ -51,7 +51,7 @@ const relation_ok_caveats = [_][]const u8{
     "candidate relation evidence only; file-level Git evidence remains product truth",
     "bounded Python syntax proof: contains, local direct identifier references, direct calls, imports, unresolved identifiers, and ambiguous attribute syntax",
     "unresolved and external-string endpoints are caveated; no local target mapping is fabricated",
-    "relations are internal/test-facing only and are not used for scoring, ranking, cache truth, or public reports",
+    "symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction",
 };
 const relation_unresolved_caveats = relation_ok_caveats ++ [_][]const u8{
     "target is unresolved by this bounded syntax proof",
@@ -1139,7 +1139,7 @@ test "extract relations emits bounded caveated Python relation candidates" {
         try provider.validateRelationEndpoint(relation.source);
         try provider.validateRelationEndpoint(relation.target);
         try std.testing.expectEqual(provider.ProviderKind.relation, relation.provider.kind);
-        try expectCaveat(relation.caveats, "relations are internal/test-facing only and are not used for scoring, ranking, cache truth, or public reports");
+        try expectCaveat(relation.caveats, "symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction");
     }
 }
 

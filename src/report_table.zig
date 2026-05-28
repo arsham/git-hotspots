@@ -52,7 +52,26 @@ pub fn renderTable(allocator: std.mem.Allocator, writer: anytype, analysis: mode
     }
     if (analysis.project_symbol_report) |project_symbols| try renderProjectSymbolRows(allocator, writer, project_symbols, analysis.symbol_display);
     if (analysis.historical_symbol_report) |historical_symbols| try renderHistoricalSymbolRows(writer, analysis, historical_symbols);
+    if (analysis.relation_report) |relation_report| try renderSymbolRelationshipRows(writer, analysis, relation_report);
     try writer.print("\nScores are deterministic prompts for investigation, not bug predictions or code-quality ratings.\n", .{});
+}
+
+fn renderSymbolRelationshipRows(writer: anytype, analysis: model.Analysis, report: model.RelationAggregationReport) !void {
+    const shown = @min(report.records.len, analysis.symbol_display.limit);
+    try writer.print("\nsymbol relationships for retained ranked files:\n", .{});
+    try writer.print("  summary: candidates={d} retained_candidates={d} current_symbol_candidates={d} providers={d} records={d} shown={d} omitted={d} record_bound={d} record_bound_exceeded={} omitted_records={d}\n", .{ report.candidate_file_count, report.retained_candidate_file_count, report.current_symbol_candidate_count, report.providers.len, report.records.len, shown, report.records.len - shown, report.relation_record_bound, report.relation_record_bound_exceeded, report.omitted_record_count });
+    try writer.print("  caveats: ", .{});
+    try fmt.renderCaveatInline(writer, report.caveats);
+    try writer.writeByte('\n');
+    if (report.records.len == 0) {
+        try writer.print("  none\n", .{});
+        return;
+    }
+    for (report.records[0..shown]) |record| {
+        try writer.print("  {s} {s} source={s} target={s} unresolved={} provider={s} input={s} freshness={s} failure={s} confidence={s} basis={s} caveats=", .{ @tagName(record.kind), @tagName(record.direction), record.source_key, record.target_key, std.mem.startsWith(u8, record.target_key, "unresolved:"), record.provider_name, record.provider_input_identity, @tagName(record.freshness), @tagName(record.failure), @tagName(record.confidence), record.evidence_basis });
+        try fmt.renderCaveatInline(writer, record.caveats);
+        try writer.writeByte('\n');
+    }
 }
 
 fn renderHistoricalSymbolRows(writer: anytype, analysis: model.Analysis, report: model.HistoricalSymbolReport) !void {

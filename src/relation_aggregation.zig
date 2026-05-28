@@ -6,7 +6,7 @@ const tree_sitter_python = @import("tree_sitter_python.zig");
 
 const invalid_path_caveats = [_][]const u8{
     "relation provider skipped candidate with invalid repo-relative path; retained provider failure for internal diagnostics",
-    "relations are internal/test-facing only and are not used for scoring, ranking, cache truth, or public reports",
+    "symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction",
 };
 
 pub const Options = struct {
@@ -281,6 +281,7 @@ fn appendRelationRecord(
         .target_key = target_key,
         .evidence_basis = try allocator.dupe(u8, relation.evidence_basis),
         .provider_name = try allocator.dupe(u8, relation.provider.name),
+        .provider_input_identity = try allocator.dupe(u8, relation.provider.input.identity),
         .freshness = relation.freshness,
         .failure = relation.failure,
         .confidence = relation.confidence,
@@ -366,6 +367,7 @@ fn deinitRelationRecords(allocator: std.mem.Allocator, records: []model.Relation
         allocator.free(record.target_key);
         allocator.free(record.evidence_basis);
         allocator.free(record.provider_name);
+        allocator.free(record.provider_input_identity);
         deinitStringList(allocator, record.caveats);
         allocator.free(record.caveats);
         allocator.free(record.sort_key);
@@ -492,7 +494,7 @@ test "relation aggregation attaches retained file and symbol candidates internal
     try std.testing.expectEqual(@as(usize, 1), report.current_symbol_candidate_count);
     try std.testing.expect(report.records.len > 0);
     try std.testing.expectEqual(@as(usize, 2), report.providers.len);
-    try std.testing.expect(reportContainsCaveat(report, "relations are internal/test-facing only"));
+    try std.testing.expect(reportContainsCaveat(report, "optional caveated provider evidence"));
 
     var saw_unsupported = false;
     for (report.providers) |file| {

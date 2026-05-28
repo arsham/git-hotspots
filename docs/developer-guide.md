@@ -21,6 +21,8 @@ usage or contributor detail here or in `docs/user-guide.md`.
   ranked files or for one inspected path; it is not a runtime plugin framework.
 - `src/historical_symbol_*.zig` owns bounded historical hunk attribution over
   retained ranked-file candidates.
+- `src/relation_aggregation.zig` owns bounded opt-in relationship aggregation
+  for retained ranked-file candidates.
 - `src/tree_sitter_*.zig` modules own language-specific current-symbol and
   revision-local extraction.
 - `src/report*.zig` owns deterministic table, JSON, Markdown, and symbol report
@@ -64,10 +66,11 @@ hooks, or packaging work as part of a docs/help-only change.
 
 File-level local Git-history evidence is the product truth. Provider output is
 optional current-file enrichment for ranked files with `--symbols`, optional
-current-line evidence with `--symbol-line-history`, or optional historical hunk
-attribution with `--historical-symbols`. It must not change score, rank,
-confidence, co-change evidence, Git rename lineage, scope, or inclusion and
-exclusion decisions.
+current-line evidence with `--symbol-line-history`, optional historical hunk
+attribution with `--historical-symbols`, or optional relationship evidence with
+`--symbol-relationships`. It must not change score, rank, confidence,
+co-change evidence, Git rename lineage, scope, or inclusion and exclusion
+decisions.
 
 Provider changes should expose source, freshness, confidence, failure state, and
 caveats. They should not emit parser diagnostics, source snippets, author

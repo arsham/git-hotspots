@@ -40,6 +40,10 @@ pub fn renderJson(allocator: std.mem.Allocator, writer: anytype, analysis: model
         try renderHistoricalSymbolReportJson(writer, analysis);
         try writer.print(",\n", .{});
     }
+    if (analysis.relation_report != null) {
+        try renderSymbolRelationshipsJson(writer, analysis);
+        try writer.print(",\n", .{});
+    }
     if (analysis.inspect) |inspect| {
         try writer.print("  \"inspect\": {{ \"requested_path\": ", .{});
         try fmt.jsonString(writer, inspect.requested_path);
@@ -309,6 +313,78 @@ fn renderCurrentLineHistoryJson(writer: anytype, line_history: provider.CurrentL
     try writer.print(", \"caveats\": ", .{});
     try fmt.stringArray(writer, line_history.caveats);
     try writer.print(" }}", .{});
+}
+
+fn renderSymbolRelationshipsJson(writer: anytype, analysis: model.Analysis) !void {
+    const relation_report = analysis.relation_report.?;
+    try writer.print("  \"symbol_relationships\": {{\n", .{});
+    try writer.print("    \"basis\": {{ \"kind\": ", .{});
+    try fmt.jsonString(writer, "bounded-local-relation-evidence");
+    try writer.print(", \"requires_symbols_flag\": true, \"retained_ranked_file_candidates\": true, \"scoring_effect\": ", .{});
+    try fmt.jsonString(writer, "none");
+    try writer.print(" }},\n", .{});
+    try writer.print("    \"provenance\": {{ \"local_only\": true, \"network\": false, \"checkout\": false, \"auto_fetch\": false }},\n", .{});
+    try writer.print("    \"human_display\": {{ \"total_count\": {d}, \"shown_count\": {d}, \"omitted_count\": {d}, \"default_limit\": {d}, \"active_limit\": {d}, \"limit_source\": ", .{ relation_report.records.len, @min(relation_report.records.len, analysis.symbol_display.limit), relation_report.records.len - @min(relation_report.records.len, analysis.symbol_display.limit), model.default_symbol_display_limit, analysis.symbol_display.limit });
+    try fmt.jsonString(writer, if (analysis.symbol_display.explicit_limit) "explicit" else "default");
+    try writer.print(", \"sort_basis\": ", .{});
+    try fmt.jsonString(writer, "source endpoint, target endpoint, kind, direction, provider, evidence basis");
+    try writer.print(" }},\n", .{});
+    try writer.print("    \"summary\": {{ \"candidate_file_count\": {d}, \"retained_candidate_file_count\": {d}, \"current_symbol_candidate_count\": {d}, \"provider_report_count\": {d}, \"relation_record_count\": {d}, \"relation_record_bound\": {d}, \"relation_record_bound_exceeded\": {}, \"omitted_record_count\": {d} }},\n", .{ relation_report.candidate_file_count, relation_report.retained_candidate_file_count, relation_report.current_symbol_candidate_count, relation_report.providers.len, relation_report.records.len, relation_report.relation_record_bound, relation_report.relation_record_bound_exceeded, relation_report.omitted_record_count });
+    try writer.print("    \"caveats\": ", .{});
+    try fmt.stringArray(writer, relation_report.caveats);
+    try writer.print(",\n", .{});
+    try writer.print("    \"providers\": [\n", .{});
+    for (relation_report.providers, 0..) |file, file_i| {
+        try writer.print("      {{ \"path\": ", .{});
+        try fmt.jsonString(writer, file.file_path);
+        try writer.print(", \"parent_rank\": {d}, \"provider\": {{ \"name\": ", .{file.parent_rank});
+        try fmt.jsonString(writer, file.provider.name);
+        try writer.print(", \"kind\": ", .{});
+        try fmt.jsonString(writer, @tagName(file.provider.kind));
+        try writer.print(", \"version\": ", .{});
+        try fmt.jsonString(writer, file.provider.version);
+        try writer.print(", \"contract_version\": ", .{});
+        try fmt.jsonString(writer, file.provider.contract_version);
+        try writer.print(", \"freshness\": ", .{});
+        try fmt.jsonString(writer, @tagName(file.provider.freshness));
+        try writer.print(", \"failure\": ", .{});
+        try fmt.jsonString(writer, @tagName(file.provider.failure));
+        try writer.print(", \"confidence\": ", .{});
+        try fmt.jsonString(writer, @tagName(file.provider.confidence));
+        try writer.print(", \"caveats\": ", .{});
+        try fmt.stringArray(writer, file.provider.caveats);
+        try writer.print(", \"provenance\": {{ \"input\": ", .{});
+        try fmt.jsonString(writer, file.provider.input.identity);
+        try writer.print(", \"local_only\": true }} }}, \"candidate_count\": {d}, \"omitted_count\": {d}, \"cap_reached\": {} }}{s}\n", .{ file.candidate_count, file.omitted_count, file.cap_reached, if (file_i + 1 == relation_report.providers.len) "" else "," });
+    }
+    try writer.print("    ],\n", .{});
+    try writer.print("    \"records\": [\n", .{});
+    for (relation_report.records, 0..) |record, i| {
+        try writer.print("      {{ \"kind\": ", .{});
+        try fmt.jsonString(writer, @tagName(record.kind));
+        try writer.print(", \"direction\": ", .{});
+        try fmt.jsonString(writer, @tagName(record.direction));
+        try writer.print(", \"source_endpoint\": ", .{});
+        try fmt.jsonString(writer, record.source_key);
+        try writer.print(", \"target_endpoint\": ", .{});
+        try fmt.jsonString(writer, record.target_key);
+        try writer.print(", \"target_unresolved\": {}, \"evidence_basis\": ", .{std.mem.startsWith(u8, record.target_key, "unresolved:")});
+        try fmt.jsonString(writer, record.evidence_basis);
+        try writer.print(", \"provider\": {{ \"name\": ", .{});
+        try fmt.jsonString(writer, record.provider_name);
+        try writer.print(", \"input\": ", .{});
+        try fmt.jsonString(writer, record.provider_input_identity);
+        try writer.print(" }}, \"freshness\": ", .{});
+        try fmt.jsonString(writer, @tagName(record.freshness));
+        try writer.print(", \"failure\": ", .{});
+        try fmt.jsonString(writer, @tagName(record.failure));
+        try writer.print(", \"confidence\": ", .{});
+        try fmt.jsonString(writer, @tagName(record.confidence));
+        try writer.print(", \"caveats\": ", .{});
+        try fmt.stringArray(writer, record.caveats);
+        try writer.print(" }}{s}\n", .{if (i + 1 == relation_report.records.len) "" else ","});
+    }
+    try writer.print("    ]\n  }}", .{});
 }
 
 test "symbol JSON preserves line and byte ranges" {

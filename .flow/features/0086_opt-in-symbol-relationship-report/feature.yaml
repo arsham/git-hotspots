@@ -4,7 +4,7 @@ feature:
   slug: opt-in-symbol-relationship-report
   title: Opt-in symbol relationship report
   lane: standard
-  status: ready
+  status: executing
   autonomy_default: ask
 intent:
   problem: After internal relation provider and aggregation proof, users still
@@ -69,7 +69,7 @@ proposal:
     materialised_at: 2026-05-28T01:17:15.274Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: executing
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -231,7 +231,7 @@ execution:
   current_packet_id: null
   next_packet_ids: []
   blockers: []
-  requires_confirmation: true
+  requires_confirmation: false
 links:
   epic_todo_id: null
   brief_ids:

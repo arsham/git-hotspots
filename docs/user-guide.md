@@ -213,6 +213,21 @@ parse the historical blob, and file-level fallbacks when it cannot. It is not
 semantic symbol lineage, reference/use analysis, ownership, bug prediction,
 scoring replacement, or a ranking input.
 
+Use `--symbol-relationships` when you want bounded local relationship evidence
+for retained ranked-file candidates:
+
+```sh
+./zig-out/bin/git-hotspots --repo . --symbols --symbol-relationships --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.py --symbols --symbol-relationships --format json
+```
+
+Relationship evidence currently comes from the local Python Tree-sitter lane. It
+reports source and target endpoints, unresolved targets, provider identity,
+freshness, failure, confidence, caveats, record bounds, and omitted counts. It
+is caveated investigation context only, not call-graph truth, dependency proof,
+ownership, developer metrics, bug prediction, scoring replacement, or a ranking
+input.
+
 ## Reading reports
 
 Reports include:
@@ -245,6 +260,8 @@ the tool does not silently fetch more history.
   requesting current-line Git evidence.
 - `error: --historical-symbols requires --symbols`: add `--symbols` before
   requesting historical hunk attribution.
+- `error: --symbol-relationships requires --symbols`: add `--symbols` before
+  requesting relationship evidence.
 - `error: --format accepts one value`: use `--format table`, `--format json`,
   or `--format markdown`.
 - Missing values such as `--repo`, `--limit`, `--since`, `--include-prefix`,

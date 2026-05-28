@@ -90,10 +90,18 @@ add bounded true historical hunk attribution for retained ranked-file
 candidates. This is not semantic symbol lineage, reference/use analysis,
 ownership, bug prediction, scoring replacement, or a ranking input.
 .TP
+.B --symbol-relationships
+With
+.B --symbols,
+add bounded local relationship evidence for retained ranked-file candidates.
+This is caveated provider evidence, not call-graph truth, dependency proof,
+ownership, developer metrics, bug prediction, scoring replacement, or a ranking
+input.
+.TP
 .BI --symbol-limit " N"
 With
 .B --symbols,
-limit human table and Markdown current and historical symbol rows. JSON symbol
+limit human table and Markdown current, historical, and relationship rows. JSON
 item arrays remain complete within internal bounds. The default is 25.
 .TP
 .B --progress
@@ -132,6 +140,7 @@ git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
 git-hotspots --repo . --symbols --symbol-line-history --format markdown
 git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
 git-hotspots --repo . --symbols --historical-symbols --format markdown
+git-hotspots --repo . --symbols --symbol-relationships --format markdown
 .EE
 .PP
 Use the static scoring explanation:
@@ -181,6 +190,13 @@ uses local historical blobs and hunks for retained ranked-file candidates only.
 It reports revision-local symbol or fallback aggregates with caveats and bounded
 sample commits; it does not checkout files, fetch history, upload source, or
 change ranking.
+.PP
+.B --symbol-relationships
+uses bounded local provider output for retained ranked-file candidates only. It
+reports source and target endpoints, unresolved targets, provider identity,
+freshness, failure, confidence, caveats, record bounds, and omitted counts; it
+does not prove calls, dependencies, ownership, developer metrics, bugs, or
+ranking changes.
 .SH DIAGNOSTICS
 Invalid CLI arguments exit 2 with concise stderr diagnostics that name the
 failed flag and, when deterministic, include a valid next command shape. For
@@ -189,6 +205,9 @@ example,
 and
 .B --historical-symbols
 require
+.B --symbols.
+.B --symbol-relationships
+also requires
 .B --symbols.
 Use
 .B git-hotspots --help
