@@ -147,6 +147,16 @@ durable_decisions:
     stays local-first, deterministic, caveated, evidence-only, and must not
     alter file/symbol scoring or imply call-graph truth, dependency proof,
     ownership, code-quality judgement, developer metrics, or bug prediction."
+  - "Relation provider expansion batch selected after feature 0086: 0087 records
+    the provider expansion strategy and admission rubric, 0088 adds
+    TypeScript/TSX/JavaScript relationship provider proof, 0089 adds Rust
+    relationship provider proof, and 0090 hardens the provider relationship
+    capability matrix and validation. The batch remains serial: 0088 depends on
+    0087, 0089 depends on 0088, and 0090 depends on 0089. Public relationship
+    claims must remain opt-in, deterministic, local-first, caveated,
+    evidence-only, and must not imply call-graph truth, type-aware dependency
+    proof, ownership, code-quality judgement, developer metrics, bug prediction,
+    scoring changes, cache truth, network access, or telemetry."
 links:
   roadmap_item_id: null
   feature_ids:
@@ -158,6 +168,8 @@ links:
     - "0084"
     - "0085"
     - "0086"
+    - "0087"
+    - "0090"
 timestamps:
   created_at: 2026-05-27T19:12:06.269Z
-  updated_at: 2026-05-28T01:14:50.702Z
+  updated_at: 2026-05-28T20:53:38.410Z

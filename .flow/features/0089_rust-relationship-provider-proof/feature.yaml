@@ -1,0 +1,811 @@
+schema: flow-feature.v1
+feature:
+  id: "0089"
+  slug: rust-relationship-provider-proof
+  title: Rust relationship provider proof
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Rust has parser and current-symbol proof surfaces and good
+    relationship-report value, but syntax-only extraction can easily overclaim
+    modules, traits, macros, generics, method resolution, and cross-crate
+    meaning.
+  outcome: Add Rust relationship provider support for retained ranked-file
+    candidates behind the existing --symbols --symbol-relationships opt-in
+    report, preserving deterministic local evidence, explicit Rust caveats, and
+    no scoring effect.
+  acceptance:
+    - Rust relation extraction reuses the shared relation model, aggregation,
+      and report surfaces.
+    - Supported relation kinds include contains, reference, call,
+      import_include, unresolved, and unknown where Rust Tree-sitter evidence
+      supports them honestly.
+    - Macros, trait resolution, method receiver type, module/crate resolution,
+      generics, and dynamic dispatch remain caveated or unresolved unless
+      syntactic evidence is sufficient.
+    - Default output remains unchanged and --symbol-relationships still requires
+      --symbols.
+    - Docs, man page, help/explain/capability claims, fixtures, and validation
+      are updated only to accurately reflect Rust relationship support.
+    - JSON, Markdown, and table golden fixtures remain deterministic and
+      privacy-safe when public output changes.
+    - Rust provider proofs, zig build test, zig build validate, Flow validation,
+      and privacy-safe real-repo or skip evidence are recorded.
+planning:
+  state: ready
+  summary: Implementation slice for Rust relationship provider support using the
+    existing provider-neutral relation model and public opt-in relationship
+    report surface, with explicit syntax-only Rust caveats.
+  brief_sync:
+    status: updated
+    reason: B002 records the provider expansion batch decision and feature 0089 is
+      linked as the Rust relationship provider proof.
+    checked_at: 2026-05-28T20:53:49.361Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Feature 0089 follows the TypeScript/JavaScript proof with Rust
+      relationship provider support under the same B002 relation evidence
+      contract.
+    checked_at: 2026-05-28T20:53:59.759Z
+proposal:
+  lifecycle_state: discovering
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-28T20:55:31.507Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-28T20:55:31.507Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-28T20:55:31.507Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-28T20:55:31.507Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: false
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: B002 successor batch for symbol relationship provider expansion sequencing.
+  depends_on_feature_ids:
+    - "0088"
+  blocked_by: []
+design:
+  rough_shape:
+    - Extend Rust relation extraction using existing vendored Tree-sitter Rust
+      surfaces and current provider patterns.
+    - Represent Rust syntax evidence through shared relation endpoints and
+      candidates without claiming type-aware resolution.
+    - Add fixtures for nested items, calls, use/mod evidence, unresolved
+      targets, macro/dynamic caveats, invalid input, caps, and deterministic
+      ordering.
+    - Update public provider capability claims and validation harness only after
+      implementation proof.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Rust provider extraction proof
+      goal: Implement Rust relation extraction through the shared provider-neutral
+        model.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/tree_sitter_rust.zig, src/provider_selection.zig,
+          src/provider.zig, src/relation_aggregation.zig, build.zig,
+          tests/tree_sitter_rust_*."
+        - "In scope: local source-byte syntax relations for retained candidates;
+          contains/reference/call/import_include/unresolved/unknown;
+          deterministic ordering; caps and caveats."
+        - "Out of scope: Cargo graph, rust-analyzer, macro expansion, trait
+          solving, type inference, cross-crate call graph, new CLI flags,
+          scoring changes."
+        - "Protected: existing Python and JS/TS relationships and default
+          outputs must not regress."
+        - "Dependencies: 0088 closed."
+        - "Validation/evidence: targeted Rust provider proofs and unit tests."
+        - "Review focus: Rust caveats are honest and no semantic certainty is
+          implied."
+        - "Escalate if: implementation needs Cargo, rust-analyzer, network,
+          cache truth, or report-schema redesign."
+        - "Done boundary: Rust provider extraction tests pass and shared model
+          remains intact."
+      verification_commands:
+        - zig build tree-sitter-rust-build-proof
+        - zig build tree-sitter-rust-query-proof
+        - zig build tree-sitter-rust-symbol-proof
+        - zig build test
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: Public opt-in surface and fixtures
+      goal: Update existing opt-in relationship report fixtures, docs, and validation
+        to reflect Rust support accurately.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: README.md, docs/user-guide.md, docs/developer-guide.md,
+          man/git-hotspots.1, report_json/table/markdown,
+          fixtures/expected/symbol-relationships.*, tools/validate.sh,
+          tests/integration.sh."
+        - "In scope: additive opt-in report output, golden fixtures, provider
+          matrix claims, relationship validation checks."
+        - "Out of scope: default output changes, new flags, non-implemented
+          language claims."
+        - "Protected: --symbol-relationships requires --symbols; local-only/no
+          scoring effect/privacy assertions remain enforced."
+        - "Dependencies: P1 provider proof."
+        - "Validation/evidence: integration fixtures, deterministic
+          JSON/Markdown/table checks, zig build validate."
+        - "Review focus: public claims match Rust implementation and caveats."
+        - "Escalate if: docs imply full Rust call graph, crate graph, trait
+          resolution, ownership, quality, metrics, or prediction."
+        - "Done boundary: public opt-in fixtures and validation pass."
+      verification_commands:
+        - zig build validate
+        - flow validate --target feature:0089
+        - flow validate --target brief:B002
+    - id: P3
+      depends_on:
+        - P2
+      status: planned
+      title: Close-out smoke and evidence
+      goal: Record privacy-safe Rust real-repo or skip smoke evidence and complete
+        Flow validation for close-out.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: validation output, run evidence, feature 0089 state."
+        - "In scope: close-out validation, real-repo Rust smoke or durable skip
+          reason, Flow validation."
+        - "Out of scope: extra language support or unrelated cleanup."
+        - "Protected: no raw private report output or absolute private paths in
+          durable evidence."
+        - "Dependencies: P1-P2 complete."
+        - "Validation/evidence: zig build validate plus close-out smoke command
+          named by contract."
+        - "Review focus: evidence is fresh, reproducible, and privacy-safe."
+        - "Escalate if: no safe smoke path exists and skip reason is weak."
+      verification_commands:
+        - zig build validate
+        - flow validate --target feature:0089
+        - flow validate --target brief:B002
+  output_contract:
+    runtime_changes: bounded Rust relationship provider support
+    public_output_changes: additive changes only under existing --symbols
+      --symbol-relationships opt-in surface
+    prohibited_changes:
+      - new CLI flag
+      - new report schema family
+      - scoring or ranking changes
+      - network or telemetry
+      - cargo invocation
+      - rust-analyzer dependency
+      - macro or trait semantic certainty claims
+    consumers:
+      - CLI users opting into symbol relationships
+      - validation harness
+      - future provider features
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B002
+timestamps:
+  created_at: 2026-05-28T20:43:42.898Z
+  updated_at: 2026-05-28T20:56:04.834Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-28T20:56:04.834Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0089"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B002
+    feature:
+      title: Rust relationship provider proof
+      problem: Rust has parser and current-symbol proof surfaces and good
+        relationship-report value, but syntax-only extraction can easily
+        overclaim modules, traits, macros, generics, method resolution, and
+        cross-crate meaning.
+      outcome: Add Rust relationship provider support for retained ranked-file
+        candidates behind the existing --symbols --symbol-relationships opt-in
+        report, preserving deterministic local evidence, explicit Rust caveats,
+        and no scoring effect.
+      acceptance:
+        - Rust relation extraction reuses the shared relation model,
+          aggregation, and report surfaces.
+        - Supported relation kinds include contains, reference, call,
+          import_include, unresolved, and unknown where Rust Tree-sitter
+          evidence supports them honestly.
+        - Macros, trait resolution, method receiver type, module/crate
+          resolution, generics, and dynamic dispatch remain caveated or
+          unresolved unless syntactic evidence is sufficient.
+        - Default output remains unchanged and --symbol-relationships still
+          requires --symbols.
+        - Docs, man page, help/explain/capability claims, fixtures, and
+          validation are updated only to accurately reflect Rust relationship
+          support.
+        - JSON, Markdown, and table golden fixtures remain deterministic and
+          privacy-safe when public output changes.
+        - Rust provider proofs, zig build test, zig build validate, Flow
+          validation, and privacy-safe real-repo or skip evidence are recorded.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Feature 0089 follows the TypeScript/JavaScript proof with Rust
+        relationship provider support under the same B002 relation evidence
+        contract.
+      checked_at: 2026-05-28T20:53:59.759Z
+    briefs:
+      - id: B002
+        title: Symbol-aware hotspot intelligence
+        summary: "Capability brief for symbol-aware hotspot intelligence: extend
+          git-hotspots beyond file-level evidence to identify historically
+          active code symbols (functions, methods, types, modules, or other
+          language-provider symbols) from local Git history using a
+          language-agnostic pipeline. The capability must stay deterministic,
+          local-first, and performant, while making new language support
+          automatically benefit from the same history attribution, scoring,
+          explanation, and future relationship analysis surfaces."
+        desired_capability:
+          - Report hotspot evidence at symbol granularity, not just file
+            granularity, so users can investigate historically volatile
+            functions, methods, types, modules, or provider-defined symbols.
+          - "Use a normalized symbol-provider contract: language-specific
+            providers only expose symbol identity, kind, file path, source
+            range/span, and optional nesting/context; the Git-history
+            attribution, scoring, output, and explanation pipeline remains
+            language-agnostic."
+          - Attribute local Git history to symbols by intersecting changed
+            ranges, file revisions, and symbol spans in a deterministic way,
+            with enough evidence for users to understand why a symbol appears
+            hot.
+          - Design the symbol model so future enrichers can ask which symbols
+            are referenced by, used by, or related to hot places without
+            redesigning hotspot evidence from scratch.
+          - "Keep runtime defaults local-first: no network, telemetry, remote
+            enrichment, or non-deterministic service dependency for symbol
+            hotspot analysis."
+        why:
+          - File-level hotspots are useful but too coarse when a large file
+            contains one volatile function or type and many stable neighbours.
+          - A language-agnostic symbol pipeline prevents each future language
+            provider from needing bespoke hotspot scoring and history-search
+            logic.
+          - Symbol-level evidence gives agents and humans a more precise
+            investigation prompt while preserving the project rule that hotspots
+            are evidence, not blame, predictions, or code-quality scores.
+          - Future relationship analysis, such as symbols used by hot places,
+            needs stable symbol identities and relation-ready output contracts
+            from the beginning.
+        in_scope:
+          - Capability-level planning for extracting or receiving symbols
+            through providers, normalizing symbol records, and mapping
+            Git-history changes onto those records.
+          - "Performance-sensitive history traversal strategy: batch Git
+            queries, stream/limit revision data, parse only relevant file
+            revisions where possible, and avoid naive full-repository reparsing
+            for every commit."
+          - "Deterministic evidence fields for symbol hotspots: churn/change
+            frequency/recency/confidence/explanation inputs at symbol level,
+            with links back to file path, symbol kind, range/source context, and
+            relevant commits or changed hunks where feasible."
+          - "Language-extensibility rule: adding a new symbol provider should
+            make that language eligible for symbol hotspot reports without
+            changing the scoring, history attribution, CLI report, or export
+            logic except for provider registration and provider-specific tests."
+          - "Forward-compatible seams for reference/use analysis: symbol
+            identifiers, nesting/ownership, and relation-provider hooks should
+            be planned even if reference graph support is deferred."
+        out_of_scope:
+          - Predicting bugs, judging code quality, ranking developers, or
+            treating symbol hotspots as accusations rather than investigation
+            prompts.
+          - Network-backed code intelligence, hosted enrichment, telemetry, or
+            remote index upload by default.
+          - Implementing full semantic reference graphs, call graphs, or
+            cross-language dependency intelligence in the first symbol-hotspot
+            slice; those are future enrichers that should consume stable symbol
+            evidence.
+          - Requiring cache as product truth. Caches may improve performance
+            later, but symbol analysis must have a correct no-cache path.
+          - Browser-visible UI design is out of scope for this brief unless a
+            future feature adds visual symbol hotspot exploration; if that
+            happens, UX tone, visual constraints, and approval decisions must be
+            captured in feature/PRD artefacts.
+        durable_decisions:
+          - Treat symbol hotspots as an extension of deterministic Git-history
+            evidence, not as semantic judgement or prediction.
+          - "Make the core symbol-hotspot pipeline provider-neutral: providers
+            supply symbols; the shared engine maps history to symbols and
+            produces common reports/exports."
+          - Design for performance from the first feature by avoiding per-commit
+            whole-tree parsing and by batching Git/history work.
+          - Plan relation-aware output seams now, but defer reference/use
+            analysis until after symbol hotspot evidence is trustworthy.
+          - No feature-level PRD or implementation packet is created yet from
+            this intake; the next shaping step should decide whether to create a
+            feature for the first symbol-provider/history-attribution slice and
+            push detailed acceptance and packet plans into feature.yaml/prd.md.
+          - "First implementation slice selected during shaping for feature
+            0078: project-level current-symbol hotspot evidence over retained
+            ranked file hotspots using existing current symbol providers and
+            optional HEAD current-line Git evidence. This deliberately is not
+            true historical hunk-to-symbol attribution, symbol rename/move
+            lineage, reference/use analysis, scoring replacement, cache, or
+            provider plugin infrastructure; those remain later capability work
+            after current-symbol evidence is trustworthy."
+          - "Successor architecture spike selected for feature 0079: define true
+            historical hunk-to-symbol attribution before runtime implementation.
+            The spike is architecture-only and should produce
+            docs/historical-symbol-attribution-architecture.md, comparing
+            approaches and selecting a deterministic no-checkout local pipeline
+            over historical blobs, changed hunks, and revision-local provider
+            symbols. It deliberately does not add a user-facing historical
+            symbol engine, scoring changes, semantic lineage, reference
+            analysis, cache truth, or remote/provider dependencies."
+          - "Successor batch selected after feature 0080: feature 0081 is the
+            prerequisite internal pipeline integration that wires historical
+            hunk attribution into bounded ranked-file analysis without public
+            output drift; feature 0082 is the primary user-facing opt-in
+            historical symbol hotspot report that should execute serially after
+            0081 and update CLI/report/docs/tests/validation together.
+            Reference/use analysis remains deferred until the public historical
+            symbol report contract is stable."
+          - "Successor architecture spike selected for feature 0083: define
+            symbol relationship evidence before runtime implementation. The
+            spike is documentation-only and should produce
+            docs/symbol-relationship-architecture.md, comparing provider
+            approaches and defining relation endpoints, kinds, confidence,
+            caveats, deterministic aggregation, performance limits, and a narrow
+            local-first implementation successor. It deliberately does not add
+            relation runtime analysis, CLI/report output, scoring changes, cache
+            truth, dependencies, or public claim expansion."
+          - "Relation evidence successor batch selected: 0084 internal relation
+            provider proof, then 0085 internal relation aggregation integration,
+            then 0086 opt-in public symbol relationship report. The batch
+            remains serial: 0085 depends on 0084, and 0086 depends on 0084 and
+            0085. Public relation output must wait until internal provider and
+            aggregation proof are closed. Relation evidence stays local-first,
+            deterministic, caveated, evidence-only, and must not alter
+            file/symbol scoring or imply call-graph truth, dependency proof,
+            ownership, code-quality judgement, developer metrics, or bug
+            prediction."
+          - "Relation provider expansion batch selected after feature 0086: 0087
+            records the provider expansion strategy and admission rubric, 0088
+            adds TypeScript/TSX/JavaScript relationship provider proof, 0089
+            adds Rust relationship provider proof, and 0090 hardens the provider
+            relationship capability matrix and validation. The batch remains
+            serial: 0088 depends on 0087, 0089 depends on 0088, and 0090 depends
+            on 0089. Public relationship claims must remain opt-in,
+            deterministic, local-first, caveated, evidence-only, and must not
+            imply call-graph truth, type-aware dependency proof, ownership,
+            code-quality judgement, developer metrics, bug prediction, scoring
+            changes, cache truth, network access, or telemetry."
+    prd_path: .flow/features/0089_rust-relationship-provider-proof/prd.md
+  requirements_contract:
+    source_path: .flow/features/0089_rust-relationship-provider-proof/prd.md
+    source_digest: b460bc8f16fa577b9a8ab66329750003252fd2b588f520eb5566877a575d35bb
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: "R1: Reuse the existing relation provider model and aggregation pipeline.
+          Do not create Rust-specific report schemas, scoring changes, cache
+          truth, or a separate relationship output path."
+        category: requirement
+        packet_refs:
+          - P1
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: "R2: Add Rust relation extraction over current local source bytes for
+          retained ranked-file candidates only."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: "R3: Emit syntax-only contains, reference, call, import_include,
+          unresolved, and unknown candidates where Rust Tree-sitter evidence
+          supports that honestly. Macro expansion, trait resolution, module
+          resolution, method receiver type, and dynamic dispatch must remain
+          caveated or unresolved."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: "R4: Preserve deterministic sorting, caps, omitted counts, provider
+          failure caveats, unsupported-language behaviour, privacy-safe provider
+          inputs, and no scoring or ranking effect."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: "R5: Add or update fixtures that prove Rust relationship extraction for
+          nested items, function or method-like calls, use/module-like import
+          evidence, unresolved targets, macro or generated-like caveats, invalid
+          input, cap behaviour, and deterministic ordering."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: "R6: Update public docs, man page, provider capability matrix text,
+          explain/help claims, and validation checks only to state Rust
+          relationship support accurately and with caveats."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: "R7: Update golden JSON, Markdown, and table fixtures if public
+          --symbol-relationships output changes. Fixture updates must remain
+          deterministic and privacy-safe."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: "R8: Validate that default output without --symbol-relationships is
+          unchanged and that --symbol-relationships still requires --symbols."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: "R9: Run zig build tree-sitter-rust-build-proof, zig build
+          tree-sitter-rust-query-proof, zig build tree-sitter-rust-symbol-proof,
+          zig build test, and zig build validate or justify any replaced command
+          through the dispatch contract."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: "R10: Include privacy-safe real-repo smoke evidence for at least one
+          repository with tracked Rust files, or record a durable skip reason."
+        category: requirement
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#non-goals[1]
+        text: No Cargo metadata graph, crate dependency resolver, rust-analyzer
+          dependency, macro expansion, trait solving, type inference, borrow
+          checking, dynamic dispatch proof, or cross-crate call graph.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-012
+        source_ref: prd.md#non-goals[2]
+        text: No network, telemetry, runtime LLM, remote index, mandatory cache, cargo
+          invocation, or global language server dependency.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-013
+        source_ref: prd.md#non-goals[3]
+        text: No relationship-based scoring or ranking changes.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-014
+        source_ref: prd.md#non-goals[4]
+        text: No support claim for languages not implemented in this feature.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-015
+        source_ref: prd.md#edge-cases[1]
+        text: "E1: A macro invocation looks call-like but cannot be resolved. Preserve
+          syntax evidence as caveated call, unknown, or unresolved, not semantic
+          certainty."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#edge-cases[2]
+        text: "E2: A method call has a receiver but no type resolution. Do not claim the
+          target impl or trait method unless local syntax evidence can identify
+          it safely."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#edge-cases[3]
+        text: "E3: use, mod, and path expressions may name modules or external crates.
+          Represent them as local strings or unresolved/external endpoints with
+          caveats."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#edge-cases[4]
+        text: "E4: Lifetimes, generics, attributes, and generated code patterns must not
+          break file-level hotspot output."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#verification-notes[1]
+        text: "Close-out evidence should include:"
+        category: verification
+        packet_refs:
+          - P3
+        verification: "Close-out evidence should include:"
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#verification-notes[2]
+        text: git diff --check.
+        category: verification
+        packet_refs: []
+        verification: git diff --check.
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#verification-notes[3]
+        text: zig fmt --check build.zig src tests.
+        category: verification
+        packet_refs: []
+        verification: zig fmt --check build.zig src tests.
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#verification-notes[4]
+        text: Rust tree-sitter proof commands.
+        category: verification
+        packet_refs: []
+        verification: Rust tree-sitter proof commands.
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#verification-notes[5]
+        text: zig build test.
+        category: verification
+        packet_refs: []
+        verification: zig build test.
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#verification-notes[6]
+        text: zig build validate.
+        category: verification
+        packet_refs: []
+        verification: zig build validate.
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#verification-notes[7]
+        text: Updated fixture and validation proof for JSON, Markdown, and table outputs
+          when public output changes.
+        category: verification
+        packet_refs: []
+        verification: Updated fixture and validation proof for JSON, Markdown, and table
+          outputs when public output changes.
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#verification-notes[8]
+        text: flow validate --target feature:0089.
+        category: verification
+        packet_refs: []
+        verification: flow validate --target feature:0089.
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#verification-notes[9]
+        text: flow validate --target brief:B002.
+        category: verification
+        packet_refs: []
+        verification: flow validate --target brief:B002.
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#verification-notes[10]
+        text: Independent reviewer verification of Rust caveats and public claim
+          accuracy.
+        category: verification
+        packet_refs: []
+        verification: Independent reviewer verification of Rust caveats and public claim
+          accuracy.
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: Rust has existing local Tree-sitter parser and current-symbol proof
+          surfaces, and it is valuable for real-repo relationship evidence. Rust
+          relationship extraction is also easy to overclaim because modules,
+          traits, macros, generics, and method resolution require semantic
+          knowledge that a syntax-only provider cannot prove.
+      - source_ref: prd.md#outcome[1]
+        text: Add bounded local Rust relationship provider support using the existing
+          provider-neutral relation model and aggregation/report surfaces. The
+          output remains opt-in behind --symbols --symbol-relationships,
+          additive, deterministic, caveated, local-first, and evidence-only.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 2 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: Add Rust relationship provider support for retained ranked-file
+      candidates behind the existing --symbols --symbol-relationships opt-in
+      report, preserving deterministic local evidence, explicit Rust caveats,
+      and no scoring effect.
+    acceptance:
+      - Rust relation extraction reuses the shared relation model, aggregation,
+        and report surfaces.
+      - Supported relation kinds include contains, reference, call,
+        import_include, unresolved, and unknown where Rust Tree-sitter evidence
+        supports them honestly.
+      - Macros, trait resolution, method receiver type, module/crate resolution,
+        generics, and dynamic dispatch remain caveated or unresolved unless
+        syntactic evidence is sufficient.
+      - Default output remains unchanged and --symbol-relationships still
+        requires --symbols.
+      - Docs, man page, help/explain/capability claims, fixtures, and validation
+        are updated only to accurately reflect Rust relationship support.
+      - JSON, Markdown, and table golden fixtures remain deterministic and
+        privacy-safe when public output changes.
+      - Rust provider proofs, zig build test, zig build validate, Flow
+        validation, and privacy-safe real-repo or skip evidence are recorded.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig build tree-sitter-rust-build-proof
+      - zig build tree-sitter-rust-query-proof
+      - zig build tree-sitter-rust-symbol-proof
+      - zig build test
+      - zig build validate
+      - flow validate --target feature:0089
+      - flow validate --target brief:B002
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces:
+      - default output
+      - new CLI flags
+      - new report schema family
+      - scoring/ranking
+      - network/telemetry
+      - Cargo/rust-analyzer dependency
+      - macro or trait certainty claims
+  fallback_path: deferred_reconcile_decision
+  notes: null

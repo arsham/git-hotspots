@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0088"
   active_run_id: null
   last_completed_feature_id: "0086"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 87
+  next_id: 91
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -373,6 +373,22 @@ features:
       slug: opt-in-symbol-relationship-report
       path: .flow/features/0086_opt-in-symbol-relationship-report
       created_at: 2026-05-28T01:10:39.542Z
+    - id: "0087"
+      slug: relation-provider-expansion-strategy
+      path: .flow/features/0087_relation-provider-expansion-strategy
+      created_at: 2026-05-28T20:43:30.929Z
+    - id: "0088"
+      slug: typescript-javascript-relationship-provider-proof
+      path: .flow/features/0088_typescript-javascript-relationship-provider-proof
+      created_at: 2026-05-28T20:43:36.862Z
+    - id: "0089"
+      slug: rust-relationship-provider-proof
+      path: .flow/features/0089_rust-relationship-provider-proof
+      created_at: 2026-05-28T20:43:42.898Z
+    - id: "0090"
+      slug: provider-relationship-capability-matrix
+      path: .flow/features/0090_provider-relationship-capability-matrix
+      created_at: 2026-05-28T20:43:50.112Z
 intake:
   mode: roadmap
   summary: null

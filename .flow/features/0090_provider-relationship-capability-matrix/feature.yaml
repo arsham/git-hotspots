@@ -1,0 +1,771 @@
+schema: flow-feature.v1
+feature:
+  id: "0090"
+  slug: provider-relationship-capability-matrix
+  title: Provider relationship capability matrix
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: After relationship provider expansion, public docs,
+    help/explain/inspect wording, fixtures, and validation need one durable
+    capability matrix that prevents symbol, historical-symbol, and relationship
+    support claims from drifting or overclaiming.
+  outcome: Update provider capability documentation and validation so relationship
+    support is explicit per language and synchronized across public surfaces
+    after the provider proofs close.
+  acceptance:
+    - README, user guide, developer guide, man page, and provider capability
+      text accurately distinguish symbol, current-line history,
+      historical-symbol, and relationship support per language.
+    - Unsupported, internal-only, and public opt-in relationship support are
+      distinguished clearly.
+    - Help, explain, inspect, and validation checks prevent provider capability
+      claim drift.
+    - --symbol-relationships remains opt-in, requires --symbols, is local-only,
+      and has no scoring effect.
+    - JSON, Markdown, and table fixture checks cover provider list, caveats,
+      deterministic ordering, omitted counts, and privacy constraints after
+      language expansion.
+    - Default output compatibility is preserved when --symbol-relationships is
+      not requested.
+    - B002 records the durable matrix/validation rule for future relationship
+      providers but is not closed.
+planning:
+  state: ready
+  summary: Claim-safety slice for provider relationship capability matrix and
+    validation after JS/TS/TSX and Rust relationship support close.
+  brief_sync:
+    status: updated
+    reason: B002 records the provider expansion batch decision and feature 0090 is
+      linked as the capability-matrix and validation-hardening slice.
+    checked_at: 2026-05-28T20:53:49.390Z
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Feature 0090 follows provider implementation by hardening B002 public
+      capability claims and validation matrix for relationship support.
+    checked_at: 2026-05-28T20:53:59.780Z
+proposal:
+  lifecycle_state: discovering
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - feature_dependencies_present
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-28T20:55:31.503Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-28T20:55:31.503Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-28T20:55:31.503Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-28T20:55:31.503Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: false
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: B002 successor batch for symbol relationship provider expansion sequencing.
+  depends_on_feature_ids:
+    - "0089"
+  blocked_by: []
+design:
+  rough_shape:
+    - Audit and update public provider capability tables and relationship
+      wording after 0088 and 0089 close.
+    - Harden validation checks around capability drift, opt-in semantics,
+      local-only evidence, deterministic fixtures, omitted counts, and privacy
+      assertions.
+    - Keep this slice focused on claim safety and validation, not new provider
+      implementation.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Capability matrix and docs alignment
+      goal: Update public provider capability wording after relationship provider
+        expansion.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: README.md, docs/user-guide.md, docs/developer-guide.md,
+          man/git-hotspots.1, docs/symbol-relationship-architecture.md if
+          needed."
+        - "In scope: capability matrix and prose alignment for symbol, history,
+          and relationship support per language."
+        - "Out of scope: new provider implementation, new CLI flags, new report
+          schema, scoring changes."
+        - "Protected: public wording must not imply call graph truth, type-aware
+          resolution, dependency proof, ownership, quality, metrics, or
+          prediction."
+        - "Dependencies: 0088 and 0089 closed through 0089 dependency chain."
+        - "Validation/evidence: docs/man checks and prohibited-claim scans
+          through zig build validate."
+        - "Review focus: claims match implemented capabilities and caveats."
+        - "Escalate if: implementation capabilities are ambiguous or docs
+          require public contract changes."
+        - "Done boundary: public docs state support accurately."
+      verification_commands:
+        - git diff --check
+        - zig build validate
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: Validation harness drift protection
+      goal: Harden validation so relationship provider claims and fixtures cannot
+        drift silently.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: tools/validate.sh, tests/integration.sh,
+          fixtures/expected/symbol-relationships.*, report_json/table/markdown
+          if assertions need stable labels."
+        - "In scope: provider list assertions, opt-in requirement assertions,
+          local-only/no scoring/privacy assertions, deterministic
+          JSON/Markdown/table fixture checks."
+        - "Out of scope: changing report semantics beyond assertion-stable
+          wording."
+        - "Protected: default output compatibility and privacy-safe fixture
+          evidence."
+        - "Dependencies: P1 claim wording."
+        - "Validation/evidence: zig build test; zig build validate; fixture
+          determinism/privacy checks."
+        - "Review focus: validation fails on overclaim drift and does not bake
+          private paths or brittle incidental output."
+        - "Escalate if: validation needs broad report schema redesign."
+        - "Done boundary: validate catches capability drift and all checks pass."
+      verification_commands:
+        - zig build test
+        - zig build validate
+        - flow validate --target feature:0090
+        - flow validate --target brief:B002
+    - id: P3
+      depends_on:
+        - P2
+      status: planned
+      title: B002 decision and close-out proof
+      goal: Record the durable future-provider matrix rule and complete Flow
+        validation.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: .flow/briefs/B002_symbol-aware-hotspot-intelligence.yaml,
+          feature 0090 state, validation evidence."
+        - "In scope: B002 durable decision, Flow feature/brief validation,
+          close-out evidence."
+        - "Out of scope: closing B002 or starting next provider batch."
+        - "Protected: fresh planner can continue without chat context."
+        - "Dependencies: P1-P2 complete."
+        - "Validation/evidence: flow validate feature/brief; zig build validate."
+        - "Review focus: B002 captures future-provider matrix rule without
+          overclosing capability brief."
+        - "Escalate if: B002 should be closed or superseded."
+      verification_commands:
+        - flow validate --target feature:0090
+        - flow validate --target brief:B002
+        - zig build validate
+  output_contract:
+    runtime_changes: validation and public documentation alignment only unless tiny
+      assertion helpers are needed
+    public_output_changes: no new report schema; fixture updates only if existing
+      output claims are aligned
+    prohibited_changes:
+      - new provider implementation
+      - new CLI flag
+      - new report schema
+      - scoring or ranking changes
+      - network or telemetry
+      - cache truth
+      - browser-visible UI
+    consumers:
+      - CLI users
+      - docs readers
+      - validation harness
+      - future provider implementers
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B002
+timestamps:
+  created_at: 2026-05-28T20:43:50.112Z
+  updated_at: 2026-05-28T20:56:13.537Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-28T20:56:13.537Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0090"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B002
+    feature:
+      title: Provider relationship capability matrix
+      problem: After relationship provider expansion, public docs,
+        help/explain/inspect wording, fixtures, and validation need one durable
+        capability matrix that prevents symbol, historical-symbol, and
+        relationship support claims from drifting or overclaiming.
+      outcome: Update provider capability documentation and validation so relationship
+        support is explicit per language and synchronized across public surfaces
+        after the provider proofs close.
+      acceptance:
+        - README, user guide, developer guide, man page, and provider capability
+          text accurately distinguish symbol, current-line history,
+          historical-symbol, and relationship support per language.
+        - Unsupported, internal-only, and public opt-in relationship support are
+          distinguished clearly.
+        - Help, explain, inspect, and validation checks prevent provider
+          capability claim drift.
+        - --symbol-relationships remains opt-in, requires --symbols, is
+          local-only, and has no scoring effect.
+        - JSON, Markdown, and table fixture checks cover provider list, caveats,
+          deterministic ordering, omitted counts, and privacy constraints after
+          language expansion.
+        - Default output compatibility is preserved when --symbol-relationships
+          is not requested.
+        - B002 records the durable matrix/validation rule for future
+          relationship providers but is not closed.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Feature 0090 follows provider implementation by hardening B002 public
+        capability claims and validation matrix for relationship support.
+      checked_at: 2026-05-28T20:53:59.780Z
+    briefs:
+      - id: B002
+        title: Symbol-aware hotspot intelligence
+        summary: "Capability brief for symbol-aware hotspot intelligence: extend
+          git-hotspots beyond file-level evidence to identify historically
+          active code symbols (functions, methods, types, modules, or other
+          language-provider symbols) from local Git history using a
+          language-agnostic pipeline. The capability must stay deterministic,
+          local-first, and performant, while making new language support
+          automatically benefit from the same history attribution, scoring,
+          explanation, and future relationship analysis surfaces."
+        desired_capability:
+          - Report hotspot evidence at symbol granularity, not just file
+            granularity, so users can investigate historically volatile
+            functions, methods, types, modules, or provider-defined symbols.
+          - "Use a normalized symbol-provider contract: language-specific
+            providers only expose symbol identity, kind, file path, source
+            range/span, and optional nesting/context; the Git-history
+            attribution, scoring, output, and explanation pipeline remains
+            language-agnostic."
+          - Attribute local Git history to symbols by intersecting changed
+            ranges, file revisions, and symbol spans in a deterministic way,
+            with enough evidence for users to understand why a symbol appears
+            hot.
+          - Design the symbol model so future enrichers can ask which symbols
+            are referenced by, used by, or related to hot places without
+            redesigning hotspot evidence from scratch.
+          - "Keep runtime defaults local-first: no network, telemetry, remote
+            enrichment, or non-deterministic service dependency for symbol
+            hotspot analysis."
+        why:
+          - File-level hotspots are useful but too coarse when a large file
+            contains one volatile function or type and many stable neighbours.
+          - A language-agnostic symbol pipeline prevents each future language
+            provider from needing bespoke hotspot scoring and history-search
+            logic.
+          - Symbol-level evidence gives agents and humans a more precise
+            investigation prompt while preserving the project rule that hotspots
+            are evidence, not blame, predictions, or code-quality scores.
+          - Future relationship analysis, such as symbols used by hot places,
+            needs stable symbol identities and relation-ready output contracts
+            from the beginning.
+        in_scope:
+          - Capability-level planning for extracting or receiving symbols
+            through providers, normalizing symbol records, and mapping
+            Git-history changes onto those records.
+          - "Performance-sensitive history traversal strategy: batch Git
+            queries, stream/limit revision data, parse only relevant file
+            revisions where possible, and avoid naive full-repository reparsing
+            for every commit."
+          - "Deterministic evidence fields for symbol hotspots: churn/change
+            frequency/recency/confidence/explanation inputs at symbol level,
+            with links back to file path, symbol kind, range/source context, and
+            relevant commits or changed hunks where feasible."
+          - "Language-extensibility rule: adding a new symbol provider should
+            make that language eligible for symbol hotspot reports without
+            changing the scoring, history attribution, CLI report, or export
+            logic except for provider registration and provider-specific tests."
+          - "Forward-compatible seams for reference/use analysis: symbol
+            identifiers, nesting/ownership, and relation-provider hooks should
+            be planned even if reference graph support is deferred."
+        out_of_scope:
+          - Predicting bugs, judging code quality, ranking developers, or
+            treating symbol hotspots as accusations rather than investigation
+            prompts.
+          - Network-backed code intelligence, hosted enrichment, telemetry, or
+            remote index upload by default.
+          - Implementing full semantic reference graphs, call graphs, or
+            cross-language dependency intelligence in the first symbol-hotspot
+            slice; those are future enrichers that should consume stable symbol
+            evidence.
+          - Requiring cache as product truth. Caches may improve performance
+            later, but symbol analysis must have a correct no-cache path.
+          - Browser-visible UI design is out of scope for this brief unless a
+            future feature adds visual symbol hotspot exploration; if that
+            happens, UX tone, visual constraints, and approval decisions must be
+            captured in feature/PRD artefacts.
+        durable_decisions:
+          - Treat symbol hotspots as an extension of deterministic Git-history
+            evidence, not as semantic judgement or prediction.
+          - "Make the core symbol-hotspot pipeline provider-neutral: providers
+            supply symbols; the shared engine maps history to symbols and
+            produces common reports/exports."
+          - Design for performance from the first feature by avoiding per-commit
+            whole-tree parsing and by batching Git/history work.
+          - Plan relation-aware output seams now, but defer reference/use
+            analysis until after symbol hotspot evidence is trustworthy.
+          - No feature-level PRD or implementation packet is created yet from
+            this intake; the next shaping step should decide whether to create a
+            feature for the first symbol-provider/history-attribution slice and
+            push detailed acceptance and packet plans into feature.yaml/prd.md.
+          - "First implementation slice selected during shaping for feature
+            0078: project-level current-symbol hotspot evidence over retained
+            ranked file hotspots using existing current symbol providers and
+            optional HEAD current-line Git evidence. This deliberately is not
+            true historical hunk-to-symbol attribution, symbol rename/move
+            lineage, reference/use analysis, scoring replacement, cache, or
+            provider plugin infrastructure; those remain later capability work
+            after current-symbol evidence is trustworthy."
+          - "Successor architecture spike selected for feature 0079: define true
+            historical hunk-to-symbol attribution before runtime implementation.
+            The spike is architecture-only and should produce
+            docs/historical-symbol-attribution-architecture.md, comparing
+            approaches and selecting a deterministic no-checkout local pipeline
+            over historical blobs, changed hunks, and revision-local provider
+            symbols. It deliberately does not add a user-facing historical
+            symbol engine, scoring changes, semantic lineage, reference
+            analysis, cache truth, or remote/provider dependencies."
+          - "Successor batch selected after feature 0080: feature 0081 is the
+            prerequisite internal pipeline integration that wires historical
+            hunk attribution into bounded ranked-file analysis without public
+            output drift; feature 0082 is the primary user-facing opt-in
+            historical symbol hotspot report that should execute serially after
+            0081 and update CLI/report/docs/tests/validation together.
+            Reference/use analysis remains deferred until the public historical
+            symbol report contract is stable."
+          - "Successor architecture spike selected for feature 0083: define
+            symbol relationship evidence before runtime implementation. The
+            spike is documentation-only and should produce
+            docs/symbol-relationship-architecture.md, comparing provider
+            approaches and defining relation endpoints, kinds, confidence,
+            caveats, deterministic aggregation, performance limits, and a narrow
+            local-first implementation successor. It deliberately does not add
+            relation runtime analysis, CLI/report output, scoring changes, cache
+            truth, dependencies, or public claim expansion."
+          - "Relation evidence successor batch selected: 0084 internal relation
+            provider proof, then 0085 internal relation aggregation integration,
+            then 0086 opt-in public symbol relationship report. The batch
+            remains serial: 0085 depends on 0084, and 0086 depends on 0084 and
+            0085. Public relation output must wait until internal provider and
+            aggregation proof are closed. Relation evidence stays local-first,
+            deterministic, caveated, evidence-only, and must not alter
+            file/symbol scoring or imply call-graph truth, dependency proof,
+            ownership, code-quality judgement, developer metrics, or bug
+            prediction."
+          - "Relation provider expansion batch selected after feature 0086: 0087
+            records the provider expansion strategy and admission rubric, 0088
+            adds TypeScript/TSX/JavaScript relationship provider proof, 0089
+            adds Rust relationship provider proof, and 0090 hardens the provider
+            relationship capability matrix and validation. The batch remains
+            serial: 0088 depends on 0087, 0089 depends on 0088, and 0090 depends
+            on 0089. Public relationship claims must remain opt-in,
+            deterministic, local-first, caveated, evidence-only, and must not
+            imply call-graph truth, type-aware dependency proof, ownership,
+            code-quality judgement, developer metrics, bug prediction, scoring
+            changes, cache truth, network access, or telemetry."
+    prd_path: .flow/features/0090_provider-relationship-capability-matrix/prd.md
+  requirements_contract:
+    source_path: .flow/features/0090_provider-relationship-capability-matrix/prd.md
+    source_digest: 00172c13a3e83604daaf026e4d9733567fdbdb85a28b257130d40242fe0bf72e
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: "R1: Update README, docs/user-guide.md, docs/developer-guide.md,
+          man/git-hotspots.1, and any provider capability text so each supported
+          language states symbol, current-line history, historical-symbol, and
+          relationship support accurately."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: "R2: Distinguish unsupported, internal-only, and public opt-in
+          relationship support. Public wording must not imply full call graph,
+          type-aware resolution, dependency proof, ownership, code quality,
+          developer metrics, or bug prediction."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: "R3: Update help, explain, inspect, and provider capability validation
+          checks so new relationship-language support cannot drift silently."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: "R4: Add validation assertions that --symbol-relationships still requires
+          --symbols, remains opt-in, remains local-only, and has no scoring
+          effect."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: "R5: Ensure JSON, Markdown, and table fixture checks cover the
+          relationship provider list, caveats, deterministic ordering, omitted
+          counts, and privacy constraints after language expansion."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: "R6: Preserve default output compatibility. Running without
+          --symbol-relationships must not add relationship fields or
+          relationship sections."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: "R7: Run zig build validate and any targeted fixture validation needed for
+          the updated public surfaces."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: "R8: Update B002 with a durable decision that the first provider-expansion
+          batch closed and that future languages must update the capability
+          matrix through the same validation-owned surface."
+        category: requirement
+        packet_refs:
+          - P1
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#non-goals[1]
+        text: No new relationship provider implementation beyond what prior batch
+          features already delivered.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-010
+        source_ref: prd.md#non-goals[2]
+        text: No new CLI flag or report schema beyond existing --symbol-relationships.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-011
+        source_ref: prd.md#non-goals[3]
+        text: No scoring or ranking changes.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-012
+        source_ref: prd.md#non-goals[4]
+        text: No network, telemetry, runtime LLM, remote index, mandatory cache, or
+          browser UI work.
+        category: non_goal
+        packet_refs: []
+        verification: null
+        required_for_close_out: false
+      - id: REQ-013
+        source_ref: prd.md#edge-cases[1]
+        text: "E1: A language has current-symbol support but no relationship support.
+          The matrix must say so explicitly without making the language look
+          broken."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#edge-cases[2]
+        text: "E2: A language has internal relation proof but no public report support.
+          The matrix must not expose it as public support until a public feature
+          closes."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#edge-cases[3]
+        text: "E3: If validation fixtures use a project-local synthetic repo, outputs
+          must not contain absolute private paths, remotes, authors, emails,
+          commit messages, or raw private report dumps."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#edge-cases[4]
+        text: "E4: If later languages are added, validation should fail until
+          matrix/docs/help surfaces are deliberately updated."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#verification-notes[1]
+        text: "Close-out evidence should include:"
+        category: verification
+        packet_refs: []
+        verification: "Close-out evidence should include:"
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#verification-notes[2]
+        text: git diff --check.
+        category: verification
+        packet_refs: []
+        verification: git diff --check.
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#verification-notes[3]
+        text: zig fmt --check build.zig src tests.
+        category: verification
+        packet_refs: []
+        verification: zig fmt --check build.zig src tests.
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#verification-notes[4]
+        text: zig build test.
+        category: verification
+        packet_refs: []
+        verification: zig build test.
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#verification-notes[5]
+        text: zig build validate.
+        category: verification
+        packet_refs: []
+        verification: zig build validate.
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#verification-notes[6]
+        text: Fixture determinism/privacy checks for JSON, Markdown, and table outputs.
+        category: verification
+        packet_refs: []
+        verification: Fixture determinism/privacy checks for JSON, Markdown, and table
+          outputs.
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#verification-notes[7]
+        text: flow validate --target feature:0090.
+        category: verification
+        packet_refs: []
+        verification: flow validate --target feature:0090.
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#verification-notes[8]
+        text: flow validate --target brief:B002.
+        category: verification
+        packet_refs:
+          - P3
+        verification: flow validate --target brief:B002.
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#verification-notes[9]
+        text: Independent reviewer verification that public claims match implemented
+          provider capabilities.
+        category: verification
+        packet_refs: []
+        verification: Independent reviewer verification that public claims match
+          implemented provider capabilities.
+        required_for_close_out: true
+    supporting_context:
+      - source_ref: prd.md#problem[1]
+        text: As relationship support expands beyond Python, project documentation and
+          validation need a durable capability matrix that distinguishes symbol
+          support, historical symbol support, and relationship support per
+          language. Without this, help text, README claims, user guide claims,
+          man page wording, inspect output, and validation assertions can drift
+          or overclaim.
+      - source_ref: prd.md#outcome[1]
+        text: Update the provider capability matrix and validation harness so
+          relationship support is explicit per language and kept in sync across
+          public documentation, help/explain/inspect surfaces, fixtures, and
+          validation. The feature is a claim-safety and drift-prevention slice
+          after the TypeScript/JavaScript and Rust provider proofs close.
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+      - Supporting context and structural headings are not close-out required;
+        kept 2 refs outside default requirement rows.
+  acceptance_contract:
+    outcome: Update provider capability documentation and validation so relationship
+      support is explicit per language and synchronized across public surfaces
+      after the provider proofs close.
+    acceptance:
+      - README, user guide, developer guide, man page, and provider capability
+        text accurately distinguish symbol, current-line history,
+        historical-symbol, and relationship support per language.
+      - Unsupported, internal-only, and public opt-in relationship support are
+        distinguished clearly.
+      - Help, explain, inspect, and validation checks prevent provider
+        capability claim drift.
+      - --symbol-relationships remains opt-in, requires --symbols, is
+        local-only, and has no scoring effect.
+      - JSON, Markdown, and table fixture checks cover provider list, caveats,
+        deterministic ordering, omitted counts, and privacy constraints after
+        language expansion.
+      - Default output compatibility is preserved when --symbol-relationships is
+        not requested.
+      - B002 records the durable matrix/validation rule for future relationship
+        providers but is not closed.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig build validate
+      - zig build test
+      - flow validate --target feature:0090
+      - flow validate --target brief:B002
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+    protected_surfaces:
+      - new provider implementation
+      - new CLI flags
+      - new report schema
+      - scoring/ranking
+      - network/telemetry
+      - cache truth
+      - browser UI
+  fallback_path: deferred_reconcile_decision
+  notes: null
