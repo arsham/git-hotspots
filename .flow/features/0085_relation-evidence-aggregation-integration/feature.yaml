@@ -4,7 +4,7 @@ feature:
   slug: relation-evidence-aggregation-integration
   title: Relation evidence aggregation integration
   lane: standard
-  status: ready
+  status: executing
   autonomy_default: ask
 intent:
   problem: Feature 0084 can prove relation candidates in isolation, but
@@ -64,7 +64,7 @@ proposal:
     materialised_at: 2026-05-28T01:17:09.627Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: executing
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -122,7 +122,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: running
       title: Bounded aggregation wiring
       goal: Attach internal relation candidates to retained file/current-symbol
         candidates without public output drift.
@@ -149,7 +149,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: running
       title: Limits, caveats, and deterministic ordering
       goal: Prove deduplication, caveat merging, omitted counts, caps, failure
         retention, and stable sort keys.
@@ -172,7 +172,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: running
       title: Real-repo smoke and close-out proof
       goal: Record privacy-safe performance/smoke evidence and validate no public
         drift.
@@ -219,11 +219,11 @@ design:
       - code_quality
     verification_required: true
 execution:
-  active_run_id: null
+  active_run_id: RUN-20260528-0148
   current_packet_id: null
   next_packet_ids: []
   blockers: []
-  requires_confirmation: true
+  requires_confirmation: false
 links:
   epic_todo_id: null
   brief_ids:

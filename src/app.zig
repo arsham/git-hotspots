@@ -3,6 +3,7 @@ const cli = @import("cli.zig");
 const model = @import("model.zig");
 const git = @import("git.zig");
 const historical_symbol_pipeline = @import("historical_symbol_pipeline.zig");
+const relation_aggregation = @import("relation_aggregation.zig");
 const report = @import("report.zig");
 const provider_selection = @import("provider_selection.zig");
 const explain = @import("explain.zig");
@@ -85,6 +86,7 @@ pub fn run(allocator: std.mem.Allocator, io: std.Io, args: []const [:0]const u8,
         if (cfg.symbol_line_history) try git.attachCurrentLineHistory(allocator, io, &analysis);
         analysis.symbol_display = .{ .limit = cfg.symbol_limit orelse model.default_symbol_display_limit, .explicit_limit = cfg.symbol_limit != null };
     }
+    try relation_aggregation.attach(allocator, io, &analysis, .{});
     if (cfg.historical_symbols) {
         try writeProgress(progress, "reading historical symbol evidence");
         try historical_symbol_pipeline.attach(allocator, io, &analysis, .{});

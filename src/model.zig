@@ -134,6 +134,61 @@ pub const HistoricalSymbolReport = struct {
     }
 };
 
+pub const RelationProviderReport = struct {
+    file_path: []const u8,
+    parent_rank: usize,
+    provider: provider.ProviderEvidence,
+    candidate_count: usize,
+    omitted_count: usize,
+    cap_reached: bool,
+};
+
+pub const RelationRecord = struct {
+    kind: provider.RelationKind,
+    direction: provider.RelationDirection,
+    source_key: []const u8,
+    target_key: []const u8,
+    evidence_basis: []const u8,
+    provider_name: []const u8,
+    freshness: provider.Freshness,
+    failure: provider.Failure,
+    confidence: provider.Confidence,
+    caveats: [][]const u8,
+    sort_key: []const u8,
+};
+
+pub const RelationAggregationReport = struct {
+    candidate_file_count: usize,
+    retained_candidate_file_count: usize,
+    current_symbol_candidate_count: usize,
+    relation_record_bound: usize,
+    relation_record_bound_exceeded: bool,
+    omitted_record_count: usize,
+    providers: []RelationProviderReport,
+    records: []RelationRecord,
+    caveats: [][]const u8,
+
+    pub fn deinit(self: RelationAggregationReport, allocator: std.mem.Allocator) void {
+        for (self.providers) |file| {
+            allocator.free(file.file_path);
+            allocator.free(file.provider.input.identity);
+        }
+        allocator.free(self.providers);
+        for (self.records) |record| {
+            allocator.free(record.source_key);
+            allocator.free(record.target_key);
+            allocator.free(record.evidence_basis);
+            allocator.free(record.provider_name);
+            for (record.caveats) |caveat| allocator.free(caveat);
+            allocator.free(record.caveats);
+            allocator.free(record.sort_key);
+        }
+        allocator.free(self.records);
+        for (self.caveats) |caveat| allocator.free(caveat);
+        allocator.free(self.caveats);
+    }
+};
+
 pub const default_symbol_display_limit: usize = 25;
 
 pub const SymbolDisplay = struct {
@@ -150,6 +205,7 @@ pub const Analysis = struct {
     symbol_report: ?SymbolReport = null,
     project_symbol_report: ?ProjectSymbolReport = null,
     historical_symbol_report: ?HistoricalSymbolReport = null,
+    relation_report: ?RelationAggregationReport = null,
     symbol_display: SymbolDisplay = .{},
     results: []Result,
     caveats: [][]const u8,
@@ -201,6 +257,7 @@ pub const Analysis = struct {
             self.allocator.free(project_symbols.files);
         }
         if (self.historical_symbol_report) |historical_symbols| historical_symbols.deinit(self.allocator);
+        if (self.relation_report) |relations| relations.deinit(self.allocator);
         if (self.inspect) |inspect| {
             self.allocator.free(inspect.requested_path);
             self.allocator.free(inspect.matched_path);

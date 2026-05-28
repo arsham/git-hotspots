@@ -95,6 +95,7 @@ pub const RelationExtraction = struct {
     provider: provider.ProviderEvidence,
     candidates: []provider.RelationCandidate,
     cap_reached: bool = false,
+    omitted_count: usize = 0,
 
     pub fn deinit(self: *RelationExtraction, allocator: std.mem.Allocator) void {
         freeRelationProvider(allocator, self.provider);
@@ -141,6 +142,7 @@ const RelationBuildState = struct {
     candidates: std.ArrayList(provider.RelationCandidate),
     max_candidates: usize,
     cap_reached: bool = false,
+    omitted_count: usize = 0,
 
     fn deinit(self: *RelationBuildState) void {
         for (self.candidates.items) |candidate| freeRelationCandidate(self.allocator, candidate);
@@ -251,31 +253,31 @@ pub fn extractSource(allocator: std.mem.Allocator, repo_relative_path: []const u
 pub fn extractRelationsSource(allocator: std.mem.Allocator, repo_relative_path: []const u8, source: []const u8, options: RelationOptions) !RelationExtraction {
     try provider.validateRepoRelativePath(repo_relative_path);
     if (options.force_provider_unavailable) {
-        return relationExtraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &relation_unavailable_caveats, false, &.{});
+        return relationExtraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &relation_unavailable_caveats, false, 0, &.{});
     }
     if (!std.mem.endsWith(u8, repo_relative_path, ".py")) {
-        return relationExtraction(allocator, repo_relative_path, .unsupported, .unknown, .unknown, &relation_unsupported_caveats, false, &.{});
+        return relationExtraction(allocator, repo_relative_path, .unsupported, .unknown, .unknown, &relation_unsupported_caveats, false, 0, &.{});
     }
     if (source.len > options.max_source_bytes) {
-        return relationExtraction(allocator, repo_relative_path, .skipped, .unknown, .unknown, &relation_oversized_caveats, false, &.{});
+        return relationExtraction(allocator, repo_relative_path, .skipped, .unknown, .unknown, &relation_oversized_caveats, false, 0, &.{});
     }
 
-    const parser = c.ts_parser_new() orelse return relationExtraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &relation_unavailable_caveats, false, &.{});
+    const parser = c.ts_parser_new() orelse return relationExtraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &relation_unavailable_caveats, false, 0, &.{});
     defer c.ts_parser_delete(parser);
 
-    if (!c.ts_parser_set_language(parser, tree_sitter_python())) return relationExtraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &relation_unavailable_caveats, false, &.{});
+    if (!c.ts_parser_set_language(parser, tree_sitter_python())) return relationExtraction(allocator, repo_relative_path, .unavailable, .unknown, .unknown, &relation_unavailable_caveats, false, 0, &.{});
 
-    const source_len = std.math.cast(u32, source.len) orelse return relationExtraction(allocator, repo_relative_path, .skipped, .unknown, .unknown, &relation_oversized_caveats, false, &.{});
-    const tree = c.ts_parser_parse_string(parser, null, source.ptr, source_len) orelse return relationExtraction(allocator, repo_relative_path, .failed, .unknown, .low, &relation_failed_caveats, false, &.{});
+    const source_len = std.math.cast(u32, source.len) orelse return relationExtraction(allocator, repo_relative_path, .skipped, .unknown, .unknown, &relation_oversized_caveats, false, 0, &.{});
+    const tree = c.ts_parser_parse_string(parser, null, source.ptr, source_len) orelse return relationExtraction(allocator, repo_relative_path, .failed, .unknown, .low, &relation_failed_caveats, false, 0, &.{});
     defer c.ts_tree_delete(tree);
 
     const root = c.ts_tree_root_node(tree);
-    if (c.ts_node_has_error(root)) return relationExtraction(allocator, repo_relative_path, .failed, .unknown, .low, &relation_failed_caveats, false, &.{});
+    if (c.ts_node_has_error(root)) return relationExtraction(allocator, repo_relative_path, .failed, .unknown, .low, &relation_failed_caveats, false, 0, &.{});
 
-    const query = compilePythonQuery() catch return relationExtraction(allocator, repo_relative_path, .failed, .unknown, .low, &relation_failed_caveats, false, &.{});
+    const query = compilePythonQuery() catch return relationExtraction(allocator, repo_relative_path, .failed, .unknown, .low, &relation_failed_caveats, false, 0, &.{});
     defer c.ts_query_delete(query);
 
-    const cursor = c.ts_query_cursor_new() orelse return relationExtraction(allocator, repo_relative_path, .failed, .unknown, .low, &relation_failed_caveats, false, &.{});
+    const cursor = c.ts_query_cursor_new() orelse return relationExtraction(allocator, repo_relative_path, .failed, .unknown, .low, &relation_failed_caveats, false, 0, &.{});
     defer c.ts_query_cursor_delete(cursor);
 
     var definitions: std.ArrayList(DefinitionRecord) = .empty;
@@ -331,8 +333,9 @@ pub fn extractRelationsSource(allocator: std.mem.Allocator, repo_relative_path: 
 
     const candidates = try state.candidates.toOwnedSlice(allocator);
     const cap_reached = state.cap_reached;
+    const omitted_count = state.omitted_count;
     const caveats = if (cap_reached) &relation_cap_caveats else &relation_ok_caveats;
-    return relationExtraction(allocator, repo_relative_path, .ok, if (cap_reached) .partial else .fresh, if (cap_reached) .low else .medium, caveats, cap_reached, candidates);
+    return relationExtraction(allocator, repo_relative_path, .ok, if (cap_reached) .partial else .fresh, if (cap_reached) .low else .medium, caveats, cap_reached, omitted_count, candidates);
 }
 
 fn extraction(
@@ -355,6 +358,7 @@ fn relationExtraction(
     confidence: provider.Confidence,
     caveats: []const []const u8,
     cap_reached: bool,
+    omitted_count: usize,
     candidates: []provider.RelationCandidate,
 ) !RelationExtraction {
     errdefer freeRelationCandidates(allocator, candidates);
@@ -362,6 +366,7 @@ fn relationExtraction(
         .provider = try makeRelationProvider(allocator, repo_relative_path, failure, freshness, confidence, caveats),
         .candidates = candidates,
         .cap_reached = cap_reached,
+        .omitted_count = omitted_count,
     };
 }
 
@@ -575,6 +580,7 @@ fn appendRelationOwned(
         freeRelationEndpoint(state.allocator, source_endpoint);
         freeRelationEndpoint(state.allocator, target_endpoint);
         state.cap_reached = true;
+        state.omitted_count += 1;
         return;
     }
 
@@ -1161,6 +1167,7 @@ test "extract relations degrades for unsupported failure unavailable oversized a
     var capped = try extractRelationsSource(std.testing.allocator, "pkg/capped.py", "def one():\n    pass\ndef two():\n    one()\n", .{ .max_candidates = 2 });
     defer capped.deinit(std.testing.allocator);
     try std.testing.expect(capped.cap_reached);
+    try std.testing.expect(capped.omitted_count > 0);
     try std.testing.expectEqual(provider.Freshness.partial, capped.provider.freshness);
     try std.testing.expectEqual(@as(usize, 2), capped.candidates.len);
     try expectCaveat(capped.provider.caveats, "relation candidate cap reached; emitted evidence is partial and deterministically truncated");
