@@ -4,6 +4,7 @@ const provider = @import("provider.zig");
 const tree_sitter_common = @import("tree_sitter_common.zig");
 const tree_sitter_javascript = @import("tree_sitter_javascript.zig");
 const tree_sitter_python = @import("tree_sitter_python.zig");
+const tree_sitter_rust = @import("tree_sitter_rust.zig");
 const tree_sitter_typescript = @import("tree_sitter_typescript.zig");
 
 const invalid_path_caveats = [_][]const u8{
@@ -166,6 +167,22 @@ fn extractRelationsPath(
             });
         defer allocator.free(source);
         return tree_sitter_typescript.extractRelationsSource(allocator, path, source, relation_options);
+    }
+
+    if (tree_sitter_rust.isSupportedPath(path)) {
+        const relation_options: tree_sitter_rust.RelationOptions = .{
+            .max_source_bytes = options.max_source_bytes,
+            .max_candidates = options.max_candidates_per_file,
+            .force_provider_unavailable = options.force_provider_unavailable,
+        };
+        const source = try tree_sitter_common.readBoundedFile(allocator, io, repo_root, path, options.max_source_bytes) orelse
+            return tree_sitter_rust.extractRelationsSource(allocator, path, "", .{
+                .max_source_bytes = options.max_source_bytes,
+                .max_candidates = options.max_candidates_per_file,
+                .force_provider_unavailable = true,
+            });
+        defer allocator.free(source);
+        return tree_sitter_rust.extractRelationsSource(allocator, path, source, relation_options);
     }
 
     const relation_options: tree_sitter_python.RelationOptions = .{
@@ -543,6 +560,59 @@ test "relation aggregation attaches retained file and symbol candidates internal
     defer second.deinit(allocator);
     try std.testing.expectEqual(report.records.len, second.records.len);
     if (report.records.len > 0) try std.testing.expectEqualStrings(report.records[0].sort_key, second.records[0].sort_key);
+}
+
+test "relation aggregation routes Rust candidates through shared report model" {
+    const allocator = std.testing.allocator;
+    var threaded: std.Io.Threaded = .init(allocator, .{});
+    defer threaded.deinit();
+    const io = threaded.io();
+
+    const repo = ".zig-cache/relation-aggregation-rust-fixture";
+    std.Io.Dir.cwd().deleteTree(io, repo) catch {};
+    try std.Io.Dir.cwd().createDirPath(io, repo);
+    defer std.Io.Dir.cwd().deleteTree(io, repo) catch {};
+    try writeFixtureFile(io, repo, "src/relations.rs",
+        \\use crate::tools::worker;
+        \\mod external;
+        \\fn helper() {}
+        \\fn caller() {
+        \\    helper();
+        \\    missing_value;
+        \\    receiver.method();
+        \\}
+        \\make_item!(Generated);
+        \\
+    );
+
+    const results = try allocator.alloc(model.Result, 1);
+    results[0] = try makeResult(allocator, "src/relations.rs");
+    var analysis = try makeAnalysis(allocator, repo, results);
+    defer analysis.deinit();
+
+    try attach(allocator, io, &analysis, .{ .max_candidate_files = 1, .max_relation_records = 64 });
+    const report = analysis.relation_report.?;
+    try std.testing.expectEqual(@as(usize, 1), report.providers.len);
+    try std.testing.expectEqualStrings(tree_sitter_rust.relation_provider_name, report.providers[0].provider.name);
+    try std.testing.expectEqual(provider.Failure.ok, report.providers[0].provider.failure);
+    try std.testing.expect(report.records.len > 0);
+
+    var saw_call = false;
+    var saw_import = false;
+    var saw_unknown = false;
+    var saw_unresolved = false;
+    for (report.records) |record| {
+        saw_call = saw_call or record.kind == .call;
+        saw_import = saw_import or record.kind == .import_include;
+        saw_unknown = saw_unknown or record.kind == .unknown;
+        saw_unresolved = saw_unresolved or record.kind == .unresolved;
+        try std.testing.expectEqualStrings(tree_sitter_rust.relation_provider_name, record.provider_name);
+    }
+    try std.testing.expect(saw_call);
+    try std.testing.expect(saw_import);
+    try std.testing.expect(saw_unknown);
+    try std.testing.expect(saw_unresolved);
+    try std.testing.expect(reportContainsCaveat(report, "bounded Rust syntax proof"));
 }
 
 test "relation aggregation preserves bounds provider failures and omission counts" {

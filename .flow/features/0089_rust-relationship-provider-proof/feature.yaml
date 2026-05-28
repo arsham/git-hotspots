@@ -4,7 +4,7 @@ feature:
   slug: rust-relationship-provider-proof
   title: Rust relationship provider proof
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Rust has parser and current-symbol proof surfaces and good
@@ -68,7 +68,7 @@ proposal:
     materialised_at: 2026-05-28T20:55:31.507Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -128,7 +128,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Rust provider extraction proof
       goal: Implement Rust relation extraction through the shared provider-neutral
         model.
@@ -161,7 +161,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Public opt-in surface and fixtures
       goal: Update existing opt-in relationship report fixtures, docs, and validation
         to reflect Rust support accurately.
@@ -191,7 +191,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Close-out smoke and evidence
       goal: Record privacy-safe Rust real-repo or skip smoke evidence and complete
         Flow validation for close-out.
@@ -256,7 +256,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-28T20:43:42.898Z
-  updated_at: 2026-05-28T20:56:04.834Z
+  updated_at: 2026-05-28T23:16:44.245Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-28T20:56:04.834Z

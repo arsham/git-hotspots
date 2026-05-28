@@ -318,8 +318,8 @@ analysis, ownership, bug prediction, scoring replacement, or a ranking input.
 
 `--symbol-relationships` is an opt-in relationship layer that requires
 `--symbols`. It currently adds bounded local Tree-sitter relation evidence for
-retained ranked-file candidates in Python, JavaScript, TypeScript, and TSX
-lanes, and reports source and target endpoints, unresolved targets, provider
+retained ranked-file candidates in Python, JavaScript, Rust, TypeScript, and
+TSX lanes, and reports source and target endpoints, unresolved targets, provider
 identity, freshness, failure, confidence, caveats, record bounds, and omitted
 counts. Relationship evidence is caveated investigation context only: it is not
 call-graph truth, dependency proof, ownership, developer metrics, bug

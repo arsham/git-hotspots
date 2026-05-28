@@ -1001,13 +1001,13 @@ docs_manual_checks() {
   grep -Fq -- '--symbols' man/git-hotspots.1 || return 1
   grep -Fq -- '--historical-symbols' man/git-hotspots.1 || return 1
   grep -Fq -- '--symbol-relationships' man/git-hotspots.1 || return 1
-  grep -Fq 'Python, JavaScript, TypeScript, and TSX lanes' man/git-hotspots.1 || return 1
+  grep -Fq 'Python, JavaScript, Rust, TypeScript, and TSX lanes' man/git-hotspots.1 || return 1
   grep -Fq -- '--progress' man/git-hotspots.1 || return 1
   grep -Fq 'local-first' man/git-hotspots.1 || return 1
   ! grep -Eq 'dogfood|tools/release-linux\.sh|packaging/aur|makepkg|pacman|pkg\.tar' man/git-hotspots.1 || return 1
 
   grep -Fq 'docs/user-guide.md' README.md || return 1
-  grep -Fq 'Python, JavaScript, TypeScript, and TSX' README.md || return 1
+  grep -Fq 'Python, JavaScript, Rust, TypeScript, and' README.md || return 1
   grep -Fq 'retained ranked-file candidates in Python' README.md || return 1
   grep -Fq 'Invalid CLI combinations exit 2' README.md || return 1
   grep -Fq 'Local Linux dogfood packaging' README.md || return 1
@@ -1275,11 +1275,12 @@ fixture_json_checks() {
   grep -q -- '## Symbol relationships' "$SYMBOL_RELATIONSHIPS_MD" || return 1
   grep -q -- 'symbol relationships for retained ranked files:' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   ! grep -Eiq -- 'Fixture Author|fixture@example|https?://|ssh://|git@|/home/|/Users/|source snippet|commit message' "$SYMBOL_RELATIONSHIPS_JSON" "$SYMBOL_RELATIONSHIPS_MD" "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
-  for lane in javascript typescript tsx; do
+  for lane in javascript typescript tsx rust; do
     case "$lane" in
       javascript) repo=fixtures/javascript-symbols; inspect=src/example.mjs ;;
       typescript) repo=fixtures/typescript-symbols; inspect=src/example.ts ;;
       tsx) repo=fixtures/typescript-symbols; inspect=src/component.tsx ;;
+      rust) repo=fixtures/rust-relationships; inspect=src/relations.rs ;;
     esac
     lane_json="$ARTIFACT_DIR/symbol-relationships-$lane.json"
     lane_json_b="$ARTIFACT_DIR/symbol-relationships-$lane-b.json"
@@ -1305,12 +1306,13 @@ fixture_json_checks() {
     ! grep -Eiq -- 'Fixture Author|fixture@example|https?://|ssh://|git@|/home/|/Users/|source snippet|commit message' "$lane_json" "$lane_md" "$lane_table" || return 1
   done
   have_python || return 1
-  python3 - "$ARTIFACT_DIR/symbol-relationships-javascript.json" "$ARTIFACT_DIR/symbol-relationships-typescript.json" "$ARTIFACT_DIR/symbol-relationships-tsx.json" <<'PY' || return 1
+  python3 - "$ARTIFACT_DIR/symbol-relationships-javascript.json" "$ARTIFACT_DIR/symbol-relationships-typescript.json" "$ARTIFACT_DIR/symbol-relationships-tsx.json" "$ARTIFACT_DIR/symbol-relationships-rust.json" <<'PY' || return 1
 import json, sys
 cases = [
     (sys.argv[1], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}),
     (sys.argv[2], 'tree-sitter-typescript-relations', {'contains', 'call', 'unresolved', 'unknown'}),
     (sys.argv[3], 'tree-sitter-tsx-relations', {'contains', 'reference', 'unresolved', 'unknown'}),
+    (sys.argv[4], 'tree-sitter-rust-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved', 'unknown'}),
 ]
 for path, provider_name, expected_kinds in cases:
     with open(path, encoding='utf-8') as fh:

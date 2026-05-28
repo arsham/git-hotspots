@@ -127,6 +127,15 @@ pub const text =
     \\commit messages, source snippets, remotes, or absolute paths. This is not
     \\symbol lineage, ownership, scoring input, or semantic history.
     \\
+    \\--symbol-relationships is opt-in and requires --symbols. It adds bounded
+    \\local Tree-sitter relation evidence for Python, JavaScript, Rust,
+    \\TypeScript, and TSX retained ranked-file candidates, or for the inspected
+    \\file when --inspect PATH is present. Rust relation evidence is syntax-only:
+    \\contains, direct calls, local direct identifier references, external mod/use
+    \\includes, unresolved identifiers, and ambiguous path or member syntax. It
+    \\is not call-graph truth, dependency proof, semantic Rust analysis, scoring,
+    \\ownership, developer metrics, or bug prediction.
+    \\
     \\## Limitations and non-claims
     \\
     \\Scores are not bug predictions, objective code-quality ratings, maintainer
@@ -182,6 +191,9 @@ test "explanation includes confidence and non-claim boundaries" {
         "Unsupported current files",
         "current-line Git evidence for HEAD line ranges",
         "not true symbol history, historical identity tracking, or git log -L",
+        "--symbol-relationships is opt-in and requires --symbols",
+        "local Tree-sitter relation evidence for Python, JavaScript, Rust",
+        "Rust relation evidence is syntax-only",
     }) |snippet| {
         try std.testing.expect(std.mem.indexOf(u8, text, snippet) != null);
     }

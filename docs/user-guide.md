@@ -220,11 +220,12 @@ for retained ranked-file candidates:
 ./zig-out/bin/git-hotspots --repo . --symbols --symbol-relationships --format markdown
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.py --symbols --symbol-relationships --format json
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.js --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.rs --symbols --symbol-relationships --format json
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.ts --symbols --symbol-relationships --format json
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.tsx --symbols --symbol-relationships --format json
 ```
 
-Relationship evidence currently comes from local Python, JavaScript,
+Relationship evidence currently comes from local Python, JavaScript, Rust,
 TypeScript, and TSX Tree-sitter lanes. It reports source and target endpoints,
 unresolved targets, provider identity, freshness, failure, confidence, caveats,
 record bounds, and omitted counts. It is caveated investigation context only,

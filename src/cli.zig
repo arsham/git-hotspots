@@ -104,7 +104,8 @@ pub const usage =
     \\  ranked-file candidates only; it is not semantic lineage, reference/use
     \\  analysis, ownership, bug prediction, scoring replacement, or ranking input.
     \\  --symbol-relationships adds bounded local relation evidence for retained
-    \\  ranked-file candidates only; it is caveated syntax/provider evidence, not
+    \\  ranked-file candidates in Python, JavaScript, Rust, TypeScript, and TSX
+    \\  lanes only; it is caveated syntax/provider evidence, not
     \\  call-graph truth, dependency proof, scoring replacement, ownership,
     \\  developer metrics, or bug prediction.
     \\

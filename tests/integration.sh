@@ -356,12 +356,15 @@ diff -u fixtures/expected/symbol-relationships-javascript.json "$tmp_dir/git-hot
 diff -u fixtures/expected/symbol-relationships-typescript.json "$tmp_dir/git-hotspots-symbol-relationships-typescript.json"
 "$EXE" --repo fixtures/typescript-symbols --inspect src/component.tsx --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-tsx.json"
 diff -u fixtures/expected/symbol-relationships-tsx.json "$tmp_dir/git-hotspots-symbol-relationships-tsx.json"
-python3 - "$tmp_dir/git-hotspots-symbol-relationships-javascript.json" "$tmp_dir/git-hotspots-symbol-relationships-typescript.json" "$tmp_dir/git-hotspots-symbol-relationships-tsx.json" <<'PY'
+"$EXE" --repo fixtures/rust-relationships --inspect src/relations.rs --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-rust.json"
+diff -u fixtures/expected/symbol-relationships-rust.json "$tmp_dir/git-hotspots-symbol-relationships-rust.json"
+python3 - "$tmp_dir/git-hotspots-symbol-relationships-javascript.json" "$tmp_dir/git-hotspots-symbol-relationships-typescript.json" "$tmp_dir/git-hotspots-symbol-relationships-tsx.json" "$tmp_dir/git-hotspots-symbol-relationships-rust.json" <<'PY'
 import json, sys
 cases = [
     (sys.argv[1], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}),
     (sys.argv[2], 'tree-sitter-typescript-relations', {'contains', 'call', 'unresolved', 'unknown'}),
     (sys.argv[3], 'tree-sitter-tsx-relations', {'contains', 'reference', 'unresolved', 'unknown'}),
+    (sys.argv[4], 'tree-sitter-rust-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved', 'unknown'}),
 ]
 for path, provider_name, expected_kinds in cases:
     with open(path, encoding='utf-8') as fh:
@@ -377,11 +380,12 @@ for path, provider_name, expected_kinds in cases:
     assert all(item['provider']['input'].startswith('working-tree:') for item in relationships['records'])
     assert 'call-graph truth' not in json.dumps(data)
 PY
-for lane in javascript typescript tsx; do
+for lane in javascript typescript tsx rust; do
   case "$lane" in
     javascript) repo=fixtures/javascript-symbols; inspect=src/example.mjs ;;
     typescript) repo=fixtures/typescript-symbols; inspect=src/example.ts ;;
     tsx) repo=fixtures/typescript-symbols; inspect=src/component.tsx ;;
+    rust) repo=fixtures/rust-relationships; inspect=src/relations.rs ;;
   esac
   "$EXE" --repo "$repo" --inspect "$inspect" --symbols --symbol-relationships --symbol-limit 6 --format markdown > "$tmp_dir/git-hotspots-symbol-relationships-$lane.md"
   diff -u "fixtures/expected/symbol-relationships-$lane.md" "$tmp_dir/git-hotspots-symbol-relationships-$lane.md"

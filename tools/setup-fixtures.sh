@@ -920,6 +920,41 @@ EOF
   commit_all "$repo" '2026-05-02T00:00:00+0000' 'expand rust symbol functions'
 }
 
+make_rust_relationships() {
+  repo="$FIX/rust-relationships"
+  rm -rf "$repo"
+  mkdir -p "$repo/src"
+  setup_repo "$repo"
+
+  cat > "$repo/src/relations.rs" <<'EOF'
+use crate::tools::worker;
+
+const LIMIT: usize = 1;
+
+mod external;
+
+mod inner {
+    pub struct Record { value: i32 }
+
+    impl Record {
+        pub fn new(value: i32) -> Self { Self { value } }
+        pub fn value(&self) -> i32 { self.value }
+    }
+
+    fn helper() { crate::missing::call(); }
+}
+
+fn top_function() {
+    top_function();
+    missing_value;
+    receiver.method();
+}
+
+make_item!(Generated);
+EOF
+  commit_all "$repo" '2026-05-03T00:00:00+0000' 'initial rust relationship fixture'
+}
+
 make_symbol_line_history() {
   repo="$FIX/symbol-line-history"
   rm -rf "$repo"
@@ -983,6 +1018,7 @@ make_javascript_symbols
 make_lua_symbols
 make_typescript_symbols
 make_rust_symbols
+make_rust_relationships
 make_symbol_line_history
 rm -rf "$FIX/shallow" "$FIX/medium" "$FIX/partial" "$FIX/detached" "$FIX/linked" "$FIX/symbol-line-history-shallow" "$FIX/symbol-line-history-partial" "$FIX/go-symbols-shallow" "$FIX/go-symbols-partial" "$FIX/python-symbols-shallow" "$FIX/python-symbols-partial" "$FIX/javascript-symbols-shallow" "$FIX/javascript-symbols-partial" "$FIX/lua-symbols-shallow" "$FIX/lua-symbols-partial" "$FIX/typescript-symbols-shallow" "$FIX/typescript-symbols-partial" "$FIX/rust-symbols-shallow" "$FIX/rust-symbols-partial"
 git clone -q --depth 1 "file://$FIX/basic" "$FIX/shallow"

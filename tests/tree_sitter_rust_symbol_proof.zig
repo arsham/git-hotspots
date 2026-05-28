@@ -59,6 +59,22 @@ fn expectCaveat(caveats: []const []const u8, expected: []const u8) !void {
     return error.ExpectedCaveat;
 }
 
+fn endpointName(endpoint: provider.RelationEndpoint) []const u8 {
+    return switch (endpoint) {
+        .file => |file| file.path,
+        .current_symbol => |symbol| symbol.name,
+        .report_symbol => |symbol| symbol.name,
+        .unresolved, .external_string => |named| named.value,
+    };
+}
+
+fn expectRelationTarget(relations: []const provider.RelationCandidate, kind: provider.RelationKind, target: []const u8) !void {
+    for (relations) |relation| {
+        if (relation.kind == kind and std.mem.eql(u8, endpointName(relation.target), target)) return;
+    }
+    return error.ExpectedRelation;
+}
+
 test "Rust symbol proof maps query captures into current symbol evidence metadata" {
     var result = try tree_sitter_rust.extractSource(std.testing.allocator, "crates/demo/src/supported_subset.rs", supported_source);
     defer result.deinit(std.testing.allocator);
@@ -127,4 +143,48 @@ test "Rust symbol proof covers empty generated macro cfg unsupported and failed 
     try std.testing.expectEqual(@as(usize, 0), unsupported.symbols.len);
 
     try std.testing.expectError(error.InvalidRepoRelativePath, tree_sitter_rust.extractSource(std.testing.allocator, "../private/source.rs", "pub fn hidden() {}\n"));
+}
+
+test "Rust symbol proof covers relation extraction states" {
+    const relation_source =
+        \\use crate::tools::worker;
+        \\mod external;
+        \\fn helper() {}
+        \\fn caller() {
+        \\    helper();
+        \\    missing_value;
+        \\    receiver.method();
+        \\}
+        \\make_item!(Generated);
+        \\
+    ;
+
+    var result = try tree_sitter_rust.extractRelationsSource(std.testing.allocator, "crates/demo/src/relations.rs", relation_source, .{});
+    defer result.deinit(std.testing.allocator);
+
+    try std.testing.expectEqualStrings(tree_sitter_rust.relation_provider_name, result.provider.name);
+    try std.testing.expectEqual(provider.ProviderKind.relation, result.provider.kind);
+    try std.testing.expectEqual(provider.Failure.ok, result.provider.failure);
+    try expectRelationTarget(result.candidates, .contains, "helper");
+    try expectRelationTarget(result.candidates, .import_include, "crate::tools::worker");
+    try expectRelationTarget(result.candidates, .call, "helper");
+    try expectRelationTarget(result.candidates, .call, "make_item");
+    try expectRelationTarget(result.candidates, .unresolved, "missing_value");
+    try expectRelationTarget(result.candidates, .unknown, "receiver.method");
+    try expectCaveat(result.provider.caveats, "bounded Rust syntax proof: contains, local direct identifier references, direct calls, external mod/use includes, unresolved identifiers, and ambiguous path/member syntax");
+
+    var capped = try tree_sitter_rust.extractRelationsSource(std.testing.allocator, "crates/demo/src/capped.rs", relation_source, .{ .max_candidates = 2 });
+    defer capped.deinit(std.testing.allocator);
+    try std.testing.expect(capped.cap_reached);
+    try std.testing.expect(capped.omitted_count > 0);
+    try std.testing.expectEqual(provider.Freshness.partial, capped.provider.freshness);
+    try expectCaveat(capped.provider.caveats, "relation candidate cap reached; emitted evidence is partial and deterministically truncated");
+
+    var unsupported = try tree_sitter_rust.extractRelationsSource(std.testing.allocator, "docs/unsupported.md", relation_source, .{});
+    defer unsupported.deinit(std.testing.allocator);
+    try std.testing.expectEqual(provider.Failure.unsupported, unsupported.provider.failure);
+
+    var failed = try tree_sitter_rust.extractRelationsSource(std.testing.allocator, "crates/demo/src/broken.rs", "fn broken(", .{});
+    defer failed.deinit(std.testing.allocator);
+    try std.testing.expectEqual(provider.Failure.failed, failed.provider.failure);
 }
