@@ -1,0 +1,27 @@
+git-hotspots: file-level Git-history investigation prompts
+commits=2 shallow=false partial=false dirty=false auto_fetch=false
+scope: selected=project include_prefixes=[] exclude_prefixes=[.flow/,.zig-cache/,zig-out/,target/,node_modules/,dist/,build/,coverage/] outside_include_paths=0 outside_include_changes=0 excluded_paths=0 excluded_changes=0
+project symbols: state=current-only files=3 total=3 shown=2 omitted=1 limit=2 unsupported=1 unavailable=1 failed=0 skipped=0 sort_basis="parent file rank, then current-line Git evidence/provider order"
+symbols caveat: current working-tree enrichment for retained ranked files only; file-level Git evidence, score, file order, lineage, and confidence are unchanged
+
+rank  score   changes churn   confidence lineage path
+1     46.3    2       7       medium     no      src/example.zig
+2     35.0    1       1       low        no      src/link.zig
+3     35.0    1       1       low        no      src/readme.txt
+4     35.0    1       1       low        no      src/target.zig
+
+current symbols for ranked files:
+  summary: files=3 total=3 unsupported=1 unavailable=1 failed=0 skipped=0
+  file rank=1 score=46.3 path=src/example.zig provider=tree-sitter-zig failure=ok confidence=high
+    function alpha lines 5-5 confidence=high
+    function zebra lines 1-3 confidence=high
+
+historical symbols for retained ranked files:
+  summary: candidates=4 retained_candidates=4 aggregates=6 shown=2 omitted=4 limit=2 limit_source=explicit aggregate_bound=128 aggregate_bound_exceeded=false fallback_records=2 fallback_count=2
+  provider_states: ok=4 unavailable=0 unsupported=1 failed=0 timed_out=0 skipped=1
+  sort_basis="historical aggregate sort key: evidence path, symbol kind/name/status/range; attached parent rank is reported but does not change file ranking"
+  caveats: historical symbols are opt-in true historical hunk attribution over retained ranked-file candidates only; provider-supported languages only; unsupported, binary, large, missing, provider-failed, merge, and unattributed evidence may fall back to file-level records; no semantic symbol lineage, rename/move/split/merge proof, reference/use analysis, maintainer attribution, bug prediction, scoring replacement, or developer metrics; local Git history only; no checkout, network access, auto-fetch, telemetry, remote enrichment, cache truth, or runtime LLM judgement
+  file rank=1 score=46.3 path=src/example.zig evidence_path=src/example.zig function alpha lines=3-3 status=historical changes=1 added_pressure=3 deleted_pressure=0 latest=1777593600 provider_state=ok confidence=high fallback_count=0 sample_commits=[68512f487cd1a83c99b3fee9b07fb05e3ab24fe8] caveats=current working-tree enrichment only; file-level Git evidence remains product truth; supported subset: named Zig function declarations only; range convention: one-based inclusive lines
+  file rank=1 score=46.3 path=src/example.zig evidence_path=src/example.zig function zebra lines=1-1 status=historical changes=2 added_pressure=3 deleted_pressure=1 latest=1777680000 provider_state=ok confidence=high fallback_count=0 sample_commits=[5e8784e66dbf456b6e994af7e5eac03329ea47cd,68512f487cd1a83c99b3fee9b07fb05e3ab24fe8] caveats=current working-tree enrichment only; file-level Git evidence remains product truth; supported subset: named Zig function declarations only; range convention: one-based inclusive lines
+
+Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.

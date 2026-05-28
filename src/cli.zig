@@ -48,9 +48,14 @@ pub const usage =
     \\                    Git evidence for current Zig, Go, Python, JavaScript,
     \\                    Lua, Rust, TypeScript, or TSX symbol line ranges at HEAD; not true
     \\                    symbol history, lineage, scoring, or ownership
+    \\  --historical-symbols
+    \\                    With --symbols, add opt-in true historical hunk attribution
+    \\                    for retained ranked-file candidates; separate from current
+    \\                    working-tree symbols and current-line HEAD evidence; does not
+    \\                    affect score, rank, lineage, confidence, or file-level evidence
     \\  --symbol-limit N  With --symbols, limit human table and
-    \\                    Markdown symbol rows (default: 25); JSON symbol item
-    \\                    arrays remain complete
+    \\                    Markdown current and historical symbol rows (default: 25);
+    \\                    JSON symbol item arrays remain complete within internal bounds
     \\
     \\Standalone help:
     \\  --explain         Explain current scoring semantics without analysing a repo
@@ -61,6 +66,7 @@ pub const usage =
     \\  git-hotspots --repo . --limit 10 --format table
     \\  git-hotspots --repo . --scope project --since HEAD~500 --progress --format markdown
     \\  git-hotspots --repo . --limit 5 --symbols --format markdown
+    \\  git-hotspots --repo . --limit 5 --symbols --historical-symbols --format markdown
     \\  git-hotspots --repo . --inspect src/main.zig --symbols --format markdown
     \\  git-hotspots --explain
     \\
@@ -87,6 +93,9 @@ pub const usage =
     \\  dependency graphs, or semantic Rust analysis.
     \\  --symbol-line-history adds current-line Git evidence for HEAD symbol
     \\  ranges only; it is not true symbol history, lineage, scoring, or ownership.
+    \\  --historical-symbols adds true historical hunk attribution for retained
+    \\  ranked-file candidates only; it is not semantic lineage, reference/use
+    \\  analysis, ownership, bug prediction, scoring replacement, or ranking input.
     \\
 ;
 
@@ -118,6 +127,7 @@ pub const CliError = error{
     InvalidInspectLimitCombination,
     InvalidSymbolsCombination,
     InvalidSymbolLineHistoryCombination,
+    InvalidHistoricalSymbolsCombination,
     InvalidSymbolLimitCombination,
     InvalidSymbolLimit,
     InvalidScope,
@@ -170,6 +180,13 @@ pub fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliEr
             if (explain_requested) return error.InvalidExplainCombination;
             if (version_requested) return error.InvalidVersionCombination;
             cfg.symbol_line_history = true;
+            continue;
+        }
+        if (std.mem.eql(u8, arg, "--historical-symbols")) {
+            analysis_flag_seen = true;
+            if (explain_requested) return error.InvalidExplainCombination;
+            if (version_requested) return error.InvalidVersionCombination;
+            cfg.historical_symbols = true;
             continue;
         }
         if (std.mem.eql(u8, arg, "--symbol-limit")) {
@@ -267,6 +284,7 @@ pub fn parseArgs(allocator: std.mem.Allocator, args: []const [:0]const u8) CliEr
     if (cfg.limit == 0) return error.InvalidLimit;
     if (cfg.inspect_path != null and limit_seen) return error.InvalidInspectLimitCombination;
     if (cfg.symbol_line_history and !cfg.symbols) return error.InvalidSymbolLineHistoryCombination;
+    if (cfg.historical_symbols and !cfg.symbols) return error.InvalidHistoricalSymbolsCombination;
     if (cfg.symbol_limit != null and !cfg.symbols) return error.InvalidSymbolLimitCombination;
     try applyScopePreset(allocator, &cfg);
     return .{ .analyze = cfg };
@@ -411,6 +429,7 @@ test "parse defaults are documented through config shape" {
     try std.testing.expect(!cfg.progress);
     try std.testing.expect(!cfg.symbols);
     try std.testing.expect(!cfg.symbol_line_history);
+    try std.testing.expect(!cfg.historical_symbols);
     try std.testing.expectEqual(@as(?usize, null), cfg.symbol_limit);
 }
 
@@ -456,6 +475,7 @@ test "parse help has high precedence independent of order" {
     const cases = [_][]const [:0]const u8{
         &[_][:0]const u8{ "git-hotspots", "--symbols", "--help" },
         &[_][:0]const u8{ "git-hotspots", "--help", "--symbols" },
+        &[_][:0]const u8{ "git-hotspots", "--historical-symbols", "--help" },
         &[_][:0]const u8{ "git-hotspots", "--repo", "--help" },
         &[_][:0]const u8{ "git-hotspots", "--format", "--help" },
         &[_][:0]const u8{ "git-hotspots", "-h", "--symbol-limit", "0" },
@@ -479,6 +499,8 @@ test "reject explain combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--progress", "--explain" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--symbols" },
         &[_][:0]const u8{ "git-hotspots", "--symbols", "--explain" },
+        &[_][:0]const u8{ "git-hotspots", "--explain", "--historical-symbols" },
+        &[_][:0]const u8{ "git-hotspots", "--historical-symbols", "--explain" },
         &[_][:0]const u8{ "git-hotspots", "--explain", "--symbol-limit", "1" },
         &[_][:0]const u8{ "git-hotspots", "--symbol-limit", "1", "--explain" },
     };
@@ -502,6 +524,8 @@ test "reject version combined with analysis flags" {
         &[_][:0]const u8{ "git-hotspots", "--progress", "--version" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--symbols" },
         &[_][:0]const u8{ "git-hotspots", "--symbols", "--version" },
+        &[_][:0]const u8{ "git-hotspots", "--version", "--historical-symbols" },
+        &[_][:0]const u8{ "git-hotspots", "--historical-symbols", "--version" },
         &[_][:0]const u8{ "git-hotspots", "--version", "--symbol-limit", "1" },
         &[_][:0]const u8{ "git-hotspots", "--symbol-limit", "1", "--version" },
     };
@@ -659,6 +683,26 @@ test "parse symbol line history requires symbols" {
     try std.testing.expectEqualStrings("src/app.zig", cfg.inspect_path.?);
     try std.testing.expectError(error.InvalidSymbolLineHistoryCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--symbol-line-history" }));
     try std.testing.expectError(error.InvalidSymbolLineHistoryCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbol-line-history" }));
+}
+
+test "parse historical symbols requires symbols" {
+    const project_args = [_][:0]const u8{ "git-hotspots", "--symbols", "--historical-symbols" };
+    const project_mode = try parseArgs(std.testing.allocator, &project_args);
+    const project_cfg = project_mode.analyze;
+    defer freeConfig(std.testing.allocator, project_cfg);
+    try std.testing.expect(project_cfg.symbols);
+    try std.testing.expect(project_cfg.historical_symbols);
+
+    const args = [_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--symbols", "--historical-symbols" };
+    const mode = try parseArgs(std.testing.allocator, &args);
+    const cfg = mode.analyze;
+    defer freeConfig(std.testing.allocator, cfg);
+    try std.testing.expect(cfg.symbols);
+    try std.testing.expect(cfg.historical_symbols);
+    try std.testing.expectEqualStrings("src/app.zig", cfg.inspect_path.?);
+
+    try std.testing.expectError(error.InvalidHistoricalSymbolsCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--historical-symbols" }));
+    try std.testing.expectError(error.InvalidHistoricalSymbolsCombination, parseArgs(std.testing.allocator, &[_][:0]const u8{ "git-hotspots", "--inspect", "src/app.zig", "--historical-symbols" }));
 }
 
 test "parse symbol limit is human display only with symbols" {

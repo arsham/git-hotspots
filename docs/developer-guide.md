@@ -15,12 +15,14 @@ usage or contributor detail here or in `docs/user-guide.md`.
 - `src/git_history.zig`, `src/git_log.zig`, `src/git_path.zig`, and related
   modules own deterministic Git-history collection and path handling.
 - `src/scoring.zig` owns deterministic ranking and confidence rules.
-- `src/provider.zig` owns provider evidence contracts and current-only
-  semantics.
+- `src/provider.zig` owns provider evidence contracts and current-only plus
+  revision-local symbol semantics.
 - `src/provider_selection.zig` chooses bounded symbol providers for retained
   ranked files or for one inspected path; it is not a runtime plugin framework.
-- `src/tree_sitter_*.zig` modules own language-specific current-symbol
-  extraction.
+- `src/historical_symbol_*.zig` owns bounded historical hunk attribution over
+  retained ranked-file candidates.
+- `src/tree_sitter_*.zig` modules own language-specific current-symbol and
+  revision-local extraction.
 - `src/report*.zig` owns deterministic table, JSON, Markdown, and symbol report
   rendering.
 - `tests/integration.sh` protects executable behaviour and public output
@@ -61,8 +63,9 @@ hooks, or packaging work as part of a docs/help-only change.
 ## Report and provider boundaries
 
 File-level local Git-history evidence is the product truth. Provider output is
-optional current-file enrichment for ranked files with `--symbols`, or for one
-inspected file with `--inspect PATH --symbols`, and must not change score, rank,
+optional current-file enrichment for ranked files with `--symbols`, optional
+current-line evidence with `--symbol-line-history`, or optional historical hunk
+attribution with `--historical-symbols`. It must not change score, rank,
 confidence, co-change evidence, Git rename lineage, scope, or inclusion and
 exclusion decisions.
 

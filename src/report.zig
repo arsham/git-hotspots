@@ -4,6 +4,7 @@ const provider = @import("provider.zig");
 const version = @import("version.zig");
 const fmt = @import("report_format.zig");
 const report_symbols = @import("report_symbols.zig");
+const report_historical_symbols = @import("report_historical_symbols.zig");
 const report_json = @import("report_json.zig");
 const report_markdown = @import("report_markdown.zig");
 const report_table = @import("report_table.zig");

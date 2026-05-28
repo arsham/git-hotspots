@@ -1,6 +1,7 @@
 const std = @import("std");
 const model = @import("model.zig");
 const fmt = @import("report_format.zig");
+const historical = @import("report_historical_symbols.zig");
 const report_symbols = @import("report_symbols.zig");
 
 pub fn renderTable(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
@@ -50,7 +51,59 @@ pub fn renderTable(allocator: std.mem.Allocator, writer: anytype, analysis: mode
         }
     }
     if (analysis.project_symbol_report) |project_symbols| try renderProjectSymbolRows(allocator, writer, project_symbols, analysis.symbol_display);
+    if (analysis.historical_symbol_report) |historical_symbols| try renderHistoricalSymbolRows(writer, analysis, historical_symbols);
     try writer.print("\nScores are deterministic prompts for investigation, not bug predictions or code-quality ratings.\n", .{});
+}
+
+fn renderHistoricalSymbolRows(writer: anytype, analysis: model.Analysis, report: model.HistoricalSymbolReport) !void {
+    const display = historical.displaySummary(report, analysis.symbol_display);
+    const provider_summary = historical.providerStateSummary(report);
+    try writer.print("\nhistorical symbols for retained ranked files:\n", .{});
+    try writer.print("  summary: candidates={d} retained_candidates={d} aggregates={d} shown={d} omitted={d} limit={d} limit_source={s} aggregate_bound={d} aggregate_bound_exceeded={} fallback_records={d} fallback_count={d}\n", .{ report.candidate_path_count, report.retained_candidate_path_count, report.aggregates.len, display.shown, display.omitted, display.limit, display.limitSource(), report.aggregate_record_bound, report.aggregate_record_bound_exceeded, provider_summary.fallback_record_count, provider_summary.fallback_count });
+    try writer.print("  provider_states: ok={d} unavailable={d} unsupported={d} failed={d} timed_out={d} skipped={d}\n", .{ provider_summary.ok, provider_summary.unavailable, provider_summary.unsupported, provider_summary.failed, provider_summary.timed_out, provider_summary.skipped });
+    try writer.print("  sort_basis=\"{s}\"\n", .{historical.sort_basis});
+    try writer.print("  caveats: ", .{});
+    try renderHistoricalCaveatsInline(writer, report.caveats);
+    try writer.writeByte('\n');
+    if (report.aggregates.len == 0) {
+        try writer.print("  none\n", .{});
+        return;
+    }
+    for (report.aggregates[0..display.shown]) |record| {
+        const parent = historical.parentMeta(analysis.results, record.parent_path);
+        const parent_path = if (parent) |meta| meta.path else record.parent_path;
+        const parent_rank = if (parent) |meta| meta.rank else 0;
+        const parent_score = if (parent) |meta| meta.score else 0;
+        try writer.print("  file rank={d} score={d:.1} path={s} evidence_path={s} ", .{ parent_rank, parent_score, parent_path, record.parent_path });
+        if (record.symbol_name) |name| {
+            try writer.print("{s} {s}", .{ if (record.symbol_kind) |kind| historical.kindName(kind) else "symbol", name });
+        } else {
+            try writer.print("file-fallback", .{});
+        }
+        if (record.revision_range) |range| try writer.print(" lines={d}-{d}", .{ range.start, range.end });
+        try writer.print(" status={s} changes={d} added_pressure={d} deleted_pressure={d} latest=", .{ historical.statusName(record.status), record.change_count, record.added_line_pressure, record.deleted_line_pressure });
+        if (record.latest_timestamp) |ts| try writer.print("{d}", .{ts}) else try writer.print("none", .{});
+        try writer.print(" provider_state={s} confidence={s} fallback_count={d} sample_commits=", .{ historical.providerStateName(record.provider_state), historical.confidenceName(record.confidence), record.fallback_count });
+        try fmt.renderInlineStringArray(writer, record.sample_commit_ids);
+        try writer.print(" caveats=", .{});
+        try fmt.renderCaveatInline(writer, record.caveats);
+        try writer.writeByte('\n');
+    }
+}
+
+fn renderHistoricalCaveatsInline(writer: anytype, caveats: []const []const u8) !void {
+    var emitted = false;
+    for (historical.report_level_caveats) |caveat| {
+        if (emitted) try writer.writeAll("; ");
+        try writer.writeAll(caveat);
+        emitted = true;
+    }
+    for (caveats) |caveat| {
+        if (emitted) try writer.writeAll("; ");
+        try writer.writeAll(caveat);
+        emitted = true;
+    }
+    if (!emitted) try writer.writeAll("none");
 }
 
 fn renderProjectSymbolRows(allocator: std.mem.Allocator, writer: anytype, project_symbols: model.ProjectSymbolReport, display: model.SymbolDisplay) !void {

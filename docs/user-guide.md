@@ -200,6 +200,19 @@ Current-line evidence is not true symbol history, historical identity tracking,
 or semantic ownership. Shallow, partial, dirty, unsupported, symlinked, missing,
 or too-large files report caveats instead of silently expanding scope.
 
+Use `--historical-symbols` when you want bounded true historical hunk
+attribution for retained ranked-file candidates:
+
+```sh
+./zig-out/bin/git-hotspots --repo . --symbols --historical-symbols --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect src/main.zig --symbols --historical-symbols --format json
+```
+
+Historical symbol evidence reports revision-local symbols when the provider can
+parse the historical blob, and file-level fallbacks when it cannot. It is not
+semantic symbol lineage, reference/use analysis, ownership, bug prediction,
+scoring replacement, or a ranking input.
+
 ## Reading reports
 
 Reports include:
@@ -209,7 +222,8 @@ Reports include:
 - ranked file-level hotspot rows;
 - frequency, churn, recency, co-change, size, confidence, and evidence fields;
 - conservative Git-detected file rename lineage when both paths are in scope;
-- optional current provider evidence for ranked files or one inspected file.
+- optional current provider evidence for ranked files or one inspected file;
+- optional historical hunk attribution for retained ranked-file candidates.
 
 Confidence is a caveated evidence summary, not a correctness score. Co-change
 means files changed in the same commits; it is not dependency analysis.
@@ -229,6 +243,8 @@ the tool does not silently fetch more history.
 
 - `error: --symbol-line-history requires --symbols`: add `--symbols` before
   requesting current-line Git evidence.
+- `error: --historical-symbols requires --symbols`: add `--symbols` before
+  requesting historical hunk attribution.
 - `error: --format accepts one value`: use `--format table`, `--format json`,
   or `--format markdown`.
 - Missing values such as `--repo`, `--limit`, `--since`, `--include-prefix`,

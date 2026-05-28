@@ -2,6 +2,7 @@ const std = @import("std");
 const model = @import("model.zig");
 const version = @import("version.zig");
 const fmt = @import("report_format.zig");
+const historical = @import("report_historical_symbols.zig");
 const report_symbols = @import("report_symbols.zig");
 
 pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
@@ -67,6 +68,9 @@ pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: m
     }
     if (analysis.project_symbol_report) |project_symbols| {
         try renderProjectSymbolReportMarkdown(allocator, writer, project_symbols, analysis.symbol_display);
+    }
+    if (analysis.historical_symbol_report) |historical_symbols| {
+        try renderHistoricalSymbolReportMarkdown(writer, analysis, historical_symbols);
     }
 
     try writer.writeAll("## Caveats\n\n");
@@ -164,6 +168,70 @@ pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: m
                 try writer.writeByte('\n');
             }
         }
+    }
+}
+
+fn renderHistoricalSymbolReportMarkdown(writer: anytype, analysis: model.Analysis, report: model.HistoricalSymbolReport) !void {
+    const display = historical.displaySummary(report, analysis.symbol_display);
+    const provider_summary = historical.providerStateSummary(report);
+    try writer.writeAll("## Historical symbols\n\n");
+    try writer.writeAll("Historical symbols are opt-in true historical hunk attribution for retained ranked-file candidates only. They do not change score, file order, lineage, confidence, or file-level Git evidence.\n\n");
+    try writer.print("- Candidate paths: {d}\n- Retained candidate paths: {d}\n- Aggregate records: {d}\n- Shown records: {d}\n- Omitted records: {d}\n- Human display limit: {d} ({s})\n", .{ report.candidate_path_count, report.retained_candidate_path_count, report.aggregates.len, display.shown, display.omitted, display.limit, display.limitSource() });
+    try writer.print("- Aggregate record bound: {d}\n- Aggregate record bound exceeded: {}\n- Fallback records: {d}\n- Fallback count: {d}\n", .{ report.aggregate_record_bound, report.aggregate_record_bound_exceeded, provider_summary.fallback_record_count, provider_summary.fallback_count });
+    try writer.print("- Provider states: ok={d}, unavailable={d}, unsupported={d}, failed={d}, timed_out={d}, skipped={d}\n", .{ provider_summary.ok, provider_summary.unavailable, provider_summary.unsupported, provider_summary.failed, provider_summary.timed_out, provider_summary.skipped });
+    try writer.writeAll("- Sort basis: ");
+    try fmt.markdownText(writer, historical.sort_basis);
+    try writer.writeAll("\n- Caveats:\n");
+    for (historical.report_level_caveats) |caveat| {
+        try writer.writeAll("  - ");
+        try fmt.markdownText(writer, caveat);
+        try writer.writeByte('\n');
+    }
+    for (report.caveats) |caveat| {
+        try writer.writeAll("  - ");
+        try fmt.markdownText(writer, caveat);
+        try writer.writeByte('\n');
+    }
+    try writer.writeByte('\n');
+    try writer.writeAll("| File rank | File | Evidence path | Score | Name | Kind | Revision lines | Status | Changes | Added pressure | Deleted pressure | Latest timestamp | Provider state | Confidence | Fallbacks | Sample commits | Caveats |\n");
+    try writer.writeAll("| ---: | --- | --- | ---: | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | --- | --- | ---: | --- | --- |\n");
+    if (report.aggregates.len == 0) {
+        try writer.writeAll("| - | None | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |\n\n");
+        return;
+    }
+    for (report.aggregates[0..display.shown]) |record| {
+        const parent = historical.parentMeta(analysis.results, record.parent_path);
+        if (parent) |meta| try writer.print("| {d} | ", .{meta.rank}) else try writer.writeAll("| - | ");
+        if (parent) |meta| try fmt.markdownText(writer, meta.path) else try fmt.markdownText(writer, record.parent_path);
+        try writer.writeAll(" | ");
+        try fmt.markdownText(writer, record.parent_path);
+        try writer.writeAll(" | ");
+        if (parent) |meta| try writer.print("{d:.1}", .{meta.score}) else try writer.writeAll("-");
+        try writer.writeAll(" | ");
+        if (record.symbol_name) |name| try fmt.markdownText(writer, name) else try writer.writeAll("file fallback");
+        try writer.writeAll(" | ");
+        if (record.symbol_kind) |kind| try writer.writeAll(historical.kindName(kind)) else try writer.writeAll("-");
+        try writer.writeAll(" | ");
+        if (record.revision_range) |range| try writer.print("{d}-{d}", .{ range.start, range.end }) else try writer.writeAll("-");
+        try writer.print(" | {s} | {d} | {d} | {d} | ", .{ historical.statusName(record.status), record.change_count, record.added_line_pressure, record.deleted_line_pressure });
+        if (record.latest_timestamp) |ts| try writer.print("{d}", .{ts}) else try writer.writeAll("-");
+        try writer.print(" | {s} | {s} | {d} | ", .{ historical.providerStateName(record.provider_state), historical.confidenceName(record.confidence), record.fallback_count });
+        try renderMarkdownInlineStrings(writer, record.sample_commit_ids);
+        try writer.writeAll(" | ");
+        try fmt.renderMarkdownCaveatInline(writer, record.caveats);
+        try writer.writeAll(" |\n");
+    }
+    try writer.writeByte('\n');
+}
+
+fn renderMarkdownInlineStrings(writer: anytype, values: []const []const u8) !void {
+    if (values.len == 0) {
+        try writer.writeAll("none");
+        return;
+    }
+    for (values, 0..) |value, i| {
+        if (i != 0) try writer.writeAll(", ");
+        try fmt.markdownText(writer, value);
     }
 }
 

@@ -3,6 +3,7 @@ const model = @import("model.zig");
 const provider = @import("provider.zig");
 const version = @import("version.zig");
 const fmt = @import("report_format.zig");
+const historical = @import("report_historical_symbols.zig");
 const report_symbols = @import("report_symbols.zig");
 
 pub fn renderJson(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
@@ -33,6 +34,10 @@ pub fn renderJson(allocator: std.mem.Allocator, writer: anytype, analysis: model
     }
     if (analysis.project_symbol_report) |project_symbols| {
         try renderProjectSymbolReportJson(allocator, writer, project_symbols, analysis.symbol_display);
+        try writer.print(",\n", .{});
+    }
+    if (analysis.historical_symbol_report != null) {
+        try renderHistoricalSymbolReportJson(writer, analysis);
         try writer.print(",\n", .{});
     }
     if (analysis.inspect) |inspect| {
@@ -91,6 +96,77 @@ pub fn renderJson(allocator: std.mem.Allocator, writer: anytype, analysis: model
     }
     try writer.print("  ]\n", .{});
     try writer.print("}}\n", .{});
+}
+
+fn renderHistoricalSymbolReportJson(writer: anytype, analysis: model.Analysis) !void {
+    const report = analysis.historical_symbol_report.?;
+    const display = historical.displaySummary(report, analysis.symbol_display);
+    const provider_summary = historical.providerStateSummary(report);
+
+    try writer.print("  \"historical_symbols\": {{\n", .{});
+    try writer.print("    \"basis\": {{ \"kind\": ", .{});
+    try fmt.jsonString(writer, "historical-hunk-attribution");
+    try writer.print(", \"requires_symbols_flag\": true, \"retained_ranked_file_candidates\": true, \"scoring_effect\": ", .{});
+    try fmt.jsonString(writer, "none");
+    try writer.print(" }},\n", .{});
+    try writer.print("    \"provenance\": {{ \"local_only\": true, \"network\": false, \"checkout\": false, \"auto_fetch\": false }},\n", .{});
+    try writer.print("    \"human_display\": {{ \"total_count\": {d}, \"shown_count\": {d}, \"omitted_count\": {d}, \"default_limit\": {d}, \"active_limit\": {d}, \"limit_source\": ", .{ display.total, display.shown, display.omitted, model.default_symbol_display_limit, display.limit });
+    try fmt.jsonString(writer, display.limitSource());
+    try writer.print(", \"sort_basis\": ", .{});
+    try fmt.jsonString(writer, historical.sort_basis);
+    try writer.print(" }},\n", .{});
+    try writer.print("    \"summary\": {{ \"candidate_path_count\": {d}, \"retained_candidate_path_count\": {d}, \"item_count\": {d}, \"aggregate_record_bound\": {d}, \"aggregate_record_bound_exceeded\": {}, \"fallback_record_count\": {d}, \"fallback_count\": {d}, \"provider_states\": {{ \"ok\": {d}, \"unavailable\": {d}, \"unsupported\": {d}, \"failed\": {d}, \"timed_out\": {d}, \"skipped\": {d} }} }},\n", .{ report.candidate_path_count, report.retained_candidate_path_count, report.aggregates.len, report.aggregate_record_bound, report.aggregate_record_bound_exceeded, provider_summary.fallback_record_count, provider_summary.fallback_count, provider_summary.ok, provider_summary.unavailable, provider_summary.unsupported, provider_summary.failed, provider_summary.timed_out, provider_summary.skipped });
+    try writer.print("    \"caveats\": ", .{});
+    try renderHistoricalCaveatsJson(writer, report.caveats);
+    try writer.print(",\n", .{});
+    try writer.print("    \"items\": [\n", .{});
+    for (report.aggregates, 0..) |record, i| {
+        const parent = historical.parentMeta(analysis.results, record.parent_path);
+        try writer.print("      {{ \"parent_file_path\": ", .{});
+        if (parent) |meta| try fmt.jsonString(writer, meta.path) else try fmt.jsonString(writer, record.parent_path);
+        try writer.print(", \"evidence_path\": ", .{});
+        try fmt.jsonString(writer, record.parent_path);
+        try writer.print(", \"parent_rank\": ", .{});
+        if (parent) |meta| try writer.print("{d}", .{meta.rank}) else try writer.print("null", .{});
+        try writer.print(", \"parent_score\": ", .{});
+        if (parent) |meta| try writer.print("{d:.3}", .{meta.score}) else try writer.print("null", .{});
+        try writer.print(", \"name\": ", .{});
+        if (record.symbol_name) |name| try fmt.jsonString(writer, name) else try writer.print("null", .{});
+        try writer.print(", \"kind\": ", .{});
+        if (record.symbol_kind) |kind| try fmt.jsonString(writer, historical.kindName(kind)) else try writer.print("null", .{});
+        try writer.print(", \"revision_range\": ", .{});
+        if (record.revision_range) |range| try writer.print("{{ \"start\": {d}, \"end\": {d} }}", .{ range.start, range.end }) else try writer.print("null", .{});
+        try writer.print(", \"status\": ", .{});
+        try fmt.jsonString(writer, historical.statusName(record.status));
+        try writer.print(", \"change_count\": {d}, \"added_line_pressure\": {d}, \"deleted_line_pressure\": {d}, \"latest_timestamp\": ", .{ record.change_count, record.added_line_pressure, record.deleted_line_pressure });
+        if (record.latest_timestamp) |ts| try writer.print("{d}", .{ts}) else try writer.print("null", .{});
+        try writer.print(", \"sample_commit_ids\": ", .{});
+        try fmt.stringArray(writer, record.sample_commit_ids);
+        try writer.print(", \"provider_state\": ", .{});
+        try fmt.jsonString(writer, historical.providerStateName(record.provider_state));
+        try writer.print(", \"confidence\": ", .{});
+        try fmt.jsonString(writer, historical.confidenceName(record.confidence));
+        try writer.print(", \"fallback_count\": {d}, \"caveats\": ", .{record.fallback_count});
+        try fmt.stringArray(writer, record.caveats);
+        try writer.print(" }}{s}\n", .{if (i + 1 == report.aggregates.len) "" else ","});
+    }
+    try writer.print("    ]\n  }}", .{});
+}
+
+fn renderHistoricalCaveatsJson(writer: anytype, caveats: []const []const u8) !void {
+    try writer.print("[", .{});
+    var emitted = false;
+    for (historical.report_level_caveats) |caveat| {
+        if (emitted) try writer.print(", ", .{});
+        try fmt.jsonString(writer, caveat);
+        emitted = true;
+    }
+    for (caveats) |caveat| {
+        if (emitted) try writer.print(", ", .{});
+        try fmt.jsonString(writer, caveat);
+        emitted = true;
+    }
+    try writer.print("]", .{});
 }
 
 fn renderProjectSymbolReportJson(allocator: std.mem.Allocator, writer: anytype, project_symbols: model.ProjectSymbolReport, display: model.SymbolDisplay) !void {

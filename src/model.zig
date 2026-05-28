@@ -18,6 +18,7 @@ pub const Config = struct {
     progress: bool = false,
     symbols: bool = false,
     symbol_line_history: bool = false,
+    historical_symbols: bool = false,
     since: ?[]const u8 = null,
     inspect_path: ?[]const u8 = null,
     scope: ScopePreset = .project,

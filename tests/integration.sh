@@ -103,6 +103,7 @@ grep -q -- "project (default) or all" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "--progress" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "--symbols" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "--symbol-line-history" "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "--historical-symbols" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "--symbol-limit N" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "-h, --help" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "Examples:" "$tmp_dir/git-hotspots-help.txt"
@@ -123,6 +124,9 @@ test ! -s "$tmp_dir/git-hotspots-progress-help.err"
 "$EXE" --symbols --help > "$tmp_dir/git-hotspots-symbols-help.txt" 2> "$tmp_dir/git-hotspots-symbols-help.err"
 diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-symbols-help.txt"
 test ! -s "$tmp_dir/git-hotspots-symbols-help.err"
+"$EXE" --historical-symbols --help > "$tmp_dir/git-hotspots-historical-symbols-help.txt" 2> "$tmp_dir/git-hotspots-historical-symbols-help.err"
+diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-historical-symbols-help.txt"
+test ! -s "$tmp_dir/git-hotspots-historical-symbols-help.err"
 "$EXE" --repo --help > "$tmp_dir/git-hotspots-repo-help.txt" 2> "$tmp_dir/git-hotspots-repo-help.err"
 diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-repo-help.txt"
 test ! -s "$tmp_dir/git-hotspots-repo-help.err"
@@ -184,6 +188,10 @@ assert_fails_with_stderr symbol-line-history-alone "--symbol-line-history requir
 assert_fails_with_stderr symbol-line-history-no-symbols "--symbol-line-history requires --symbols" "$EXE" --inspect src/app.zig --symbol-line-history
 assert_fails_with_stderr symbol-line-history-explain "--explain cannot be combined" "$EXE" --symbol-line-history --explain
 assert_fails_with_stderr symbol-line-history-version "--version cannot be combined" "$EXE" --symbol-line-history --version
+assert_fails_with_stderr historical-symbols-alone "--historical-symbols requires --symbols" "$EXE" --historical-symbols
+assert_fails_with_stderr historical-symbols-no-symbols "--historical-symbols requires --symbols" "$EXE" --inspect src/app.zig --historical-symbols
+assert_fails_with_stderr historical-symbols-explain "--explain cannot be combined" "$EXE" --historical-symbols --explain
+assert_fails_with_stderr historical-symbols-version "--version cannot be combined" "$EXE" --historical-symbols --version
 assert_fails_with_stderr symbol-limit-alone "--symbol-limit requires --symbols" "$EXE" --symbol-limit 1
 assert_fails_with_stderr symbol-limit-no-symbols "--symbol-limit requires --symbols" "$EXE" --inspect src/app.zig --symbol-limit 1
 assert_fails_with_stderr symbol-limit-missing "--symbol-limit must be a positive integer" "$EXE" --inspect src/app.zig --symbols --symbol-limit
@@ -266,6 +274,39 @@ grep -Fq -- '- Omitted symbols: 1' "$tmp_dir/git-hotspots-symbols-limit.md"
 diff -u fixtures/expected/symbols-limit.txt "$tmp_dir/git-hotspots-symbols-limit.txt"
 "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-limit 1 --format table > "$tmp_dir/git-hotspots-symbols-limit-2.txt"
 diff -u "$tmp_dir/git-hotspots-symbols-limit.txt" "$tmp_dir/git-hotspots-symbols-limit-2.txt"
+"$EXE" --repo fixtures/symbols --symbols --historical-symbols --symbol-limit 2 --format json > "$tmp_dir/git-hotspots-historical-symbols.json"
+diff -u fixtures/expected/historical-symbols.json "$tmp_dir/git-hotspots-historical-symbols.json"
+"$EXE" --repo fixtures/symbols --symbols --historical-symbols --symbol-limit 2 --format json > "$tmp_dir/git-hotspots-historical-symbols-2.json"
+diff -u "$tmp_dir/git-hotspots-historical-symbols.json" "$tmp_dir/git-hotspots-historical-symbols-2.json"
+python3 - "$tmp_dir/git-hotspots-historical-symbols.json" <<'PY'
+import json, sys
+with open(sys.argv[1], encoding='utf-8') as fh:
+    data = json.load(fh)
+historical = data['historical_symbols']
+assert 'project_symbols' in data and 'symbols' not in data
+assert historical['basis']['kind'] == 'historical-hunk-attribution'
+assert historical['basis']['requires_symbols_flag'] is True
+assert historical['provenance']['local_only'] is True
+assert historical['human_display']['active_limit'] == 2
+assert historical['summary']['candidate_path_count'] >= historical['summary']['retained_candidate_path_count'] >= 1
+assert historical['summary']['item_count'] == len(historical['items'])
+assert historical['summary']['fallback_count'] >= 0
+assert historical['caveats']
+assert all('parent_file_path' in item and 'evidence_path' in item and 'provider_state' in item for item in historical['items'])
+assert 'current_line_history' not in json.dumps(historical)
+PY
+"$EXE" --repo fixtures/symbols --symbols --historical-symbols --symbol-limit 2 --format markdown > "$tmp_dir/git-hotspots-historical-symbols.md"
+diff -u fixtures/expected/historical-symbols.md "$tmp_dir/git-hotspots-historical-symbols.md"
+"$EXE" --repo fixtures/symbols --symbols --historical-symbols --symbol-limit 2 --format markdown > "$tmp_dir/git-hotspots-historical-symbols-2.md"
+diff -u "$tmp_dir/git-hotspots-historical-symbols.md" "$tmp_dir/git-hotspots-historical-symbols-2.md"
+grep -Fq -- '## Historical symbols' "$tmp_dir/git-hotspots-historical-symbols.md"
+grep -Fq -- 'Historical symbols are opt-in true historical hunk attribution' "$tmp_dir/git-hotspots-historical-symbols.md"
+"$EXE" --repo fixtures/symbols --symbols --historical-symbols --symbol-limit 2 --format table > "$tmp_dir/git-hotspots-historical-symbols.txt"
+diff -u fixtures/expected/historical-symbols.txt "$tmp_dir/git-hotspots-historical-symbols.txt"
+"$EXE" --repo fixtures/symbols --symbols --historical-symbols --symbol-limit 2 --format table > "$tmp_dir/git-hotspots-historical-symbols-2.txt"
+diff -u "$tmp_dir/git-hotspots-historical-symbols.txt" "$tmp_dir/git-hotspots-historical-symbols-2.txt"
+grep -Fq -- 'historical symbols for retained ranked files:' "$tmp_dir/git-hotspots-historical-symbols.txt"
+grep -Fq -- 'provider_states:' "$tmp_dir/git-hotspots-historical-symbols.txt"
 "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-line-history --format json > "$tmp_dir/git-hotspots-symbols-line-history.json"
 python3 -m json.tool "$tmp_dir/git-hotspots-symbols-line-history.json" >/dev/null
 grep -Fq -- '"current_line_history"' "$tmp_dir/git-hotspots-symbols-line-history.json"
@@ -322,7 +363,7 @@ printf 'dirty unrelated\n' >> fixtures/symbol-line-history/src/readme.txt
 "$EXE" --repo fixtures/symbol-line-history --inspect src/current.zig --symbols --symbol-line-history --format json > "$tmp_dir/git-hotspots-line-history-dirty-unrelated.json"
 grep -Fq -- '"failure": "ok"' "$tmp_dir/git-hotspots-line-history-dirty-unrelated.json"
 git -C fixtures/symbol-line-history checkout -q -- src/readme.txt
-! grep -Eiq -- 'Fixture Author|fixture@example|fixture function|private|file://|raw blame|source line|previous filename|ownership|productivity|developer ranking' "$tmp_dir/git-hotspots-symbols-inspect-symbols.json" "$tmp_dir/git-hotspots-symbols-inspect-symbols.md" "$tmp_dir/git-hotspots-symbols-inspect-symbols.txt" "$tmp_dir/git-hotspots-symbols-project.json" "$tmp_dir/git-hotspots-symbols-limit-json.json" "$tmp_dir/git-hotspots-symbols-limit.md" "$tmp_dir/git-hotspots-symbols-limit.txt" "$tmp_dir/git-hotspots-line-history-success.json" "$tmp_dir/git-hotspots-line-history-success.md" "$tmp_dir/git-hotspots-line-history-success.txt" "$tmp_dir/git-hotspots-line-history-project.json" "$tmp_dir/git-hotspots-line-history-shallow.json" "$tmp_dir/git-hotspots-line-history-partial.json" "$tmp_dir/git-hotspots-line-history-unsupported.json" "$tmp_dir/git-hotspots-line-history-empty.json" "$tmp_dir/git-hotspots-line-history-broken.json" "$tmp_dir/git-hotspots-line-history-link.json" "$tmp_dir/git-hotspots-line-history-dirty-inspected.json" "$tmp_dir/git-hotspots-line-history-dirty-unrelated.json" fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt
+! grep -Eiq -- 'Fixture Author|fixture@example|fixture function|private|file://|raw blame|source line|previous filename|ownership|productivity|developer ranking' "$tmp_dir/git-hotspots-symbols-inspect-symbols.json" "$tmp_dir/git-hotspots-symbols-inspect-symbols.md" "$tmp_dir/git-hotspots-symbols-inspect-symbols.txt" "$tmp_dir/git-hotspots-symbols-project.json" "$tmp_dir/git-hotspots-symbols-limit-json.json" "$tmp_dir/git-hotspots-symbols-limit.md" "$tmp_dir/git-hotspots-symbols-limit.txt" "$tmp_dir/git-hotspots-historical-symbols.json" "$tmp_dir/git-hotspots-historical-symbols.md" "$tmp_dir/git-hotspots-historical-symbols.txt" "$tmp_dir/git-hotspots-line-history-success.json" "$tmp_dir/git-hotspots-line-history-success.md" "$tmp_dir/git-hotspots-line-history-success.txt" "$tmp_dir/git-hotspots-line-history-project.json" "$tmp_dir/git-hotspots-line-history-shallow.json" "$tmp_dir/git-hotspots-line-history-partial.json" "$tmp_dir/git-hotspots-line-history-unsupported.json" "$tmp_dir/git-hotspots-line-history-empty.json" "$tmp_dir/git-hotspots-line-history-broken.json" "$tmp_dir/git-hotspots-line-history-link.json" "$tmp_dir/git-hotspots-line-history-dirty-inspected.json" "$tmp_dir/git-hotspots-line-history-dirty-unrelated.json" fixtures/expected/symbols-inspect-symbols.json fixtures/expected/symbols-inspect-symbols.md fixtures/expected/symbols-inspect-symbols.txt fixtures/expected/symbols-limit.md fixtures/expected/symbols-limit.txt fixtures/expected/historical-symbols.json fixtures/expected/historical-symbols.md fixtures/expected/historical-symbols.txt fixtures/expected/line-history-success.json fixtures/expected/line-history-success.md fixtures/expected/line-history-success.txt
 assert_fails_with_stderr symbol-line-history-alone "--symbol-line-history requires --symbols" "$EXE" --symbol-line-history
 assert_fails_with_stderr symbol-line-history-no-symbols "--symbol-line-history requires --symbols" "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbol-line-history
 "$EXE" --repo fixtures/symbols --inspect src/readme.txt --symbols --format json > "$tmp_dir/git-hotspots-symbols-unsupported.json"

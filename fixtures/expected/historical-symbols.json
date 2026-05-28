@@ -1,0 +1,84 @@
+{
+  "schema_version": "1",
+  "tool": { "name": "git-hotspots", "version": "0.1.0-alpha.1" },
+  "analysis": {
+    "history": { "head": "5e8784e66dbf456b6e994af7e5eac03329ea47cd", "head_timestamp": 1777680000, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 2 },
+    "scope": { "selected_scope": "project", "filters_active": true, "include_prefixes": [], "exclude_prefixes": [".flow/", ".zig-cache/", "zig-out/", "target/", "node_modules/", "dist/", "build/", "coverage/"], "outside_include_path_count": 0, "outside_include_change_count": 0, "excluded_path_count": 0, "excluded_change_count": 0 },
+    "caveats": []
+  },
+  "project_symbols": {
+    "current_only": true,
+    "human_display": { "total_count": 3, "shown_count": 2, "omitted_count": 1, "default_limit": 25, "active_limit": 2, "limit_source": "explicit", "sort_basis": "parent file rank, then current-line Git evidence/provider order" },
+    "summary": { "file_count": 3, "unsupported_count": 1, "unavailable_count": 1, "failed_count": 0, "skipped_count": 0 },
+    "files": [
+      { "path": "src/example.zig", "parent_rank": 1, "parent_score": 46.280, "provider": { "name": "tree-sitter-zig", "kind": "symbol", "version": "tree-sitter-core@v0.26.9/tree-sitter-zig@v1.1.2", "contract_version": "provider-symbol-evidence-v1", "freshness": "fresh", "failure": "ok", "confidence": "high", "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"], "provenance": { "input": "working-tree:src/example.zig", "local_only": true } }, "items": [{ "path": "src/example.zig", "parent_rank": 1, "parent_score": 46.280, "name": "alpha", "kind": "function", "range": { "type": "lines", "start": 5, "end": 5 }, "provider": "tree-sitter-zig", "confidence": "high", "current_only": true, "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"] }, { "path": "src/example.zig", "parent_rank": 1, "parent_score": 46.280, "name": "zebra", "kind": "function", "range": { "type": "lines", "start": 1, "end": 3 }, "provider": "tree-sitter-zig", "confidence": "high", "current_only": true, "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"] }] },
+      { "path": "src/link.zig", "parent_rank": 2, "parent_score": 35.040, "provider": { "name": "tree-sitter-zig", "kind": "symbol", "version": "tree-sitter-core@v0.26.9/tree-sitter-zig@v1.1.2", "contract_version": "provider-symbol-evidence-v1", "freshness": "unknown", "failure": "unavailable", "confidence": "unknown", "caveats": ["current working-tree file unavailable or not a regular bounded file", "no parser diagnostics, source snippets, absolute paths, remotes, author identities, commit messages, or private repo names exposed"], "provenance": { "input": "working-tree:src/link.zig", "local_only": true } }, "items": [] },
+      { "path": "src/target.zig", "parent_rank": 4, "parent_score": 35.040, "provider": { "name": "tree-sitter-zig", "kind": "symbol", "version": "tree-sitter-core@v0.26.9/tree-sitter-zig@v1.1.2", "contract_version": "provider-symbol-evidence-v1", "freshness": "fresh", "failure": "ok", "confidence": "high", "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"], "provenance": { "input": "working-tree:src/target.zig", "local_only": true } }, "items": [{ "path": "src/target.zig", "parent_rank": 4, "parent_score": 35.040, "name": "target", "kind": "function", "range": { "type": "lines", "start": 1, "end": 1 }, "provider": "tree-sitter-zig", "confidence": "high", "current_only": true, "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"] }] }
+    ]
+  },
+  "historical_symbols": {
+    "basis": { "kind": "historical-hunk-attribution", "requires_symbols_flag": true, "retained_ranked_file_candidates": true, "scoring_effect": "none" },
+    "provenance": { "local_only": true, "network": false, "checkout": false, "auto_fetch": false },
+    "human_display": { "total_count": 6, "shown_count": 2, "omitted_count": 4, "default_limit": 25, "active_limit": 2, "limit_source": "explicit", "sort_basis": "historical aggregate sort key: evidence path, symbol kind/name/status/range; attached parent rank is reported but does not change file ranking" },
+    "summary": { "candidate_path_count": 4, "retained_candidate_path_count": 4, "item_count": 6, "aggregate_record_bound": 128, "aggregate_record_bound_exceeded": false, "fallback_record_count": 2, "fallback_count": 2, "provider_states": { "ok": 4, "unavailable": 0, "unsupported": 1, "failed": 0, "timed_out": 0, "skipped": 1 } },
+    "caveats": ["historical symbols are opt-in true historical hunk attribution over retained ranked-file candidates only", "provider-supported languages only; unsupported, binary, large, missing, provider-failed, merge, and unattributed evidence may fall back to file-level records", "no semantic symbol lineage, rename/move/split/merge proof, reference/use analysis, maintainer attribution, bug prediction, scoring replacement, or developer metrics", "local Git history only; no checkout, network access, auto-fetch, telemetry, remote enrichment, cache truth, or runtime LLM judgement"],
+    "items": [
+      { "parent_file_path": "src/example.zig", "evidence_path": "src/example.zig", "parent_rank": 1, "parent_score": 46.280, "name": "alpha", "kind": "function", "revision_range": { "start": 3, "end": 3 }, "status": "historical", "change_count": 1, "added_line_pressure": 3, "deleted_line_pressure": 0, "latest_timestamp": 1777593600, "sample_commit_ids": ["68512f487cd1a83c99b3fee9b07fb05e3ab24fe8"], "provider_state": "ok", "confidence": "high", "fallback_count": 0, "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"] },
+      { "parent_file_path": "src/example.zig", "evidence_path": "src/example.zig", "parent_rank": 1, "parent_score": 46.280, "name": "zebra", "kind": "function", "revision_range": { "start": 1, "end": 1 }, "status": "historical", "change_count": 2, "added_line_pressure": 3, "deleted_line_pressure": 1, "latest_timestamp": 1777680000, "sample_commit_ids": ["5e8784e66dbf456b6e994af7e5eac03329ea47cd", "68512f487cd1a83c99b3fee9b07fb05e3ab24fe8"], "provider_state": "ok", "confidence": "high", "fallback_count": 0, "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"] },
+      { "parent_file_path": "src/example.zig", "evidence_path": "src/example.zig", "parent_rank": 1, "parent_score": 46.280, "name": "zebra", "kind": "function", "revision_range": { "start": 1, "end": 3 }, "status": "historical", "change_count": 1, "added_line_pressure": 3, "deleted_line_pressure": 0, "latest_timestamp": 1777680000, "sample_commit_ids": ["5e8784e66dbf456b6e994af7e5eac03329ea47cd"], "provider_state": "ok", "confidence": "high", "fallback_count": 0, "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"] },
+      { "parent_file_path": "src/link.zig", "evidence_path": "src/link.zig", "parent_rank": 2, "parent_score": 35.040, "name": null, "kind": null, "revision_range": null, "status": "unknown", "change_count": 1, "added_line_pressure": 1, "deleted_line_pressure": 0, "latest_timestamp": 1777593600, "sample_commit_ids": ["68512f487cd1a83c99b3fee9b07fb05e3ab24fe8"], "provider_state": "skipped", "confidence": "low", "fallback_count": 1, "caveats": ["unattributed hunk fallback; no nearest-symbol guessing", "root commit has no parent pre-image"] },
+      { "parent_file_path": "src/readme.txt", "evidence_path": "src/readme.txt", "parent_rank": 3, "parent_score": 35.040, "name": null, "kind": null, "revision_range": null, "status": "unknown", "change_count": 1, "added_line_pressure": 1, "deleted_line_pressure": 0, "latest_timestamp": 1777593600, "sample_commit_ids": ["68512f487cd1a83c99b3fee9b07fb05e3ab24fe8"], "provider_state": "unsupported", "confidence": "unknown", "fallback_count": 1, "caveats": ["provider could not parse revision-local source; fallback retained", "root commit has no parent pre-image"] },
+      { "parent_file_path": "src/target.zig", "evidence_path": "src/target.zig", "parent_rank": 4, "parent_score": 35.040, "name": "target", "kind": "function", "revision_range": { "start": 1, "end": 1 }, "status": "historical", "change_count": 1, "added_line_pressure": 1, "deleted_line_pressure": 0, "latest_timestamp": 1777593600, "sample_commit_ids": ["68512f487cd1a83c99b3fee9b07fb05e3ab24fe8"], "provider_state": "ok", "confidence": "high", "fallback_count": 0, "caveats": ["current working-tree enrichment only; file-level Git evidence remains product truth", "supported subset: named Zig function declarations only", "range convention: one-based inclusive lines"] }
+    ]
+  },
+  "results": [
+    {
+      "path": "src/example.zig",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
+      "score": { "total": 46.280, "frequency": 20.000, "churn": 0.280, "recency": 20.000, "cochange": 6.000 },
+      "change_count": 2, "additions": 6, "deletions": 1, "churn": 7,
+      "recency": { "last_changed_timestamp": 1777680000, "last_changed_commit": "5e8784e66dbf" },
+      "current_size": 56,
+      "cochanges": [{ "path": "src/link.zig", "count": 1 }, { "path": "src/readme.txt", "count": 1 }, { "path": "src/target.zig", "count": 1 }],
+      "confidence": "medium",
+      "caveats": [],
+      "evidence": [{ "commit": "5e8784e66dbf", "timestamp": 1777680000, "additions": 3, "deletions": 1 }, { "commit": "68512f487cd1", "timestamp": 1777593600, "additions": 3, "deletions": 0 }]
+    },
+    {
+      "path": "src/link.zig",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
+      "score": { "total": 35.040, "frequency": 10.000, "churn": 0.040, "recency": 19.000, "cochange": 6.000 },
+      "change_count": 1, "additions": 1, "deletions": 0, "churn": 1,
+      "recency": { "last_changed_timestamp": 1777593600, "last_changed_commit": "68512f487cd1" },
+      "current_size": 24,
+      "cochanges": [{ "path": "src/example.zig", "count": 1 }, { "path": "src/readme.txt", "count": 1 }, { "path": "src/target.zig", "count": 1 }],
+      "confidence": "low",
+      "caveats": [],
+      "evidence": [{ "commit": "68512f487cd1", "timestamp": 1777593600, "additions": 1, "deletions": 0 }]
+    },
+    {
+      "path": "src/readme.txt",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
+      "score": { "total": 35.040, "frequency": 10.000, "churn": 0.040, "recency": 19.000, "cochange": 6.000 },
+      "change_count": 1, "additions": 1, "deletions": 0, "churn": 1,
+      "recency": { "last_changed_timestamp": 1777593600, "last_changed_commit": "68512f487cd1" },
+      "current_size": 8,
+      "cochanges": [{ "path": "src/example.zig", "count": 1 }, { "path": "src/link.zig", "count": 1 }, { "path": "src/target.zig", "count": 1 }],
+      "confidence": "low",
+      "caveats": [],
+      "evidence": [{ "commit": "68512f487cd1", "timestamp": 1777593600, "additions": 1, "deletions": 0 }]
+    },
+    {
+      "path": "src/target.zig",
+      "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
+      "score": { "total": 35.040, "frequency": 10.000, "churn": 0.040, "recency": 19.000, "cochange": 6.000 },
+      "change_count": 1, "additions": 1, "deletions": 0, "churn": 1,
+      "recency": { "last_changed_timestamp": 1777593600, "last_changed_commit": "68512f487cd1" },
+      "current_size": 24,
+      "cochanges": [{ "path": "src/example.zig", "count": 1 }, { "path": "src/link.zig", "count": 1 }, { "path": "src/readme.txt", "count": 1 }],
+      "confidence": "low",
+      "caveats": [],
+      "evidence": [{ "commit": "68512f487cd1", "timestamp": 1777593600, "additions": 1, "deletions": 0 }]
+    }
+  ]
+}

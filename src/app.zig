@@ -2,6 +2,7 @@ const std = @import("std");
 const cli = @import("cli.zig");
 const model = @import("model.zig");
 const git = @import("git.zig");
+const historical_symbol_pipeline = @import("historical_symbol_pipeline.zig");
 const report = @import("report.zig");
 const provider_selection = @import("provider_selection.zig");
 const explain = @import("explain.zig");
@@ -33,6 +34,7 @@ pub fn run(allocator: std.mem.Allocator, io: std.Io, args: []const [:0]const u8,
             error.InvalidInspectLimitCombination => try stderr.print("error: --limit cannot be combined with --inspect; use git-hotspots --inspect PATH or git-hotspots --limit N\n", .{}),
             error.InvalidSymbolsCombination => try stderr.print("error: --symbols can be used with project analysis or --inspect PATH; use git-hotspots --repo . --symbols or git-hotspots --inspect src/main.zig --symbols\n", .{}),
             error.InvalidSymbolLineHistoryCombination => try stderr.print("error: --symbol-line-history requires --symbols; use git-hotspots --repo . --symbols --symbol-line-history\n", .{}),
+            error.InvalidHistoricalSymbolsCombination => try stderr.print("error: --historical-symbols requires --symbols; use git-hotspots --repo . --symbols --historical-symbols\n", .{}),
             error.InvalidSymbolLimitCombination => try stderr.print("error: --symbol-limit requires --symbols; use git-hotspots --repo . --symbols --symbol-limit N\n", .{}),
             error.InvalidSymbolLimit => try stderr.print("error: --symbol-limit must be a positive integer; use git-hotspots --symbols --symbol-limit 25\n", .{}),
             error.InvalidExplainCombination => try stderr.print("error: --explain cannot be combined with analysis flags; use git-hotspots --explain\n", .{}),
@@ -82,6 +84,10 @@ pub fn run(allocator: std.mem.Allocator, io: std.Io, args: []const [:0]const u8,
         }
         if (cfg.symbol_line_history) try git.attachCurrentLineHistory(allocator, io, &analysis);
         analysis.symbol_display = .{ .limit = cfg.symbol_limit orelse model.default_symbol_display_limit, .explicit_limit = cfg.symbol_limit != null };
+    }
+    if (cfg.historical_symbols) {
+        try writeProgress(progress, "reading historical symbol evidence");
+        try historical_symbol_pipeline.attach(allocator, io, &analysis, .{});
     }
 
     try writeProgress(progress, "rendering report");

@@ -552,6 +552,7 @@ explain_output_checks() {
   grep -q -- '--progress' "$help_out" || return 1
   grep -q -- '--symbols' "$help_out" || return 1
   grep -q -- '--symbol-line-history' "$help_out" || return 1
+  grep -q -- '--historical-symbols' "$help_out" || return 1
   grep -q -- '--symbol-limit N' "$help_out" || return 1
   grep -q -- '-h, --help' "$help_out" || return 1
   grep -q -- 'Examples:' "$help_out" || return 1
@@ -572,6 +573,9 @@ explain_output_checks() {
   "$EXE" --symbols --help > "$ARTIFACT_DIR/help-symbols.txt" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
   diff -u "$help_out" "$ARTIFACT_DIR/help-symbols.txt" >/dev/null || return 1
+  "$EXE" --historical-symbols --help > "$ARTIFACT_DIR/help-historical-symbols.txt" 2> "$explain_err" || return 1
+  [ ! -s "$explain_err" ] || return 1
+  diff -u "$help_out" "$ARTIFACT_DIR/help-historical-symbols.txt" >/dev/null || return 1
   "$EXE" --repo --help > "$ARTIFACT_DIR/help-repo.txt" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
   diff -u "$help_out" "$ARTIFACT_DIR/help-repo.txt" >/dev/null || return 1
@@ -600,7 +604,8 @@ explain_output_checks() {
     '--exclude-prefix .flow/' \
     '--inspect src/app.txt' \
     '--progress' \
-    '--symbols'
+    '--symbols' \
+    '--historical-symbols'
   do
     # shellcheck disable=SC2086
     if "$EXE" --explain $args > "$ARTIFACT_DIR/explain-invalid.out" 2> "$explain_err"; then
@@ -620,7 +625,8 @@ explain_output_checks() {
     '--inspect src/app.txt' \
     '--explain' \
     '--progress' \
-    '--symbols'
+    '--symbols' \
+    '--historical-symbols'
   do
     # shellcheck disable=SC2086
     if "$EXE" --version $args > "$ARTIFACT_DIR/version-invalid.out" 2> "$explain_err"; then
@@ -655,8 +661,10 @@ cli_misuse_matrix_checks() {
     grep -q -- 'git-hotspots: deterministic local Git-history hotspot prompts' "$out" || return 1
   }
 
-    assert_cli_error symbol-line-history-alone '--symbol-line-history requires --symbols' --symbol-line-history || return 1
+  assert_cli_error symbol-line-history-alone '--symbol-line-history requires --symbols' --symbol-line-history || return 1
   assert_cli_error symbol-line-history-inspect-no-symbols '--symbol-line-history requires --symbols' --inspect src/app.zig --symbol-line-history || return 1
+  assert_cli_error historical-symbols-alone '--historical-symbols requires --symbols' --historical-symbols || return 1
+  assert_cli_error historical-symbols-inspect-no-symbols '--historical-symbols requires --symbols' --inspect src/app.zig --historical-symbols || return 1
   assert_cli_error symbol-limit-alone '--symbol-limit requires --symbols' --symbol-limit 1 || return 1
   assert_cli_error symbol-limit-inspect-no-symbols '--symbol-limit requires --symbols' --inspect src/app.zig --symbol-limit 1 || return 1
   assert_cli_error symbol-limit-missing '--symbol-limit must be a positive integer' --inspect src/app.zig --symbols --symbol-limit || return 1
@@ -680,11 +688,14 @@ cli_misuse_matrix_checks() {
 
   assert_cli_error explain-symbols '--explain cannot be combined' --explain --symbols || return 1
   assert_cli_error symbols-explain '--explain cannot be combined' --symbols --explain || return 1
+  assert_cli_error historical-symbols-explain '--explain cannot be combined' --historical-symbols --explain || return 1
   assert_cli_error version-symbols '--version cannot be combined' --version --symbols || return 1
   assert_cli_error symbols-version '--version cannot be combined' --symbols --version || return 1
+  assert_cli_error historical-symbols-version '--version cannot be combined' --historical-symbols --version || return 1
 
   assert_cli_help help-symbols --help --symbols || return 1
   assert_cli_help symbols-help --symbols --help || return 1
+  assert_cli_help historical-symbols-help --historical-symbols --help || return 1
   assert_cli_help repo-help --repo --help || return 1
 
   zig_run_out=$ARTIFACT_DIR/cli-zig-run-symbol-line-history.out
@@ -912,6 +923,7 @@ docs_manual_checks() {
   grep -Fq -- '--inspect' docs/user-guide.md || return 1
   grep -Fq -- '--symbols' docs/user-guide.md || return 1
   grep -Fq -- '--symbol-line-history' docs/user-guide.md || return 1
+  grep -Fq -- '--historical-symbols' docs/user-guide.md || return 1
   grep -Fq 'Rust support is syntax-only' docs/user-guide.md || return 1
   grep -Fq 'Cargo metadata, crates, module resolution' docs/user-guide.md || return 1
   grep -Fq -- '--scope all' docs/user-guide.md || return 1
@@ -921,6 +933,7 @@ docs_manual_checks() {
   grep -Fq 'tools/release-linux.sh' docs/user-guide.md || return 1
   grep -Fq 'unpublished use' docs/user-guide.md || return 1
   grep -Fq 'error: --symbol-line-history requires --symbols' docs/user-guide.md || return 1
+  grep -Fq 'error: --historical-symbols requires --symbols' docs/user-guide.md || return 1
   grep -Fq 'local-first' docs/user-guide.md || return 1
   grep -Fq 'telemetry' docs/user-guide.md || return 1
 
@@ -949,6 +962,7 @@ docs_manual_checks() {
   grep -Fq -- '--explain' man/git-hotspots.1 || return 1
   grep -Fq -- '--inspect' man/git-hotspots.1 || return 1
   grep -Fq -- '--symbols' man/git-hotspots.1 || return 1
+  grep -Fq -- '--historical-symbols' man/git-hotspots.1 || return 1
   grep -Fq -- '--progress' man/git-hotspots.1 || return 1
   grep -Fq 'local-first' man/git-hotspots.1 || return 1
   ! grep -Eq 'dogfood|tools/release-linux\.sh|packaging/aur|makepkg|pacman|pkg\.tar' man/git-hotspots.1 || return 1
@@ -1195,6 +1209,15 @@ fixture_json_checks() {
   "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-limit 1 --format table > "$SYMBOLS_LIMIT_TABLE_B" || return 1
   diff -u fixtures/expected/symbols-limit.txt "$SYMBOLS_LIMIT_TABLE" >/dev/null || return 1
   diff -u "$SYMBOLS_LIMIT_TABLE" "$SYMBOLS_LIMIT_TABLE_B" >/dev/null || return 1
+  "$EXE" --repo fixtures/symbols --symbols --historical-symbols --symbol-limit 2 --format json > "$HISTORICAL_SYMBOLS_JSON" || return 1
+  diff -u fixtures/expected/historical-symbols.json "$HISTORICAL_SYMBOLS_JSON" >/dev/null || return 1
+  "$EXE" --repo fixtures/symbols --symbols --historical-symbols --symbol-limit 2 --format markdown > "$HISTORICAL_SYMBOLS_MD" || return 1
+  diff -u fixtures/expected/historical-symbols.md "$HISTORICAL_SYMBOLS_MD" >/dev/null || return 1
+  "$EXE" --repo fixtures/symbols --symbols --historical-symbols --symbol-limit 2 --format table > "$HISTORICAL_SYMBOLS_TABLE" || return 1
+  diff -u fixtures/expected/historical-symbols.txt "$HISTORICAL_SYMBOLS_TABLE" >/dev/null || return 1
+  grep -q -- '"historical_symbols"' "$HISTORICAL_SYMBOLS_JSON" || return 1
+  grep -q -- '## Historical symbols' "$HISTORICAL_SYMBOLS_MD" || return 1
+  grep -q -- 'historical symbols for retained ranked files:' "$HISTORICAL_SYMBOLS_TABLE" || return 1
   "$EXE" --repo fixtures/symbols --inspect src/readme.txt --symbols --format json > "$SYMBOLS_UNSUPPORTED_JSON" || return 1
   diff -u fixtures/expected/symbols-unsupported.json "$SYMBOLS_UNSUPPORTED_JSON" >/dev/null || return 1
   "$EXE" --repo fixtures/symbols --inspect src/link.zig --symbols --format json > "$SYMBOLS_SYMLINK_JSON" || return 1
@@ -2030,6 +2053,9 @@ SYMBOLS_LIMIT_MD=$ARTIFACT_DIR/symbols-limit.md
 SYMBOLS_LIMIT_MD_B=$ARTIFACT_DIR/symbols-limit-b.md
 SYMBOLS_LIMIT_TABLE=$ARTIFACT_DIR/symbols-limit.txt
 SYMBOLS_LIMIT_TABLE_B=$ARTIFACT_DIR/symbols-limit-b.txt
+HISTORICAL_SYMBOLS_JSON=$ARTIFACT_DIR/historical-symbols.json
+HISTORICAL_SYMBOLS_MD=$ARTIFACT_DIR/historical-symbols.md
+HISTORICAL_SYMBOLS_TABLE=$ARTIFACT_DIR/historical-symbols.txt
 SYMBOLS_UNSUPPORTED_JSON=$ARTIFACT_DIR/symbols-unsupported.json
 SYMBOLS_SYMLINK_JSON=$ARTIFACT_DIR/symbols-symlink.json
 PY_SYMBOLS_JSON=$ARTIFACT_DIR/python-symbols.json
@@ -2179,7 +2205,7 @@ else
 fi
 
 printf 'validate: RUN JSON validity\n'
-json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_PROGRESS_JSON" "$BASIC_INSPECT_JSON" "$BASIC_INSPECT_PROGRESS_JSON" "$SYMBOLS_JSON" "$SYMBOLS_LIMIT_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$PY_SYMBOLS_JSON" "$PY_SYMBOLS_JSON_B" "$PY_SYMBOLS_LIMIT_JSON" "$PY_SYMBOLS_EMPTY_JSON" "$PY_SYMBOLS_INVALID_JSON" "$PY_SYMBOLS_GENERATED_JSON" "$PY_SYMBOLS_SYMLINK_JSON" "$PY_SYMBOLS_LARGE_JSON" "$PY_SYMBOLS_MISSING_JSON" "$PY_SYMBOLS_ALIAS_JSON" "$PY_SYMBOLS_OTHER_JSON" "$PY_LINE_HISTORY_JSON" "$PY_LINE_HISTORY_JSON_B" "$PY_LINE_HISTORY_SHALLOW_JSON" "$PY_LINE_HISTORY_PARTIAL_JSON" "$PY_LINE_HISTORY_EMPTY_JSON" "$PY_LINE_HISTORY_INVALID_JSON" "$PY_LINE_HISTORY_SYMLINK_JSON" "$PY_LINE_HISTORY_LARGE_JSON" "$PY_LINE_HISTORY_MISSING_JSON" "$PY_LINE_HISTORY_DIRTY_JSON" "$PY_LINE_HISTORY_UNRELATED_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" "$SCOPE_PROJECT_PROGRESS_JSON" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_NODE_JSON" "$SCOPE_ALL_INCLUDE_NODE_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_PROJECT_INSPECT_PROGRESS_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_ALL_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_EXCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_PROJECT_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_PROJECT_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
+json_validity "JSON validity" "$BASIC_A" "$BASIC_B" "$BASIC_PROGRESS_JSON" "$BASIC_INSPECT_JSON" "$BASIC_INSPECT_PROGRESS_JSON" "$SYMBOLS_JSON" "$SYMBOLS_LIMIT_JSON" "$HISTORICAL_SYMBOLS_JSON" "$SYMBOLS_UNSUPPORTED_JSON" "$SYMBOLS_SYMLINK_JSON" "$PY_SYMBOLS_JSON" "$PY_SYMBOLS_JSON_B" "$PY_SYMBOLS_LIMIT_JSON" "$PY_SYMBOLS_EMPTY_JSON" "$PY_SYMBOLS_INVALID_JSON" "$PY_SYMBOLS_GENERATED_JSON" "$PY_SYMBOLS_SYMLINK_JSON" "$PY_SYMBOLS_LARGE_JSON" "$PY_SYMBOLS_MISSING_JSON" "$PY_SYMBOLS_ALIAS_JSON" "$PY_SYMBOLS_OTHER_JSON" "$PY_LINE_HISTORY_JSON" "$PY_LINE_HISTORY_JSON_B" "$PY_LINE_HISTORY_SHALLOW_JSON" "$PY_LINE_HISTORY_PARTIAL_JSON" "$PY_LINE_HISTORY_EMPTY_JSON" "$PY_LINE_HISTORY_INVALID_JSON" "$PY_LINE_HISTORY_SYMLINK_JSON" "$PY_LINE_HISTORY_LARGE_JSON" "$PY_LINE_HISTORY_MISSING_JSON" "$PY_LINE_HISTORY_DIRTY_JSON" "$PY_LINE_HISTORY_UNRELATED_JSON" "$SCOPE_UNFILTERED_JSON" "$SCOPE_ALL_JSON" "$SCOPE_FILTERED_JSON" "$SCOPE_PROJECT_JSON" "$SCOPE_PROJECT_JSON_B" "$SCOPE_PROJECT_PROGRESS_JSON" "$SCOPE_PROJECT_DUPLICATE_JSON" "$SCOPE_PROJECT_INCLUDE_FLOW_JSON" "$SCOPE_PROJECT_INCLUDE_NODE_JSON" "$SCOPE_ALL_INCLUDE_NODE_JSON" "$SCOPE_PROJECT_INCLUDE_SRC_JSON" "$SCOPE_PROJECT_INSPECT_JSON" "$SCOPE_PROJECT_INSPECT_PROGRESS_JSON" "$SCOPE_ALL_INSPECT_FLOW_JSON" "$SCOPE_ALL_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_EXCLUDED_TO_EXCLUDED_JSON" "$SCOPE_ALL_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_PROJECT_INSPECT_INCLUDED_TO_EXCLUDED_JSON" "$SCOPE_PROJECT_INSPECT_CHAINED_CROSS_JSON" "$SCOPE_INSPECT_EXCLUDED_FLOW_JSON" "$SCOPE_INSPECT_RENAMED_JSON" "$SCOPE_SRC_INCLUDE_JSON" "$SCOPE_SRC_VENDOR_INCLUDE_JSON" "$SCOPE_INCLUDE_EXCLUDE_JSON" "$SCOPE_WEIRD_INCLUDE_JSON" "$SCOPE_GLOB_STAR_INCLUDE_JSON" "$SCOPE_GLOB_INCLUDE_JSON" "$SCOPE_INCLUDE_EMPTY_JSON" "$SCOPE_SRC_FILTERED_JSON" "$SCOPE_WEIRD_FILTERED_JSON" "$SCOPE_EMPTY_JSON" "$EDGE_INSPECT_TAB_JSON" "$SHALLOW_JSON" "$PARTIAL_JSON" "$SELF_JSON" "$SELF_SCOPED_JSON" || fail_rung "JSON validity" "no JSON checker succeeded"
 
 printf 'validate: RUN shallow, partial, and privacy assertions\n'
 if semantic_assertions; then
