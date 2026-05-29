@@ -4,6 +4,7 @@
 
 const std = @import("std");
 
+const tree_sitter_go = @import("tree_sitter_go.zig");
 const tree_sitter_javascript = @import("tree_sitter_javascript.zig");
 const tree_sitter_python = @import("tree_sitter_python.zig");
 const tree_sitter_rust = @import("tree_sitter_rust.zig");
@@ -22,6 +23,12 @@ const DegradedCase = struct {
     valid_source: []const u8,
     invalid_path: []const u8,
     invalid_source: []const u8,
+};
+
+const GoLane = struct {
+    fn extract(allocator: std.mem.Allocator, path: []const u8, source: []const u8, options: tree_sitter_go.RelationOptions) !tree_sitter_go.RelationExtraction {
+        return tree_sitter_go.extractRelationsSource(allocator, path, source, options);
+    }
 };
 
 const PythonLane = struct {
@@ -318,6 +325,47 @@ test "relation provider conformance covers Python" {
         .valid_source = source,
         .invalid_path = "pkg/broken.py",
         .invalid_source = "def broken(:\n    pass\n",
+    });
+}
+
+test "relation provider conformance covers internal Go proof" {
+    const source =
+        \\package proof
+        \\
+        \\import (
+        \\    alias "example.com/worker"
+        \\    . "example.com/dot"
+        \\    _ "example.com/blank"
+        \\    "example.com/plain"
+        \\)
+        \\
+        \\const LIMIT = 3
+        \\
+        \\type Service struct{}
+        \\type Runner interface{ Run() }
+        \\
+        \\func helper() {}
+        \\func (s Service) Serve() {
+        \\    helper()
+        \\    LIMIT
+        \\    missingValue
+        \\    alias.Make()
+        \\    receiver.Field
+        \\}
+        \\
+    ;
+    try runSupportedConformance(GoLane, .{
+        .path = "internal/relations.go",
+        .source = source,
+        .expected_provider_name = tree_sitter_go.relation_provider_name,
+        .expected_kinds = &.{ "contains", "reference", "call", "import_include", "unresolved", "unknown" },
+        .expected_targets = &.{ "LIMIT", "Service", "Runner", "helper", "Serve", "example.com/worker", "example.com/dot", "example.com/blank", "example.com/plain", "helper", "missingValue", "alias.Make", "receiver.Field" },
+    });
+    try runDegradedConformance(GoLane, .{
+        .unsupported_path = "docs/relations.md",
+        .valid_source = source,
+        .invalid_path = "internal/broken.go",
+        .invalid_source = "package proof\nfunc {",
     });
 }
 

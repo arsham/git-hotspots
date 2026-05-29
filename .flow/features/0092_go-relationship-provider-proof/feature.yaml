@@ -4,7 +4,7 @@ feature:
   slug: go-relationship-provider-proof
   title: Go relationship provider proof
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Go has current symbol support but no relationship provider; adding it
@@ -59,7 +59,7 @@ proposal:
     materialised_at: 2026-05-29T00:49:35.283Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -116,7 +116,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Go provider extraction
       goal: Implement bounded syntax-only Go relation extraction through the shared
         contract.
@@ -143,7 +143,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Go conformance and fixtures
       goal: Exercise Go provider behaviour through conformance and integration
         fixtures.
@@ -170,7 +170,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Go validation and smoke
       goal: Record validation and privacy-safe real-repo smoke or a precise skip
         reason.
@@ -233,7 +233,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-29T00:39:17.198Z
-  updated_at: 2026-05-29T00:50:23.370Z
+  updated_at: 2026-05-29T02:07:06.599Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-29T00:50:23.370Z
