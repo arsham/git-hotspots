@@ -15,6 +15,11 @@ SMOKE_REPO=
 SMOKE_LABEL=
 SMOKE_SKIP_REASON=
 
+BUDGET_FILE_HOTSPOTS_MS=${BUDGET_FILE_HOTSPOTS_MS:-30000}
+BUDGET_CURRENT_SYMBOLS_MS=${BUDGET_CURRENT_SYMBOLS_MS:-30000}
+BUDGET_HISTORICAL_SYMBOLS_MS=${BUDGET_HISTORICAL_SYMBOLS_MS:-45000}
+BUDGET_RELATIONSHIP_ENRICHMENT_MS=${BUDGET_RELATIONSHIP_ENRICHMENT_MS:-45000}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --closeout)
@@ -130,6 +135,79 @@ print('results=%d caveats=%d dirty=%s scope_active=%s outside_include_paths=%d o
     int(scope.get('excluded_change_count', 0) or 0),
 ))
 PY
+}
+
+now_ms() {
+  if have_python; then
+    python3 - <<'PY'
+import time
+print(int(time.monotonic() * 1000))
+PY
+  else
+    seconds=$(date +%s 2>/dev/null || printf '0')
+    printf '%s000\n' "$seconds"
+  fi
+}
+
+json_benchmark_summary() {
+  json_file=$1
+  have_python || return 1
+  python3 - "$json_file" <<'PY'
+import json, sys
+with open(sys.argv[1], encoding='utf-8') as fh:
+    data = json.load(fh)
+analysis = data.get('analysis', {})
+symbols = data.get('symbols') or {}
+historical = data.get('historical_symbols') or {}
+relationships = data.get('symbol_relationships') or {}
+print('results=%d caveats=%d dirty=%s symbols=%d historical_files=%d relationship_records=%d' % (
+    len(data.get('results') or []),
+    len(analysis.get('caveats') or []),
+    str((analysis.get('history') or {}).get('dirty_worktree', False)).lower(),
+    len(symbols.get('items') or []),
+    len(historical.get('files') or []),
+    int((relationships.get('summary') or {}).get('relation_record_count') or 0),
+))
+PY
+}
+
+run_budgeted_json() {
+  budget_name=$1
+  budget_ms=$2
+  phase=$3
+  provider=$4
+  scope=$5
+  repo=$6
+  output=$7
+  stderr_file=$8
+  shift 8
+
+  start_ms=$(now_ms)
+  if "$EXE" --repo "$repo" "$@" --format json > "$output" 2> "$stderr_file"; then
+    status=0
+  else
+    status=$?
+  fi
+  end_ms=$(now_ms)
+  elapsed_ms=$((end_ms - start_ms))
+  [ "$elapsed_ms" -ge 0 ] || elapsed_ms=0
+
+  if [ "$status" -ne 0 ]; then
+    fail_rung "performance budget $budget_name" "phase=$phase provider=$provider scope=$scope command exited non-zero; retry with zig build validate"
+    return 1
+  fi
+  if [ -s "$stderr_file" ]; then
+    fail_rung "performance budget $budget_name" "phase=$phase provider=$provider scope=$scope unexpected stderr; inspect validation log and retry with zig build validate"
+    return 1
+  fi
+  if [ "$elapsed_ms" -gt "$budget_ms" ]; then
+    fail_rung "performance budget $budget_name" "phase=$phase provider=$provider scope=$scope elapsed_ms=$elapsed_ms limit_ms=$budget_ms; retry with BUDGET_${budget_name}_MS override only after local investigation"
+    return 1
+  fi
+
+  summary=$(json_benchmark_summary "$output") || return 1
+  printf 'budget name=%s phase=%s provider=%s scope=%s limit_ms=%s elapsed_ms=%s %s\n' "$budget_name" "$phase" "$provider" "$scope" "$budget_ms" "$elapsed_ms" "$summary" >> "$SMOKES"
+  return 0
 }
 
 json_validity() {
@@ -1225,6 +1303,8 @@ allowed = (
     'tree-sitter-rust-relations',
     'tree-sitter-typescript-relations',
     'tree-sitter-tsx-relations',
+    'run_budgeted_json CURRENT_SYMBOLS',
+    'run_budgeted_json HISTORICAL_SYMBOLS',
     'current-line Git evidence for HEAD line ranges',
     'runtime dependency scan: python3 source scan',
 )
@@ -1974,6 +2054,63 @@ fixture_performance_smoke() {
   printf 'fixture-medium %s elapsed=%s\n' "$summary" "$elapsed" >> "$SMOKES"
 }
 
+fixture_benchmark_budgets() {
+  have_python || { fail_rung "performance budget harness" "python3 is required for deterministic budget summaries"; return 1; }
+  sh tools/setup-fixtures.sh >/dev/null 2>&1 || return 1
+
+  failed=0
+
+  file_hotspots_a=$(mktemp "$ARTIFACT_DIR/budget-file-hotspots-a.XXXXXX.json")
+  file_hotspots_b=$(mktemp "$ARTIFACT_DIR/budget-file-hotspots-b.XXXXXX.json")
+  file_hotspots_err=$(mktemp "$ARTIFACT_DIR/budget-file-hotspots.XXXXXX.err")
+  if run_budgeted_json FILE_HOTSPOTS "$BUDGET_FILE_HOTSPOTS_MS" file-hotspots git-history fixture-medium fixtures/medium "$file_hotspots_a" "$file_hotspots_err" --scope project --limit 25; then
+    "$EXE" --repo fixtures/medium --scope project --limit 25 --format json > "$file_hotspots_b" 2> "$file_hotspots_err" && diff -u "$file_hotspots_a" "$file_hotspots_b" >/dev/null || {
+      fail_rung "performance budget FILE_HOTSPOTS determinism" "phase=file-hotspots provider=git-history scope=fixture-medium output changed across repeated runs"
+      failed=1
+    }
+  else
+    failed=1
+  fi
+
+  current_symbols_a=$(mktemp "$ARTIFACT_DIR/budget-current-symbols-a.XXXXXX.json")
+  current_symbols_b=$(mktemp "$ARTIFACT_DIR/budget-current-symbols-b.XXXXXX.json")
+  current_symbols_err=$(mktemp "$ARTIFACT_DIR/budget-current-symbols.XXXXXX.err")
+  if run_budgeted_json CURRENT_SYMBOLS "$BUDGET_CURRENT_SYMBOLS_MS" current-symbols tree-sitter-python fixture-python fixtures/python-symbols "$current_symbols_a" "$current_symbols_err" --inspect src/example.py --symbols; then
+    "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --format json > "$current_symbols_b" 2> "$current_symbols_err" && diff -u "$current_symbols_a" "$current_symbols_b" >/dev/null || {
+      fail_rung "performance budget CURRENT_SYMBOLS determinism" "phase=current-symbols provider=tree-sitter-python scope=fixture-python output changed across repeated runs"
+      failed=1
+    }
+  else
+    failed=1
+  fi
+
+  historical_symbols_a=$(mktemp "$ARTIFACT_DIR/budget-historical-symbols-a.XXXXXX.json")
+  historical_symbols_b=$(mktemp "$ARTIFACT_DIR/budget-historical-symbols-b.XXXXXX.json")
+  historical_symbols_err=$(mktemp "$ARTIFACT_DIR/budget-historical-symbols.XXXXXX.err")
+  if run_budgeted_json HISTORICAL_SYMBOLS "$BUDGET_HISTORICAL_SYMBOLS_MS" historical-symbols tree-sitter-zig fixture-symbols fixtures/symbols "$historical_symbols_a" "$historical_symbols_err" --symbols --historical-symbols --symbol-limit 2; then
+    "$EXE" --repo fixtures/symbols --symbols --historical-symbols --symbol-limit 2 --format json > "$historical_symbols_b" 2> "$historical_symbols_err" && diff -u "$historical_symbols_a" "$historical_symbols_b" >/dev/null || {
+      fail_rung "performance budget HISTORICAL_SYMBOLS determinism" "phase=historical-symbols provider=tree-sitter-zig scope=fixture-symbols output changed across repeated runs"
+      failed=1
+    }
+  else
+    failed=1
+  fi
+
+  relationships_a=$(mktemp "$ARTIFACT_DIR/budget-relationships-a.XXXXXX.json")
+  relationships_b=$(mktemp "$ARTIFACT_DIR/budget-relationships-b.XXXXXX.json")
+  relationships_err=$(mktemp "$ARTIFACT_DIR/budget-relationships.XXXXXX.err")
+  if run_budgeted_json RELATIONSHIP_ENRICHMENT "$BUDGET_RELATIONSHIP_ENRICHMENT_MS" relationship-enrichment tree-sitter-python-relations fixture-python fixtures/python-symbols "$relationships_a" "$relationships_err" --inspect src/example.py --symbols --symbol-relationships --symbol-limit 4; then
+    "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-relationships --symbol-limit 4 --format json > "$relationships_b" 2> "$relationships_err" && diff -u "$relationships_a" "$relationships_b" >/dev/null || {
+      fail_rung "performance budget RELATIONSHIP_ENRICHMENT determinism" "phase=relationship-enrichment provider=tree-sitter-python-relations scope=fixture-python output changed across repeated runs"
+      failed=1
+    }
+  else
+    failed=1
+  fi
+
+  [ "$failed" -eq 0 ] || return 1
+}
+
 real_repo_smoke() {
   label=$1
   repo=$2
@@ -2464,6 +2601,14 @@ if fixture_performance_smoke; then
   pass_rung "medium fixture performance smoke"
 else
   fail_rung "medium fixture performance smoke" "timed fixture command failed"
+fi
+
+printf 'validate: RUN deterministic fixture performance budgets\n'
+if fixture_benchmark_budgets; then
+  note_fallback "performance budgets: named fixture budgets for file hotspots, current symbols, historical symbols, and relationship enrichment"
+  pass_rung "deterministic fixture performance budgets"
+else
+  fail_rung "deterministic fixture performance budgets" "budget threshold, determinism, or summary check failed"
 fi
 
 printf 'validate: RUN source install smoke\n'

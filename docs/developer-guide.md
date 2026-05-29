@@ -114,6 +114,28 @@ zig build test
 zig build validate
 ```
 
+`tools/validate.sh` also owns the deterministic fixture performance budget
+harness. The budget rung records privacy-safe rows in the validation evidence
+summary for these named lanes:
+
+- `FILE_HOTSPOTS`: baseline Git-history hotspot analysis over the medium
+  fixture.
+- `CURRENT_SYMBOLS`: current working-tree symbol enrichment over a fixed Python
+  fixture file.
+- `HISTORICAL_SYMBOLS`: revision-local historical symbol attribution over the
+  Zig symbols fixture.
+- `RELATIONSHIP_ENRICHMENT`: opt-in relationship enrichment over a fixed Python
+  fixture file.
+
+Each row should include only the lane name, phase, provider label, fixture scope,
+bounded counts, elapsed milliseconds, and the active limit. Repeated fixture
+runs must diff cleanly before the rung passes. Future provider features should
+add a new row by reusing that pattern, not by printing raw reports, absolute
+paths, remotes, commit messages, source snippets, or author identities. Budget
+limits may be overridden locally with `BUDGET_<NAME>_MS` while investigating,
+but committed defaults should remain broad enough to avoid machine-specific
+flakes and narrow enough to catch obvious regressions.
+
 Run shell syntax checks when shell files change:
 
 ```sh
