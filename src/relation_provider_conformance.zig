@@ -10,6 +10,7 @@ const tree_sitter_lua = @import("tree_sitter_lua.zig");
 const tree_sitter_python = @import("tree_sitter_python.zig");
 const tree_sitter_rust = @import("tree_sitter_rust.zig");
 const tree_sitter_typescript = @import("tree_sitter_typescript.zig");
+const tree_sitter_zig = @import("tree_sitter_zig.zig");
 
 const SupportedCase = struct {
     path: []const u8,
@@ -53,6 +54,12 @@ const LuaLane = struct {
 const RustLane = struct {
     fn extract(allocator: std.mem.Allocator, path: []const u8, source: []const u8, options: tree_sitter_rust.RelationOptions) !tree_sitter_rust.RelationExtraction {
         return tree_sitter_rust.extractRelationsSource(allocator, path, source, options);
+    }
+};
+
+const ZigLane = struct {
+    fn extract(allocator: std.mem.Allocator, path: []const u8, source: []const u8, options: tree_sitter_zig.RelationOptions) !tree_sitter_zig.RelationExtraction {
+        return tree_sitter_zig.extractRelationsSource(allocator, path, source, options);
     }
 };
 
@@ -537,5 +544,37 @@ test "relation provider conformance covers Rust" {
         .valid_source = source,
         .invalid_path = "crates/demo/src/broken.rs",
         .invalid_source = "fn broken(",
+    });
+}
+
+test "relation provider conformance covers internal Zig proof" {
+    const source =
+        \\const std = @import("std");
+        \\const Worker = struct {
+        \\    const LIMIT = 3;
+        \\    pub fn run() void {
+        \\        helper();
+        \\        LIMIT;
+        \\        missing_value;
+        \\        receiver.method();
+        \\        @compileLog(LIMIT);
+        \\        const nested = struct { fn inner() void {} };
+        \\    }
+        \\};
+        \\fn helper() void {}
+        \\
+    ;
+    try runSupportedConformance(ZigLane, .{
+        .path = "src/relations.zig",
+        .source = source,
+        .expected_provider_name = tree_sitter_zig.relation_provider_name,
+        .expected_kinds = &.{ "contains", "reference", "call", "import_include", "unresolved", "unknown" },
+        .expected_targets = &.{ "std", "Worker", "LIMIT", "run", "nested", "inner", "helper", "std", "helper", "LIMIT", "missing_value", "receiver.method", "@compileLog" },
+    });
+    try runDegradedConformance(ZigLane, .{
+        .unsupported_path = "docs/relations.md",
+        .valid_source = source,
+        .invalid_path = "src/broken.zig",
+        .invalid_source = "pub fn {",
     });
 }
