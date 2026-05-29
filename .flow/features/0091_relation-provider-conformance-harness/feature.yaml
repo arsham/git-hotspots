@@ -1,0 +1,704 @@
+schema: flow-feature.v1
+feature:
+  id: "0091"
+  slug: relation-provider-conformance-harness
+  title: Relation provider conformance harness
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Relation provider additions currently rely on repeated fixture patterns
+    and public report checks; adding Go, Lua, or Zig without a shared
+    conformance harness would increase drift risk across caveats, caps,
+    failures, privacy, and deterministic ordering.
+  outcome: A reusable internal conformance harness proves provider-neutral
+    relationship evidence behaviour across existing lanes and becomes the
+    admission bar for future providers without changing public support claims.
+  acceptance:
+    - Shared relation provider conformance checks cover supported relation
+      kinds, unresolved and unknown evidence, unsupported languages, provider
+      failure, cap behaviour, duplicate merging, caveats, privacy, and
+      deterministic ordering.
+    - Existing public relationship lanes are exercised through the harness where
+      practical without changing public report semantics.
+    - zig build test and zig build validate include or preserve the conformance
+      checks.
+    - Public CLI/report/docs/help/man/scoring behaviour does not drift in this
+      feature.
+planning:
+  state: ready
+  summary: Create a shared internal conformance harness for relationship providers
+    before adding more language lanes.
+  brief_sync:
+    status: updated
+    reason: B002 linked and updated with the provider hardening batch decision; 0091
+      owns the conformance-harness prerequisite slice.
+    checked_at: 2026-05-29T00:45:25.126Z
+  brief_alignment:
+    status: aligned
+    role: prerequisite
+    summary: 0091 is the conformance-harness prerequisite for safe B002
+      relation-provider expansion; it changes internal validation only and
+      preserves public support claims.
+    checked_at: 2026-05-29T00:45:31.210Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-05-29T00:49:29.615Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-05-29T00:49:29.615Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-05-29T00:49:29.615Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-05-29T00:49:29.615Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: "Detached B002 successor batch: provider hardening and
+    remaining-language relationship expansion after feature 0090 closed the
+    current public matrix."
+  depends_on_feature_ids: []
+  blocked_by: []
+design:
+  rough_shape:
+    - Add reusable relation-provider conformance fixtures or helpers near
+      existing relation provider tests.
+    - Apply the harness to Python, JavaScript, TypeScript, TSX, and Rust
+      relationship lanes where practical.
+    - Wire validation so conformance drift is caught by the standard validation
+      ladder.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Harness contract and fixtures
+      goal: Create the shared relation provider conformance harness and baseline
+        cases.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src relation provider modules, tests, fixtures,
+          tools/validate.sh as needed."
+        - "In scope: reusable checks for relation kinds, unresolved/unknown,
+          unsupported, failure, caps, caveats, privacy, and ordering."
+        - "Out of scope: new language providers, public report claims, scoring
+          or ranking changes."
+        - "Protected: current public report output and B002 local-first
+          evidence-only boundaries."
+        - "Dependencies: closed relation provider/report features through 0090."
+        - "Validation/evidence: targeted unit tests plus deterministic fixture
+          proof."
+        - "Review focus: harness actually reduces provider drift and does not
+          encode public overclaims."
+        - "Escalate if: harness requires public output changes, network tooling,
+          or broad parser rewrites."
+        - "Done boundary: reusable conformance checks exist and are runnable."
+      verification_commands:
+        - zig build test
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: Existing-lane adoption
+      goal: Exercise existing relationship provider lanes through the harness where
+        practical.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: Python, JavaScript, TypeScript, TSX, and Rust relation
+          fixtures/tests."
+        - "In scope: migrate or add coverage without semantic output drift."
+        - "Out of scope: admitting Go, Lua, or Zig relationship support."
+        - "Protected: current capability matrix and golden public report
+          semantics."
+        - "Dependencies: P1 harness contract."
+        - "Validation/evidence: fixture diffs demonstrate unchanged public
+          behaviour or intentional internal-only additions."
+        - "Review focus: no provider lane is falsely marked supported by harness
+          presence alone."
+        - "Escalate if: existing fixtures need broad public rewrites unrelated
+          to conformance."
+        - "Done boundary: existing lanes have representative conformance
+          coverage."
+      verification_commands:
+        - zig build test
+        - zig build validate
+    - id: P3
+      depends_on:
+        - P2
+      status: planned
+      title: Validation and close-out proof
+      goal: Make conformance part of standard validation and record privacy-safe
+        evidence.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: tools/validate.sh, build.zig, tests/integration.sh if
+          needed."
+        - "In scope: validation hooks and privacy-safe evidence for conformance
+          drift checks."
+        - "Out of scope: public language support changes."
+        - "Protected: validation must not require network, global parser CLIs,
+          cache truth, or private paths."
+        - "Dependencies: P1 and P2 complete."
+        - "Validation/evidence: git diff --check, zig build test, zig build
+          validate, privacy-safe smoke or explicit skip reason."
+        - "Review focus: future provider proof can rely on this harness as an
+          admission gate."
+        - "Escalate if: validation cost or flakiness becomes unsuitable for
+          default validate."
+        - "Done boundary: repo validates and conformance behaviour is durably
+          evidenced."
+      verification_commands:
+        - git diff --check
+        - zig build test
+        - zig build validate
+  output_contract:
+    storage: Internal test fixtures, helper code, and validation hooks only.
+    public_surface: No new language support claims or report fields in this feature.
+    consumers:
+      - future provider proofs
+      - runner
+      - reviewer
+    prohibited_content:
+      - absolute local paths
+      - remotes
+      - authors or emails
+      - source snippets
+      - parser diagnostics
+      - raw private reports
+      - commit messages
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B002
+timestamps:
+  created_at: 2026-05-29T00:39:13.797Z
+  updated_at: 2026-05-29T00:50:13.860Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-29T00:50:13.860Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0091"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B002
+    feature:
+      title: Relation provider conformance harness
+      problem: Relation provider additions currently rely on repeated fixture patterns
+        and public report checks; adding Go, Lua, or Zig without a shared
+        conformance harness would increase drift risk across caveats, caps,
+        failures, privacy, and deterministic ordering.
+      outcome: A reusable internal conformance harness proves provider-neutral
+        relationship evidence behaviour across existing lanes and becomes the
+        admission bar for future providers without changing public support
+        claims.
+      acceptance:
+        - Shared relation provider conformance checks cover supported relation
+          kinds, unresolved and unknown evidence, unsupported languages,
+          provider failure, cap behaviour, duplicate merging, caveats, privacy,
+          and deterministic ordering.
+        - Existing public relationship lanes are exercised through the harness
+          where practical without changing public report semantics.
+        - zig build test and zig build validate include or preserve the
+          conformance checks.
+        - Public CLI/report/docs/help/man/scoring behaviour does not drift in
+          this feature.
+    brief_alignment:
+      status: aligned
+      role: prerequisite
+      summary: 0091 is the conformance-harness prerequisite for safe B002
+        relation-provider expansion; it changes internal validation only and
+        preserves public support claims.
+      checked_at: 2026-05-29T00:45:31.210Z
+    briefs:
+      - id: B002
+        title: Symbol-aware hotspot intelligence
+        summary: "Capability brief for symbol-aware hotspot intelligence: extend
+          git-hotspots beyond file-level evidence to identify historically
+          active code symbols (functions, methods, types, modules, or other
+          language-provider symbols) from local Git history using a
+          language-agnostic pipeline. The capability must stay deterministic,
+          local-first, and performant, while making new language support
+          automatically benefit from the same history attribution, scoring,
+          explanation, and future relationship analysis surfaces."
+        desired_capability:
+          - Report hotspot evidence at symbol granularity, not just file
+            granularity, so users can investigate historically volatile
+            functions, methods, types, modules, or provider-defined symbols.
+          - "Use a normalized symbol-provider contract: language-specific
+            providers only expose symbol identity, kind, file path, source
+            range/span, and optional nesting/context; the Git-history
+            attribution, scoring, output, and explanation pipeline remains
+            language-agnostic."
+          - Attribute local Git history to symbols by intersecting changed
+            ranges, file revisions, and symbol spans in a deterministic way,
+            with enough evidence for users to understand why a symbol appears
+            hot.
+          - Design the symbol model so future enrichers can ask which symbols
+            are referenced by, used by, or related to hot places without
+            redesigning hotspot evidence from scratch.
+          - "Keep runtime defaults local-first: no network, telemetry, remote
+            enrichment, or non-deterministic service dependency for symbol
+            hotspot analysis."
+        why:
+          - File-level hotspots are useful but too coarse when a large file
+            contains one volatile function or type and many stable neighbours.
+          - A language-agnostic symbol pipeline prevents each future language
+            provider from needing bespoke hotspot scoring and history-search
+            logic.
+          - Symbol-level evidence gives agents and humans a more precise
+            investigation prompt while preserving the project rule that hotspots
+            are evidence, not blame, predictions, or code-quality scores.
+          - Future relationship analysis, such as symbols used by hot places,
+            needs stable symbol identities and relation-ready output contracts
+            from the beginning.
+        in_scope:
+          - Capability-level planning for extracting or receiving symbols
+            through providers, normalizing symbol records, and mapping
+            Git-history changes onto those records.
+          - "Performance-sensitive history traversal strategy: batch Git
+            queries, stream/limit revision data, parse only relevant file
+            revisions where possible, and avoid naive full-repository reparsing
+            for every commit."
+          - "Deterministic evidence fields for symbol hotspots: churn/change
+            frequency/recency/confidence/explanation inputs at symbol level,
+            with links back to file path, symbol kind, range/source context, and
+            relevant commits or changed hunks where feasible."
+          - "Language-extensibility rule: adding a new symbol provider should
+            make that language eligible for symbol hotspot reports without
+            changing the scoring, history attribution, CLI report, or export
+            logic except for provider registration and provider-specific tests."
+          - "Forward-compatible seams for reference/use analysis: symbol
+            identifiers, nesting/ownership, and relation-provider hooks should
+            be planned even if reference graph support is deferred."
+        out_of_scope:
+          - Predicting bugs, judging code quality, ranking developers, or
+            treating symbol hotspots as accusations rather than investigation
+            prompts.
+          - Network-backed code intelligence, hosted enrichment, telemetry, or
+            remote index upload by default.
+          - Implementing full semantic reference graphs, call graphs, or
+            cross-language dependency intelligence in the first symbol-hotspot
+            slice; those are future enrichers that should consume stable symbol
+            evidence.
+          - Requiring cache as product truth. Caches may improve performance
+            later, but symbol analysis must have a correct no-cache path.
+          - Browser-visible UI design is out of scope for this brief unless a
+            future feature adds visual symbol hotspot exploration; if that
+            happens, UX tone, visual constraints, and approval decisions must be
+            captured in feature/PRD artefacts.
+        durable_decisions:
+          - Treat symbol hotspots as an extension of deterministic Git-history
+            evidence, not as semantic judgement or prediction.
+          - "Make the core symbol-hotspot pipeline provider-neutral: providers
+            supply symbols; the shared engine maps history to symbols and
+            produces common reports/exports."
+          - Design for performance from the first feature by avoiding per-commit
+            whole-tree parsing and by batching Git/history work.
+          - Plan relation-aware output seams now, but defer reference/use
+            analysis until after symbol hotspot evidence is trustworthy.
+          - No feature-level PRD or implementation packet is created yet from
+            this intake; the next shaping step should decide whether to create a
+            feature for the first symbol-provider/history-attribution slice and
+            push detailed acceptance and packet plans into feature.yaml/prd.md.
+          - "First implementation slice selected during shaping for feature
+            0078: project-level current-symbol hotspot evidence over retained
+            ranked file hotspots using existing current symbol providers and
+            optional HEAD current-line Git evidence. This deliberately is not
+            true historical hunk-to-symbol attribution, symbol rename/move
+            lineage, reference/use analysis, scoring replacement, cache, or
+            provider plugin infrastructure; those remain later capability work
+            after current-symbol evidence is trustworthy."
+          - "Successor architecture spike selected for feature 0079: define true
+            historical hunk-to-symbol attribution before runtime implementation.
+            The spike is architecture-only and should produce
+            docs/historical-symbol-attribution-architecture.md, comparing
+            approaches and selecting a deterministic no-checkout local pipeline
+            over historical blobs, changed hunks, and revision-local provider
+            symbols. It deliberately does not add a user-facing historical
+            symbol engine, scoring changes, semantic lineage, reference
+            analysis, cache truth, or remote/provider dependencies."
+          - "Successor batch selected after feature 0080: feature 0081 is the
+            prerequisite internal pipeline integration that wires historical
+            hunk attribution into bounded ranked-file analysis without public
+            output drift; feature 0082 is the primary user-facing opt-in
+            historical symbol hotspot report that should execute serially after
+            0081 and update CLI/report/docs/tests/validation together.
+            Reference/use analysis remains deferred until the public historical
+            symbol report contract is stable."
+          - "Successor architecture spike selected for feature 0083: define
+            symbol relationship evidence before runtime implementation. The
+            spike is documentation-only and should produce
+            docs/symbol-relationship-architecture.md, comparing provider
+            approaches and defining relation endpoints, kinds, confidence,
+            caveats, deterministic aggregation, performance limits, and a narrow
+            local-first implementation successor. It deliberately does not add
+            relation runtime analysis, CLI/report output, scoring changes, cache
+            truth, dependencies, or public claim expansion."
+          - "Relation evidence successor batch selected: 0084 internal relation
+            provider proof, then 0085 internal relation aggregation integration,
+            then 0086 opt-in public symbol relationship report. The batch
+            remains serial: 0085 depends on 0084, and 0086 depends on 0084 and
+            0085. Public relation output must wait until internal provider and
+            aggregation proof are closed. Relation evidence stays local-first,
+            deterministic, caveated, evidence-only, and must not alter
+            file/symbol scoring or imply call-graph truth, dependency proof,
+            ownership, code-quality judgement, developer metrics, or bug
+            prediction."
+          - "Relation provider expansion batch selected after feature 0086: 0087
+            records the provider expansion strategy and admission rubric, 0088
+            adds TypeScript/TSX/JavaScript relationship provider proof, 0089
+            adds Rust relationship provider proof, and 0090 hardens the provider
+            relationship capability matrix and validation. The batch remains
+            serial: 0088 depends on 0087, 0089 depends on 0088, and 0090 depends
+            on 0089. Public relationship claims must remain opt-in,
+            deterministic, local-first, caveated, evidence-only, and must not
+            imply call-graph truth, type-aware dependency proof, ownership,
+            code-quality judgement, developer metrics, bug prediction, scoring
+            changes, cache truth, network access, or telemetry."
+          - "Feature 0090 closed the public provider capability decision:
+            current symbols, current-line history, and historical-symbol hunk
+            attribution use the Zig, Go, Python, JavaScript, Lua, Rust,
+            TypeScript, and TSX provider lanes, with file-level fallback for
+            unsupported historical blobs; symbol-relationship evidence is public
+            only for Python, JavaScript, Rust, TypeScript, and TSX. Zig, Go,
+            Lua, and unsupported current files have no public relationship
+            provider. Documentation, help/explain text, man page, integration
+            checks, and validation anchors must stay aligned with that matrix
+            until a later feature explicitly admits another relationship lane."
+          - "Provider hardening and remaining-language relationship batch
+            selected after feature 0090: 0091 creates a shared relation provider
+            conformance harness; 0092 adds internal Go relationship provider
+            proof; 0093 adds internal Lua relationship provider proof; 0094
+            evaluates and, if safe, adds internal Zig relationship provider
+            proof or records a no-admit outcome; 0095 is the only public-surface
+            refresh and may admit Go, Lua, or Zig relationship support only from
+            closed proof evidence. The batch is serial: 0092 depends on 0091,
+            0093 depends on 0092, 0094 depends on 0093, and 0095 depends on
+            0094. Public claims remain local-first, deterministic, caveated,
+            evidence-only, and must not imply call-graph truth, dependency
+            proof, type checking, ownership, code-quality judgement, developer
+            metrics, bug prediction, scoring changes, cache truth, network
+            access, or telemetry."
+    prd_path: .flow/features/0091_relation-provider-conformance-harness/prd.md
+  requirements_contract:
+    source_path: .flow/features/0091_relation-provider-conformance-harness/prd.md
+    source_digest: 112c20c90137a327f83919ce31f4fcaf12525bd7390ccb4858e13a300d16a209
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: REQ-001 - Add reusable conformance checks for provider-neutral
+          relationship evidence candidates.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: REQ-002 - Cover contains, reference, call, import_include, unresolved, and
+          unknown where the existing lanes can exercise them.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: REQ-003 - Cover unsupported language or unsupported provider behaviour
+          without breaking file-level hotspot analysis.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: REQ-004 - Cover provider failure, parse failure, cap reached, duplicate or
+          multi-pass caveat merging, and deterministic ordering.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: REQ-005 - Cover privacy checks so candidates and fixtures do not expose
+          absolute paths, remotes, authors, emails, source snippets, parser
+          diagnostics, raw private reports, or commit messages.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: REQ-006 - Exercise existing Python, JavaScript, TypeScript, TSX, and Rust
+          relationship lanes through the harness where practical.
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: REQ-007 - Preserve current public report semantics, capability claims, and
+          ranking/scoring behaviour.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: REQ-008 - Wire the harness into zig build test and preserve or add
+          validation coverage in zig build validate where suitable.
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: REQ-009 - Record fresh validation evidence and a privacy-safe smoke record
+          or explicit skip reason.
+        category: requirement
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#edge-cases[1]
+        text: A provider supports current symbols but not relationship evidence.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#edge-cases[2]
+        text: A provider emits unresolved evidence for a syntactic target.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#edge-cases[3]
+        text: A provider emits relation-like syntax that cannot be safely classified.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#edge-cases[4]
+        text: A cap is reached while other candidate files still complete.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#edge-cases[5]
+        text: Multiple caveats merge without nondeterministic ordering.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#edge-cases[6]
+        text: Existing public fixtures must stay stable unless the harness intentionally
+          exposes an already-approved invariant.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#verification[1]
+        text: git diff --check
+        category: verification
+        packet_refs: []
+        verification: git diff --check
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#verification[2]
+        text: zig fmt --check build.zig src tests
+        category: verification
+        packet_refs: []
+        verification: zig fmt --check build.zig src tests
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#verification[3]
+        text: zig build test
+        category: verification
+        packet_refs: []
+        verification: zig build test
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#verification[4]
+        text: zig build validate
+        category: verification
+        packet_refs: []
+        verification: zig build validate
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#verification[5]
+        text: Privacy-safe smoke or explicit skip reason.
+        category: verification
+        packet_refs: []
+        verification: Privacy-safe smoke or explicit skip reason.
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: A reusable internal conformance harness proves provider-neutral
+      relationship evidence behaviour across existing lanes and becomes the
+      admission bar for future providers without changing public support claims.
+    acceptance:
+      - Shared relation provider conformance checks cover supported relation
+        kinds, unresolved and unknown evidence, unsupported languages, provider
+        failure, cap behaviour, duplicate merging, caveats, privacy, and
+        deterministic ordering.
+      - Existing public relationship lanes are exercised through the harness
+        where practical without changing public report semantics.
+      - zig build test and zig build validate include or preserve the
+        conformance checks.
+      - Public CLI/report/docs/help/man/scoring behaviour does not drift in this
+        feature.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - zig build test
+      - zig build validate
+      - git diff --check
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+      - confirm no public capability claim drift
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+      - public support claim changes
+    protected_surfaces:
+      - public CLI flags
+      - public report schema
+      - README/user guide/man capability claims
+      - file ranking and scoring
+      - network telemetry or cache defaults
+  fallback_path: deferred_reconcile_decision
+  notes: Serial batch head. Build internal conformance harness only; no new
+    language support claims.

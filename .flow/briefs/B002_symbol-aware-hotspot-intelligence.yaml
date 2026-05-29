@@ -166,6 +166,18 @@ durable_decisions:
     public relationship provider. Documentation, help/explain text, man page,
     integration checks, and validation anchors must stay aligned with that
     matrix until a later feature explicitly admits another relationship lane."
+  - "Provider hardening and remaining-language relationship batch selected after
+    feature 0090: 0091 creates a shared relation provider conformance harness;
+    0092 adds internal Go relationship provider proof; 0093 adds internal Lua
+    relationship provider proof; 0094 evaluates and, if safe, adds internal Zig
+    relationship provider proof or records a no-admit outcome; 0095 is the only
+    public-surface refresh and may admit Go, Lua, or Zig relationship support
+    only from closed proof evidence. The batch is serial: 0092 depends on 0091,
+    0093 depends on 0092, 0094 depends on 0093, and 0095 depends on 0094. Public
+    claims remain local-first, deterministic, caveated, evidence-only, and must
+    not imply call-graph truth, dependency proof, type checking, ownership,
+    code-quality judgement, developer metrics, bug prediction, scoring changes,
+    cache truth, network access, or telemetry."
 links:
   roadmap_item_id: null
   feature_ids:
@@ -181,6 +193,11 @@ links:
     - "0088"
     - "0089"
     - "0090"
+    - "0091"
+    - "0092"
+    - "0093"
+    - "0094"
+    - "0095"
 timestamps:
   created_at: 2026-05-27T19:12:06.269Z
-  updated_at: 2026-05-29T00:00:00.000Z
+  updated_at: 2026-05-29T00:44:55.632Z
