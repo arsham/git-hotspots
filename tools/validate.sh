@@ -806,11 +806,11 @@ zig, go, python, javascript, lua, rust, typescript, tsx, unsupported = payloads[
 rel_zig, rel_go, rel_python, rel_javascript, rel_lua, rel_rust, rel_typescript, rel_tsx, rel_unsupported = payloads[9:]
 
 readme_rows = [
-    '| Zig | `.zig` | `tree-sitter-zig` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-zig` when parsing succeeds | unsupported | no dependencies, semantic moves, relationship support, true semantic lineage, scoring, or ownership claims |',
-    '| Go | `.go` | `tree-sitter-go` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-go` when parsing succeeds | unsupported | no packages, build tags, cgo, dependency graphs, relationship support, true semantic lineage, scoring, or ownership claims |',
+    '| Zig | `.zig` | `tree-sitter-zig` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-zig` when parsing succeeds | public opt-in `tree-sitter-zig-relations` syntax evidence | no packages, build graph, comptime, generated-code truth, dependencies, semantic moves, true semantic lineage, scoring, or ownership claims |',
+    '| Go | `.go` | `tree-sitter-go` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-go` when parsing succeeds | public opt-in `tree-sitter-go-relations` syntax evidence | no packages, modules, build tags, cgo, dependency graphs, method-set or interface semantics, true semantic lineage, scoring, or ownership claims |',
     '| Python | `.py` | `tree-sitter-python` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-python` when parsing succeeds | public opt-in `tree-sitter-python-relations` syntax evidence | no imports, packages, virtual environments, dependency graphs, generated-source policy, call-graph truth, scoring, or ownership claims |',
     '| JavaScript | `.js`, `.mjs`, `.cjs`, admitted `.jsx` | `tree-sitter-javascript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-javascript` when parsing succeeds | public opt-in `tree-sitter-javascript-relations` syntax evidence | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, call-graph truth, scoring, or ownership claims |',
-    '| Lua | `.lua` | `tree-sitter-lua` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-lua` when parsing succeeds | unsupported | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, relationship support, scoring, or ownership claims |',
+    '| Lua | `.lua` | `tree-sitter-lua` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-lua` when parsing succeeds | public opt-in `tree-sitter-lua-relations` syntax evidence | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, scoring, or ownership claims |',
     '| Rust | `.rs` | `tree-sitter-rust` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-rust` when parsing succeeds | public opt-in `tree-sitter-rust-relations` syntax evidence | no Cargo, crates, module resolution, macro expansion output, cfg feature selection, type checking, dependency graphs, call-graph truth, scoring, or ownership claims |',
     '| TypeScript | `.ts`, `.mts`, `.cts` | `tree-sitter-typescript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-typescript` when parsing succeeds | public opt-in `tree-sitter-typescript-relations` syntax evidence | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, call-graph truth, scoring, or ownership claims |',
     '| TSX | `.tsx` | `tree-sitter-tsx` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-tsx` when parsing succeeds | public opt-in `tree-sitter-tsx-relations` syntax evidence | no React, DOM, packages, type analysis, dependency graphs, cache, call-graph truth, scoring, or ownership claims |',
@@ -829,15 +829,18 @@ for text, label in ((readme, 'README'), (explain, 'explain')):
     assert 'current-line Git evidence for HEAD line ranges' in text, f'{label} current-line basis missing'
     assert '--historical-symbols evidence' in normalized_text, f'{label} historical-symbol matrix column missing'
     assert '--symbol-relationships evidence' in normalized_text, f'{label} relationship matrix column missing'
+    assert 'public opt-in tree-sitter-zig-relations syntax evidence' in normalized_text, f'{label} Zig relationship support missing'
+    assert 'public opt-in tree-sitter-go-relations syntax evidence' in normalized_text, f'{label} Go relationship support missing'
+    assert 'public opt-in tree-sitter-lua-relations syntax evidence' in normalized_text, f'{label} Lua relationship support missing'
     assert 'public opt-in tree-sitter-rust-relations syntax evidence' in normalized_text, f'{label} Rust relationship support missing'
     assert 'file-level fallback only when retained by historical attribution' in text, f'{label} unsupported fallback wording missing'
 
 summary_rows = [
-    '| Zig `.zig` | supported | supported | supported with revision-local provider fallback | unsupported |',
-    '| Go `.go` | supported | supported | supported with revision-local provider fallback | unsupported |',
+    '| Zig `.zig` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-zig-relations` |',
+    '| Go `.go` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-go-relations` |',
     '| Python `.py` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-python-relations` |',
     '| JavaScript `.js`, `.mjs`, `.cjs`, `.jsx` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-javascript-relations` |',
-    '| Lua `.lua` | supported | supported | supported with revision-local provider fallback | unsupported |',
+    '| Lua `.lua` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-lua-relations` |',
     '| Rust `.rs` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-rust-relations` |',
     '| TypeScript `.ts`, `.mts`, `.cts` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-typescript-relations` |',
     '| TSX `.tsx` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-tsx-relations` |',
@@ -850,9 +853,11 @@ for text, label in ((user_guide, 'user guide'), (developer_guide, 'developer gui
 
 for needle in (
     'Zig', 'Go', 'Python', 'JavaScript', 'Lua', 'Rust', 'TypeScript', 'TSX',
+    'tree-sitter-zig-relations', 'tree-sitter-go-relations',
     'tree-sitter-python-relations', 'tree-sitter-javascript-relations',
-    'tree-sitter-rust-relations', 'tree-sitter-typescript-relations',
-    'tree-sitter-tsx-relations', 'public relationships are unsupported',
+    'tree-sitter-lua-relations', 'tree-sitter-rust-relations',
+    'tree-sitter-typescript-relations', 'tree-sitter-tsx-relations',
+    'Other current files preserve file evidence',
     'file-level fallback only when',
 ):
     assert needle in man_page, f'man capability text missing: {needle}'
@@ -862,8 +867,8 @@ for needle in (
     'current working-tree symbol evidence',
     'Other ranked current files are counted as unsupported while preserving file evidence.',
     'not true symbol history, lineage, scoring, or ownership',
-    'Zig, Go, Lua, and unsupported current',
-    'Python, JavaScript, Rust,',
+    'Zig, Go, Python, JavaScript, Lua,',
+    'Rust, TypeScript, and TSX lanes only',
 ):
     assert needle in help_text, f'help capability text missing: {needle}'
 
@@ -894,8 +899,11 @@ for label, data, provider_name, matched_path in cases:
         assert history['current_only'] is True, f'{label} line-history current_only changed'
 
 relationship_supported = [
+    ('Zig', rel_zig, 'tree-sitter-zig-relations'),
+    ('Go', rel_go, 'tree-sitter-go-relations'),
     ('Python', rel_python, 'tree-sitter-python-relations'),
     ('JavaScript', rel_javascript, 'tree-sitter-javascript-relations'),
+    ('Lua', rel_lua, 'tree-sitter-lua-relations'),
     ('Rust', rel_rust, 'tree-sitter-rust-relations'),
     ('TypeScript', rel_typescript, 'tree-sitter-typescript-relations'),
     ('TSX', rel_tsx, 'tree-sitter-tsx-relations'),
@@ -911,9 +919,6 @@ for label, data, provider_name in relationship_supported:
     assert all(record['provider']['input'].startswith('working-tree:') for record in relationships['records']), f'{label} relation input provenance changed'
 
 relationship_unsupported = [
-    ('Zig', rel_zig),
-    ('Go', rel_go),
-    ('Lua', rel_lua),
     ('Unsupported', rel_unsupported),
 ]
 for label, data in relationship_unsupported:
@@ -1047,7 +1052,9 @@ docs_manual_checks() {
   grep -Fq 'Provider capability summary' docs/user-guide.md || return 1
   grep -Fq 'Python, JavaScript,' docs/user-guide.md || return 1
   grep -Fq 'TypeScript, and TSX Tree-sitter lanes' docs/user-guide.md || return 1
-  grep -Fq 'Zig `.zig` | supported | supported | supported with revision-local provider fallback | unsupported' docs/user-guide.md || return 1
+  grep -Fq 'Zig `.zig` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-zig-relations`' docs/user-guide.md || return 1
+  grep -Fq 'Go `.go` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-go-relations`' docs/user-guide.md || return 1
+  grep -Fq 'Lua `.lua` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-lua-relations`' docs/user-guide.md || return 1
   grep -Fq 'Rust `.rs` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-rust-relations`' docs/user-guide.md || return 1
   grep -Fq 'Rust support is syntax-only' docs/user-guide.md || return 1
   grep -Fq 'Cargo metadata, crates, module resolution' docs/user-guide.md || return 1
@@ -1093,16 +1100,19 @@ docs_manual_checks() {
   grep -Fq -- '--historical-symbols' man/git-hotspots.1 || return 1
   grep -Fq -- '--symbol-relationships' man/git-hotspots.1 || return 1
   grep -Fq 'Capability by language' man/git-hotspots.1 || return 1
-  grep -Fq 'Python, JavaScript, Rust, TypeScript, and TSX lanes' man/git-hotspots.1 || return 1
+  grep -Fq 'Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and TSX lanes' man/git-hotspots.1 || return 1
+  grep -Fq 'tree-sitter-zig-relations' man/git-hotspots.1 || return 1
+  grep -Fq 'tree-sitter-go-relations' man/git-hotspots.1 || return 1
+  grep -Fq 'tree-sitter-lua-relations' man/git-hotspots.1 || return 1
   grep -Fq 'tree-sitter-rust-relations' man/git-hotspots.1 || return 1
-  grep -Fq 'public relationships are unsupported' man/git-hotspots.1 || return 1
+  grep -Fq 'Other current files preserve file evidence' man/git-hotspots.1 || return 1
   grep -Fq -- '--progress' man/git-hotspots.1 || return 1
   grep -Fq 'local-first' man/git-hotspots.1 || return 1
   ! grep -Eq 'dogfood|tools/release-linux\.sh|packaging/aur|makepkg|pacman|pkg\.tar' man/git-hotspots.1 || return 1
 
   grep -Fq 'docs/user-guide.md' README.md || return 1
-  grep -Fq 'Python, JavaScript, Rust, TypeScript, and' README.md || return 1
-  grep -Fq 'retained ranked-file candidates in Python' README.md || return 1
+  grep -Fq 'Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and' README.md || return 1
+  grep -Fq 'retained ranked-file candidates in Zig' README.md || return 1
   grep -Fq 'Invalid CLI combinations exit 2' README.md || return 1
   grep -Fq 'Local Linux dogfood packaging' README.md || return 1
   grep -Fq 'tools/release-linux.sh' README.md || return 1
@@ -1207,8 +1217,11 @@ allowed = (
     "('git network command', re.compile",
     "('go toolchain command', re.compile",
     "('global tree-sitter cli', re.compile",
+    'tree-sitter-zig-relations',
+    'tree-sitter-go-relations',
     'tree-sitter-python-relations',
     'tree-sitter-javascript-relations',
+    'tree-sitter-lua-relations',
     'tree-sitter-rust-relations',
     'tree-sitter-typescript-relations',
     'tree-sitter-tsx-relations',
@@ -1374,9 +1387,12 @@ fixture_json_checks() {
   grep -q -- '## Symbol relationships' "$SYMBOL_RELATIONSHIPS_MD" || return 1
   grep -q -- 'symbol relationships for retained ranked files:' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   ! grep -Eiq -- 'Fixture Author|fixture@example|https?://|ssh://|git@|/home/|/Users/|source snippet|commit message' "$SYMBOL_RELATIONSHIPS_JSON" "$SYMBOL_RELATIONSHIPS_MD" "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
-  for lane in javascript typescript tsx rust; do
+  for lane in zig go javascript lua typescript tsx rust; do
     case "$lane" in
+      zig) repo=fixtures/symbols; inspect=src/example.zig ;;
+      go) repo=fixtures/go-symbols; inspect=src/example.go ;;
       javascript) repo=fixtures/javascript-symbols; inspect=src/example.mjs ;;
+      lua) repo=fixtures/lua-symbols; inspect=src/example.lua ;;
       typescript) repo=fixtures/typescript-symbols; inspect=src/example.ts ;;
       tsx) repo=fixtures/typescript-symbols; inspect=src/component.tsx ;;
       rust) repo=fixtures/rust-relationships; inspect=src/relations.rs ;;
@@ -1405,15 +1421,18 @@ fixture_json_checks() {
     ! grep -Eiq -- 'Fixture Author|fixture@example|https?://|ssh://|git@|/home/|/Users/|source snippet|commit message' "$lane_json" "$lane_md" "$lane_table" || return 1
   done
   have_python || return 1
-  python3 - "$ARTIFACT_DIR/symbol-relationships-javascript.json" "$ARTIFACT_DIR/symbol-relationships-typescript.json" "$ARTIFACT_DIR/symbol-relationships-tsx.json" "$ARTIFACT_DIR/symbol-relationships-rust.json" <<'PY' || return 1
+  python3 - "$ARTIFACT_DIR/symbol-relationships-zig.json" "$ARTIFACT_DIR/symbol-relationships-go.json" "$ARTIFACT_DIR/symbol-relationships-javascript.json" "$ARTIFACT_DIR/symbol-relationships-lua.json" "$ARTIFACT_DIR/symbol-relationships-typescript.json" "$ARTIFACT_DIR/symbol-relationships-tsx.json" "$ARTIFACT_DIR/symbol-relationships-rust.json" <<'PY' || return 1
 import json, sys
 cases = [
-    (sys.argv[1], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}),
-    (sys.argv[2], 'tree-sitter-typescript-relations', {'contains', 'call', 'unresolved', 'unknown'}),
-    (sys.argv[3], 'tree-sitter-tsx-relations', {'contains', 'reference', 'unresolved', 'unknown'}),
-    (sys.argv[4], 'tree-sitter-rust-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved', 'unknown'}),
+    (sys.argv[1], 'tree-sitter-zig-relations', {'contains'}, False),
+    (sys.argv[2], 'tree-sitter-go-relations', {'contains'}, False),
+    (sys.argv[3], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}, True),
+    (sys.argv[4], 'tree-sitter-lua-relations', {'contains', 'reference', 'call', 'unresolved', 'unknown'}, True),
+    (sys.argv[5], 'tree-sitter-typescript-relations', {'contains', 'call', 'unresolved', 'unknown'}, True),
+    (sys.argv[6], 'tree-sitter-tsx-relations', {'contains', 'reference', 'unresolved', 'unknown'}, True),
+    (sys.argv[7], 'tree-sitter-rust-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved', 'unknown'}, True),
 ]
-for path, provider_name, expected_kinds in cases:
+for path, provider_name, expected_kinds, require_unresolved in cases:
     with open(path, encoding='utf-8') as fh:
         data = json.load(fh)
     relationships = data['symbol_relationships']
@@ -1422,8 +1441,10 @@ for path, provider_name, expected_kinds in cases:
     assert relationships['provenance']['local_only'] is True and relationships['provenance']['network'] is False
     assert relationships['providers'][0]['provider']['name'] == provider_name
     assert relationships['summary']['relation_record_count'] == len(relationships['records'])
+    assert relationships['records'], path
     assert expected_kinds.issubset({item['kind'] for item in relationships['records']}), path
-    assert any(item['target_unresolved'] for item in relationships['records']), path
+    if require_unresolved:
+        assert any(item['target_unresolved'] for item in relationships['records']), path
     assert all(item['provider']['input'].startswith('working-tree:') for item in relationships['records'])
     assert 'call-graph truth' not in json.dumps(data)
 PY

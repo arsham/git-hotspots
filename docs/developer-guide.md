@@ -84,11 +84,11 @@ The current public matrix is:
 
 | Language lane | Current symbols | Current-line history | Historical symbols | Public relationships |
 | --- | --- | --- | --- | --- |
-| Zig `.zig` | supported | supported | supported with revision-local provider fallback | unsupported |
-| Go `.go` | supported | supported | supported with revision-local provider fallback | unsupported |
+| Zig `.zig` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-zig-relations` |
+| Go `.go` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-go-relations` |
 | Python `.py` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-python-relations` |
 | JavaScript `.js`, `.mjs`, `.cjs`, `.jsx` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-javascript-relations` |
-| Lua `.lua` | supported | supported | supported with revision-local provider fallback | unsupported |
+| Lua `.lua` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-lua-relations` |
 | Rust `.rs` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-rust-relations` |
 | TypeScript `.ts`, `.mts`, `.cts` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-typescript-relations` |
 | TSX `.tsx` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-tsx-relations` |

@@ -188,11 +188,11 @@ Provider capability summary:
 
 | Language lane | Current symbols | Current-line history | Historical symbols | Public relationships |
 | --- | --- | --- | --- | --- |
-| Zig `.zig` | supported | supported | supported with revision-local provider fallback | unsupported |
-| Go `.go` | supported | supported | supported with revision-local provider fallback | unsupported |
+| Zig `.zig` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-zig-relations` |
+| Go `.go` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-go-relations` |
 | Python `.py` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-python-relations` |
 | JavaScript `.js`, `.mjs`, `.cjs`, `.jsx` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-javascript-relations` |
-| Lua `.lua` | supported | supported | supported with revision-local provider fallback | unsupported |
+| Lua `.lua` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-lua-relations` |
 | Rust `.rs` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-rust-relations` |
 | TypeScript `.ts`, `.mts`, `.cts` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-typescript-relations` |
 | TSX `.tsx` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-tsx-relations` |
@@ -232,19 +232,22 @@ for retained ranked-file candidates:
 
 ```sh
 ./zig-out/bin/git-hotspots --repo . --symbols --symbol-relationships --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.zig --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.go --symbols --symbol-relationships --format json
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.py --symbols --symbol-relationships --format json
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.js --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.lua --symbols --symbol-relationships --format json
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.rs --symbols --symbol-relationships --format json
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.ts --symbols --symbol-relationships --format json
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.tsx --symbols --symbol-relationships --format json
 ```
 
-Relationship evidence currently comes from local Python, JavaScript, Rust,
-TypeScript, and TSX Tree-sitter lanes. It reports source and target endpoints,
-unresolved targets, provider identity, freshness, failure, confidence, caveats,
-record bounds, and omitted counts. It is caveated investigation context only,
-not call-graph truth, dependency proof, ownership, developer metrics, bug
-prediction, scoring replacement, or a ranking input.
+Relationship evidence currently comes from local Zig, Go, Python, JavaScript,
+Lua, Rust, TypeScript, and TSX Tree-sitter lanes. It reports source and target
+endpoints, unresolved targets, provider identity, freshness, failure,
+confidence, caveats, record bounds, and omitted counts. It is caveated
+investigation context only, not call-graph truth, dependency proof, ownership,
+developer metrics, bug prediction, scoring replacement, or a ranking input.
 
 ## Reading reports
 

@@ -141,6 +141,14 @@ git-hotspots --repo . --symbols --symbol-line-history --format markdown
 git-hotspots --repo . --inspect src/main.zig --symbols --symbol-line-history --format markdown
 git-hotspots --repo . --symbols --historical-symbols --format markdown
 git-hotspots --repo . --symbols --symbol-relationships --format markdown
+git-hotspots --repo . --inspect path/to/file.zig --symbols --symbol-relationships --format json
+git-hotspots --repo . --inspect path/to/file.go --symbols --symbol-relationships --format json
+git-hotspots --repo . --inspect path/to/file.py --symbols --symbol-relationships --format json
+git-hotspots --repo . --inspect path/to/file.js --symbols --symbol-relationships --format json
+git-hotspots --repo . --inspect path/to/file.lua --symbols --symbol-relationships --format json
+git-hotspots --repo . --inspect path/to/file.rs --symbols --symbol-relationships --format json
+git-hotspots --repo . --inspect path/to/file.ts --symbols --symbol-relationships --format json
+git-hotspots --repo . --inspect path/to/file.tsx --symbols --symbol-relationships --format json
 .EE
 .PP
 Use the static scoring explanation:
@@ -180,13 +188,17 @@ Capability by language:
 .IP \[bu] 2
 Zig
 .B .zig
-supports current symbols, current-line history, and historical-symbol fallback;
-public relationships are unsupported.
+supports current symbols, current-line history, historical-symbol fallback, and
+public opt-in
+.B tree-sitter-zig-relations
+relationship evidence.
 .IP \[bu]
 Go
 .B .go
-supports current symbols, current-line history, and historical-symbol fallback;
-public relationships are unsupported.
+supports current symbols, current-line history, historical-symbol fallback, and
+public opt-in
+.B tree-sitter-go-relations
+relationship evidence.
 .IP \[bu]
 Python
 .B .py
@@ -204,8 +216,10 @@ relationship evidence.
 .IP \[bu]
 Lua
 .B .lua
-supports current symbols, current-line history, and historical-symbol fallback;
-public relationships are unsupported.
+supports current symbols, current-line history, historical-symbol fallback, and
+public opt-in
+.B tree-sitter-lua-relations
+relationship evidence.
 .IP \[bu]
 Rust
 .B .rs
@@ -249,10 +263,11 @@ change ranking.
 .PP
 .B --symbol-relationships
 uses bounded local provider output for retained ranked-file candidates in the
-Python, JavaScript, Rust, TypeScript, and TSX lanes only. It reports source and
-target endpoints, unresolved targets, provider identity, freshness, failure,
-confidence, caveats, record bounds, and omitted counts; it does not prove
-calls, dependencies, ownership, developer metrics, bugs, or ranking changes.
+Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and TSX lanes only. It
+reports source and target endpoints, unresolved targets, provider identity,
+freshness, failure, confidence, caveats, record bounds, and omitted counts; it
+does not prove calls, dependencies, ownership, developer metrics, bugs, or
+ranking changes.
 .SH DIAGNOSTICS
 Invalid CLI arguments exit 2 with concise stderr diagnostics that name the
 failed flag and, when deterministic, include a valid next command shape. For

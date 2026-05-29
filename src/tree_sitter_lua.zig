@@ -10,7 +10,7 @@ extern fn tree_sitter_lua() *const c.TSLanguage;
 
 pub const provider_name = "tree-sitter-lua";
 pub const provider_version = "tree-sitter-core@v0.26.9/tree-sitter-lua@v0.5.0/lua-symbol-query-v1";
-pub const relation_provider_name = "tree-sitter-lua-relations-internal";
+pub const relation_provider_name = "tree-sitter-lua-relations";
 pub const relation_provider_version = "tree-sitter-core@v0.26.9/tree-sitter-lua@v0.5.0/lua-relation-proof-v1";
 const query_fingerprint = "src/queries/lua-symbols.scm:lua-symbol-query-v1";
 const max_file_bytes: u64 = 1024 * 1024;
@@ -71,10 +71,9 @@ const embedded_dsl_caveats = ok_caveats ++ [_][]const u8{
 };
 const relation_ok_caveats = [_][]const u8{
     "candidate relation evidence only; file-level Git evidence remains product truth",
-    "internal bounded Lua syntax proof: contains, require-like imports, direct calls, table/member reference-like syntax, unresolved identifiers, and unknown relation-like syntax",
+    "bounded Lua syntax evidence: contains, require-like imports, direct calls, table/member reference-like syntax, unresolved identifiers, and unknown relation-like syntax",
     "unresolved and external-string endpoints are caveated; no module loader, package.path, metatable, dynamic table, runtime mutation, generated-source, or semantic dependency identity is fabricated",
     "symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction",
-    "Lua relationship evidence is internal proof evidence only and is not admitted as a public capability claim in this feature",
 };
 const relation_unresolved_caveats = relation_ok_caveats ++ [_][]const u8{
     "target is unresolved by this bounded Lua syntax proof",
@@ -89,11 +88,11 @@ const relation_cap_caveats = relation_ok_caveats ++ [_][]const u8{
     "relation candidate cap reached; emitted evidence is partial and deterministically truncated",
 };
 const relation_unsupported_caveats = [_][]const u8{
-    "relation provider unsupported: only repo-relative .lua files are parsed by the internal Lua proof",
+    "relation provider unsupported: only repo-relative .lua files are parsed by the Lua relation provider",
     "no parser diagnostics or source snippets exposed",
 };
 const relation_unavailable_caveats = [_][]const u8{
-    "relation provider unavailable or current working-tree source was not available to the bounded Lua proof",
+    "relation provider unavailable or current working-tree source was not available to the Lua relation provider",
     "no parser diagnostics, source snippets, absolute paths, remotes, author identities, commit messages, or private repo names exposed",
 };
 const relation_oversized_caveats = [_][]const u8{
@@ -1122,7 +1121,7 @@ fn endpointName(endpoint: provider.RelationEndpoint) []const u8 {
     };
 }
 
-test "extract relations emits internal bounded Lua syntax candidates" {
+test "extract relations emits bounded Lua syntax candidates" {
     const source =
         \\local helper_value = 1
         \\local exports = {
@@ -1162,7 +1161,7 @@ test "extract relations emits internal bounded Lua syntax candidates" {
     try std.testing.expect(result.candidates.len > 0);
     try std.testing.expect(!result.cap_reached);
     try expectRelationOrder(result.candidates);
-    try expectCaveat(result.provider.caveats, "Lua relationship evidence is internal proof evidence only and is not admitted as a public capability claim in this feature");
+    try expectCaveat(result.provider.caveats, "bounded Lua syntax evidence: contains, require-like imports, direct calls, table/member reference-like syntax, unresolved identifiers, and unknown relation-like syntax");
 
     try expectRelationTarget(result.candidates, .contains, "helper_value");
     try expectRelationTarget(result.candidates, .contains, "exports");
@@ -1184,11 +1183,11 @@ test "extract relations emits internal bounded Lua syntax candidates" {
         try std.testing.expectEqual(provider.ProviderKind.relation, relation.provider.kind);
         try std.testing.expectEqual(provider.Failure.ok, relation.failure);
         try expectCaveat(relation.caveats, "symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction");
-        try expectCaveat(relation.caveats, "Lua relationship evidence is internal proof evidence only and is not admitted as a public capability claim in this feature");
+        try expectCaveat(relation.caveats, "bounded Lua syntax evidence: contains, require-like imports, direct calls, table/member reference-like syntax, unresolved identifiers, and unknown relation-like syntax");
     }
 }
 
-test "extract relations degrades and caps internal Lua proof safely" {
+test "extract relations degrades and caps Lua proof safely" {
     const source =
         \\local one = 1
         \\local two = 2

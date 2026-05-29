@@ -1,0 +1,22 @@
+git-hotspots: file-level Git-history investigation prompts
+commits=2 shallow=false partial=false dirty=false auto_fetch=false
+scope: selected=project include_prefixes=[] exclude_prefixes=[.flow/,.zig-cache/,zig-out/,target/,node_modules/,dist/,build/,coverage/] outside_include_paths=0 outside_include_changes=0 excluded_paths=0 excluded_changes=0
+inspect: requested=src/example.zig matched=src/example.zig rank=1
+symbols: provider=tree-sitter-zig state=current-only freshness=fresh failure=ok confidence=high total=2 shown=2 omitted=0 limit=6 limit_source=explicit sort_basis="provider order"
+symbols caveat: current working-tree enrichment only; file-level Git evidence, score, file order, lineage, and confidence are unchanged
+
+rank  score   changes churn   confidence lineage path
+1     46.3    2       7       medium     no      src/example.zig
+
+current symbols (shown first by provider order):
+  summary: total=2 shown=2 omitted=0 limit=6 limit_source=explicit sort_basis="provider order"
+  function alpha lines 5-5 confidence=high
+  function zebra lines 1-3 confidence=high
+
+symbol relationships for retained ranked files:
+  summary: candidates=1 retained_candidates=1 current_symbol_candidates=2 providers=1 records=2 shown=2 omitted=0 record_bound=1024 record_bound_exceeded=false omitted_records=0
+  caveats: candidate relation evidence only; file-level Git evidence remains product truth; bounded Zig syntax proof: contains, @import strings, direct identifier calls, local identifier references, unresolved identifiers, and ambiguous member or comptime syntax; unresolved and external-string endpoints are caveated; no package, build graph, namespace, type, method, comptime, or generated-code truth is fabricated; symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
+  contains source_to_target source=file:src/example.zig target=symbol:src/example.zig:alpha:function unresolved=false provider=tree-sitter-zig-relations input=working-tree:src/example.zig freshness=fresh failure=ok confidence=medium basis=zig definition containment caveats=candidate relation evidence only; file-level Git evidence remains product truth; bounded Zig syntax proof: contains, @import strings, direct identifier calls, local identifier references, unresolved identifiers, and ambiguous member or comptime syntax; unresolved and external-string endpoints are caveated; no package, build graph, namespace, type, method, comptime, or generated-code truth is fabricated; symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
+  contains source_to_target source=file:src/example.zig target=symbol:src/example.zig:zebra:function unresolved=false provider=tree-sitter-zig-relations input=working-tree:src/example.zig freshness=fresh failure=ok confidence=medium basis=zig definition containment caveats=candidate relation evidence only; file-level Git evidence remains product truth; bounded Zig syntax proof: contains, @import strings, direct identifier calls, local identifier references, unresolved identifiers, and ambiguous member or comptime syntax; unresolved and external-string endpoints are caveated; no package, build graph, namespace, type, method, comptime, or generated-code truth is fabricated; symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
+
+Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.

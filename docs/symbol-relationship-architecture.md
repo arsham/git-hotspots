@@ -3,11 +3,11 @@
 This document defines the relationship-evidence layer for `git-hotspots`. The
 first public runtime surface is `--symbol-relationships`, an opt-in report layer
 that requires `--symbols` and currently exposes bounded local Tree-sitter
-relation evidence for Python, JavaScript, Rust, TypeScript, and TSX retained
-ranked-file candidates. Zig, Go, Lua, and unsupported current files have no
-public relationship provider. The layer remains additive to file-level
-Git-history evidence and changes no scoring, ranking, cache behaviour, network
-behaviour, or telemetry defaults.
+relation evidence for Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and
+TSX retained ranked-file candidates. Unsupported current files have no public
+relationship provider. The layer remains additive to file-level Git-history
+evidence and changes no scoring, ranking, cache behaviour, network behaviour,
+or telemetry defaults.
 
 Relationship evidence is optional investigation context attached to existing
 file, current-symbol, and historical-symbol hotspot evidence. It helps a user

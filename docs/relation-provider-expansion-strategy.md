@@ -158,3 +158,23 @@ is unsupported. It should not imply full call graphs, dependency graphs, package
 graphs, type checking, semantic reference resolution, ownership, code quality,
 developer performance, impact, bug prediction, cache truth, network access, or
 telemetry.
+
+## Current admission matrix
+
+Feature 0095 admits the predecessor proofs below into the public relationship
+capability matrix. This matrix records only syntax-provider evidence already
+closed by the source feature; it does not widen scoring, ranking, cache truth,
+network access, telemetry, ownership, dependency-proof, or bug-prediction
+claims.
+
+| Language lane | Source feature | Public relationship provider | Admitted evidence | Required caveats |
+| --- | --- | --- | --- | --- |
+| Python | Existing baseline before 0091 | `tree-sitter-python-relations` | Bounded local syntax relation evidence already exposed publicly. | No imports, packages, virtual environments, generated-source policy, call-graph truth, scoring, or ownership claims. |
+| JavaScript | 0091 | `tree-sitter-javascript-relations` | Bounded syntax evidence for contains, references, calls, imports, unresolved targets, and unknown relation-like syntax. | No Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, call-graph truth, scoring, or ownership claims. |
+| TypeScript | 0091 | `tree-sitter-typescript-relations` | Bounded syntax evidence for contains, calls, unresolved targets, and unknown relation-like syntax. | No packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, call-graph truth, scoring, or ownership claims. |
+| TSX | 0091 | `tree-sitter-tsx-relations` | Bounded syntax evidence for contains, references, unresolved targets, and unknown relation-like syntax. | No React, DOM, package, type-analysis, dependency-graph, cache, call-graph, scoring, or ownership claims. |
+| Rust | 0091 | `tree-sitter-rust-relations` | Bounded syntax evidence for contains, references, calls, import/include-like syntax, unresolved targets, and unknown relation-like syntax. | No Cargo, crates, module resolution, macro expansion output, cfg feature selection, type checking, dependency graphs, call-graph truth, scoring, or ownership claims. |
+| Go | 0092 | `tree-sitter-go-relations` | Bounded syntax evidence for contains, import includes, direct identifier calls, selector-like syntax, unresolved identifiers, and unknown relation-like syntax. | No packages, modules, build tags, cgo, dependency graphs, method-set or interface semantics, true semantic lineage, scoring, or ownership claims. |
+| Lua | 0093 | `tree-sitter-lua-relations` | Bounded syntax evidence for contains, require-like imports, direct calls, table/member reference-like syntax, unresolved identifiers, and unknown relation-like syntax. | No package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, scoring, or ownership claims. |
+| Zig | 0094 | `tree-sitter-zig-relations` | Bounded syntax evidence for contains, `@import` strings, direct identifier calls, local identifier references, unresolved identifiers, and ambiguous member or comptime syntax. | No packages, build graph, comptime, generated-code truth, dependencies, semantic moves, true semantic lineage, scoring, or ownership claims. |
+| Unsupported current files | 0095 matrix refresh | unsupported fallback | No relationship records; file evidence remains intact. | No parser diagnostics, source snippets, parsed symbols, relationship support, or scoring claims. |

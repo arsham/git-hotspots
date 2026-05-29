@@ -106,11 +106,11 @@ pub const text =
     \\
     \\| Language lane | Inspected paths | --symbols provider | --symbols evidence | --symbol-line-history evidence | --historical-symbols evidence | --symbol-relationships evidence | Explicit boundary |
     \\| --- | --- | --- | --- | --- | --- | --- | --- |
-    \\| Zig | .zig | tree-sitter-zig | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-zig when parsing succeeds | unsupported | no dependencies, semantic moves, relationship support, true semantic lineage, scoring, or ownership claims |
-    \\| Go | .go | tree-sitter-go | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-go when parsing succeeds | unsupported | no packages, build tags, cgo, dependency graphs, relationship support, true semantic lineage, scoring, or ownership claims |
+    \\| Zig | .zig | tree-sitter-zig | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-zig when parsing succeeds | public opt-in tree-sitter-zig-relations syntax evidence | no packages, build graph, comptime, generated-code truth, dependencies, semantic moves, true semantic lineage, scoring, or ownership claims |
+    \\| Go | .go | tree-sitter-go | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-go when parsing succeeds | public opt-in tree-sitter-go-relations syntax evidence | no packages, modules, build tags, cgo, dependency graphs, method-set or interface semantics, true semantic lineage, scoring, or ownership claims |
     \\| Python | .py | tree-sitter-python | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-python when parsing succeeds | public opt-in tree-sitter-python-relations syntax evidence | no imports, packages, virtual environments, dependency graphs, generated-source policy, call-graph truth, scoring, or ownership claims |
     \\| JavaScript | .js, .mjs, .cjs, admitted .jsx | tree-sitter-javascript | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-javascript when parsing succeeds | public opt-in tree-sitter-javascript-relations syntax evidence | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, call-graph truth, scoring, or ownership claims |
-    \\| Lua | .lua | tree-sitter-lua | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-lua when parsing succeeds | unsupported | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, relationship support, scoring, or ownership claims |
+    \\| Lua | .lua | tree-sitter-lua | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-lua when parsing succeeds | public opt-in tree-sitter-lua-relations syntax evidence | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, scoring, or ownership claims |
     \\| Rust | .rs | tree-sitter-rust | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-rust when parsing succeeds | public opt-in tree-sitter-rust-relations syntax evidence | no Cargo, crates, module resolution, macro expansion output, cfg feature selection, type checking, dependency graphs, call-graph truth, scoring, or ownership claims |
     \\| TypeScript | .ts, .mts, .cts | tree-sitter-typescript | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-typescript when parsing succeeds | public opt-in tree-sitter-typescript-relations syntax evidence | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, call-graph truth, scoring, or ownership claims |
     \\| TSX | .tsx | tree-sitter-tsx | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-tsx when parsing succeeds | public opt-in tree-sitter-tsx-relations syntax evidence | no React, DOM, packages, type analysis, dependency graphs, cache, call-graph truth, scoring, or ownership claims |
@@ -138,13 +138,13 @@ pub const text =
     \\scoring replacement, or a ranking input.
     \\
     \\--symbol-relationships is opt-in and requires --symbols. It adds bounded
-    \\local Tree-sitter relation evidence for Python, JavaScript, Rust,
-    \\TypeScript, and TSX retained ranked-file candidates, or for the inspected
-    \\file when --inspect PATH is present. Rust relation evidence is syntax-only:
-    \\contains, direct calls, local direct identifier references, external mod/use
-    \\includes, unresolved identifiers, and ambiguous path or member syntax. It
-    \\is not call-graph truth, dependency proof, semantic Rust analysis, scoring,
-    \\ownership, developer metrics, or bug prediction.
+    \\local Tree-sitter relation evidence for Zig, Go, Python, JavaScript, Lua,
+    \\Rust, TypeScript, and TSX retained ranked-file candidates, or for the
+    \\inspected file when --inspect PATH is present. Relation evidence is
+    \\syntax-only: contains, direct calls, local direct identifier references,
+    \\external imports/includes, unresolved identifiers, and ambiguous syntax. It
+    \\is not call-graph truth, dependency proof, semantic language analysis,
+    \\scoring, ownership, developer metrics, or bug prediction.
     \\
     \\## Limitations and non-claims
     \\
@@ -204,10 +204,13 @@ test "explanation includes confidence and non-claim boundaries" {
         "--symbol-relationships evidence",
         "not true symbol history, historical identity tracking, or git log -L",
         "--symbol-relationships is opt-in and requires --symbols",
-        "local Tree-sitter relation evidence for Python, JavaScript, Rust",
-        "Rust relation evidence is syntax-only",
+        "local Tree-sitter relation evidence for Zig, Go, Python, JavaScript, Lua",
+        "Relation evidence is",
+        "public opt-in tree-sitter-zig-relations syntax evidence",
+        "public opt-in tree-sitter-go-relations syntax evidence",
+        "public opt-in tree-sitter-lua-relations syntax evidence",
         "public opt-in tree-sitter-typescript-relations syntax evidence",
-        "| Zig | .zig | tree-sitter-zig | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-zig when parsing succeeds | unsupported |",
+        "| Zig | .zig | tree-sitter-zig | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through tree-sitter-zig when parsing succeeds | public opt-in tree-sitter-zig-relations syntax evidence |",
     }) |snippet| {
         try std.testing.expect(std.mem.indexOf(u8, text, snippet) != null);
     }

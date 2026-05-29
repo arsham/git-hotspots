@@ -104,10 +104,10 @@ pub const usage =
     \\  ranked-file candidates only; it is not semantic lineage, reference/use
     \\  analysis, ownership, bug prediction, scoring replacement, or ranking input.
     \\  --symbol-relationships adds opt-in bounded local relation evidence for
-    \\  retained ranked-file candidates in Python, JavaScript, Rust,
-    \\  TypeScript, and TSX lanes only; Zig, Go, Lua, and unsupported current
-    \\  files have no public relationship support. It is caveated
-    \\  syntax/provider evidence, not call-graph truth, dependency proof,
+    \\  retained ranked-file candidates in Zig, Go, Python, JavaScript, Lua,
+    \\  Rust, TypeScript, and TSX lanes only; unsupported current files have
+    \\  no public relationship support. It is caveated syntax/provider evidence,
+    \\  not call-graph truth, dependency proof,
     \\  scoring replacement, ownership, developer metrics, or bug prediction.
     \\
 ;

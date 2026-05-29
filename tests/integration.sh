@@ -116,9 +116,9 @@ grep -q -- "no Cargo, crates, module" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "macro expansion, cfg/feature evaluation, type checking" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "dependency graphs, or semantic Rust analysis" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "not true symbol history" "$tmp_dir/git-hotspots-help.txt"
-grep -q -- "Zig, Go, Lua, and unsupported current" "$tmp_dir/git-hotspots-help.txt"
-grep -q -- "Python, JavaScript, Rust," "$tmp_dir/git-hotspots-help.txt"
-grep -q -- "Zig, Go, Lua, and unsupported current" "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "Zig, Go, Python, JavaScript, Lua," "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "Rust, TypeScript, and TSX lanes" "$tmp_dir/git-hotspots-help.txt"
+grep -q -- "unsupported current files have" "$tmp_dir/git-hotspots-help.txt"
 grep -q -- "no public relationship support" "$tmp_dir/git-hotspots-help.txt"
 "$EXE" -h > "$tmp_dir/git-hotspots-help-short.txt" 2> "$tmp_dir/git-hotspots-help-short.err"
 diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-help-short.txt"
@@ -363,23 +363,32 @@ grep -Fq -- 'Unresolved target' "$tmp_dir/git-hotspots-symbol-relationships.md"
 diff -u fixtures/expected/symbol-relationships.txt "$tmp_dir/git-hotspots-symbol-relationships.txt"
 grep -Fq -- 'symbol relationships for retained ranked files:' "$tmp_dir/git-hotspots-symbol-relationships.txt"
 grep -Fq -- 'records=' "$tmp_dir/git-hotspots-symbol-relationships.txt"
+"$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-zig.json"
+diff -u fixtures/expected/symbol-relationships-zig.json "$tmp_dir/git-hotspots-symbol-relationships-zig.json"
+"$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-go.json"
+diff -u fixtures/expected/symbol-relationships-go.json "$tmp_dir/git-hotspots-symbol-relationships-go.json"
 "$EXE" --repo fixtures/javascript-symbols --inspect src/example.mjs --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-javascript.json"
 diff -u fixtures/expected/symbol-relationships-javascript.json "$tmp_dir/git-hotspots-symbol-relationships-javascript.json"
+"$EXE" --repo fixtures/lua-symbols --inspect src/example.lua --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-lua.json"
+diff -u fixtures/expected/symbol-relationships-lua.json "$tmp_dir/git-hotspots-symbol-relationships-lua.json"
 "$EXE" --repo fixtures/typescript-symbols --inspect src/example.ts --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-typescript.json"
 diff -u fixtures/expected/symbol-relationships-typescript.json "$tmp_dir/git-hotspots-symbol-relationships-typescript.json"
 "$EXE" --repo fixtures/typescript-symbols --inspect src/component.tsx --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-tsx.json"
 diff -u fixtures/expected/symbol-relationships-tsx.json "$tmp_dir/git-hotspots-symbol-relationships-tsx.json"
 "$EXE" --repo fixtures/rust-relationships --inspect src/relations.rs --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-rust.json"
 diff -u fixtures/expected/symbol-relationships-rust.json "$tmp_dir/git-hotspots-symbol-relationships-rust.json"
-python3 - "$tmp_dir/git-hotspots-symbol-relationships-javascript.json" "$tmp_dir/git-hotspots-symbol-relationships-typescript.json" "$tmp_dir/git-hotspots-symbol-relationships-tsx.json" "$tmp_dir/git-hotspots-symbol-relationships-rust.json" <<'PY'
+python3 - "$tmp_dir/git-hotspots-symbol-relationships-zig.json" "$tmp_dir/git-hotspots-symbol-relationships-go.json" "$tmp_dir/git-hotspots-symbol-relationships-javascript.json" "$tmp_dir/git-hotspots-symbol-relationships-lua.json" "$tmp_dir/git-hotspots-symbol-relationships-typescript.json" "$tmp_dir/git-hotspots-symbol-relationships-tsx.json" "$tmp_dir/git-hotspots-symbol-relationships-rust.json" <<'PY'
 import json, sys
 cases = [
-    (sys.argv[1], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}),
-    (sys.argv[2], 'tree-sitter-typescript-relations', {'contains', 'call', 'unresolved', 'unknown'}),
-    (sys.argv[3], 'tree-sitter-tsx-relations', {'contains', 'reference', 'unresolved', 'unknown'}),
-    (sys.argv[4], 'tree-sitter-rust-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved', 'unknown'}),
+    (sys.argv[1], 'tree-sitter-zig-relations', {'contains'}, False),
+    (sys.argv[2], 'tree-sitter-go-relations', {'contains'}, False),
+    (sys.argv[3], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}, True),
+    (sys.argv[4], 'tree-sitter-lua-relations', {'contains', 'reference', 'call', 'unresolved', 'unknown'}, True),
+    (sys.argv[5], 'tree-sitter-typescript-relations', {'contains', 'call', 'unresolved', 'unknown'}, True),
+    (sys.argv[6], 'tree-sitter-tsx-relations', {'contains', 'reference', 'unresolved', 'unknown'}, True),
+    (sys.argv[7], 'tree-sitter-rust-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved', 'unknown'}, True),
 ]
-for path, provider_name, expected_kinds in cases:
+for path, provider_name, expected_kinds, require_unresolved in cases:
     with open(path, encoding='utf-8') as fh:
         data = json.load(fh)
     relationships = data['symbol_relationships']
@@ -388,14 +397,19 @@ for path, provider_name, expected_kinds in cases:
     assert relationships['provenance']['local_only'] is True
     assert relationships['providers'][0]['provider']['name'] == provider_name
     assert relationships['summary']['relation_record_count'] == len(relationships['records'])
+    assert relationships['records'], path
     assert expected_kinds.issubset({item['kind'] for item in relationships['records']}), path
-    assert any(item['target_unresolved'] for item in relationships['records']), path
+    if require_unresolved:
+        assert any(item['target_unresolved'] for item in relationships['records']), path
     assert all(item['provider']['input'].startswith('working-tree:') for item in relationships['records'])
     assert 'call-graph truth' not in json.dumps(data)
 PY
-for lane in javascript typescript tsx rust; do
+for lane in zig go javascript lua typescript tsx rust; do
   case "$lane" in
+    zig) repo=fixtures/symbols; inspect=src/example.zig ;;
+    go) repo=fixtures/go-symbols; inspect=src/example.go ;;
     javascript) repo=fixtures/javascript-symbols; inspect=src/example.mjs ;;
+    lua) repo=fixtures/lua-symbols; inspect=src/example.lua ;;
     typescript) repo=fixtures/typescript-symbols; inspect=src/example.ts ;;
     tsx) repo=fixtures/typescript-symbols; inspect=src/component.tsx ;;
     rust) repo=fixtures/rust-relationships; inspect=src/relations.rs ;;

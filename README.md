@@ -212,6 +212,14 @@ zig build
 ./zig-out/bin/git-hotspots --repo . --inspect path/to/file.ts --symbols --symbol-line-history --format markdown
 ./zig-out/bin/git-hotspots --repo . --symbols --historical-symbols --format markdown
 ./zig-out/bin/git-hotspots --repo . --symbols --symbol-relationships --format markdown
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.zig --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.go --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.py --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.js --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.lua --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.rs --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.ts --symbols --symbol-relationships --format json
+./zig-out/bin/git-hotspots --repo . --inspect path/to/file.tsx --symbols --symbol-relationships --format json
 ./zig-out/bin/git-hotspots --repo . --progress --format json
 ./zig-out/bin/git-hotspots --explain
 ./zig-out/bin/git-hotspots --version
@@ -285,11 +293,11 @@ Provider capability matrix:
 
 | Language lane | Inspected paths | `--symbols` provider | `--symbols` evidence | `--symbol-line-history` evidence | `--historical-symbols` evidence | `--symbol-relationships` evidence | Explicit boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Zig | `.zig` | `tree-sitter-zig` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-zig` when parsing succeeds | unsupported | no dependencies, semantic moves, relationship support, true semantic lineage, scoring, or ownership claims |
-| Go | `.go` | `tree-sitter-go` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-go` when parsing succeeds | unsupported | no packages, build tags, cgo, dependency graphs, relationship support, true semantic lineage, scoring, or ownership claims |
+| Zig | `.zig` | `tree-sitter-zig` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-zig` when parsing succeeds | public opt-in `tree-sitter-zig-relations` syntax evidence | no packages, build graph, comptime, generated-code truth, dependencies, semantic moves, true semantic lineage, scoring, or ownership claims |
+| Go | `.go` | `tree-sitter-go` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-go` when parsing succeeds | public opt-in `tree-sitter-go-relations` syntax evidence | no packages, modules, build tags, cgo, dependency graphs, method-set or interface semantics, true semantic lineage, scoring, or ownership claims |
 | Python | `.py` | `tree-sitter-python` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-python` when parsing succeeds | public opt-in `tree-sitter-python-relations` syntax evidence | no imports, packages, virtual environments, dependency graphs, generated-source policy, call-graph truth, scoring, or ownership claims |
 | JavaScript | `.js`, `.mjs`, `.cjs`, admitted `.jsx` | `tree-sitter-javascript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-javascript` when parsing succeeds | public opt-in `tree-sitter-javascript-relations` syntax evidence | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, call-graph truth, scoring, or ownership claims |
-| Lua | `.lua` | `tree-sitter-lua` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-lua` when parsing succeeds | unsupported | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, relationship support, scoring, or ownership claims |
+| Lua | `.lua` | `tree-sitter-lua` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-lua` when parsing succeeds | public opt-in `tree-sitter-lua-relations` syntax evidence | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, scoring, or ownership claims |
 | Rust | `.rs` | `tree-sitter-rust` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-rust` when parsing succeeds | public opt-in `tree-sitter-rust-relations` syntax evidence | no Cargo, crates, module resolution, macro expansion output, cfg feature selection, type checking, dependency graphs, call-graph truth, scoring, or ownership claims |
 | TypeScript | `.ts`, `.mts`, `.cts` | `tree-sitter-typescript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-typescript` when parsing succeeds | public opt-in `tree-sitter-typescript-relations` syntax evidence | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, call-graph truth, scoring, or ownership claims |
 | TSX | `.tsx` | `tree-sitter-tsx` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-tsx` when parsing succeeds | public opt-in `tree-sitter-tsx-relations` syntax evidence | no React, DOM, packages, type analysis, dependency graphs, cache, call-graph truth, scoring, or ownership claims |
@@ -321,12 +329,12 @@ prediction, scoring replacement, or a ranking input.
 
 `--symbol-relationships` is an opt-in relationship layer that requires
 `--symbols`. It currently adds bounded local Tree-sitter relation evidence for
-retained ranked-file candidates in Python, JavaScript, Rust, TypeScript, and
-TSX lanes, and reports source and target endpoints, unresolved targets, provider
-identity, freshness, failure, confidence, caveats, record bounds, and omitted
-counts. Relationship evidence is caveated investigation context only: it is not
-call-graph truth, dependency proof, ownership, developer metrics, bug
-prediction, scoring replacement, or a ranking input.
+retained ranked-file candidates in Zig, Go, Python, JavaScript, Lua, Rust,
+TypeScript, and TSX lanes, and reports source and target endpoints, unresolved
+targets, provider identity, freshness, failure, confidence, caveats, record
+bounds, and omitted counts. Relationship evidence is caveated investigation
+context only: it is not call-graph truth, dependency proof, ownership,
+developer metrics, bug prediction, scoring replacement, or a ranking input.
 
 Git-detected file renames are folded conservatively when both the old and new
 paths are in scope. This is file-path lineage from local Git history only, not

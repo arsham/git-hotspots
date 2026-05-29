@@ -52,6 +52,11 @@ The feature must not be used as evidence that `git-hotspots` publicly supports
 Zig relationship reports. It is reviewer evidence for the internal provider seam
 only, and it remains additive to deterministic file-history evidence.
 
+Feature 0095 later admitted this proof into the public relationship capability
+matrix as `tree-sitter-zig-relations`, with the same syntax-only caveats and no
+scoring, ranking, cache-truth, ownership, dependency-proof, or bug-prediction
+claim.
+
 ## Reproducible fixture evidence
 
 The shared conformance harness exercises a Zig fixture with `@import`, a
