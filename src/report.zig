@@ -61,7 +61,7 @@ test "markdown report has stable sections and no raw private root" {
 
     try std.testing.expect(std.mem.indexOf(u8, out, "# git-hotspots report\n\n") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "File-level Git-history investigation prompts, not bug predictions or code-quality ratings.") != null);
-    try std.testing.expect(std.mem.indexOf(u8, out, "## Run summary\n\n- Tool: git-hotspots 0.1.0-alpha.1") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "## Run summary\n\n- Tool: git-hotspots 0.1.0-alpha.3") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "## Scope") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "## Caveats") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "## Top hotspots") != null);

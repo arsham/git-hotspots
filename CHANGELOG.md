@@ -1,13 +1,13 @@
 # Changelog
 
-## Unreleased draft
+## v0.1.0-alpha.3 draft
 
-Version alignment, release tagging, package publication, and release uploads are
-intentionally out of scope for this draft.
+Release tagging, package publication, and release uploads are intentionally out
+of scope for this draft.
 
 ### Release notes draft
 
-This draft describes the current public alpha work for later release
+This draft describes the v0.1.0-alpha.3 public alpha work for later release
 preparation. `git-hotspots` remains a deterministic, local-first CLI that turns
 local Git history into evidence for investigation. Reports are prompts for human
 review, not bug predictions, objective code-quality ratings, ownership analysis,
@@ -53,6 +53,6 @@ Implemented work covered by this draft includes:
 
 ### Release preparation notes
 
-- Align this draft with the chosen version before tagging.
+- Version surfaces are aligned for v0.1.0-alpha.3 before release validation.
 - Do not create or push tags, publish packages, upload release artefacts, or
   create a hosted release from this draft alone.

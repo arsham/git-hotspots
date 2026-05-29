@@ -7,7 +7,7 @@ packages, absolute local paths, upload logs, or machine-specific raw output.
 Expected validation sequence:
 
 1. Run `./tools/release-linux.sh` on a native Linux host.
-2. Unpack `dist/git-hotspots-0.1.0-alpha.1-linux-$(uname -m).tar.gz` into a
+2. Unpack `dist/git-hotspots-0.1.0-alpha.3-linux-$(uname -m).tar.gz` into a
    temporary directory.
 3. Run the unpacked `git-hotspots --version` and `git-hotspots --help`.
 4. Copy the archive into `packaging/aur/git-hotspots-bin/`.
