@@ -4,7 +4,7 @@ feature:
   slug: large-repository-sampling-and-bounds
   title: Large repository sampling and bounds
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Large repositories and histories can stress symbol/history/relationship
@@ -53,7 +53,7 @@ proposal:
     materialised_at: 2026-05-29T12:55:58.715Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -108,7 +108,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Bound model and fixtures
       goal: Define and prove deterministic bounds for large repository candidate
         paths.
@@ -134,7 +134,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Real-repo and validation proof
       goal: Integrate large-bound proof into validation with privacy-safe smoke
         evidence.
@@ -183,7 +183,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-29T12:48:38.832Z
-  updated_at: 2026-05-29T12:57:12.281Z
+  updated_at: 2026-05-29T14:15:12.430Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-29T12:57:12.281Z

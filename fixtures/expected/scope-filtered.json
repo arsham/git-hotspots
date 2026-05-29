@@ -4,7 +4,7 @@
   "analysis": {
     "history": { "head": "158d6f63309fda6a5e7db0068bbbf28f265dc32f", "head_timestamp": 1772668800, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 5 },
     "scope": { "selected_scope": "all", "filters_active": true, "include_prefixes": [], "exclude_prefixes": [".flow/", ".zig-cache/", "zig-out/", "target/", "node_modules/", "dist/", "build/", "coverage/"], "outside_include_path_count": 0, "outside_include_change_count": 0, "excluded_path_count": 13, "excluded_change_count": 28 },
-    "caveats": ["Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked", "some observed rename edges were outside active scope filters; lineage may be partial"]
+    "caveats": ["Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked", "some observed rename edges were outside active scope filters; lineage may be partial", "file candidate display limit exceeded; retained top 10 of 12 deterministically by score; use --limit to widen local evidence"]
   },
   "results": [
     {

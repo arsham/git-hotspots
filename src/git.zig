@@ -179,6 +179,8 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
     if (dirty) try git_history.addCaveat(allocator, &caveats, "dirty worktree detected; ranking uses committed history only");
     if (parser.rename_detected) try git_history.addCaveat(allocator, &caveats, "Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked");
     if (parser.partial_lineage) try git_history.addCaveat(allocator, &caveats, "some observed rename edges were outside active scope filters; lineage may be partial");
+    if (parser.commit_bound_exceeded) try git_history.addCaveat(allocator, &caveats, "Git commit history bound exceeded; older commits skipped; use --since or scope filters to narrow local evidence");
+    if (parser.changed_file_bound_exceeded) try git_history.addCaveat(allocator, &caveats, "Git changed-file row bound exceeded; trailing local history rows skipped; use --since or scope filters to narrow local evidence");
 
     phase_started = std.Io.Clock.Timestamp.now(io, .awake);
     try writeProgress(progress, "scoring files");
@@ -220,6 +222,11 @@ pub fn analyze(allocator: std.mem.Allocator, io: std.Io, cfg: model.Config, prog
             .rank = rank,
         };
     } else if (results.items.len > cfg.limit) {
+        const caveat = try std.fmt.allocPrint(allocator, "file candidate display limit exceeded; retained top {d} of {d} deterministically by score; use --limit to widen local evidence", .{ cfg.limit, results.items.len });
+        caveats.append(caveat) catch |err| {
+            allocator.free(caveat);
+            return err;
+        };
         for (results.items[cfg.limit..]) |*r| {
             freeResult(allocator, r);
         }

@@ -29,6 +29,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 
 - Git rename lineage is conservative: local \-\-find\-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked
 - some observed rename edges were outside active scope filters; lineage may be partial
+- file candidate display limit exceeded; retained top 10 of 12 deterministically by score; use \-\-limit to widen local evidence
 
 ## Top hotspots
 

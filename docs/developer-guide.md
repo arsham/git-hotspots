@@ -72,6 +72,14 @@ attribution with `--historical-symbols`, or optional relationship evidence with
 co-change evidence, Git rename lineage, scope, or inclusion and exclusion
 decisions.
 
+History and provider routes must stay bounded and deterministic on large
+repositories. File-level Git log parsing enforces internal commit and changed
+file-row bounds, `--limit` bounds displayed file candidates, historical symbol
+attribution bounds candidate files, commits, changed files, hunks, blobs, and
+aggregate records, and relationship aggregation bounds retained candidates and
+records. When a bound truncates evidence, reports should emit a caveat instead
+of silently implying complete evidence.
+
 Provider changes should expose source, freshness, confidence, failure state, and
 caveats. They should not emit parser diagnostics, source snippets, author
 identities, remotes, absolute local paths, package graphs, semantic moves, true

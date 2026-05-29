@@ -160,13 +160,18 @@ analysis = data.get('analysis', {})
 symbols = data.get('symbols') or {}
 historical = data.get('historical_symbols') or {}
 relationships = data.get('symbol_relationships') or {}
-print('results=%d caveats=%d dirty=%s symbols=%d historical_files=%d relationship_records=%d' % (
+historical_summary = historical.get('summary') or {}
+relationship_summary = relationships.get('summary') or {}
+print('results=%d caveats=%d dirty=%s symbols=%d historical_candidates=%d historical_retained=%d historical_aggregate_bound=%d relationship_records=%d relationship_record_bound=%d' % (
     len(data.get('results') or []),
     len(analysis.get('caveats') or []),
     str((analysis.get('history') or {}).get('dirty_worktree', False)).lower(),
     len(symbols.get('items') or []),
-    len(historical.get('files') or []),
-    int((relationships.get('summary') or {}).get('relation_record_count') or 0),
+    int(historical_summary.get('candidate_path_count') or 0),
+    int(historical_summary.get('retained_candidate_path_count') or 0),
+    int(historical_summary.get('aggregate_record_bound') or 0),
+    int(relationship_summary.get('relation_record_count') or 0),
+    int(relationship_summary.get('relation_record_bound') or 0),
 ))
 PY
 }
@@ -206,7 +211,7 @@ run_budgeted_json() {
   fi
 
   summary=$(json_benchmark_summary "$output") || return 1
-  printf 'budget name=%s phase=%s provider=%s scope=%s limit_ms=%s elapsed_ms=%s %s\n' "$budget_name" "$phase" "$provider" "$scope" "$budget_ms" "$elapsed_ms" "$summary" >> "$SMOKES"
+  printf 'budget name=%s phase=%s provider=%s scope=%s time_limit_ms=%s elapsed_ms=%s %s\n' "$budget_name" "$phase" "$provider" "$scope" "$budget_ms" "$elapsed_ms" "$summary" >> "$SMOKES"
   return 0
 }
 

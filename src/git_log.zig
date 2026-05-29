@@ -2,6 +2,11 @@ const std = @import("std");
 const git_history = @import("git_history.zig");
 const git_path = @import("git_path.zig");
 
+pub const Bounds = struct {
+    max_commits: usize = 50_000,
+    max_changed_file_rows: usize = 500_000,
+};
+
 pub const LogParser = struct {
     allocator: std.mem.Allocator,
     map: *std.StringHashMap(git_history.FileAgg),
@@ -13,10 +18,14 @@ pub const LogParser = struct {
     include_prefixes: []const []const u8,
     exclude_prefixes: []const []const u8,
     aliases: *std.StringHashMap([]u8),
+    bounds: Bounds,
     pending: std.array_list.Managed(u8),
     cur_hash: ?[]u8 = null,
     cur_ts: i64 = 0,
     commit_count: usize = 0,
+    changed_file_row_count: usize = 0,
+    commit_bound_exceeded: bool = false,
+    changed_file_bound_exceeded: bool = false,
     rename_detected: bool = false,
     partial_lineage: bool = false,
 
@@ -32,6 +41,22 @@ pub const LogParser = struct {
         exclude_prefixes: []const []const u8,
         aliases: *std.StringHashMap([]u8),
     ) LogParser {
+        return initBounded(allocator, map, commit_paths, outside_include_paths, outside_include_change_count, excluded_paths, excluded_change_count, include_prefixes, exclude_prefixes, aliases, .{});
+    }
+
+    pub fn initBounded(
+        allocator: std.mem.Allocator,
+        map: *std.StringHashMap(git_history.FileAgg),
+        commit_paths: *std.array_list.Managed([]const u8),
+        outside_include_paths: *std.StringHashMap(void),
+        outside_include_change_count: *usize,
+        excluded_paths: *std.StringHashMap(void),
+        excluded_change_count: *usize,
+        include_prefixes: []const []const u8,
+        exclude_prefixes: []const []const u8,
+        aliases: *std.StringHashMap([]u8),
+        bounds: Bounds,
+    ) LogParser {
         return .{
             .allocator = allocator,
             .map = map,
@@ -43,6 +68,7 @@ pub const LogParser = struct {
             .include_prefixes = include_prefixes,
             .exclude_prefixes = exclude_prefixes,
             .aliases = aliases,
+            .bounds = bounds,
             .pending = std.array_list.Managed(u8).init(allocator),
         };
     }
@@ -85,6 +111,11 @@ pub const LogParser = struct {
                 try git_history.finishCommit(self.allocator, self.map, self.commit_paths.items);
                 self.commit_paths.clearRetainingCapacity();
                 if (self.cur_hash) |hash| self.allocator.free(hash);
+                self.cur_hash = null;
+                if (self.commit_count >= self.bounds.max_commits) {
+                    self.commit_bound_exceeded = true;
+                    return;
+                }
                 self.cur_hash = try self.allocator.dupe(u8, first);
                 self.cur_ts = std.fmt.parseInt(i64, line[tab + 1 ..], 10) catch 0;
                 self.commit_count += 1;
@@ -92,6 +123,11 @@ pub const LogParser = struct {
             }
         }
         const cur_hash = self.cur_hash orelse return;
+        if (self.changed_file_row_count >= self.bounds.max_changed_file_rows) {
+            self.changed_file_bound_exceeded = true;
+            return;
+        }
+        self.changed_file_row_count += 1;
         var parts = std.mem.splitScalar(u8, line, '\t');
         const add_s = parts.next() orelse return;
         const del_s = parts.next() orelse return;
@@ -353,4 +389,49 @@ test "streaming log parser handles chunk boundaries and numstat edge cases" {
     try std.testing.expectEqual(@as(u64, 3), map.get("weird/tab\tname.txt").?.additions);
     try std.testing.expectEqual(@as(u64, 6), map.get("unicode/雪.zig").?.deletions);
     try std.testing.expect(map.get("malformed") == null);
+}
+
+test "streaming log parser enforces commit and changed-file bounds deterministically" {
+    const allocator = std.testing.allocator;
+    var map = std.StringHashMap(git_history.FileAgg).init(allocator);
+    defer {
+        var it = map.iterator();
+        while (it.next()) |entry| git_history.deinitAgg(entry.key_ptr.*, entry.value_ptr.*, allocator);
+        map.deinit();
+    }
+    var commit_paths = std.array_list.Managed([]const u8).init(allocator);
+    defer commit_paths.deinit();
+    var outside_include_paths = std.StringHashMap(void).init(allocator);
+    defer outside_include_paths.deinit();
+    var excluded_paths = std.StringHashMap(void).init(allocator);
+    defer excluded_paths.deinit();
+    var aliases = std.StringHashMap([]u8).init(allocator);
+    defer {
+        var it = aliases.iterator();
+        while (it.next()) |entry| {
+            allocator.free(entry.key_ptr.*);
+            allocator.free(entry.value_ptr.*);
+        }
+        aliases.deinit();
+    }
+    var outside_include_change_count: usize = 0;
+    var excluded_change_count: usize = 0;
+
+    var parser = LogParser.initBounded(allocator, &map, &commit_paths, &outside_include_paths, &outside_include_change_count, &excluded_paths, &excluded_change_count, &.{}, &.{}, &aliases, .{ .max_commits = 1, .max_changed_file_rows = 1 });
+    defer parser.deinit();
+
+    try parser.feed("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\t100\n");
+    try parser.feed("1\t0\tone.zig\n");
+    try parser.feed("2\t0\ttwo.zig\n");
+    try parser.feed("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\t90\n");
+    try parser.feed("3\t0\tthree.zig\n");
+    try parser.finish();
+
+    try std.testing.expect(parser.changed_file_bound_exceeded);
+    try std.testing.expect(parser.commit_bound_exceeded);
+    try std.testing.expectEqual(@as(usize, 1), parser.commit_count);
+    try std.testing.expectEqual(@as(usize, 1), parser.changed_file_row_count);
+    try std.testing.expect(map.get("one.zig") != null);
+    try std.testing.expect(map.get("two.zig") == null);
+    try std.testing.expect(map.get("three.zig") == null);
 }
