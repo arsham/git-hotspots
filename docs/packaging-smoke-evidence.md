@@ -22,3 +22,29 @@ Expected validation sequence:
 Current status: local dogfood only. Publishing GitHub Releases, AUR uploads,
 release signing, official checksums, multi-platform builds, and hosted release
 automation remain future work.
+
+## Release-readiness validation evidence, 2026-05-29
+
+Privacy-safe local release-readiness validation for the future tag decision ran
+without creating or pushing tags, releases, package uploads, or remote metadata.
+
+- `git diff --check`: passed.
+- `zig build test`: passed.
+- `zig build validate -Dcloseout=true -Dsmoke-repo=../git-hotspots.rs
+  -Dsmoke-label=sibling-rs`: passed.
+- `tools/flow-closeout-check.sh --smoke-repo ../git-hotspots.rs
+  --smoke-label sibling-rs`: passed.
+
+Bounded smoke evidence from the validation summary:
+
+- `this-repo`: commits=250, tracked_files=679, results=10,
+  project_excluded_paths=213, project_excluded_changes=548.
+- `sibling-rs`: commits=30, tracked_files=54, results=10,
+  project_excluded_paths=0, project_excluded_changes=0.
+- Deterministic fixture budgets passed for file hotspots, current symbols,
+  historical symbols, and relationship enrichment within the named validation
+  limits.
+- Source-install copy smoke passed with version `0.1.0-alpha.3`.
+
+The recorded evidence uses labels and bounded counts only; raw reports,
+absolute local paths, generated archives, and private output were not committed.
