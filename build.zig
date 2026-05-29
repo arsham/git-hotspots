@@ -66,6 +66,19 @@ fn addTreeSitterPythonHeaders(b: *std.Build, module: *std.Build.Module) void {
     module.link_libc = true;
 }
 
+fn addTreeSitterProviderHeaders(b: *std.Build, module: *std.Build.Module) void {
+    module.addIncludePath(b.path("third_party/tree-sitter-core/v0.26.9/lib/include"));
+    module.addIncludePath(b.path("third_party/tree-sitter-zig/v1.1.2/src"));
+    module.addIncludePath(b.path("third_party/tree-sitter-go/v0.25.0/src"));
+    module.addIncludePath(b.path("third_party/tree-sitter-python/v0.25.0/src"));
+    module.addIncludePath(b.path("third_party/tree-sitter-javascript/v0.25.0/src"));
+    module.addIncludePath(b.path("third_party/tree-sitter-lua/v0.5.0/src"));
+    module.addIncludePath(b.path("third_party/tree-sitter-rust/v0.24.2/src"));
+    module.addIncludePath(b.path("third_party/tree-sitter-typescript/v0.23.2/typescript/src"));
+    module.addIncludePath(b.path("third_party/tree-sitter-typescript/v0.23.2/tsx/src"));
+    module.link_libc = true;
+}
+
 fn addTreeSitterZig(b: *std.Build, module: *std.Build.Module) void {
     addTreeSitterCore(b, module);
     addTreeSitterZigGrammar(b, module);
@@ -152,6 +165,25 @@ pub fn build(b: *std.Build) void {
     });
 
     const run_unit_tests = b.addRunArtifact(unit_tests);
+
+    const relation_provider_conformance_module = b.createModule(.{
+        .root_source_file = b.path("tests/relation_provider_conformance.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    const relation_provider_conformance_harness_module = b.createModule(.{
+        .root_source_file = b.path("src/relation_provider_conformance.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    addTreeSitterProviderHeaders(b, relation_provider_conformance_harness_module);
+    relation_provider_conformance_module.addImport("relation_provider_conformance", relation_provider_conformance_harness_module);
+    addTreeSitterProviders(b, relation_provider_conformance_module);
+    const relation_provider_conformance = b.addTest(.{
+        .root_module = relation_provider_conformance_module,
+    });
+    const run_relation_provider_conformance = b.addRunArtifact(relation_provider_conformance);
+
     const integration_tests = b.addSystemCommand(&.{ "sh", "tests/integration.sh" });
     integration_tests.addArtifactArg(exe);
     integration_tests.step.dependOn(&setup_fixtures.step);
@@ -159,6 +191,7 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test", "Run unit and integration tests");
     run_unit_tests.step.dependOn(&setup_fixtures.step);
     test_step.dependOn(&run_unit_tests.step);
+    test_step.dependOn(&run_relation_provider_conformance.step);
     test_step.dependOn(&integration_tests.step);
 
     const validate = b.addSystemCommand(&.{ "sh", "tools/validate.sh" });
