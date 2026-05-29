@@ -4,7 +4,7 @@ feature:
   slug: version-and-package-metadata-bump
   title: Version and package metadata bump
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The v0.1.0-alpha.3 needs consistent version and package metadata after
@@ -39,7 +39,7 @@ proposal:
     materialised_at: 2026-05-29T16:23:54.903Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -94,7 +94,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Version metadata bump
       goal: Update all owned version/package metadata surfaces consistently.
       owner_phase: runner
@@ -114,7 +114,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Consistency review
       goal: Verify no release side effect and all metadata agrees.
       owner_phase: reviewer
@@ -153,7 +153,7 @@ design:
       - runtime behaviour change
     dependency: Requires 0100 release-note draft.
 execution:
-  active_run_id: RUN-20260529-1639
+  active_run_id: null
   current_packet_id: null
   next_packet_ids: []
   blockers: []
@@ -163,7 +163,7 @@ links:
   brief_ids: []
 timestamps:
   created_at: 2026-05-29T16:17:08.465Z
-  updated_at: 2026-05-29T16:24:20.134Z
+  updated_at: 2026-05-29T17:02:33.592Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-29T16:24:20.134Z
