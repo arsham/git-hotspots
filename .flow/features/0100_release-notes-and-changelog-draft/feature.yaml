@@ -4,7 +4,7 @@ feature:
   slug: release-notes-and-changelog-draft
   title: Release notes and changelog draft
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The v0.1.0-alpha.3 needs public-safe release notes after substantial
@@ -43,7 +43,7 @@ proposal:
     materialised_at: 2026-05-29T16:23:54.937Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -98,7 +98,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Draft release notes
       goal: Create the public-safe release-note/changelog draft.
       owner_phase: runner
@@ -117,7 +117,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Review wording and evidence
       goal: Verify public-safe wording and no side effects.
       owner_phase: reviewer
@@ -165,7 +165,7 @@ links:
   brief_ids: []
 timestamps:
   created_at: 2026-05-29T16:16:59.041Z
-  updated_at: 2026-05-29T16:24:05.805Z
+  updated_at: 2026-05-29T16:38:50.213Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-29T16:24:05.805Z
