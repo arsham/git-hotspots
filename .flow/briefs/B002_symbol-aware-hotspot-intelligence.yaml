@@ -178,6 +178,12 @@ durable_decisions:
     not imply call-graph truth, dependency proof, type checking, ownership,
     code-quality judgement, developer metrics, bug prediction, scoring changes,
     cache truth, network access, or telemetry."
+  - "Shape a serial quality/performance hardening batch after public symbol and
+    relationship provider support: 0096 performance budget and benchmark
+    harness, 0097 provider failure and caveat audit, 0098 large-repository
+    sampling and bounds, then 0099 symbol and relationship workflow docs polish.
+    The batch preserves local-first deterministic evidence, public claim
+    restraint, and no runtime network/cache truth defaults."
 links:
   roadmap_item_id: null
   feature_ids:
@@ -198,6 +204,9 @@ links:
     - "0093"
     - "0094"
     - "0095"
+    - "0096"
+    - "0099"
+    - "0098"
 timestamps:
   created_at: 2026-05-27T19:12:06.269Z
-  updated_at: 2026-05-29T00:44:55.632Z
+  updated_at: 2026-05-29T12:53:43.940Z

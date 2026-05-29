@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0097"
   active_run_id: null
   last_completed_feature_id: "0095"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 96
+  next_id: 100
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -409,6 +409,22 @@ features:
       slug: provider-relationship-capability-matrix-refresh
       path: .flow/features/0095_provider-relationship-capability-matrix-refresh
       created_at: 2026-05-29T00:39:28.992Z
+    - id: "0096"
+      slug: performance-budget-and-benchmark-harness
+      path: .flow/features/0096_performance-budget-and-benchmark-harness
+      created_at: 2026-05-29T12:48:17.027Z
+    - id: "0097"
+      slug: provider-failure-and-caveat-audit
+      path: .flow/features/0097_provider-failure-and-caveat-audit
+      created_at: 2026-05-29T12:48:26.308Z
+    - id: "0098"
+      slug: large-repository-sampling-and-bounds
+      path: .flow/features/0098_large-repository-sampling-and-bounds
+      created_at: 2026-05-29T12:48:38.832Z
+    - id: "0099"
+      slug: symbol-and-relationship-workflow-docs-polish
+      path: .flow/features/0099_symbol-and-relationship-workflow-docs-polish
+      created_at: 2026-05-29T12:48:47.353Z
 intake:
   mode: roadmap
   summary: null
