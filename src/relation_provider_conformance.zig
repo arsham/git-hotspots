@@ -6,6 +6,7 @@ const std = @import("std");
 
 const tree_sitter_go = @import("tree_sitter_go.zig");
 const tree_sitter_javascript = @import("tree_sitter_javascript.zig");
+const tree_sitter_lua = @import("tree_sitter_lua.zig");
 const tree_sitter_python = @import("tree_sitter_python.zig");
 const tree_sitter_rust = @import("tree_sitter_rust.zig");
 const tree_sitter_typescript = @import("tree_sitter_typescript.zig");
@@ -40,6 +41,12 @@ const PythonLane = struct {
 const JavaScriptLane = struct {
     fn extract(allocator: std.mem.Allocator, path: []const u8, source: []const u8, options: tree_sitter_javascript.RelationOptions) !tree_sitter_javascript.RelationExtraction {
         return tree_sitter_javascript.extractRelationsSource(allocator, path, source, options);
+    }
+};
+
+const LuaLane = struct {
+    fn extract(allocator: std.mem.Allocator, path: []const u8, source: []const u8, options: tree_sitter_lua.RelationOptions) !tree_sitter_lua.RelationExtraction {
+        return tree_sitter_lua.extractRelationsSource(allocator, path, source, options);
     }
 };
 
@@ -456,6 +463,50 @@ test "relation provider conformance covers TSX" {
         .expected_provider_name = tree_sitter_typescript.tsx_relation_provider_name,
         .expected_kinds = &.{ "contains", "reference", "unresolved", "unknown" },
         .expected_targets = &.{ "Props", "fallbackTitle", "Panel", "missingValue" },
+    });
+}
+
+test "relation provider conformance covers internal Lua proof" {
+    const source =
+        \\local helper_value = 1
+        \\local exports = {
+        \\  answer = 42,
+        \\  build = function(input)
+        \\    return input + helper_value
+        \\  end,
+        \\}
+        \\
+        \\local loaded = require("demo.worker")
+        \\local unresolved_module = require(module_name)
+        \\
+        \\local function helper()
+        \\  return exports.answer
+        \\end
+        \\
+        \\function exports:run()
+        \\  helper()
+        \\  missing_call()
+        \\  local observed = missing_value
+        \\  exports.build(helper_value)
+        \\  exports[dynamic_key] = true
+        \\  setmetatable(exports, {})
+        \\end
+        \\
+        \\return exports
+        \\
+    ;
+    try runSupportedConformance(LuaLane, .{
+        .path = "lua/relations.lua",
+        .source = source,
+        .expected_provider_name = tree_sitter_lua.relation_provider_name,
+        .expected_kinds = &.{ "contains", "reference", "call", "import_include", "unresolved", "unknown" },
+        .expected_targets = &.{ "helper_value", "exports", "answer", "build", "helper", "run", "demo.worker", "helper_value", "helper", "missing_call", "missing_value", "exports.answer", "exports[dynamic_key]" },
+    });
+    try runDegradedConformance(LuaLane, .{
+        .unsupported_path = "docs/relations.md",
+        .valid_source = source,
+        .invalid_path = "lua/broken.lua",
+        .invalid_source = "local function broken(\n  return 1\n",
     });
 }
 
