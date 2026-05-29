@@ -110,6 +110,14 @@ pub const usage =
     \\  not call-graph truth, dependency proof,
     \\  scoring replacement, ownership, developer metrics, or bug prediction.
     \\
+    \\Evidence workflow:
+    \\  Start with file hotspots, add --symbols for current structure, add
+    \\  --symbol-line-history for HEAD line-range Git context, use
+    \\  --historical-symbols for revision-local hunk attribution, and add
+    \\  --symbol-relationships for bounded syntax-adjacent inspection prompts.
+    \\  These layers keep local provenance and do not change ranking, scoring,
+    \\  report schema, or file-level evidence.
+    \\
 ;
 
 pub const CliMode = union(enum) {

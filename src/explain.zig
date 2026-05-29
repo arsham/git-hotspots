@@ -146,6 +146,22 @@ pub const text =
     \\is not call-graph truth, dependency proof, semantic language analysis,
     \\scoring, ownership, developer metrics, or bug prediction.
     \\
+    \\## Combining evidence layers
+    \\
+    \\Use the layers as progressively narrower local investigation prompts:
+    \\
+    \\- file hotspots choose candidate files from frequency, churn, recency, and
+    \\  co-change evidence
+    \\- --symbols describes current working-tree structure for supported files
+    \\- --symbol-line-history adds Git context for current HEAD line ranges
+    \\- --historical-symbols adds revision-local hunk attribution with fallback
+    \\- --symbol-relationships suggests bounded syntax-adjacent code to inspect
+    \\
+    \\These provider layers keep local provenance and repo-relative paths. They
+    \\report unsupported states as caveats and do not change ranking, scoring,
+    \\report schema, or file-level evidence. Relationship rows are bounded syntax
+    \\context, not dependency proof or a complete call graph.
+    \\
     \\## Limitations and non-claims
     \\
     \\Scores are not bug predictions, objective code-quality ratings, maintainer
@@ -206,6 +222,9 @@ test "explanation includes confidence and non-claim boundaries" {
         "--symbol-relationships is opt-in and requires --symbols",
         "local Tree-sitter relation evidence for Zig, Go, Python, JavaScript, Lua",
         "Relation evidence is",
+        "Combining evidence layers",
+        "file hotspots choose candidate files",
+        "Relationship rows are bounded syntax",
         "public opt-in tree-sitter-zig-relations syntax evidence",
         "public opt-in tree-sitter-go-relations syntax evidence",
         "public opt-in tree-sitter-lua-relations syntax evidence",

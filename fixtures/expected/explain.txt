@@ -143,6 +143,22 @@ external imports/includes, unresolved identifiers, and ambiguous syntax. It
 is not call-graph truth, dependency proof, semantic language analysis,
 scoring, ownership, developer metrics, or bug prediction.
 
+## Combining evidence layers
+
+Use the layers as progressively narrower local investigation prompts:
+
+- file hotspots choose candidate files from frequency, churn, recency, and
+  co-change evidence
+- --symbols describes current working-tree structure for supported files
+- --symbol-line-history adds Git context for current HEAD line ranges
+- --historical-symbols adds revision-local hunk attribution with fallback
+- --symbol-relationships suggests bounded syntax-adjacent code to inspect
+
+These provider layers keep local provenance and repo-relative paths. They
+report unsupported states as caveats and do not change ranking, scoring,
+report schema, or file-level evidence. Relationship rows are bounded syntax
+context, not dependency proof or a complete call graph.
+
 ## Limitations and non-claims
 
 Scores are not bug predictions, objective code-quality ratings, maintainer

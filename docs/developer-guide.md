@@ -102,6 +102,15 @@ The current public matrix is:
 | TSX `.tsx` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-tsx-relations` |
 | Other current files | unsupported fallback | unsupported | file-level fallback only when retained | unsupported |
 
+Public docs should present file, current-symbol, current-line, historical-symbol,
+and relationship evidence as complementary local investigation prompts. A safe
+workflow is: file hotspots choose candidates, current symbols describe the HEAD
+shape, current-line evidence adds Git context for current ranges, historical
+symbols attribute changed hunks with revision-local fallback, and relationships
+suggest bounded syntax-adjacent code to inspect. Do not describe any provider
+layer as changing ranking, replacing file evidence, proving dependencies or
+calls, identifying ownership, or judging code quality.
+
 ## Validation ladder
 
 Enable the repository pre-commit hook in local checkouts before feature work:

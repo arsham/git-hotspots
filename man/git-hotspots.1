@@ -268,6 +268,23 @@ reports source and target endpoints, unresolved targets, provider identity,
 freshness, failure, confidence, caveats, record bounds, and omitted counts; it
 does not prove calls, dependencies, ownership, developer metrics, bugs, or
 ranking changes.
+.SH COMBINING EVIDENCE
+Use file hotspots first to choose a small inspection set from local Git-history
+frequency, churn, recency, and co-change evidence. Add
+.B --symbols
+for the current working-tree structure, add
+.B --symbol-line-history
+for Git context on current HEAD line ranges, add
+.B --historical-symbols
+for revision-local hunk attribution, and add
+.B --symbol-relationships
+when bounded syntax relationships can suggest nearby code to inspect.
+.PP
+These layers are complementary investigation prompts. They keep local
+provenance and repo-relative output, report unsupported provider states as
+caveats, and do not change ranking, scoring, report schema, or file-level
+evidence. Relationship rows are bounded syntax context, not dependency proof or
+a complete call graph.
 .SH DIAGNOSTICS
 Invalid CLI arguments exit 2 with concise stderr diagnostics that name the
 failed flag and, when deterministic, include a valid next command shape. For

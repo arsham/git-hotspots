@@ -336,6 +336,16 @@ bounds, and omitted counts. Relationship evidence is caveated investigation
 context only: it is not call-graph truth, dependency proof, ownership,
 developer metrics, bug prediction, scoring replacement, or a ranking input.
 
+Use these layers together as progressively narrower local evidence, not as a
+replacement for review. Start with file hotspots to choose where to inspect,
+add `--symbols` to see current working-tree structure, add
+`--symbol-line-history` when the current line ranges need recent Git context,
+use `--historical-symbols` when changed hunks need revision-local attribution,
+and add `--symbol-relationships` when bounded syntax relationships can suggest
+nearby code to inspect. Each layer keeps repo-relative output, local provenance,
+and caveats; none changes the file ranking or proves dependencies, calls,
+ownership, bugs, or code quality.
+
 Git-detected file renames are folded conservatively when both the old and new
 paths are in scope. This is file-path lineage from local Git history only, not
 symbol or function lineage, semantic ownership, bug prediction, quality scoring,

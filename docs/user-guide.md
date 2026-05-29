@@ -249,6 +249,26 @@ confidence, caveats, record bounds, and omitted counts. It is caveated
 investigation context only, not call-graph truth, dependency proof, ownership,
 developer metrics, bug prediction, scoring replacement, or a ranking input.
 
+### Combining evidence layers
+
+Use the layers together as a local investigation workflow:
+
+1. Start with file hotspots to choose a small set of files that changed often,
+   recently, with churn, or with repeated co-change evidence.
+2. Add `--symbols` to see current working-tree structure for supported files.
+3. Add `--symbol-line-history` when the current symbol line ranges need local
+   Git context at HEAD.
+4. Add `--historical-symbols` when changed hunks need revision-local symbol or
+   file-level fallback attribution.
+5. Add `--symbol-relationships` when bounded syntax relationships can suggest
+   nearby code to inspect.
+
+The layers are complementary evidence prompts. They keep repo-relative output
+and local provenance, report unsupported provider states as normal caveats, and
+do not change ranking, scoring, report schema, or file-level evidence. Treat
+relationship rows as bounded syntax context, not dependency proof or a complete
+call graph.
+
 ## Reading reports
 
 Reports include:
