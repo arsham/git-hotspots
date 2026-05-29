@@ -25,7 +25,7 @@ pub fn renderJson(allocator: std.mem.Allocator, writer: anytype, analysis: model
     try fmt.stringArray(writer, analysis.scope.exclude_prefixes);
     try writer.print(", \"outside_include_path_count\": {d}, \"outside_include_change_count\": {d}, \"excluded_path_count\": {d}, \"excluded_change_count\": {d} }},\n", .{ analysis.scope.outside_include_path_count, analysis.scope.outside_include_change_count, analysis.scope.excluded_path_count, analysis.scope.excluded_change_count });
     try writer.print("    \"caveats\": ", .{});
-    try fmt.stringArray(writer, analysis.caveats);
+    try fmt.caveatArray(writer, analysis.caveats);
     try writer.print("\n", .{});
     try writer.print("  }},\n", .{});
     if (analysis.symbol_report) |symbols| {
@@ -82,7 +82,7 @@ pub fn renderJson(allocator: std.mem.Allocator, writer: anytype, analysis: model
         try fmt.jsonString(writer, row.confidence);
         try writer.print(",\n", .{});
         try writer.print("      \"caveats\": ", .{});
-        try fmt.stringArray(writer, row.caveats);
+        try fmt.caveatArray(writer, row.caveats);
         try writer.print(",\n", .{});
         try writer.print("      \"evidence\": [", .{});
         for (row.evidence, 0..) |ev, j| {
@@ -151,7 +151,7 @@ fn renderHistoricalSymbolReportJson(writer: anytype, analysis: model.Analysis) !
         try writer.print(", \"confidence\": ", .{});
         try fmt.jsonString(writer, historical.confidenceName(record.confidence));
         try writer.print(", \"fallback_count\": {d}, \"caveats\": ", .{record.fallback_count});
-        try fmt.stringArray(writer, record.caveats);
+        try fmt.caveatArray(writer, record.caveats);
         try writer.print(" }}{s}\n", .{if (i + 1 == report.aggregates.len) "" else ","});
     }
     try writer.print("    ]\n  }}", .{});
@@ -165,7 +165,8 @@ fn renderHistoricalCaveatsJson(writer: anytype, caveats: []const []const u8) !vo
         try fmt.jsonString(writer, caveat);
         emitted = true;
     }
-    for (caveats) |caveat| {
+    for (caveats, 0..) |caveat, caveat_i| {
+        if (fmt.containsCaveat(&historical.report_level_caveats, caveat, false) or fmt.isDuplicateCaveat(caveats, caveat_i, caveat, false)) continue;
         if (emitted) try writer.print(", ", .{});
         try fmt.jsonString(writer, caveat);
         emitted = true;
@@ -202,7 +203,7 @@ fn renderProjectSymbolReportJson(allocator: std.mem.Allocator, writer: anytype, 
         try writer.print(", \"confidence\": ", .{});
         try fmt.jsonString(writer, @tagName(file.provider.confidence));
         try writer.print(", \"caveats\": ", .{});
-        try fmt.stringArrayWithLineHistoryContext(writer, file.provider.caveats, report_symbols.haveLineHistory(file.symbols));
+        try fmt.caveatArrayWithLineHistoryContext(writer, file.provider.caveats, report_symbols.haveLineHistory(file.symbols));
         try writer.print(", \"provenance\": {{ \"input\": ", .{});
         try fmt.jsonString(writer, file.provider.input.identity);
         try writer.print(", \"local_only\": true }} }}, \"items\": [", .{});
@@ -224,7 +225,7 @@ fn renderProjectSymbolReportJson(allocator: std.mem.Allocator, writer: anytype, 
             try writer.print(", \"confidence\": ", .{});
             try fmt.jsonString(writer, @tagName(symbol.confidence));
             try writer.print(", \"current_only\": true, \"caveats\": ", .{});
-            try fmt.stringArrayWithLineHistoryContext(writer, symbol.caveats, symbol.current_line_history != null);
+            try fmt.caveatArrayWithLineHistoryContext(writer, symbol.caveats, symbol.current_line_history != null);
             if (symbol.current_line_history) |line_history| {
                 try writer.print(", \"current_line_history\": ", .{});
                 try renderCurrentLineHistoryJson(writer, line_history);
@@ -261,7 +262,7 @@ fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport, display:
     try fmt.jsonString(writer, @tagName(symbols.provider.confidence));
     try writer.print(", \"caveats\": ", .{});
     const has_line_history = report_symbols.haveLineHistory(symbols.symbols);
-    try fmt.stringArrayWithLineHistoryContext(writer, symbols.provider.caveats, has_line_history);
+    try fmt.caveatArrayWithLineHistoryContext(writer, symbols.provider.caveats, has_line_history);
     try writer.print(", \"provenance\": {{ \"input\": ", .{});
     try fmt.jsonString(writer, symbols.provider.input.identity);
     try writer.print(", \"local_only\": true }} }},\n", .{});
@@ -280,7 +281,7 @@ fn renderSymbolReportJson(writer: anytype, symbols: model.SymbolReport, display:
         try writer.print(", \"confidence\": ", .{});
         try fmt.jsonString(writer, @tagName(symbol.confidence));
         try writer.print(", \"caveats\": ", .{});
-        try fmt.stringArrayWithLineHistoryContext(writer, symbol.caveats, symbol.current_line_history != null);
+        try fmt.caveatArrayWithLineHistoryContext(writer, symbol.caveats, symbol.current_line_history != null);
         if (symbol.current_line_history) |line_history| {
             try writer.print(", \"current_line_history\": ", .{});
             try renderCurrentLineHistoryJson(writer, line_history);
@@ -311,7 +312,7 @@ fn renderCurrentLineHistoryJson(writer: anytype, line_history: provider.CurrentL
     try writer.print(", \"confidence\": ", .{});
     try fmt.jsonString(writer, @tagName(line_history.confidence));
     try writer.print(", \"caveats\": ", .{});
-    try fmt.stringArray(writer, line_history.caveats);
+    try fmt.caveatArray(writer, line_history.caveats);
     try writer.print(" }}", .{});
 }
 
@@ -331,7 +332,7 @@ fn renderSymbolRelationshipsJson(writer: anytype, analysis: model.Analysis) !voi
     try writer.print(" }},\n", .{});
     try writer.print("    \"summary\": {{ \"candidate_file_count\": {d}, \"retained_candidate_file_count\": {d}, \"current_symbol_candidate_count\": {d}, \"provider_report_count\": {d}, \"relation_record_count\": {d}, \"relation_record_bound\": {d}, \"relation_record_bound_exceeded\": {}, \"omitted_record_count\": {d} }},\n", .{ relation_report.candidate_file_count, relation_report.retained_candidate_file_count, relation_report.current_symbol_candidate_count, relation_report.providers.len, relation_report.records.len, relation_report.relation_record_bound, relation_report.relation_record_bound_exceeded, relation_report.omitted_record_count });
     try writer.print("    \"caveats\": ", .{});
-    try fmt.stringArray(writer, relation_report.caveats);
+    try fmt.caveatArray(writer, relation_report.caveats);
     try writer.print(",\n", .{});
     try writer.print("    \"providers\": [\n", .{});
     for (relation_report.providers, 0..) |file, file_i| {
@@ -352,7 +353,7 @@ fn renderSymbolRelationshipsJson(writer: anytype, analysis: model.Analysis) !voi
         try writer.print(", \"confidence\": ", .{});
         try fmt.jsonString(writer, @tagName(file.provider.confidence));
         try writer.print(", \"caveats\": ", .{});
-        try fmt.stringArray(writer, file.provider.caveats);
+        try fmt.caveatArray(writer, file.provider.caveats);
         try writer.print(", \"provenance\": {{ \"input\": ", .{});
         try fmt.jsonString(writer, file.provider.input.identity);
         try writer.print(", \"local_only\": true }} }}, \"candidate_count\": {d}, \"omitted_count\": {d}, \"cap_reached\": {} }}{s}\n", .{ file.candidate_count, file.omitted_count, file.cap_reached, if (file_i + 1 == relation_report.providers.len) "" else "," });
@@ -381,7 +382,7 @@ fn renderSymbolRelationshipsJson(writer: anytype, analysis: model.Analysis) !voi
         try writer.print(", \"confidence\": ", .{});
         try fmt.jsonString(writer, @tagName(record.confidence));
         try writer.print(", \"caveats\": ", .{});
-        try fmt.stringArray(writer, record.caveats);
+        try fmt.caveatArray(writer, record.caveats);
         try writer.print(" }}{s}\n", .{if (i + 1 == relation_report.records.len) "" else ","});
     }
     try writer.print("    ]\n  }}", .{});

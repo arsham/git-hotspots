@@ -30,6 +30,52 @@ pub const Failure = enum {
     skipped,
 };
 
+pub const FailureModeInventoryItem = struct {
+    mode: []const u8,
+    provider_failure: ?Failure,
+    affected_surfaces: []const []const u8,
+    caveat_policy: []const u8,
+    evidence_path: []const u8,
+};
+
+/// Inventory for provider failure/caveat states that already surface in reports.
+/// These are caveated evidence states only; they do not change ranking or scoring.
+pub const failure_mode_inventory = [_]FailureModeInventoryItem{
+    .{ .mode = "unsupported language", .provider_failure = .unsupported, .affected_surfaces = &.{ "JSON provider failure/caveats", "Markdown provider caveats", "table provider summary", "explain capability matrix", "validation capability matrix" }, .caveat_policy = "report unsupported provider state while preserving file-level evidence and provider-specific unsupported-lane wording", .evidence_path = "fixtures/expected/symbols-unsupported.json" },
+    .{ .mode = "parse failure", .provider_failure = .failed, .affected_surfaces = &.{ "JSON provider failure/caveats", "Markdown provider caveats", "table provider summary", "validation fixture diffs" }, .caveat_policy = "fail closed without parser diagnostics or source snippets; keep language-specific parse limitation wording", .evidence_path = "fixtures/expected/*-symbols-invalid.json" },
+    .{ .mode = "oversized input", .provider_failure = .skipped, .affected_surfaces = &.{ "relation provider reports", "relation aggregate caveats", "JSON/Markdown/table relationship records" }, .caveat_policy = "mark bounded input as skipped/partial and state deterministic truncation without implying semantic certainty", .evidence_path = "relation cap and oversized tests" },
+    .{ .mode = "cap reached", .provider_failure = .skipped, .affected_surfaces = &.{ "relation summary", "relation aggregate caveats", "provider caveats", "record caveats" }, .caveat_policy = "state emitted evidence is partial and deterministically truncated; preserve provider nuance", .evidence_path = "relation aggregation and relation cap tests" },
+    .{ .mode = "missing optional provider", .provider_failure = .unavailable, .affected_surfaces = &.{ "JSON provider failure/caveats", "Markdown provider caveats", "table provider summary" }, .caveat_policy = "report unavailable local provider evidence without changing file-level ranking/scoring", .evidence_path = "fixtures/expected/*-symbols-symlink-unavailable.json" },
+    .{ .mode = "binary or non-text input", .provider_failure = null, .affected_surfaces = &.{ "analysis caveats", "row caveats", "Markdown caveats", "explain caveat classes", "validation edge fixture" }, .caveat_policy = "caveat unavailable Git churn counts as file-level evidence limitation only", .evidence_path = "fixtures/expected/scope-filtered.md and edge validation assertions" },
+    .{ .mode = "shallow history", .provider_failure = null, .affected_surfaces = &.{ "analysis history", "analysis caveats", "current-line Git evidence caveats", "explain caveat classes", "validation summaries" }, .caveat_policy = "state local history may be incomplete and auto_fetch remains false", .evidence_path = "fixtures/shallow and *-line-history-shallow validation" },
+    .{ .mode = "partial history", .provider_failure = null, .affected_surfaces = &.{ "analysis history", "analysis caveats", "current-line Git evidence caveats", "explain caveat classes", "validation summaries" }, .caveat_policy = "state partial/promisor history may be incomplete and auto_fetch remains false", .evidence_path = "fixtures/partial and *-line-history-partial validation" },
+};
+
+test "provider failure mode inventory covers public caveat states" {
+    inline for (.{
+        "unsupported language",
+        "parse failure",
+        "oversized input",
+        "cap reached",
+        "missing optional provider",
+        "binary or non-text input",
+        "shallow history",
+        "partial history",
+    }) |mode| {
+        var found = false;
+        for (failure_mode_inventory) |item| {
+            if (std.mem.eql(u8, item.mode, mode)) {
+                try std.testing.expect(item.affected_surfaces.len > 0);
+                try std.testing.expect(item.caveat_policy.len > 0);
+                try std.testing.expect(item.evidence_path.len > 0);
+                found = true;
+                break;
+            }
+        }
+        try std.testing.expect(found);
+    }
+}
+
 pub const Confidence = enum {
     high,
     medium,

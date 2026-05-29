@@ -77,7 +77,7 @@ pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: m
     }
 
     try writer.writeAll("## Caveats\n\n");
-    try fmt.renderMarkdownStringList(writer, analysis.caveats);
+    try fmt.renderMarkdownCaveatList(writer, analysis.caveats);
 
     try writer.writeAll("\n## Top hotspots\n\n");
     try writer.writeAll("| Rank | Path | Score | Changes | Churn | Confidence | Lineage | Last commit |\n");
@@ -165,7 +165,8 @@ pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: m
         if (row.caveats.len == 0) {
             try writer.writeAll("  - None\n");
         } else {
-            for (row.caveats) |caveat| {
+            for (row.caveats, 0..) |caveat, caveat_i| {
+                if (fmt.isDuplicateCaveat(row.caveats, caveat_i, caveat, false)) continue;
                 try writer.writeAll("  - ");
                 try fmt.markdownText(writer, caveat);
                 try writer.writeByte('\n');
@@ -190,7 +191,8 @@ fn renderHistoricalSymbolReportMarkdown(writer: anytype, analysis: model.Analysi
         try fmt.markdownText(writer, caveat);
         try writer.writeByte('\n');
     }
-    for (report.caveats) |caveat| {
+    for (report.caveats, 0..) |caveat, caveat_i| {
+        if (fmt.containsCaveat(&historical.report_level_caveats, caveat, false) or fmt.isDuplicateCaveat(report.caveats, caveat_i, caveat, false)) continue;
         try writer.writeAll("  - ");
         try fmt.markdownText(writer, caveat);
         try writer.writeByte('\n');
@@ -248,7 +250,8 @@ fn renderSymbolRelationshipReportMarkdown(writer: anytype, analysis: model.Analy
     if (report.caveats.len == 0) {
         try writer.writeAll("  - None\n");
     } else {
-        for (report.caveats) |caveat| {
+        for (report.caveats, 0..) |caveat, caveat_i| {
+            if (fmt.isDuplicateCaveat(report.caveats, caveat_i, caveat, false)) continue;
             try writer.writeAll("  - ");
             try fmt.markdownText(writer, caveat);
             try writer.writeByte('\n');
@@ -341,9 +344,11 @@ fn renderSymbolReportMarkdown(allocator: std.mem.Allocator, writer: anytype, sym
         try writer.writeAll("  - None\n");
     } else {
         const has_line_history = report_symbols.haveLineHistory(symbols.symbols);
-        for (symbols.provider.caveats) |caveat| {
+        for (symbols.provider.caveats, 0..) |caveat, caveat_i| {
+            const normalized = fmt.caveatForLineHistoryContext(caveat, has_line_history);
+            if (fmt.isDuplicateCaveat(symbols.provider.caveats, caveat_i, normalized, has_line_history)) continue;
             try writer.writeAll("  - ");
-            try fmt.markdownText(writer, fmt.caveatForLineHistoryContext(caveat, has_line_history));
+            try fmt.markdownText(writer, normalized);
             try writer.writeByte('\n');
         }
     }

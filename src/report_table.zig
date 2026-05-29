@@ -16,9 +16,12 @@ pub fn renderTable(allocator: std.mem.Allocator, writer: anytype, analysis: mode
     }
     if (analysis.caveats.len > 0) {
         try writer.print("caveats: ", .{});
+        var emitted_caveat = false;
         for (analysis.caveats, 0..) |c, i| {
-            if (i != 0) try writer.print("; ", .{});
+            if (fmt.isDuplicateCaveat(analysis.caveats, i, c, false)) continue;
+            if (emitted_caveat) try writer.print("; ", .{});
             try writer.print("{s}", .{c});
+            emitted_caveat = true;
         }
         try writer.print("\n", .{});
     }
@@ -117,7 +120,8 @@ fn renderHistoricalCaveatsInline(writer: anytype, caveats: []const []const u8) !
         try writer.writeAll(caveat);
         emitted = true;
     }
-    for (caveats) |caveat| {
+    for (caveats, 0..) |caveat, caveat_i| {
+        if (fmt.containsCaveat(&historical.report_level_caveats, caveat, false) or fmt.isDuplicateCaveat(caveats, caveat_i, caveat, false)) continue;
         if (emitted) try writer.writeAll("; ");
         try writer.writeAll(caveat);
         emitted = true;

@@ -4,7 +4,7 @@ feature:
   slug: provider-failure-and-caveat-audit
   title: Provider failure and caveat audit
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Provider failure and caveat wording is spread across many output paths;
@@ -52,7 +52,7 @@ proposal:
     materialised_at: 2026-05-29T12:55:58.725Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -106,7 +106,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Failure-state inventory
       goal: Map provider failure states and identify surfaces that expose caveats.
       owner_phase: runner
@@ -129,7 +129,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Caveat normalization and fixtures
       goal: Apply wording/ordering repairs and add deterministic validation coverage.
       owner_phase: runner
@@ -179,7 +179,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-29T12:48:26.308Z
-  updated_at: 2026-05-29T12:56:59.872Z
+  updated_at: 2026-05-29T13:46:57.463Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-29T12:56:59.872Z
