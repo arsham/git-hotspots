@@ -1,0 +1,30 @@
+#!/bin/sh
+set -eu
+
+ROOT=$(git rev-parse --show-toplevel)
+cd "$ROOT" || exit 1
+
+ZERO_SHA=0000000000000000000000000000000000000000
+should_validate=false
+
+while read local_ref local_sha remote_ref remote_sha; do
+  [ -n "${local_ref:-}" ] || continue
+  if [ "${local_sha:-}" = "$ZERO_SHA" ]; then
+    continue
+  fi
+
+  should_validate=true
+done
+
+if [ "$should_validate" != true ]; then
+  printf '%s\n' 'pre-push: delete-only push; full validation skipped'
+  exit 0
+fi
+
+. "$ROOT/tools/git-hook-env.sh"
+git_hotspots_clear_git_hook_env
+
+printf '%s\n' 'pre-push: RUN full validation and proof aggregate'
+zig build validate-all
+
+printf '%s\n' 'pre-push: all checks passed'

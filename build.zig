@@ -194,6 +194,19 @@ pub fn build(b: *std.Build) void {
     test_step.dependOn(&run_relation_provider_conformance.step);
     test_step.dependOn(&integration_tests.step);
 
+    const fast_fmt_check = b.addSystemCommand(&.{ "zig", "fmt", "--check", "build.zig", "src", "tests" });
+    const fast_shell_syntax = b.addSystemCommand(&.{
+        "sh",
+        "-c",
+        "for file in .githooks/* tools/*.sh tests/*.sh; do [ -f \"$file\" ] || continue; sh -n \"$file\" || exit 1; done",
+    });
+    const pre_commit_step = b.step("pre-commit", "Run fast lint and test gate for commit hooks");
+    pre_commit_step.dependOn(&fast_fmt_check.step);
+    pre_commit_step.dependOn(&fast_shell_syntax.step);
+    pre_commit_step.dependOn(&exe.step);
+    pre_commit_step.dependOn(&run_unit_tests.step);
+    pre_commit_step.dependOn(&run_relation_provider_conformance.step);
+
     const validate = b.addSystemCommand(&.{ "sh", "tools/validate.sh" });
     validate.addArtifactArg(exe);
     if (validate_closeout) validate.addArg("--closeout");

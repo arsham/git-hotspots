@@ -16,15 +16,16 @@ public alpha, so issues and small focused pull requests are welcome.
 
 ## Before opening a pull request
 
-This checkout uses the repository pre-commit hook in `.githooks/pre-commit`.
+This checkout uses the repository hooks in `.githooks/`.
 Enable it with:
 
 ```sh
 git config core.hooksPath .githooks
 ```
 
-The hook runs staged whitespace checks and `zig build validate-all` before a
-commit is created.
+The commit hook runs staged whitespace checks and `zig build pre-commit`
+before a commit is created. The push hook runs `zig build validate-all` once
+for non-delete pushes.
 
 Run the local validation workflow:
 
@@ -32,8 +33,13 @@ Run the local validation workflow:
 zig build validate
 ```
 
-If a narrower change only needs the fast gate while iterating, `zig build test`
-is useful, but `zig build validate` is the expected pre-PR check.
+If a narrower change only needs the fast gate while iterating, use:
+
+```sh
+zig build pre-commit
+```
+
+`zig build validate` remains the expected pre-PR check.
 
 Provider-lane changes should also run the full local proof aggregate:
 

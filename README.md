@@ -406,14 +406,15 @@ Hotspots are local Git-history investigation prompts. They are not bug
 predictions, objective code-quality ratings, maintainer judgement, developer
 rankings, productivity analytics, AI/LLM judgement, or technical-debt scores.
 
-Use the full local validation workflow before close-out:
+Use the full local validation workflow before release or maintainer close-out:
 
 ```sh
-zig build validate
+zig build validate-all
 ```
 
-`zig build test` remains the faster unit and fixture gate. `zig build validate`
-runs the fuller local ladder and prints a privacy-safe evidence summary.
+`zig build pre-commit` remains the faster commit gate. `zig build validate`
+runs the broader local ladder and prints a privacy-safe evidence summary;
+`zig build validate-all` adds the provider proof aggregate.
 
 ## Current limitations
 

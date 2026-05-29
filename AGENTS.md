@@ -46,5 +46,7 @@ local-first hotspot intelligence CLI.
   executable exists; default to this repo plus one suitable sibling/local repo,
   and record privacy-safe evidence without committing absolute local paths or
   raw private report output.
+- Before Flow close-out, run `tools/flow-closeout-check.sh` with a
+  privacy-safe second smoke repo or explicit skip reason.
 - Preserve existing Flow state when present; use Flow commands for lifecycle
   updates instead of hand-editing Flow artefacts when a command exists.

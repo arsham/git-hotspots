@@ -113,22 +113,34 @@ calls, identifying ownership, or judging code quality.
 
 ## Validation ladder
 
-Enable the repository pre-commit hook in local checkouts before feature work:
+Enable the repository hooks in local checkouts before feature work:
 
 ```sh
 git config core.hooksPath .githooks
 ```
 
-The hook runs `git diff --cached --check` and `zig build validate-all` before
-commits, so provider proof coverage stays enforced at local commit boundaries.
+The commit hook runs `git diff --cached --check` and `zig build pre-commit`.
+The push hook runs `zig build validate-all` once for non-delete pushes, so
+provider proof coverage stays enforced before publication without slowing every
+commit.
 
 Use the narrowest useful gate while iterating, then run the broader gate before
 hand-off:
 
 ```sh
 zig fmt --check build.zig src tests
+zig build pre-commit
 zig build test
 zig build validate
+```
+
+Before Flow close-out, run the close-out validation helper with a second
+privacy-safe smoke target or an explicit privacy-safe skip reason:
+
+```sh
+tools/flow-closeout-check.sh -Dsmoke-repo=../other-repo -Dsmoke-label=other-repo
+# or
+tools/flow-closeout-check.sh -Dsmoke-skip-reason=NoSecondLocalRepo
 ```
 
 `tools/validate.sh` also owns the deterministic fixture performance budget
@@ -156,7 +168,10 @@ flakes and narrow enough to catch obvious regressions.
 Run shell syntax checks when shell files change:
 
 ```sh
-for file in tools/*.sh tests/*.sh; do sh -n "$file" || exit 1; done
+for file in .githooks/* tools/*.sh tests/*.sh; do
+  [ -f "$file" ] || continue
+  sh -n "$file" || exit 1
+done
 ```
 
 When touching packaged dogfood delivery, also run the Linux release archive

@@ -2566,7 +2566,7 @@ else
   fail_rung "license and version consistency" "license, docs, fixtures, or CLI version contract failed"
 fi
 run_quiet "git diff whitespace check" git diff --check
-run_quiet "shell syntax checks" sh -c "for file in tools/*.sh tests/*.sh; do sh -n \"\$file\" || exit 1; done"
+run_quiet "shell syntax checks" sh -c "for file in .githooks/* tools/*.sh tests/*.sh; do [ -f \"\$file\" ] || continue; sh -n \"\$file\" || exit 1; done"
 printf 'validate: RUN runtime dependency scan\n'
 if runtime_dependency_scan; then
   note_fallback "runtime dependency scan: python3 source scan for no network, Go toolchain, or global tree-sitter CLI commands"
