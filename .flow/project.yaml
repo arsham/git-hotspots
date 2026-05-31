@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0104"
   active_run_id: null
   last_completed_feature_id: "0103"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 104
+  next_id: 105
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -441,6 +441,10 @@ features:
       slug: tag-preparation-checklist
       path: .flow/features/0103_tag-preparation-checklist
       created_at: 2026-05-29T16:17:24.277Z
+    - id: "0104"
+      slug: relationship-output-noise-audit
+      path: .flow/features/0104_relationship-output-noise-audit
+      created_at: 2026-05-31T16:42:45.804Z
 intake:
   mode: roadmap
   summary: null
