@@ -4,6 +4,7 @@ const fmt = @import("report_format.zig");
 const historical = @import("report_historical_symbols.zig");
 const report_symbols = @import("report_symbols.zig");
 const relation_caveats = @import("report_relation_caveats.zig");
+const relation_summary = @import("report_relation_summary.zig");
 
 pub fn renderTable(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
     try writer.print("git-hotspots: file-level Git-history investigation prompts\n", .{});
@@ -67,6 +68,7 @@ fn renderSymbolRelationshipRows(writer: anytype, analysis: model.Analysis, repor
     try writer.print("  caveats: ", .{});
     try fmt.renderCaveatInline(writer, report.caveats);
     try writer.writeByte('\n');
+    try relation_summary.renderTable(writer, report, shown);
     if (report.records.len == 0) {
         try writer.print("  none\n", .{});
         return;

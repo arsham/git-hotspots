@@ -83,6 +83,7 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
   - bounded Lua syntax evidence: contains, require\-like imports, direct calls, table/member reference\-like syntax, unresolved identifiers, and unknown relation\-like syntax
   - unresolved and external\-string endpoints are caveated; no module loader, package.path, metatable, dynamic table, runtime mutation, generated\-source, or semantic dependency identity is fabricated
   - symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
+- Relationship evidence summary: emitted=16 kinds=contains:9,reference:1,call:2,unknown:2,unresolved:2 unknown=2 unresolved=2 unresolved_targets=5 display_limit_omitted=10
 
 | Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveat refs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

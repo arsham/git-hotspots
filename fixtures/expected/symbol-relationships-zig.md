@@ -76,6 +76,7 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
   - bounded Zig syntax proof: contains, @import strings, direct identifier calls, local identifier references, unresolved identifiers, and ambiguous member or comptime syntax
   - unresolved and external\-string endpoints are caveated; no package, build graph, namespace, type, method, comptime, or generated\-code truth is fabricated
   - symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
+- Relationship evidence summary: emitted=2 kinds=contains:2 omissions=none
 
 | Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveat refs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

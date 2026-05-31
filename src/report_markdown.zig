@@ -5,6 +5,7 @@ const fmt = @import("report_format.zig");
 const historical = @import("report_historical_symbols.zig");
 const report_symbols = @import("report_symbols.zig");
 const relation_caveats = @import("report_relation_caveats.zig");
+const relation_summary = @import("report_relation_summary.zig");
 
 pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
     try writer.writeAll("# git-hotspots report\n\n");
@@ -258,6 +259,7 @@ fn renderSymbolRelationshipReportMarkdown(writer: anytype, analysis: model.Analy
             try writer.writeByte('\n');
         }
     }
+    try relation_summary.renderMarkdown(writer, report, shown);
     try writer.writeByte('\n');
     try writer.writeAll("| Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveat refs |\n");
     try writer.writeAll("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");

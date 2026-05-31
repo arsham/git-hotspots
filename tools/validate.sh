@@ -1471,9 +1471,13 @@ fixture_json_checks() {
   grep -q -- '"symbol_relationships"' "$SYMBOL_RELATIONSHIPS_JSON" || return 1
   grep -q -- '## Symbol relationships' "$SYMBOL_RELATIONSHIPS_MD" || return 1
   grep -q -- 'Caveat refs' "$SYMBOL_RELATIONSHIPS_MD" || return 1
+  grep -q -- 'Relationship evidence summary:' "$SYMBOL_RELATIONSHIPS_MD" || return 1
+  grep -q -- 'display_limit_omitted=' "$SYMBOL_RELATIONSHIPS_MD" || return 1
   grep -q -- 'Row caveat references' "$SYMBOL_RELATIONSHIPS_MD" || return 1
   grep -q -- 'symbol relationships for retained ranked files:' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   grep -q -- 'caveats=C1' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
+  grep -q -- 'evidence summary:' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
+  grep -q -- 'display_limit_omitted=' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   grep -q -- 'row caveats:' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   ! grep -Eiq -- 'Fixture Author|fixture@example|https?://|ssh://|git@|/home/|/Users/|source snippet|commit message' "$SYMBOL_RELATIONSHIPS_JSON" "$SYMBOL_RELATIONSHIPS_MD" "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   for lane in zig go javascript lua typescript tsx rust; do
@@ -1507,9 +1511,11 @@ fixture_json_checks() {
     grep -q -- '"symbol_relationships"' "$lane_json" || return 1
     grep -q -- '## Symbol relationships' "$lane_md" || return 1
     grep -q -- 'Caveat refs' "$lane_md" || return 1
+    grep -q -- 'Relationship evidence summary:' "$lane_md" || return 1
     grep -q -- 'Row caveat references' "$lane_md" || return 1
     grep -q -- 'symbol relationships for retained ranked files:' "$lane_table" || return 1
     grep -q -- 'caveats=C1' "$lane_table" || return 1
+    grep -q -- 'evidence summary:' "$lane_table" || return 1
     grep -q -- 'row caveats:' "$lane_table" || return 1
     ! grep -Eiq -- 'Fixture Author|fixture@example|https?://|ssh://|git@|/home/|/Users/|source snippet|commit message' "$lane_json" "$lane_md" "$lane_table" || return 1
   done

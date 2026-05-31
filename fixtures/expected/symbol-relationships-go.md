@@ -82,6 +82,7 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
   - bounded Go syntax evidence: contains, import includes, direct identifier calls, selector\-like syntax, unresolved identifiers, and unknown relation\-like syntax
   - unresolved and external\-string endpoints are caveated; no package, module, type, interface, method\-set, build\-tag, generated\-source, cgo, vendored, or semantic dependency identity is fabricated
   - symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
+- Relationship evidence summary: emitted=8 kinds=contains:8 display_limit_omitted=2
 
 | Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveat refs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

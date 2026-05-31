@@ -246,8 +246,12 @@ Relationship evidence currently comes from local Zig, Go, Python, JavaScript,
 Lua, Rust, TypeScript, and TSX Tree-sitter lanes. It reports source and target
 endpoints, unresolved targets, provider identity, freshness, failure,
 confidence, caveats, record bounds, and omitted counts. Human table and
-Markdown output compact repeated row caveats into stable `C1`-style references
-plus one caveat summary; JSON keeps per-record caveat arrays. It is caveated
+Markdown output add a compact relationship evidence summary with non-zero
+relation-kind counts, uncertainty counts for unresolved or unknown evidence,
+and separate human display-limit omissions from provider or record-cap
+omissions. They also compact repeated row caveats into stable `C1`-style
+references plus one caveat summary; JSON keeps per-record caveat arrays. It is
+caveated
 investigation context only, not call-graph truth, dependency proof, ownership,
 developer metrics, bug prediction, scoring replacement, or a ranking input.
 
