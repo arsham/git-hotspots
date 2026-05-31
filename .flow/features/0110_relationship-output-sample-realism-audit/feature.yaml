@@ -4,7 +4,7 @@ feature:
   slug: relationship-output-sample-realism-audit
   title: Relationship output sample realism audit
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Existing relationship fixtures and goldens were built through staged
@@ -64,7 +64,7 @@ proposal:
     materialised_at: 2026-05-31T22:21:14.102Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -121,7 +121,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Sample real relationship outputs
       goal: Collect privacy-safe relationship-output evidence from this repo and one
         safe sibling/local repo or a recorded skip reason.
@@ -148,7 +148,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Compare against fixtures and goldens
       goal: Classify whether current fixtures/goldens remain representative of
         realistic relationship output.
@@ -176,7 +176,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Write audit and validate
       goal: Create the audit document and complete validation evidence.
       owner_phase: runner
@@ -249,7 +249,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-31T22:17:12.050Z
-  updated_at: 2026-05-31T22:21:39.176Z
+  updated_at: 2026-05-31T22:52:52.718Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-31T22:21:39.176Z
