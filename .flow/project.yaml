@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0109"
   active_run_id: null
   last_completed_feature_id: "0108"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 109
+  next_id: 110
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -461,6 +461,10 @@ features:
       slug: relationship-deduplication-guardrail-tests
       path: .flow/features/0108_relationship-deduplication-guardrail-tests
       created_at: 2026-05-31T21:14:16.245Z
+    - id: "0109"
+      slug: relationship-presentation-release-polish
+      path: .flow/features/0109_relationship-presentation-release-polish
+      created_at: 2026-05-31T21:49:05.435Z
 intake:
   mode: roadmap
   summary: null
