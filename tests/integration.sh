@@ -416,7 +416,7 @@ grep -Fq -- 'human_display_sample_omitted=' "$tmp_dir/git-hotspots-provider-cap-
 grep -Fq -- 'provider_partial_evidence_omitted=' "$tmp_dir/git-hotspots-provider-cap-relationships.txt"
 grep -Fq -- 'provider_caps_reached=1' "$tmp_dir/git-hotspots-provider-cap-relationships.txt"
 
-"$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-zig.json"
+"$EXE" --repo fixtures/zig-relationships --inspect src/relations.zig --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-zig.json"
 diff -u fixtures/expected/symbol-relationships-zig.json "$tmp_dir/git-hotspots-symbol-relationships-zig.json"
 "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-go.json"
 diff -u fixtures/expected/symbol-relationships-go.json "$tmp_dir/git-hotspots-symbol-relationships-go.json"
@@ -433,7 +433,7 @@ diff -u fixtures/expected/symbol-relationships-rust.json "$tmp_dir/git-hotspots-
 python3 - "$tmp_dir/git-hotspots-symbol-relationships-zig.json" "$tmp_dir/git-hotspots-symbol-relationships-go.json" "$tmp_dir/git-hotspots-symbol-relationships-javascript.json" "$tmp_dir/git-hotspots-symbol-relationships-lua.json" "$tmp_dir/git-hotspots-symbol-relationships-typescript.json" "$tmp_dir/git-hotspots-symbol-relationships-tsx.json" "$tmp_dir/git-hotspots-symbol-relationships-rust.json" <<'PY'
 import json, sys
 cases = [
-    (sys.argv[1], 'tree-sitter-zig-relations', {'contains'}, False, None),
+    (sys.argv[1], 'tree-sitter-zig-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved', 'unknown'}, True, None),
     (sys.argv[2], 'tree-sitter-go-relations', {'contains'}, False, None),
     (sys.argv[3], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}, True, ('symbol:src/example.mjs:topFunction:function', 'symbol:src/example.mjs:innerFunction:function', {'contains', 'call'}, {'javascript definition containment', 'javascript direct call expression'})),
     (sys.argv[4], 'tree-sitter-lua-relations', {'contains', 'reference', 'call', 'unresolved', 'unknown'}, True, ('file:src/example.lua', 'symbol:src/example.lua:exports:variable', {'contains', 'reference'}, {'lua module-level symbol containment', 'lua identifier reference syntax'})),
@@ -467,7 +467,7 @@ for path, provider_name, expected_kinds, require_unresolved, duplicate_guard in 
 PY
 for lane in zig go javascript lua typescript tsx rust; do
   case "$lane" in
-    zig) repo=fixtures/symbols; inspect=src/example.zig ;;
+    zig) repo=fixtures/zig-relationships; inspect=src/relations.zig ;;
     go) repo=fixtures/go-symbols; inspect=src/example.go ;;
     javascript) repo=fixtures/javascript-symbols; inspect=src/example.mjs ;;
     lua) repo=fixtures/lua-symbols; inspect=src/example.lua ;;

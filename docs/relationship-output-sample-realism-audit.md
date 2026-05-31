@@ -113,6 +113,16 @@ Evidence supports two bounded successor slices:
 No provider, scoring, CLI, schema, cache, network, telemetry, release, package,
 remote, tag, or publishing slice is indicated by this audit.
 
+## Fixture follow-up note
+
+The public Zig relationship fixture added for this successor slice uses a
+small deterministic repository to cover mixed Zig relation kinds, unresolved
+targets, and human display omission. Provider-cap omission is intentionally not
+encoded in the Zig golden: stabilising it would require a very large Zig syntax
+fixture coupled to the current record cap rather than a representative public
+sample. Existing synthetic provider-cap integration coverage remains the stable
+deterministic check for cap reporting.
+
 ## Validation evidence
 
 | Check | Evidence |

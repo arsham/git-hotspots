@@ -216,6 +216,34 @@ EOF
   commit_all "$repo" '2026-05-02T00:00:00+0000' 'expand zig function'
 }
 
+make_zig_relationships() {
+  repo="$FIX/zig-relationships"
+  rm -rf "$repo"
+  mkdir -p "$repo/src"
+  setup_repo "$repo"
+
+  cat > "$repo/src/relations.zig" <<'EOF'
+const std = @import("std");
+const helper = @import("helper.zig");
+
+pub fn main() void {
+    helper.run();
+    localHelper();
+    unresolvedCall();
+    _ = helper.value;
+    _ = unknown_name;
+    _ = @TypeOf(localHelper);
+}
+
+fn localHelper() void {}
+EOF
+  cat > "$repo/src/helper.zig" <<'EOF'
+pub const value = 1;
+pub fn run() void {}
+EOF
+  commit_all "$repo" '2026-05-03T00:00:00+0000' 'initial zig relationship fixture'
+}
+
 make_go_symbols() {
   repo="$FIX/go-symbols"
   rm -rf "$repo"
@@ -1012,6 +1040,7 @@ make_edge
 make_scope
 make_lineage
 make_symbols
+make_zig_relationships
 make_go_symbols
 make_python_symbols
 make_javascript_symbols

@@ -1498,7 +1498,7 @@ assert {item['evidence_basis'] for item in matches} == {
 PY
   for lane in zig go javascript lua typescript tsx rust; do
     case "$lane" in
-      zig) repo=fixtures/symbols; inspect=src/example.zig ;;
+      zig) repo=fixtures/zig-relationships; inspect=src/relations.zig ;;
       go) repo=fixtures/go-symbols; inspect=src/example.go ;;
       javascript) repo=fixtures/javascript-symbols; inspect=src/example.mjs ;;
       lua) repo=fixtures/lua-symbols; inspect=src/example.lua ;;
@@ -1539,7 +1539,7 @@ PY
   python3 - "$ARTIFACT_DIR/symbol-relationships-zig.json" "$ARTIFACT_DIR/symbol-relationships-go.json" "$ARTIFACT_DIR/symbol-relationships-javascript.json" "$ARTIFACT_DIR/symbol-relationships-lua.json" "$ARTIFACT_DIR/symbol-relationships-typescript.json" "$ARTIFACT_DIR/symbol-relationships-tsx.json" "$ARTIFACT_DIR/symbol-relationships-rust.json" <<'PY' || return 1
 import json, sys
 cases = [
-    (sys.argv[1], 'tree-sitter-zig-relations', {'contains'}, False, None),
+    (sys.argv[1], 'tree-sitter-zig-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved', 'unknown'}, True, None),
     (sys.argv[2], 'tree-sitter-go-relations', {'contains'}, False, None),
     (sys.argv[3], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}, True, ('symbol:src/example.mjs:topFunction:function', 'symbol:src/example.mjs:innerFunction:function', {'contains', 'call'}, {'javascript definition containment', 'javascript direct call expression'})),
     (sys.argv[4], 'tree-sitter-lua-relations', {'contains', 'reference', 'call', 'unresolved', 'unknown'}, True, ('file:src/example.lua', 'symbol:src/example.lua:exports:variable', {'contains', 'reference'}, {'lua module-level symbol containment', 'lua identifier reference syntax'})),
