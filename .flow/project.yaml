@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0112"
   active_run_id: null
   last_completed_feature_id: "0111"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 112
+  next_id: 113
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -473,6 +473,10 @@ features:
       slug: realistic-zig-relationship-golden
       path: .flow/features/0111_realistic-zig-relationship-golden
       created_at: 2026-05-31T23:02:09.424Z
+    - id: "0112"
+      slug: relationship-fixture-realism-matrix
+      path: .flow/features/0112_relationship-fixture-realism-matrix
+      created_at: 2026-05-31T23:30:31.595Z
 intake:
   mode: roadmap
   summary: null
