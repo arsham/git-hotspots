@@ -77,10 +77,16 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
   - unresolved and external\-string endpoints are caveated; no package, build graph, namespace, type, method, comptime, or generated\-code truth is fabricated
   - symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
 
-| Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveats |
+| Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveat refs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| contains | source_to_target | file:src/example.zig | symbol:src/example.zig:alpha:function | false | tree\-sitter\-zig\-relations | working\-tree:src/example.zig | fresh | ok | medium | zig definition containment | candidate relation evidence only; file\-level Git evidence remains product truth; bounded Zig syntax proof: contains, @import strings, direct identifier calls, local identifier references, unresolved identifiers, and ambiguous member or comptime syntax; unresolved and external\-string endpoints are caveated; no package, build graph, namespace, type, method, comptime, or generated\-code truth is fabricated; symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction |
-| contains | source_to_target | file:src/example.zig | symbol:src/example.zig:zebra:function | false | tree\-sitter\-zig\-relations | working\-tree:src/example.zig | fresh | ok | medium | zig definition containment | candidate relation evidence only; file\-level Git evidence remains product truth; bounded Zig syntax proof: contains, @import strings, direct identifier calls, local identifier references, unresolved identifiers, and ambiguous member or comptime syntax; unresolved and external\-string endpoints are caveated; no package, build graph, namespace, type, method, comptime, or generated\-code truth is fabricated; symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction |
+| contains | source_to_target | file:src/example.zig | symbol:src/example.zig:alpha:function | false | tree\-sitter\-zig\-relations | working\-tree:src/example.zig | fresh | ok | medium | zig definition containment | C1, C2, C3, C4 |
+| contains | source_to_target | file:src/example.zig | symbol:src/example.zig:zebra:function | false | tree\-sitter\-zig\-relations | working\-tree:src/example.zig | fresh | ok | medium | zig definition containment | C1, C2, C3, C4 |
+
+- Row caveat references:
+  - C1: candidate relation evidence only; file\-level Git evidence remains product truth
+  - C2: bounded Zig syntax proof: contains, @import strings, direct identifier calls, local identifier references, unresolved identifiers, and ambiguous member or comptime syntax
+  - C3: unresolved and external\-string endpoints are caveated; no package, build graph, namespace, type, method, comptime, or generated\-code truth is fabricated
+  - C4: symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
 
 ## Caveats
 

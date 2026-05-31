@@ -3,6 +3,7 @@ const model = @import("model.zig");
 const fmt = @import("report_format.zig");
 const historical = @import("report_historical_symbols.zig");
 const report_symbols = @import("report_symbols.zig");
+const relation_caveats = @import("report_relation_caveats.zig");
 
 pub fn renderTable(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
     try writer.print("git-hotspots: file-level Git-history investigation prompts\n", .{});
@@ -70,11 +71,13 @@ fn renderSymbolRelationshipRows(writer: anytype, analysis: model.Analysis, repor
         try writer.print("  none\n", .{});
         return;
     }
-    for (report.records[0..shown]) |record| {
+    const shown_records = report.records[0..shown];
+    for (shown_records, 0..) |record, row_index| {
         try writer.print("  {s} {s} source={s} target={s} unresolved={} provider={s} input={s} freshness={s} failure={s} confidence={s} basis={s} caveats=", .{ @tagName(record.kind), @tagName(record.direction), record.source_key, record.target_key, std.mem.startsWith(u8, record.target_key, "unresolved:"), record.provider_name, record.provider_input_identity, @tagName(record.freshness), @tagName(record.failure), @tagName(record.confidence), record.evidence_basis });
-        try fmt.renderCaveatInline(writer, record.caveats);
+        try relation_caveats.renderTableRefs(writer, shown_records, row_index);
         try writer.writeByte('\n');
     }
+    try relation_caveats.renderTableSummary(writer, shown_records);
 }
 
 fn renderHistoricalSymbolRows(writer: anytype, analysis: model.Analysis, report: model.HistoricalSymbolReport) !void {

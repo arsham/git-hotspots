@@ -245,7 +245,9 @@ for retained ranked-file candidates:
 Relationship evidence currently comes from local Zig, Go, Python, JavaScript,
 Lua, Rust, TypeScript, and TSX Tree-sitter lanes. It reports source and target
 endpoints, unresolved targets, provider identity, freshness, failure,
-confidence, caveats, record bounds, and omitted counts. It is caveated
+confidence, caveats, record bounds, and omitted counts. Human table and
+Markdown output compact repeated row caveats into stable `C1`-style references
+plus one caveat summary; JSON keeps per-record caveat arrays. It is caveated
 investigation context only, not call-graph truth, dependency proof, ownership,
 developer metrics, bug prediction, scoring replacement, or a ranking input.
 

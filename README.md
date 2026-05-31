@@ -332,7 +332,9 @@ prediction, scoring replacement, or a ranking input.
 retained ranked-file candidates in Zig, Go, Python, JavaScript, Lua, Rust,
 TypeScript, and TSX lanes, and reports source and target endpoints, unresolved
 targets, provider identity, freshness, failure, confidence, caveats, record
-bounds, and omitted counts. Relationship evidence is caveated investigation
+bounds, and omitted counts. Human table and Markdown output compact repeated
+row caveats into stable `C1`-style references plus one caveat summary; JSON
+keeps per-record caveat arrays. Relationship evidence is caveated investigation
 context only: it is not call-graph truth, dependency proof, ownership,
 developer metrics, bug prediction, scoring replacement, or a ranking input.
 

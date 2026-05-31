@@ -1470,7 +1470,11 @@ fixture_json_checks() {
   diff -u "$SYMBOL_RELATIONSHIPS_TABLE" "$SYMBOL_RELATIONSHIPS_TABLE_B" >/dev/null || return 1
   grep -q -- '"symbol_relationships"' "$SYMBOL_RELATIONSHIPS_JSON" || return 1
   grep -q -- '## Symbol relationships' "$SYMBOL_RELATIONSHIPS_MD" || return 1
+  grep -q -- 'Caveat refs' "$SYMBOL_RELATIONSHIPS_MD" || return 1
+  grep -q -- 'Row caveat references' "$SYMBOL_RELATIONSHIPS_MD" || return 1
   grep -q -- 'symbol relationships for retained ranked files:' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
+  grep -q -- 'caveats=C1' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
+  grep -q -- 'row caveats:' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   ! grep -Eiq -- 'Fixture Author|fixture@example|https?://|ssh://|git@|/home/|/Users/|source snippet|commit message' "$SYMBOL_RELATIONSHIPS_JSON" "$SYMBOL_RELATIONSHIPS_MD" "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   for lane in zig go javascript lua typescript tsx rust; do
     case "$lane" in
@@ -1502,7 +1506,11 @@ fixture_json_checks() {
     diff -u "$lane_table" "$lane_table_b" >/dev/null || return 1
     grep -q -- '"symbol_relationships"' "$lane_json" || return 1
     grep -q -- '## Symbol relationships' "$lane_md" || return 1
+    grep -q -- 'Caveat refs' "$lane_md" || return 1
+    grep -q -- 'Row caveat references' "$lane_md" || return 1
     grep -q -- 'symbol relationships for retained ranked files:' "$lane_table" || return 1
+    grep -q -- 'caveats=C1' "$lane_table" || return 1
+    grep -q -- 'row caveats:' "$lane_table" || return 1
     ! grep -Eiq -- 'Fixture Author|fixture@example|https?://|ssh://|git@|/home/|/Users/|source snippet|commit message' "$lane_json" "$lane_md" "$lane_table" || return 1
   done
   have_python || return 1

@@ -4,6 +4,7 @@ const version = @import("version.zig");
 const fmt = @import("report_format.zig");
 const historical = @import("report_historical_symbols.zig");
 const report_symbols = @import("report_symbols.zig");
+const relation_caveats = @import("report_relation_caveats.zig");
 
 pub fn renderMarkdown(allocator: std.mem.Allocator, writer: anytype, analysis: model.Analysis) !void {
     try writer.writeAll("# git-hotspots report\n\n");
@@ -258,13 +259,14 @@ fn renderSymbolRelationshipReportMarkdown(writer: anytype, analysis: model.Analy
         }
     }
     try writer.writeByte('\n');
-    try writer.writeAll("| Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveats |\n");
+    try writer.writeAll("| Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveat refs |\n");
     try writer.writeAll("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
     if (report.records.len == 0) {
         try writer.writeAll("| None | - | - | - | - | - | - | - | - | - | - | - |\n\n");
         return;
     }
-    for (report.records[0..shown]) |record| {
+    const shown_records = report.records[0..shown];
+    for (shown_records, 0..) |record, row_index| {
         try writer.print("| {s} | {s} | ", .{ @tagName(record.kind), @tagName(record.direction) });
         try fmt.markdownText(writer, record.source_key);
         try writer.writeAll(" | ");
@@ -276,9 +278,10 @@ fn renderSymbolRelationshipReportMarkdown(writer: anytype, analysis: model.Analy
         try writer.print(" | {s} | {s} | {s} | ", .{ @tagName(record.freshness), @tagName(record.failure), @tagName(record.confidence) });
         try fmt.markdownText(writer, record.evidence_basis);
         try writer.writeAll(" | ");
-        try fmt.renderMarkdownCaveatInline(writer, record.caveats);
+        try relation_caveats.renderMarkdownRefs(writer, shown_records, row_index);
         try writer.writeAll(" |\n");
     }
+    try relation_caveats.renderMarkdownSummary(writer, shown_records);
     try writer.writeByte('\n');
 }
 

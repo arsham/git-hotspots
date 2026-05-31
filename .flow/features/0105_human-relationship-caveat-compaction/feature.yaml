@@ -4,7 +4,7 @@ feature:
   slug: human-relationship-caveat-compaction
   title: Human relationship caveat compaction
   lane: standard
-  status: shaping
+  status: done
   autonomy_default: ask
 intent:
   problem: Relationship evidence is useful but table and Markdown reports repeat
@@ -51,7 +51,7 @@ proposal:
   risk_assessment: null
   quality_plan: null
 project_feature:
-  lifecycle_state: null
+  lifecycle_state: done
   outcome_contract_ref: null
   quality_plan: null
   authority_refinement: null
@@ -81,7 +81,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Find caveat rendering seam
       goal: Identify the shared relationship caveat rendering seam and choose a
         deterministic compact marker/summary design for human outputs.
@@ -114,7 +114,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Implement human caveat compaction
       goal: Implement deterministic compact caveat summaries and row references for
         relationship table and Markdown output while preserving JSON records.
@@ -144,7 +144,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Update fixtures docs and validation
       goal: Update expected outputs, docs/man wording, and validation checks for
         compact human caveat presentation and prove JSON compatibility.
@@ -225,7 +225,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-31T17:22:50.884Z
-  updated_at: 2026-05-31T17:29:15.472Z
+  updated_at: 2026-05-31T18:01:09.344Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-31T17:29:15.472Z
