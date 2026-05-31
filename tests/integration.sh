@@ -373,6 +373,35 @@ grep -Fq -- 'evidence summary:' "$tmp_dir/git-hotspots-symbol-relationships.txt"
 grep -Fq -- 'human_display_sample_omitted=' "$tmp_dir/git-hotspots-symbol-relationships.txt"
 grep -Fq -- 'caveats=C1' "$tmp_dir/git-hotspots-symbol-relationships.txt"
 grep -Fq -- 'row caveats:' "$tmp_dir/git-hotspots-symbol-relationships.txt"
+
+provider_cap_repo="$tmp_dir/provider-cap-relations"
+mkdir -p "$provider_cap_repo/src"
+git init -q -b main "$provider_cap_repo"
+git -C "$provider_cap_repo" config user.name "Fixture Author"
+git -C "$provider_cap_repo" config user.email "fixture@example.invalid"
+git -C "$provider_cap_repo" config commit.gpgsign false
+python3 - "$provider_cap_repo/src/capped.py" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+lines = []
+for index in range(80):
+    lines.append(f"def relation_{index:02d}():\n")
+    lines.append("    return None\n\n")
+path.write_text("".join(lines), encoding="utf-8")
+PY
+git -C "$provider_cap_repo" add -A
+GIT_AUTHOR_DATE='2026-01-01T00:00:00+0000' GIT_COMMITTER_DATE='2026-01-01T00:00:00+0000' git -C "$provider_cap_repo" commit -q -m 'initial capped relations'
+"$EXE" --repo "$provider_cap_repo" --inspect src/capped.py --symbols --symbol-relationships --symbol-limit 4 --format markdown > "$tmp_dir/git-hotspots-provider-cap-relationships.md"
+grep -Fq -- 'human_display_sample_omitted=' "$tmp_dir/git-hotspots-provider-cap-relationships.md"
+grep -Fq -- 'provider_partial_evidence_omitted=' "$tmp_dir/git-hotspots-provider-cap-relationships.md"
+grep -Fq -- 'provider_caps_reached=1' "$tmp_dir/git-hotspots-provider-cap-relationships.md"
+"$EXE" --repo "$provider_cap_repo" --inspect src/capped.py --symbols --symbol-relationships --symbol-limit 4 --format table > "$tmp_dir/git-hotspots-provider-cap-relationships.txt"
+grep -Fq -- 'human_display_sample_omitted=' "$tmp_dir/git-hotspots-provider-cap-relationships.txt"
+grep -Fq -- 'provider_partial_evidence_omitted=' "$tmp_dir/git-hotspots-provider-cap-relationships.txt"
+grep -Fq -- 'provider_caps_reached=1' "$tmp_dir/git-hotspots-provider-cap-relationships.txt"
+
 "$EXE" --repo fixtures/symbols --inspect src/example.zig --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-zig.json"
 diff -u fixtures/expected/symbol-relationships-zig.json "$tmp_dir/git-hotspots-symbol-relationships-zig.json"
 "$EXE" --repo fixtures/go-symbols --inspect src/example.go --symbols --symbol-relationships --symbol-limit 6 --format json > "$tmp_dir/git-hotspots-symbol-relationships-go.json"
