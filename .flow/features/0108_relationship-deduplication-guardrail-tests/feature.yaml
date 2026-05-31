@@ -4,7 +4,7 @@ feature:
   slug: relationship-deduplication-guardrail-tests
   title: Relationship deduplication guardrail tests
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Relationship outputs can contain duplicate-looking source/target
@@ -63,7 +63,7 @@ proposal:
     materialised_at: 2026-05-31T21:18:49.370Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -123,7 +123,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Locate duplicate-looking evidence cases
       goal: Find current fixture or integration outputs with repeated endpoints that
         differ by relation kind or evidence basis, without changing production
@@ -153,7 +153,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Add guardrail assertions
       goal: Add tests or integration assertions that preserve meaningful
         duplicate-looking records and document exact-duplicate behaviour only if
@@ -182,7 +182,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Validation and close-out proof
       goal: Ensure the guardrail runs in normal validation and close-out evidence is
         complete.
@@ -255,7 +255,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-31T21:14:16.245Z
-  updated_at: 2026-05-31T21:19:03.243Z
+  updated_at: 2026-05-31T21:44:23.164Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-31T21:19:03.243Z

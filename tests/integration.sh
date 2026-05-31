@@ -350,6 +350,20 @@ assert relationships['records'], 'expected Python relation records'
 assert any(item['target_unresolved'] for item in relationships['records'])
 assert all('source_endpoint' in item and 'target_endpoint' in item for item in relationships['records'])
 assert all(item['provider']['input'].startswith('working-tree:') for item in relationships['records'])
+def records_for(source, target):
+    return [
+        item for item in relationships['records']
+        if item['source_endpoint'] == source and item['target_endpoint'] == target
+    ]
+method_inner_records = records_for(
+    'symbol:src/example.py:method:method',
+    'symbol:src/example.py:method_inner:function',
+)
+assert {item['kind'] for item in method_inner_records} == {'contains', 'reference'}
+assert {item['evidence_basis'] for item in method_inner_records} == {
+    'python definition containment',
+    'python identifier reference syntax',
+}
 assert 'call-graph truth' not in json.dumps(data)
 PY
 "$EXE" --repo fixtures/python-symbols --inspect src/example.py --symbols --symbol-relationships --symbol-limit 4 --format json > "$tmp_dir/git-hotspots-symbol-relationships-2.json"
@@ -419,15 +433,15 @@ diff -u fixtures/expected/symbol-relationships-rust.json "$tmp_dir/git-hotspots-
 python3 - "$tmp_dir/git-hotspots-symbol-relationships-zig.json" "$tmp_dir/git-hotspots-symbol-relationships-go.json" "$tmp_dir/git-hotspots-symbol-relationships-javascript.json" "$tmp_dir/git-hotspots-symbol-relationships-lua.json" "$tmp_dir/git-hotspots-symbol-relationships-typescript.json" "$tmp_dir/git-hotspots-symbol-relationships-tsx.json" "$tmp_dir/git-hotspots-symbol-relationships-rust.json" <<'PY'
 import json, sys
 cases = [
-    (sys.argv[1], 'tree-sitter-zig-relations', {'contains'}, False),
-    (sys.argv[2], 'tree-sitter-go-relations', {'contains'}, False),
-    (sys.argv[3], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}, True),
-    (sys.argv[4], 'tree-sitter-lua-relations', {'contains', 'reference', 'call', 'unresolved', 'unknown'}, True),
-    (sys.argv[5], 'tree-sitter-typescript-relations', {'contains', 'call', 'unresolved', 'unknown'}, True),
-    (sys.argv[6], 'tree-sitter-tsx-relations', {'contains', 'reference', 'unresolved', 'unknown'}, True),
-    (sys.argv[7], 'tree-sitter-rust-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved', 'unknown'}, True),
+    (sys.argv[1], 'tree-sitter-zig-relations', {'contains'}, False, None),
+    (sys.argv[2], 'tree-sitter-go-relations', {'contains'}, False, None),
+    (sys.argv[3], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}, True, ('symbol:src/example.mjs:topFunction:function', 'symbol:src/example.mjs:innerFunction:function', {'contains', 'call'}, {'javascript definition containment', 'javascript direct call expression'})),
+    (sys.argv[4], 'tree-sitter-lua-relations', {'contains', 'reference', 'call', 'unresolved', 'unknown'}, True, ('file:src/example.lua', 'symbol:src/example.lua:exports:variable', {'contains', 'reference'}, {'lua module-level symbol containment', 'lua identifier reference syntax'})),
+    (sys.argv[5], 'tree-sitter-typescript-relations', {'contains', 'call', 'unresolved', 'unknown'}, True, ('symbol:src/example.ts:compute:function', 'symbol:src/example.ts:localHelper:function', {'contains', 'call'}, {'typescript definition containment', 'typescript/tsx direct call expression'})),
+    (sys.argv[6], 'tree-sitter-tsx-relations', {'contains', 'reference', 'unresolved', 'unknown'}, True, None),
+    (sys.argv[7], 'tree-sitter-rust-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved', 'unknown'}, True, ('symbol:src/relations.rs:inner:module', 'symbol:src/relations.rs:Record:type', {'contains', 'reference'}, {'rust definition containment', 'rust identifier reference syntax'})),
 ]
-for path, provider_name, expected_kinds, require_unresolved in cases:
+for path, provider_name, expected_kinds, require_unresolved, duplicate_guard in cases:
     with open(path, encoding='utf-8') as fh:
         data = json.load(fh)
     relationships = data['symbol_relationships']
@@ -441,6 +455,14 @@ for path, provider_name, expected_kinds, require_unresolved in cases:
     if require_unresolved:
         assert any(item['target_unresolved'] for item in relationships['records']), path
     assert all(item['provider']['input'].startswith('working-tree:') for item in relationships['records'])
+    if duplicate_guard is not None:
+        source, target, expected_duplicate_kinds, expected_duplicate_bases = duplicate_guard
+        matches = [
+            item for item in relationships['records']
+            if item['source_endpoint'] == source and item['target_endpoint'] == target
+        ]
+        assert {item['kind'] for item in matches} == expected_duplicate_kinds, path
+        assert {item['evidence_basis'] for item in matches} == expected_duplicate_bases, path
     assert 'call-graph truth' not in json.dumps(data)
 PY
 for lane in zig go javascript lua typescript tsx rust; do
