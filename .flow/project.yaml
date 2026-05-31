@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 107
+  next_id: 108
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -453,6 +453,10 @@ features:
       slug: human-relationship-uncertainty-summary
       path: .flow/features/0106_human-relationship-uncertainty-summary
       created_at: 2026-05-31T18:06:24.453Z
+    - id: "0107"
+      slug: provider-cap-wording-hardening
+      path: .flow/features/0107_provider-cap-wording-hardening
+      created_at: 2026-05-31T19:20:44.952Z
 intake:
   mode: roadmap
   summary: null

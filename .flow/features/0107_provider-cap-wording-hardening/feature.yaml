@@ -1,0 +1,587 @@
+schema: flow-feature.v1
+feature:
+  id: "0107"
+  slug: provider-cap-wording-hardening
+  title: Provider cap wording hardening
+  lane: standard
+  status: shaping
+  autonomy_default: ask
+intent:
+  problem: Relationship human outputs now include compact caveats and uncertainty
+    summaries, but display-limit omissions and provider-cap omissions can still
+    look too similar in table and Markdown wording.
+  outcome: Table and Markdown relationship reports make display-limit omissions
+    and provider-cap omissions visibly distinct while preserving JSON
+    compatibility, provider cap algorithms, display-limit behaviour,
+    relationship semantics, and all scoring/ranking/provider-admission surfaces.
+  acceptance:
+    - Table relationship output distinguishes display-limit omissions from
+      provider-cap omissions.
+    - Markdown relationship output distinguishes display-limit omissions from
+      provider-cap omissions.
+    - Display-limit wording reads as human presentation sampling, not missing
+      provider evidence.
+    - Provider-cap wording reads as partial provider evidence, not merely hidden
+      rows.
+    - JSON schema, JSON fields, and per-record relationship evidence remain
+      compatible.
+    - No CLI flags, scoring/ranking/confidence, provider admission, relationship
+      semantics, cap algorithms, cache/network/telemetry,
+      release/tag/remote/package behaviour change.
+planning:
+  state: shaped
+  summary: B002 follow-up from the 0104 audit after 0105 caveat compaction and
+    0106 uncertainty summaries. This slice hardens human wording only for the
+    display-limit versus provider-cap distinction.
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Feature 0107 is a B002 follow-up slice from the 0104 audit after 0105
+      caveat compaction and 0106 uncertainty summaries. It hardens human
+      omission wording only, preserving JSON, provider algorithms, cap
+      behaviour, scoring/ranking, provider admission, relation semantics, and
+      release/remote/package surfaces.
+    checked_at: 2026-05-31T19:23:28.499Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment: null
+  quality_plan: null
+project_feature:
+  lifecycle_state: null
+  outcome_contract_ref: null
+  quality_plan: null
+  authority_refinement: null
+verification_independence_requirement: null
+readiness:
+  requirements_ready: true
+  acceptance_ready: false
+  packet_plan_ready: false
+  dependencies_ready: true
+  implementation_ready: false
+context:
+  roadmap_item_id: null
+  detached_reason: No active roadmap work; detached intake from the 0104
+    relationship output noise audit successor list.
+  depends_on_feature_ids: []
+  blocked_by: []
+design:
+  rough_shape:
+    - Find the current table and Markdown wording seam for relationship
+      display-limit and provider-cap omissions.
+    - Adjust human wording so display/sample omissions and provider partialness
+      are visibly distinct without changing JSON or algorithms.
+    - Update golden fixtures, docs/man wording, and validation assertions for
+      the distinction.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Locate omission wording seams
+      goal: Identify table and Markdown rendering seams and fixture cases for
+        display-limit and provider-cap omission wording without behaviour
+        changes.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/report_table.zig, src/report_markdown.zig,
+          src/report_relation_summary.zig,
+          fixtures/expected/symbol-relationships*.{txt,md}."
+        - "In scope: map existing display-limit and provider-cap wording/data
+          flow; choose minimal helper or wording refactor inside human
+          renderers."
+        - "Out of scope: JSON renderer/model/schema, provider algorithms, cap
+          limits, ordering, CLI options, scoring/ranking/provider admission."
+        - "Protected: existing JSON fixtures and relationship record semantics
+          must remain compatible."
+        - "Dependencies: none."
+        - "Validation/evidence: record file seams and fixture cases in durable
+          evidence; no behavioural commit required before P2."
+        - "Review focus: prove implementation target is human-output wording
+          only."
+        - "Escalate if: distinguishing wording requires data not already
+          available to human renderers or would require JSON/model/schema
+          changes."
+        - "Done boundary: renderer seam and fixture coverage plan are clear
+          enough for P2."
+      verification_commands:
+        - git diff --check
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: Implement human omission wording distinction
+      goal: Change table and Markdown wording so display-limit omissions and
+        provider-cap omissions are visibly distinct while preserving data and
+        semantics.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: src/report_table.zig, src/report_markdown.zig,
+          src/report_relation_summary.zig."
+        - "In scope: human wording/helper changes for display/sample omission
+          versus provider partialness; small internal refactor if needed."
+        - "Out of scope: changing counts, caps, record inclusion, JSON output,
+          CLI flags, provider behaviour, scoring/ranking/confidence, relation
+          kinds."
+        - "Protected: table/Markdown remain deterministic and evidence-only;
+          JSON remains compatible."
+        - "Dependencies: P1 seam selection."
+        - "Validation/evidence: targeted fixture regeneration or assertions for
+          table/Markdown distinction; JSON compatibility check."
+        - "Review focus: wording is distinct, accurate, concise, and not
+          overclaiming."
+        - "Escalate if: implementation requires changing provider cap algorithm
+          or public JSON fields."
+        - "Done boundary: code compiles and human outputs distinguish both
+          omission types."
+      verification_commands:
+        - zig build test
+        - tests/integration.sh ./zig-out/bin/git-hotspots
+    - id: P3
+      depends_on:
+        - P2
+      status: planned
+      title: Fixtures docs and validation
+      goal: Update fixtures, docs/man wording, and validation checks so the
+        distinction is durable and public claims stay bounded.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: fixtures/expected/symbol-relationships*.{txt,md},
+          tests/integration.sh, tools/validate.sh, README.md,
+          docs/user-guide.md, man/git-hotspots.1."
+        - "In scope: golden fixture updates, integration/validation assertions,
+          public docs/man wording for display-limit versus provider-cap
+          distinction."
+        - "Out of scope: CHANGELOG/release notes unless a release boundary is
+          later approved; package metadata; remote/tag/release side effects."
+        - "Protected: docs must preserve local-first deterministic evidence
+          framing and avoid
+          call-graph/dependency/ownership/quality/developer/performance/bug-pre\
+          diction claims."
+        - "Dependencies: P2 output wording."
+        - "Validation/evidence: git diff --check, zig build test, zig build
+          validate; reviewer must independently discover and run credible
+          lint/test gates."
+        - "Review focus: public docs and fixtures match behaviour without
+          broadening claims."
+        - "Escalate if: docs require a product-positioning change or release
+          note decision."
+        - "Done boundary: validation passes and no protected surface drift is
+          observed."
+      verification_commands:
+        - git diff --check
+        - zig build test
+        - zig build validate
+  output_contract:
+    surfaces:
+      - relationship table output
+      - relationship Markdown output
+      - README.md
+      - docs/user-guide.md
+      - man/git-hotspots.1
+      - fixtures and validation assertions
+    protected_surfaces:
+      - JSON schema and JSON relationship fields
+      - per-record relationship evidence and caveats
+      - CLI flags and option validation
+      - file/symbol scoring ranking and confidence
+      - provider admission matrix
+      - relationship semantics and provider cap algorithms
+      - display limit behaviour and ordering
+      - release state tags remotes packages network telemetry cache behaviour
+    public_claim_constraints:
+      - syntax evidence only
+      - no call-graph truth
+      - no dependency proof
+      - no ownership quality developer metric or bug prediction claims
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+dispatch:
+  status: prepared
+  prepared_at: 2026-05-31T19:25:59.085Z
+  assurance_level: sensitive
+  control_model: split
+  execution_topology: scaffold_fill
+  model_plan:
+    control_plane_model: Balanced
+    runner_model: Balanced
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: Strong
+    fill_worker_model: Fast
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Use scaffold_fill posture instead of unrestricted Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0107"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids: []
+    feature:
+      title: Provider cap wording hardening
+      problem: Relationship human outputs now include compact caveats and uncertainty
+        summaries, but display-limit omissions and provider-cap omissions can
+        still look too similar in table and Markdown wording.
+      outcome: Table and Markdown relationship reports make display-limit omissions
+        and provider-cap omissions visibly distinct while preserving JSON
+        compatibility, provider cap algorithms, display-limit behaviour,
+        relationship semantics, and all scoring/ranking/provider-admission
+        surfaces.
+      acceptance:
+        - Table relationship output distinguishes display-limit omissions from
+          provider-cap omissions.
+        - Markdown relationship output distinguishes display-limit omissions
+          from provider-cap omissions.
+        - Display-limit wording reads as human presentation sampling, not
+          missing provider evidence.
+        - Provider-cap wording reads as partial provider evidence, not merely
+          hidden rows.
+        - JSON schema, JSON fields, and per-record relationship evidence remain
+          compatible.
+        - No CLI flags, scoring/ranking/confidence, provider admission,
+          relationship semantics, cap algorithms, cache/network/telemetry,
+          release/tag/remote/package behaviour change.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Feature 0107 is a B002 follow-up slice from the 0104 audit after 0105
+        caveat compaction and 0106 uncertainty summaries. It hardens human
+        omission wording only, preserving JSON, provider algorithms, cap
+        behaviour, scoring/ranking, provider admission, relation semantics, and
+        release/remote/package surfaces.
+      checked_at: 2026-05-31T19:23:28.499Z
+    briefs: []
+    prd_path: .flow/features/0107_provider-cap-wording-hardening/prd.md
+  requirements_contract:
+    source_path: .flow/features/0107_provider-cap-wording-hardening/prd.md
+    source_digest: 18c23d2c4323451a97bfb867c2bf57953fcc821d8a482ae0f88b58ac69bb5614
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: "REQ-001: Table output for --symbol-relationships MUST distinguish
+          display-limit omissions from provider-cap omissions in human wording."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: "REQ-002: Markdown output for --symbol-relationships MUST distinguish
+          display-limit omissions from provider-cap omissions in human wording."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: "REQ-003: Display-limit omission wording MUST describe a
+          presentation/sample limit, not missing provider evidence."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: "REQ-004: Provider-cap omission wording MUST describe partial provider
+          evidence, not merely hidden rows."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: "REQ-005: When both display-limit omissions and provider-cap omissions are
+          present, human output MUST expose both without merging their counts."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: "REQ-006: When only display-limit omissions are present, human output MUST
+          NOT imply provider cap truncation."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: "REQ-007: When only provider-cap omissions are present, human output MUST
+          NOT imply the omitted count is only a display sample choice."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: "REQ-008: When neither omission type is present, human output MUST NOT add
+          noisy zero-value cap wording."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: "REQ-009: JSON report fields, schema, relationship records, per-record
+          caveats, and existing cap fields MUST remain compatible and unchanged
+          unless existing generated values naturally reflect unchanged data."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: "REQ-010: The provider cap algorithm, record cap, display limit behaviour,
+          ordering, scoring, ranking, confidence, and provider admission matrix
+          MUST NOT change."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: "REQ-011: CLI flags, option validation, diagnostics, and default
+          behaviours MUST NOT change."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: "REQ-012: Documentation and man-page wording MUST describe the distinction
+          as deterministic syntax evidence and MUST NOT imply call-graph truth,
+          dependency proof, ownership, code quality, developer metrics, or bug
+          prediction."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: "REQ-013: Golden fixtures or equivalent integration assertions MUST cover
+          table and Markdown wording for display-limit omissions, provider-cap
+          omissions, and their distinction."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: "REQ-014: Validation MUST include git diff --check, zig build test, and
+          zig build validate; close-out review MUST independently discover and
+          run credible project lint and test gates."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#acceptance[1]
+        text: Table and Markdown relationship reports make display-limit omissions and
+          provider-cap omissions visibly different.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#acceptance[2]
+        text: JSON output remains compatible and keeps record-level evidence unchanged.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#acceptance[3]
+        text: Existing uncertainty summaries and compact caveat markers remain present.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#acceptance[4]
+        text: Fixture and documentation updates prove the wording without expanding
+          public claims.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#edge-cases[1]
+        text: "A lane has many emitted records but no provider cap: show only
+          display/sample omission wording where rows are hidden by the human
+          output limit."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#edge-cases[2]
+        text: "A lane reaches the provider cap: state that provider evidence is partial
+          even if only a few rows are shown."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#edge-cases[3]
+        text: "A lane has no relationship rows: do not fabricate omission or cap
+          summaries."
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#edge-cases[4]
+        text: Unsupported relationship lanes stay unsupported and do not gain cap
+          wording.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#verification-notes[1]
+        text: Compare table, Markdown, and JSON fixtures for relationship output.
+        category: verification
+        packet_refs: []
+        verification: Compare table, Markdown, and JSON fixtures for relationship output.
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#verification-notes[2]
+        text: "JSON compatibility should be checked by fixture diff and validation scan:
+          no new human-summary-only keys should be required in JSON."
+        category: verification
+        packet_refs: []
+        verification: "JSON compatibility should be checked by fixture diff and
+          validation scan: no new human-summary-only keys should be required in
+          JSON."
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#verification-notes[3]
+        text: Real-repository validation may use the existing default validation/dogfood
+          ladder; raw private reports must not be committed or printed.
+        category: verification
+        packet_refs: []
+        verification: Real-repository validation may use the existing default
+          validation/dogfood ladder; raw private reports must not be committed
+          or printed.
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: Table and Markdown relationship reports make display-limit omissions
+      and provider-cap omissions visibly distinct while preserving JSON
+      compatibility, provider cap algorithms, display-limit behaviour,
+      relationship semantics, and all scoring/ranking/provider-admission
+      surfaces.
+    acceptance:
+      - Table relationship output distinguishes display-limit omissions from
+        provider-cap omissions.
+      - Markdown relationship output distinguishes display-limit omissions from
+        provider-cap omissions.
+      - Display-limit wording reads as human presentation sampling, not missing
+        provider evidence.
+      - Provider-cap wording reads as partial provider evidence, not merely
+        hidden rows.
+      - JSON schema, JSON fields, and per-record relationship evidence remain
+        compatible.
+      - No CLI flags, scoring/ranking/confidence, provider admission,
+        relationship semantics, cap algorithms, cache/network/telemetry,
+        release/tag/remote/package behaviour change.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig build test
+      - tests/integration.sh ./zig-out/bin/git-hotspots
+      - zig build validate
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+      - verify table and Markdown wording distinguish display-limit sampling
+        from provider-cap partial evidence
+      - verify JSON schema fields and per-record relationship evidence remain
+        compatible
+      - verify provider cap algorithms display-limit behaviour ordering CLI
+        flags scoring ranking confidence provider admission and relation
+        semantics do not change
+      - verify docs and man wording remain evidence-only and avoid unsupported
+        claims
+  decision_budget:
+    allowed_local_decisions:
+      - safe internal refactor inside dispatched scope
+      - local implementation detail changes that do not alter contracts
+      - local wording refinement that preserves display-limit versus
+        provider-cap distinction
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+      - wording ambiguity that may affect public interpretation
+    hard_planner_escalation_triggers:
+      - JSON schema or field change
+      - provider cap algorithm change
+      - display-limit behaviour change
+      - CLI flag or option change
+      - scoring ranking confidence provider admission or relationship semantics
+        change
+      - release tag remote package network telemetry or cache behaviour change
+      - unsupported semantic claims such as call graph dependency ownership
+        quality developer metric or bug prediction
+    protected_surfaces:
+      - JSON schema and JSON relationship fields
+      - per-record relationship evidence and caveats
+      - CLI flags and option validation
+      - file and symbol scoring ranking and confidence
+      - provider admission matrix
+      - relationship semantics and provider cap algorithms
+      - display limit behaviour and ordering
+      - release state tags remotes packages network telemetry cache behaviour
+  fallback_path: deferred_reconcile_decision
+  notes: null
+timestamps:
+  updated_at: 2026-05-31T19:25:59.085Z
