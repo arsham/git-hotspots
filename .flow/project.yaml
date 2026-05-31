@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 105
+  next_id: 106
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -445,6 +445,10 @@ features:
       slug: relationship-output-noise-audit
       path: .flow/features/0104_relationship-output-noise-audit
       created_at: 2026-05-31T16:42:45.804Z
+    - id: "0105"
+      slug: human-relationship-caveat-compaction
+      path: .flow/features/0105_human-relationship-caveat-compaction
+      created_at: 2026-05-31T17:22:50.884Z
 intake:
   mode: roadmap
   summary: null
