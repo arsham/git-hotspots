@@ -4,7 +4,7 @@ feature:
   slug: relationship-output-noise-audit
   title: Relationship output noise audit
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Relationship evidence now has broad provider coverage, but the next
@@ -64,7 +64,7 @@ proposal:
     materialised_at: 2026-05-31T16:48:44.729Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -123,7 +123,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Collect relationship output samples
       goal: Run bounded public relationship-output command shapes and record
         privacy-safe counts and observations.
@@ -153,7 +153,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Classify noise and follow-up targets
       goal: Turn sampled evidence into actionable classifications and successor
         recommendations.
@@ -183,7 +183,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Validation and close-out evidence
       goal: Prove the docs-only audit did not disturb product behaviour and record
         fresh validation evidence.
@@ -258,7 +258,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-31T16:42:45.804Z
-  updated_at: 2026-05-31T16:48:56.244Z
+  updated_at: 2026-05-31T17:16:47.248Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-31T16:48:56.244Z
