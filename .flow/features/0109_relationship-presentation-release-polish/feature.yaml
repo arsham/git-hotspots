@@ -4,7 +4,7 @@ feature:
   slug: relationship-presentation-release-polish
   title: Relationship presentation release polish
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The relationship presentation work now spans caveat compaction,
@@ -62,7 +62,7 @@ proposal:
     materialised_at: 2026-05-31T21:53:33.068Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -118,7 +118,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Audit relationship presentation docs
       goal: Compare release-facing docs, man page, help surfaces, and validation
         checks against the final relationship presentation behaviour.
@@ -145,7 +145,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Apply narrow docs and validation polish
       goal: Update only necessary docs/man/help wording and validation checks so
         relationship presentation reads coherently.
@@ -175,7 +175,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Close-out validation proof
       goal: Run required validation and leave durable evidence for docs polish
         completion.
@@ -244,7 +244,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-05-31T21:49:05.435Z
-  updated_at: 2026-05-31T21:54:01.483Z
+  updated_at: 2026-05-31T22:06:30.150Z
 dispatch:
   status: prepared
   prepared_at: 2026-05-31T21:54:01.483Z
