@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0108"
   active_run_id: null
   last_completed_feature_id: "0107"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 108
+  next_id: 109
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -457,6 +457,10 @@ features:
       slug: provider-cap-wording-hardening
       path: .flow/features/0107_provider-cap-wording-hardening
       created_at: 2026-05-31T19:20:44.952Z
+    - id: "0108"
+      slug: relationship-deduplication-guardrail-tests
+      path: .flow/features/0108_relationship-deduplication-guardrail-tests
+      created_at: 2026-05-31T21:14:16.245Z
 intake:
   mode: roadmap
   summary: null

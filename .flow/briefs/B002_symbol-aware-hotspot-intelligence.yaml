@@ -200,6 +200,11 @@ durable_decisions:
     scoring/ranking/confidence, provider admission, relationship semantics,
     cache/network/telemetry behaviour, release state, tags, remotes, and
     packages. Deduplication and provider admission remain separate slices."
+  - "Shape 0108 as a tests-only deduplication guardrail successor from the
+    relationship output noise audit: preserve duplicate-looking relationship
+    records when relation kind or evidence basis differs; no production
+    deduplication, JSON schema, provider algorithm, scoring, ranking, CLI,
+    release, remote, package, network, telemetry, or cache changes."
 links:
   roadmap_item_id: null
   feature_ids:
@@ -229,4 +234,4 @@ links:
     - "0107"
 timestamps:
   created_at: 2026-05-27T19:12:06.269Z
-  updated_at: 2026-05-31T19:23:14.621Z
+  updated_at: 2026-05-31T21:17:11.520Z
