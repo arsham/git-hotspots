@@ -218,6 +218,13 @@ durable_decisions:
     change runtime behaviour, CLI flags, JSON schema, report fields, provider
     algorithms, scoring, ranking, cache, network, telemetry, release, tag,
     remote, package, or publishing behaviour."
+  - "Shape 0111 as a fixture/validation successor to the 0110 relationship
+    output sample realism audit: add deterministic realistic Zig relationship
+    golden coverage for mixed relation kinds, unresolved or unknown evidence,
+    human display omissions, and provider-cap omission if stable, while
+    preserving runtime behaviour, CLI flags, JSON schema, provider algorithms,
+    relationship semantics, scoring, ranking, cache, network, telemetry,
+    release, tag, remote, package, and publishing behaviour."
 links:
   roadmap_item_id: null
   feature_ids:
@@ -247,4 +254,4 @@ links:
     - "0107"
 timestamps:
   created_at: 2026-05-27T19:12:06.269Z
-  updated_at: 2026-05-31T22:18:54.578Z
+  updated_at: 2026-05-31T23:03:56.536Z
