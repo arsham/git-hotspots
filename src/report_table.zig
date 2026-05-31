@@ -64,7 +64,7 @@ pub fn renderTable(allocator: std.mem.Allocator, writer: anytype, analysis: mode
 fn renderSymbolRelationshipRows(writer: anytype, analysis: model.Analysis, report: model.RelationAggregationReport) !void {
     const shown = @min(report.records.len, analysis.symbol_display.limit);
     try writer.print("\nsymbol relationships for retained ranked files:\n", .{});
-    try writer.print("  summary: candidates={d} retained_candidates={d} current_symbol_candidates={d} providers={d} records={d} shown={d} omitted={d} record_bound={d} record_bound_exceeded={} omitted_records={d}\n", .{ report.candidate_file_count, report.retained_candidate_file_count, report.current_symbol_candidate_count, report.providers.len, report.records.len, shown, report.records.len - shown, report.relation_record_bound, report.relation_record_bound_exceeded, report.omitted_record_count });
+    try writer.print("  summary: candidates={d} retained_candidates={d} current_symbol_candidates={d} providers={d} records={d} human_display_shown={d} human_display_sample_omitted={d} record_bound={d} record_bound_exceeded={} omitted_records={d}\n", .{ report.candidate_file_count, report.retained_candidate_file_count, report.current_symbol_candidate_count, report.providers.len, report.records.len, shown, report.records.len - shown, report.relation_record_bound, report.relation_record_bound_exceeded, report.omitted_record_count });
     try writer.print("  caveats: ", .{});
     try fmt.renderCaveatInline(writer, report.caveats);
     try writer.writeByte('\n');

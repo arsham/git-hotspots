@@ -65,7 +65,7 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
 - Provider reports: 1
 - Relation records: 2
 - Shown records: 2
-- Omitted records: 0
+- Records hidden by human display limit: 0
 - Human display limit: 6 (explicit)
 - Relation record bound: 1024
 - Relation record bound exceeded: false

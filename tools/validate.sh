@@ -616,7 +616,7 @@ assert r'markdown\|path.py' in py_symbols_path_text, 'Markdown-sensitive Python 
 relationship_text = read(symbol_relationships_md)
 assert '## Symbol relationships' in relationship_text, 'relationship markdown section missing'
 assert '- Shown records: 4' in relationship_text, 'relationship markdown shown count missing'
-assert '- Omitted records: 16' in relationship_text, 'relationship markdown omitted count missing'
+assert '- Records hidden by human display limit: 16' in relationship_text, 'relationship markdown display-limit omission count missing'
 assert 'Unresolved target' in relationship_text, 'relationship markdown unresolved column missing'
 assert 'call-graph truth' in relationship_text, 'relationship markdown caveat language missing'
 assert r'working\-tree:src/example.py' in relationship_text, 'relationship markdown provider input missing'
@@ -1472,12 +1472,12 @@ fixture_json_checks() {
   grep -q -- '## Symbol relationships' "$SYMBOL_RELATIONSHIPS_MD" || return 1
   grep -q -- 'Caveat refs' "$SYMBOL_RELATIONSHIPS_MD" || return 1
   grep -q -- 'Relationship evidence summary:' "$SYMBOL_RELATIONSHIPS_MD" || return 1
-  grep -q -- 'display_limit_omitted=' "$SYMBOL_RELATIONSHIPS_MD" || return 1
+  grep -q -- 'human_display_sample_omitted=' "$SYMBOL_RELATIONSHIPS_MD" || return 1
   grep -q -- 'Row caveat references' "$SYMBOL_RELATIONSHIPS_MD" || return 1
   grep -q -- 'symbol relationships for retained ranked files:' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   grep -q -- 'caveats=C1' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   grep -q -- 'evidence summary:' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
-  grep -q -- 'display_limit_omitted=' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
+  grep -q -- 'human_display_sample_omitted=' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   grep -q -- 'row caveats:' "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   ! grep -Eiq -- 'Fixture Author|fixture@example|https?://|ssh://|git@|/home/|/Users/|source snippet|commit message' "$SYMBOL_RELATIONSHIPS_JSON" "$SYMBOL_RELATIONSHIPS_MD" "$SYMBOL_RELATIONSHIPS_TABLE" || return 1
   for lane in zig go javascript lua typescript tsx rust; do

@@ -19,9 +19,9 @@ current symbols (shown first by provider order):
   function innerFunction lines 7-9 confidence=high
 
 symbol relationships for retained ranked files:
-  summary: candidates=1 retained_candidates=1 current_symbol_candidates=13 providers=1 records=17 shown=6 omitted=11 record_bound=1024 record_bound_exceeded=false omitted_records=0
+  summary: candidates=1 retained_candidates=1 current_symbol_candidates=13 providers=1 records=17 human_display_shown=6 human_display_sample_omitted=11 record_bound=1024 record_bound_exceeded=false omitted_records=0
   caveats: candidate relation evidence only; file-level Git evidence remains product truth; bounded JavaScript syntax proof: contains, local direct identifier references, direct calls, imports/includes, unresolved identifiers, and member/computed syntax caveats; unresolved and external-string endpoints are caveated; no local target mapping is fabricated; symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
-  evidence summary: emitted=17 kinds=contains:12,reference:1,call:2,import_include:1,unresolved:1 unresolved=1 unresolved_targets=1 display_limit_omitted=11
+  evidence summary: emitted=17 kinds=contains:12,reference:1,call:2,import_include:1,unresolved:1 unresolved=1 unresolved_targets=1 human_display_sample_omitted=11
   import_include source_to_target source=file:src/example.mjs target=external:<tag>[safe](link) unresolved=false provider=tree-sitter-javascript-relations input=working-tree:src/example.mjs freshness=fresh failure=ok confidence=medium basis=javascript import/include syntax caveats=C1,C2,C3,C4,C5
   contains source_to_target source=file:src/example.mjs target=symbol:src/example.mjs:EXPORTED_CONSTANT:other unresolved=false provider=tree-sitter-javascript-relations input=working-tree:src/example.mjs freshness=fresh failure=ok confidence=medium basis=javascript definition containment caveats=C1,C2,C3,C4
   contains source_to_target source=file:src/example.mjs target=symbol:src/example.mjs:ExportedClass:class unresolved=false provider=tree-sitter-javascript-relations input=working-tree:src/example.mjs freshness=fresh failure=ok confidence=medium basis=javascript definition containment caveats=C1,C2,C3,C4

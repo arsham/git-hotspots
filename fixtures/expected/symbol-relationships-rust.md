@@ -74,7 +74,7 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
 - Provider reports: 1
 - Relation records: 23
 - Shown records: 6
-- Omitted records: 17
+- Records hidden by human display limit: 17
 - Human display limit: 6 (explicit)
 - Relation record bound: 1024
 - Relation record bound exceeded: false
@@ -85,7 +85,7 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
   - bounded Rust syntax proof: contains, local direct identifier references, direct calls, external mod/use includes, unresolved identifiers, and ambiguous path/member syntax
   - unresolved and external\-string endpoints are caveated; no local target mapping is fabricated
   - symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
-- Relationship evidence summary: emitted=23 kinds=contains:8,reference:2,call:2,import_include:2,unknown:6,unresolved:3 unknown=6 unresolved=3 unresolved_targets=10 display_limit_omitted=17
+- Relationship evidence summary: emitted=23 kinds=contains:8,reference:2,call:2,import_include:2,unknown:6,unresolved:3 unknown=6 unresolved=3 unresolved_targets=10 human_display_sample_omitted=17
 
 | Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveat refs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

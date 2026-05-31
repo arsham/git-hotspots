@@ -585,3 +585,9 @@ dispatch:
   notes: null
 timestamps:
   updated_at: 2026-05-31T19:25:59.085Z
+execution:
+  active_run_id: RUN-20260531-1928
+  requires_confirmation: true
+  blockers: []
+  current_packet_id: null
+  next_packet_ids: []

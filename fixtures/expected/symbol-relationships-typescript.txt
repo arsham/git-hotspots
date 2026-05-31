@@ -19,9 +19,9 @@ current symbols (shown first by provider order):
   class LocalWorker lines 12-17 confidence=high
 
 symbol relationships for retained ranked files:
-  summary: candidates=1 retained_candidates=1 current_symbol_candidates=14 providers=1 records=25 shown=6 omitted=19 record_bound=1024 record_bound_exceeded=false omitted_records=0
+  summary: candidates=1 retained_candidates=1 current_symbol_candidates=14 providers=1 records=25 human_display_shown=6 human_display_sample_omitted=19 record_bound=1024 record_bound_exceeded=false omitted_records=0
   caveats: candidate relation evidence only; file-level Git evidence remains product truth; bounded TypeScript/TSX syntax proof: contains, local direct identifier references, direct calls, imports/includes, unresolved identifiers, type-only syntax caveats, and member/computed/JSX syntax caveats; unresolved and external-string endpoints are caveated; no local target mapping is fabricated; symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
-  evidence summary: emitted=25 kinds=contains:13,call:2,unknown:7,unresolved:3 unknown=7 unresolved=3 unresolved_targets=10 display_limit_omitted=19
+  evidence summary: emitted=25 kinds=contains:13,call:2,unknown:7,unresolved:3 unknown=7 unresolved=3 unresolved_targets=10 human_display_sample_omitted=19
   contains source_to_target source=file:src/example.ts target=symbol:src/example.ts:EXPORTED_FLAG:other unresolved=false provider=tree-sitter-typescript-relations input=working-tree:src/example.ts freshness=fresh failure=ok confidence=medium basis=typescript definition containment caveats=C1,C2,C3,C4
   contains source_to_target source=file:src/example.ts target=symbol:src/example.ts:LocalWorker:class unresolved=false provider=tree-sitter-typescript-relations input=working-tree:src/example.ts freshness=fresh failure=ok confidence=medium basis=typescript definition containment caveats=C1,C2,C3,C4
   contains source_to_target source=file:src/example.ts target=symbol:src/example.ts:Mode:type unresolved=false provider=tree-sitter-typescript-relations input=working-tree:src/example.ts freshness=fresh failure=ok confidence=medium basis=typescript definition containment caveats=C1,C2,C3,C4

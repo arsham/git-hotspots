@@ -77,8 +77,10 @@ repositories. File-level Git log parsing enforces internal commit and changed
 file-row bounds, `--limit` bounds displayed file candidates, historical symbol
 attribution bounds candidate files, commits, changed files, hunks, blobs, and
 aggregate records, and relationship aggregation bounds retained candidates and
-records. When a bound truncates evidence, reports should emit a caveat instead
-of silently implying complete evidence.
+records. Human table and Markdown output should keep display sampling wording
+separate from provider partial-evidence wording so display limits are not read
+as missing provider evidence. When a bound truncates evidence, reports should
+emit a caveat instead of silently implying complete evidence.
 
 Provider changes should expose source, freshness, confidence, failure state, and
 caveats. They should not emit parser diagnostics, source snippets, author

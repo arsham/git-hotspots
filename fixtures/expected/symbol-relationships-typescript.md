@@ -73,7 +73,7 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
 - Provider reports: 1
 - Relation records: 25
 - Shown records: 6
-- Omitted records: 19
+- Records hidden by human display limit: 19
 - Human display limit: 6 (explicit)
 - Relation record bound: 1024
 - Relation record bound exceeded: false
@@ -84,7 +84,7 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
   - bounded TypeScript/TSX syntax proof: contains, local direct identifier references, direct calls, imports/includes, unresolved identifiers, type\-only syntax caveats, and member/computed/JSX syntax caveats
   - unresolved and external\-string endpoints are caveated; no local target mapping is fabricated
   - symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
-- Relationship evidence summary: emitted=25 kinds=contains:13,call:2,unknown:7,unresolved:3 unknown=7 unresolved=3 unresolved_targets=10 display_limit_omitted=19
+- Relationship evidence summary: emitted=25 kinds=contains:13,call:2,unknown:7,unresolved:3 unknown=7 unresolved=3 unresolved_targets=10 human_display_sample_omitted=19
 
 | Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveat refs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

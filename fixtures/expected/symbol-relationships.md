@@ -70,7 +70,7 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
 - Provider reports: 1
 - Relation records: 20
 - Shown records: 4
-- Omitted records: 16
+- Records hidden by human display limit: 16
 - Human display limit: 4 (explicit)
 - Relation record bound: 1024
 - Relation record bound exceeded: false
@@ -81,7 +81,7 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
   - bounded Python syntax proof: contains, local direct identifier references, direct calls, imports, unresolved identifiers, and ambiguous attribute syntax
   - unresolved and external\-string endpoints are caveated; no local target mapping is fabricated
   - symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
-- Relationship evidence summary: emitted=20 kinds=contains:10,reference:2,call:1,unresolved:7 unresolved=7 unresolved_targets=8 display_limit_omitted=16
+- Relationship evidence summary: emitted=20 kinds=contains:10,reference:2,call:1,unresolved:7 unresolved=7 unresolved_targets=8 human_display_sample_omitted=16
 
 | Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveat refs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

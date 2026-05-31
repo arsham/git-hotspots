@@ -108,9 +108,9 @@ fn renderCompact(writer: anytype, summary: Summary) !void {
         return;
     }
 
-    if (summary.display_limit_omitted > 0) try writer.print(" display_limit_omitted={d}", .{summary.display_limit_omitted});
+    if (summary.display_limit_omitted > 0) try writer.print(" human_display_sample_omitted={d}", .{summary.display_limit_omitted});
     if (summary.provider_cap_omitted > 0 or summary.provider_caps_reached > 0) {
-        try writer.print(" provider_cap_omitted={d} provider_caps_reached={d}", .{ summary.provider_cap_omitted, summary.provider_caps_reached });
+        try writer.print(" provider_partial_evidence_omitted={d} provider_caps_reached={d}", .{ summary.provider_cap_omitted, summary.provider_caps_reached });
     }
     if (summary.record_bound_omitted > 0 or summary.record_bound_exceeded) {
         try writer.print(" record_bound_omitted={d} record_bound_exceeded={}", .{ summary.record_bound_omitted, summary.record_bound_exceeded });
@@ -202,5 +202,50 @@ test "relationship summary distinguishes display limit from provider and record 
     var out: std.Io.Writer.Allocating = .init(std.testing.allocator);
     defer out.deinit();
     try renderMarkdown(&out.writer, report, 1);
-    try std.testing.expectEqualStrings("- Relationship evidence summary: emitted=3 kinds=contains:1,reference:1,unresolved:1 unresolved=1 unresolved_targets=1 display_limit_omitted=2 provider_cap_omitted=2 provider_caps_reached=1 record_bound_omitted=1 record_bound_exceeded=true\n", out.written());
+    try std.testing.expectEqualStrings("- Relationship evidence summary: emitted=3 kinds=contains:1,reference:1,unresolved:1 unresolved=1 unresolved_targets=1 human_display_sample_omitted=2 provider_partial_evidence_omitted=2 provider_caps_reached=1 record_bound_omitted=1 record_bound_exceeded=true\n", out.written());
+}
+
+test "relationship summary names display sampling without implying provider cap" {
+    var records = [_]model.RelationRecord{
+        testRecord(.contains, "target"),
+        testRecord(.reference, "target"),
+    };
+    var providers = [_]model.RelationProviderReport{testProvider(0, false)};
+    const report: model.RelationAggregationReport = .{
+        .candidate_file_count = 1,
+        .retained_candidate_file_count = 1,
+        .current_symbol_candidate_count = 2,
+        .relation_record_bound = 8,
+        .relation_record_bound_exceeded = false,
+        .omitted_record_count = 0,
+        .providers = providers[0..],
+        .records = records[0..],
+        .caveats = &.{},
+    };
+
+    var out: std.Io.Writer.Allocating = .init(std.testing.allocator);
+    defer out.deinit();
+    try renderTable(&out.writer, report, 1);
+    try std.testing.expectEqualStrings("  evidence summary: emitted=2 kinds=contains:1,reference:1 human_display_sample_omitted=1\n", out.written());
+}
+
+test "relationship summary names provider partialness without display sampling" {
+    var records = [_]model.RelationRecord{testRecord(.contains, "target")};
+    var providers = [_]model.RelationProviderReport{testProvider(3, true)};
+    const report: model.RelationAggregationReport = .{
+        .candidate_file_count = 1,
+        .retained_candidate_file_count = 1,
+        .current_symbol_candidate_count = 1,
+        .relation_record_bound = 8,
+        .relation_record_bound_exceeded = false,
+        .omitted_record_count = 0,
+        .providers = providers[0..],
+        .records = records[0..],
+        .caveats = &.{},
+    };
+
+    var out: std.Io.Writer.Allocating = .init(std.testing.allocator);
+    defer out.deinit();
+    try renderMarkdown(&out.writer, report, records.len);
+    try std.testing.expectEqualStrings("- Relationship evidence summary: emitted=1 kinds=contains:1 provider_partial_evidence_omitted=3 provider_caps_reached=1\n", out.written());
 }
