@@ -192,6 +192,14 @@ durable_decisions:
     recommend bounded successor slices, and preserve CLI flags, report schema,
     scoring, ranking, provider admission, release state, tags, remotes, package
     artefacts, network behaviour, telemetry, and cache semantics."
+  - "Relationship presentation successor selected for feature 0106: add
+    provider-neutral human-only uncertainty summaries for --symbol-relationships
+    table and Markdown output. The slice should summarise relation kind counts,
+    unresolved/unknown totals, and display-limit versus provider-cap omissions
+    while preserving JSON schema, record-level evidence/caveats, CLI flags,
+    scoring/ranking/confidence, provider admission, relationship semantics,
+    cache/network/telemetry behaviour, release state, tags, remotes, and
+    packages. Deduplication and provider admission remain separate slices."
 links:
   roadmap_item_id: null
   feature_ids:
@@ -217,6 +225,7 @@ links:
     - "0098"
     - "0104"
     - "0105"
+    - "0106"
 timestamps:
   created_at: 2026-05-27T19:12:06.269Z
-  updated_at: 2026-05-31T17:26:31.463Z
+  updated_at: 2026-05-31T18:09:19.099Z

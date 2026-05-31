@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 106
+  next_id: 107
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -449,6 +449,10 @@ features:
       slug: human-relationship-caveat-compaction
       path: .flow/features/0105_human-relationship-caveat-compaction
       created_at: 2026-05-31T17:22:50.884Z
+    - id: "0106"
+      slug: human-relationship-uncertainty-summary
+      path: .flow/features/0106_human-relationship-uncertainty-summary
+      created_at: 2026-05-31T18:06:24.453Z
 intake:
   mode: roadmap
   summary: null
