@@ -256,6 +256,62 @@ caveat arrays. It is caveated investigation context only, not call-graph truth,
 dependency proof, ownership, developer metrics, bug prediction, scoring
 replacement, or a ranking input.
 
+### Drilling into relationship evidence
+
+Use checked-in fixture output as a stable way to learn the relationship fields.
+The Go fixture shows the same bounded evidence in table, Markdown, and JSON:
+
+```text
+Relationship evidence summary: emitted=8 kinds=contains:8 human_display_sample_omitted=2
+contains source_to_target source=file:src/example.go target=symbol:src/example.go:Runner:type provider=tree-sitter-go-relations basis=go top-level declaration containment
+```
+
+In Markdown, the corresponding row is a table entry with `Kind`, `Direction`,
+`Source endpoint`, `Target endpoint`, `Provider`, `Provider input`,
+`Freshness`, `Failure`, `Confidence`, `Evidence basis`, and caveat references.
+In JSON, the same row is under `symbol_relationships.records[]`:
+
+```json
+{
+  "kind": "contains",
+  "direction": "source_to_target",
+  "source_endpoint": "file:src/example.go",
+  "target_endpoint": "symbol:src/example.go:Runner:type",
+  "target_unresolved": false,
+  "evidence_basis": "go top-level declaration containment",
+  "provider": {
+    "name": "tree-sitter-go-relations",
+    "input": "working-tree:src/example.go"
+  },
+  "freshness": "fresh",
+  "failure": "ok",
+  "confidence": "medium"
+}
+```
+
+Read these fields together rather than treating one format as more truthful.
+The provider name identifies the local syntax lane, the provider input remains
+project-relative, the evidence basis explains the syntax pattern, freshness and
+failure describe provider state, confidence is a caveated evidence summary, and
+caveats define the limits. This row says the Go syntax provider saw a top-level
+containment relationship in `src/example.go`; it does not prove package
+identity, dependencies, ownership, runtime calls, quality, or bugs.
+
+Omission fields describe why a human or provider view is incomplete. The Go
+fixture's `human_display_sample_omitted=2` means table and Markdown hid two
+rows because of the human display limit; JSON still carries the bounded record
+array. Provider-cap omissions are different: `provider_partial_evidence_omitted`
+or bound-omitted counts mean the provider or record bound stopped some evidence
+from being reported.
+
+Unknown and unresolved records should stay caveated. For example, TSX fixture
+rows may report `kind: "unknown"`, `target_unresolved: true`, low confidence,
+and an evidence basis such as `typescript/tsx member, computed, or JSX syntax
+not safely classified`. That is a prompt to inspect nearby syntax, not a local
+target mapping. Duplicate-looking rows can also be meaningful when the relation
+kind or evidence basis differs, so compare `kind`, `source_endpoint`,
+`target_endpoint`, and `evidence_basis` before treating rows as redundant.
+
 ### Combining evidence layers
 
 Use the layers together as a local investigation workflow:

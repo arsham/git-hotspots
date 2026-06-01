@@ -274,6 +274,46 @@ evidence; record bound omissions remain separate. They also compact repeated
 row caveats into stable C1-style references plus one caveat summary; JSON keeps
 per-record caveat arrays. It does not prove calls, dependencies, ownership,
 developer metrics, bugs, or ranking changes.
+.SS Relationship drilldown examples
+Read relationship evidence by matching the human summary, a shown row, and the
+JSON record fields. In the checked-in Go fixture, table and Markdown output
+summarise
+.B emitted=8 kinds=contains:8 human_display_sample_omitted=2
+and show rows such as
+.B file:src/example.go
+to
+.B symbol:src/example.go:Runner:type
+from provider
+.B tree-sitter-go-relations
+with input
+.B working-tree:src/example.go,
+freshness
+.B fresh,
+failure
+.B ok,
+confidence
+.B medium,
+and evidence basis
+.B go top-level declaration containment.
+.PP
+JSON carries the same evidence under
+.B symbol_relationships.records[]
+with fields for kind, direction, source_endpoint, target_endpoint,
+target_unresolved, evidence_basis, provider name and input, freshness, failure,
+confidence, and per-record caveats. No format is more truthful than the others:
+the provider names the local syntax lane, the evidence basis names the observed
+syntax pattern, and caveats keep the record bounded as investigation context,
+not dependency, call-graph, ownership, quality, or bug truth.
+.PP
+.B human_display_sample_omitted
+means table and Markdown hid rows only because of the human display limit; JSON
+still carries the bounded records.
+.B provider_partial_evidence_omitted
+and bound-omitted counts mean provider or record bounds stopped some evidence
+from being reported. Unknown or unresolved records, such as TSX JSX or type-only
+syntax with low confidence, are prompts to inspect nearby syntax and do not
+fabricate a local target. Duplicate-looking rows can be meaningful when relation
+kind or evidence basis differs.
 .SH COMBINING EVIDENCE
 Use file hotspots first to choose a small inspection set from local Git-history
 frequency, churn, recency, and co-change evidence. Add

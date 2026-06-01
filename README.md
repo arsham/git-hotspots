@@ -343,6 +343,31 @@ caveat arrays. Relationship evidence is caveated investigation
 context only: it is not call-graph truth, dependency proof, ownership,
 developer metrics, bug prediction, scoring replacement, or a ranking input.
 
+To drill into a relationship record, read the human summary first, then match a
+shown row to the JSON fields. For example, the checked-in Go relationship
+fixture reports `emitted=8 kinds=contains:8 human_display_sample_omitted=2` in
+table and Markdown output. One shown row links `file:src/example.go` to
+`symbol:src/example.go:Runner:type` with provider
+`tree-sitter-go-relations`, input `working-tree:src/example.go`, freshness
+`fresh`, failure `ok`, confidence `medium`, and evidence basis
+`go top-level declaration containment`. In JSON, the same evidence appears
+under `symbol_relationships.records[]` as `kind`, `direction`,
+`source_endpoint`, `target_endpoint`, `target_unresolved`, `evidence_basis`,
+provider name and input, freshness, failure, confidence, and per-record
+`caveats`. Read those fields together: the provider name says which local
+syntax lane produced the record, the evidence basis says what syntax pattern was
+observed, and the caveats preserve the boundary that this is investigation
+context rather than dependency, call-graph, ownership, quality, or bug truth.
+
+Omission wording also matters. `human_display_sample_omitted` means table and
+Markdown hid extra rows only to keep the human report compact; JSON still keeps
+the bounded records. `provider_partial_evidence_omitted` and bound-omitted
+counts are different: they mean provider or record bounds stopped some evidence
+from being reported. Unknown or unresolved targets, such as TSX rows for JSX or
+type-only syntax, are still useful prompts when paired with low confidence and
+caveats; they do not fabricate a local target. Duplicate-looking records can be
+meaningful when their relation kind or evidence basis differs.
+
 Use these layers together as progressively narrower local evidence, not as a
 replacement for review. Start with file hotspots to choose where to inspect,
 add `--symbols` to see current working-tree structure, add

@@ -4,7 +4,7 @@ feature:
   slug: relationship-evidence-drilldown-examples
   title: Relationship evidence drilldown examples
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Relationship evidence is powerful but still hard to read across table,
@@ -53,7 +53,7 @@ proposal:
     materialised_at: 2026-06-01T00:26:45.714Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -108,7 +108,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Select drilldown anchors
       goal: Find stable fixture/report examples for relationship evidence
         interpretation.
@@ -127,7 +127,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Add drilldown examples
       goal: Apply narrow docs/examples that explain human and JSON relationship
         evidence together.
@@ -142,7 +142,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Validate docs guardrails
       goal: Run close-out validation and add guardrails only if needed.
       owner_phase: runner
@@ -196,7 +196,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-06-01T00:16:30.193Z
-  updated_at: 2026-06-01T00:27:27.930Z
+  updated_at: 2026-06-01T00:43:03.682Z
 dispatch:
   status: prepared
   prepared_at: 2026-06-01T00:27:27.930Z
