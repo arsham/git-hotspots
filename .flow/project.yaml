@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0118"
   active_run_id: null
   last_completed_feature_id: "0117"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 118
+  next_id: 119
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -497,6 +497,10 @@ features:
       slug: github-ci-pipeline-hardening
       path: .flow/features/0117_github-ci-pipeline-hardening
       created_at: 2026-06-01T01:36:31.518Z
+    - id: "0118"
+      slug: ci-workflow-reliability-proof
+      path: .flow/features/0118_ci-workflow-reliability-proof
+      created_at: 2026-06-01T04:57:12.597Z
 intake:
   mode: roadmap
   summary: null
