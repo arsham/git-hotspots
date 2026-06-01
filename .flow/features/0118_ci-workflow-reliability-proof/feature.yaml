@@ -4,7 +4,7 @@ feature:
   slug: ci-workflow-reliability-proof
   title: CI workflow reliability proof
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Hosted GitHub Actions has not yet proven the cleaned CI workflow change
@@ -58,7 +58,7 @@ proposal:
     materialised_at: 2026-06-01T05:04:12.409Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -108,7 +108,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Push and identify hosted CI run
       goal: Push current master and identify the GitHub Actions run for the pushed
         commit.
@@ -131,7 +131,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Record CI proof or repair target
       goal: Durably record pass evidence or concrete failure follow-up.
       owner_phase: runner
@@ -151,7 +151,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Close-out validation
       goal: Prove local state and Flow state are clean enough for close-out.
       owner_phase: runner
@@ -193,7 +193,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-06-01T04:57:12.597Z
-  updated_at: 2026-06-01T05:04:27.907Z
+  updated_at: 2026-06-01T05:42:29.185Z
 dispatch:
   status: prepared
   prepared_at: 2026-06-01T05:04:27.907Z
