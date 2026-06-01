@@ -4,7 +4,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 
 ## Run summary
 
-- Tool: git-hotspots 0.1.0-alpha.3
+- Tool: git-hotspots 0.1.0-alpha.4
 - Head commit: 5e8784e66dbf456b6e994af7e5eac03329ea47cd
 - Range: None
 - Commit count: 2

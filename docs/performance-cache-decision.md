@@ -107,7 +107,7 @@ command shapes, and caveats. Raw reports are not committed.
 
 Run context:
 
-- Tool version: `git-hotspots 0.1.0-alpha.3`.
+- Tool version: `git-hotspots 0.1.0-alpha.4`.
 - Timing method: shell elapsed time around existing CLI commands.
 - This repository: 44 analysed commits and 64 tracked files at collection time.
 - `sibling-local-repo`: 1521 analysed commits and 2840 tracked files at

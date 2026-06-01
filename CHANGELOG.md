@@ -1,13 +1,13 @@
 # Changelog
 
-## v0.1.0-alpha.3 draft
+## v0.1.0-alpha.4 draft
 
 Release tagging, package publication, and release uploads are intentionally out
 of scope for this draft.
 
 ### Release notes draft
 
-This draft describes the v0.1.0-alpha.3 public alpha work for later release
+This draft describes the v0.1.0-alpha.4 public alpha work for later release
 preparation. `git-hotspots` remains a deterministic, local-first CLI that turns
 local Git history into evidence for investigation. Reports are prompts for human
 review, not bug predictions, objective code-quality ratings, ownership analysis,
@@ -30,9 +30,17 @@ Implemented work covered by this draft includes:
 - Optional public symbol-relationship evidence for supported language lanes.
   Relationship output is syntax evidence from supported providers, not package,
   module, dependency graph, type-analysis, runtime, or complete call-graph truth.
+- Human relationship-output readability improvements, including compact caveat
+  summaries, relationship evidence summaries, clearer display-limit versus
+  provider-cap omission wording, and guardrails that preserve duplicate-looking
+  records when relation kind or evidence basis differs.
+- Relationship fixture realism coverage, including a realistic Zig relationship
+  golden and a validation matrix for admitted relationship lanes. These checks
+  make fixture coverage expectations explicit without changing runtime provider
+  behaviour or report schema.
 - Local validation coverage for integration fixtures, provider output, public
-  documentation guardrails, prohibited-claim checks, privacy scans, and
-  performance-budget smoke checks.
+  documentation guardrails, prohibited-claim checks, privacy scans,
+  relationship fixture realism checks, and performance-budget smoke checks.
 - Unpublished Linux archive and Arch dogfood packaging paths for local
   validation. These paths do not publish packages, create releases, create or
   push tags, upload artefacts, contact remotes, or require credentials by
@@ -53,6 +61,6 @@ Implemented work covered by this draft includes:
 
 ### Release preparation notes
 
-- Version surfaces are aligned for v0.1.0-alpha.3 before release validation.
+- Version surfaces are aligned for v0.1.0-alpha.4 before release validation.
 - Do not create or push tags, publish packages, upload release artefacts, or
   create a hosted release from this draft alone.

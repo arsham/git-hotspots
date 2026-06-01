@@ -690,7 +690,7 @@ explain_output_checks() {
   diff -u "$help_out" "$ARTIFACT_DIR/help-repo.txt" >/dev/null || return 1
   "$EXE" --version > "$version_out" 2> "$explain_err" || return 1
   [ ! -s "$explain_err" ] || return 1
-  [ "$(cat "$version_out")" = 'git-hotspots 0.1.0-alpha.3' ] || return 1
+  [ "$(cat "$version_out")" = 'git-hotspots 0.1.0-alpha.4' ] || return 1
 
   nongit=$(mktemp -d "$ARTIFACT_DIR/nongit.XXXXXX")
   (cd "$nongit" && "$EXE_ABS" --explain > "$explain_nongit" 2> "$explain_err") || return 1
@@ -698,7 +698,7 @@ explain_output_checks() {
   diff -u fixtures/expected/explain.txt "$explain_nongit" >/dev/null || return 1
   (cd "$nongit" && "$EXE_ABS" --version > "$version_nongit" 2> "$explain_err") || return 1
   [ ! -s "$explain_err" ] || return 1
-  [ "$(cat "$version_nongit")" = 'git-hotspots 0.1.0-alpha.3' ] || return 1
+  [ "$(cat "$version_nongit")" = 'git-hotspots 0.1.0-alpha.4' ] || return 1
   (cd "$nongit" && "$EXE_ABS" -h > "$ARTIFACT_DIR/help-nongit.txt" 2> "$explain_err") || return 1
   [ ! -s "$explain_err" ] || return 1
   diff -u "$help_out" "$ARTIFACT_DIR/help-nongit.txt" >/dev/null || return 1
@@ -1352,11 +1352,11 @@ license_version_checks() {
   grep -q 'Apache License' LICENSE || return 1
   grep -q 'Version 2.0' LICENSE || return 1
   grep -q 'Apache License, Version 2.0' README.md || return 1
-  grep -q '0.1.0-alpha.3' README.md || return 1
+  grep -q '0.1.0-alpha.4' README.md || return 1
   grep -q 'Zig `0.16.0`' README.md || return 1
   grep -q 'zig build validate' CONTRIBUTING.md || return 1
   grep -q 'public alpha' CONTRIBUTING.md || return 1
-  [ "$("$EXE" --version)" = 'git-hotspots 0.1.0-alpha.3' ] || return 1
+  [ "$("$EXE" --version)" = 'git-hotspots 0.1.0-alpha.4' ] || return 1
   ! grep -R '0\.0\.0-spike' README.md CONTRIBUTING.md src fixtures/expected tests tools build.zig >/dev/null 2>&1 || return 1
 }
 
@@ -1436,13 +1436,13 @@ source_install_smoke() {
 
   (cd "$copy" && zig build >/dev/null 2>&1) || return 1
   copy_exe=$copy/zig-out/bin/git-hotspots
-  [ "$($copy_exe --version)" = 'git-hotspots 0.1.0-alpha.3' ] || return 1
+  [ "$($copy_exe --version)" = 'git-hotspots 0.1.0-alpha.4' ] || return 1
   "$copy_exe" --help >/dev/null || return 1
   "$copy_exe" --explain >/dev/null || return 1
   copy_json=$ARTIFACT_DIR/source-copy-basic.json
   "$copy_exe" --repo "$copy/fixtures/basic" --format json > "$copy_json" || return 1
   summary=$(json_count_summary "$copy_json") || return 1
-  printf 'source-install-copy %s version=0.1.0-alpha.3\n' "$summary" >> "$SMOKES"
+  printf 'source-install-copy %s version=0.1.0-alpha.4\n' "$summary" >> "$SMOKES"
 }
 
 choose_timing_tool() {

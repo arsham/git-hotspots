@@ -4,7 +4,7 @@
 # explicitly added.
 
 pkgname=git-hotspots-bin
-pkgver=0.1.0_alpha.3
+pkgver=0.1.0_alpha.4
 pkgrel=1
 pkgdesc='Deterministic local Git-history hotspot prompts, local dogfood binary package'
 arch=('x86_64' 'aarch64')

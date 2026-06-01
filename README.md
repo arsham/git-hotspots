@@ -100,7 +100,7 @@ not the runtime authority for hotspot findings.
 
 ## Public alpha status
 
-Current version: `0.1.0-alpha.3`.
+Current version: `0.1.0-alpha.4`.
 
 This repository contains a narrow public alpha for local source builds. It does
 not provide published packaged binaries, package-manager availability, release
@@ -140,20 +140,20 @@ Build a native Linux release archive:
 ```sh
 ./tools/release-linux.sh
 mkdir -p /tmp/git-hotspots-release-smoke
-tar -xzf dist/git-hotspots-0.1.0-alpha.3-linux-$(uname -m).tar.gz -C /tmp/git-hotspots-release-smoke
-/tmp/git-hotspots-release-smoke/git-hotspots-0.1.0-alpha.3-linux-$(uname -m)/git-hotspots --version
-/tmp/git-hotspots-release-smoke/git-hotspots-0.1.0-alpha.3-linux-$(uname -m)/git-hotspots --help
+tar -xzf dist/git-hotspots-0.1.0-alpha.4-linux-$(uname -m).tar.gz -C /tmp/git-hotspots-release-smoke
+/tmp/git-hotspots-release-smoke/git-hotspots-0.1.0-alpha.4-linux-$(uname -m)/git-hotspots --version
+/tmp/git-hotspots-release-smoke/git-hotspots-0.1.0-alpha.4-linux-$(uname -m)/git-hotspots --help
 ```
 
 For local Arch dogfood packaging, copy the generated archive into the package
 directory and use standard Arch tooling:
 
 ```sh
-cp dist/git-hotspots-0.1.0-alpha.3-linux-$(uname -m).tar.gz packaging/aur/git-hotspots-bin/
+cp dist/git-hotspots-0.1.0-alpha.4-linux-$(uname -m).tar.gz packaging/aur/git-hotspots-bin/
 cd packaging/aur/git-hotspots-bin
 makepkg --printsrcinfo
 makepkg -f
-pacman -Qp git-hotspots-bin-0.1.0_alpha.3-1-$(uname -m).pkg.tar*
+pacman -Qp git-hotspots-bin-0.1.0_alpha.4-1-$(uname -m).pkg.tar*
 ```
 
 When `makepkg`, `pacman`, or `bsdtar` is unavailable, record that explicit
