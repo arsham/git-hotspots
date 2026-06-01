@@ -378,6 +378,16 @@ nearby code to inspect. Each layer keeps repo-relative output, local provenance,
 and caveats; none changes the file ranking or proves dependencies, calls,
 ownership, bugs, or code quality.
 
+For a focused historical-symbol and relationship workflow, choose a narrow
+repo-relative scope or one `--inspect PATH` target first. Run
+`--symbols --historical-symbols` to inspect revision-local hunk attribution and
+fallback evidence, then run the same scoped question with
+`--symbols --symbol-relationships` to inspect bounded current syntax
+relationships. Keep the streams independent: historical attribution does not
+explain why churn happened, and relationship evidence does not prove dependency
+truth, call-graph truth, ownership, quality, or bug risk. Unsupported provider
+lanes are unavailable enrichment, not failed hotspot analysis.
+
 Git-detected file renames are folded conservatively when both the old and new
 paths are in scope. This is file-path lineage from local Git history only, not
 symbol or function lineage, semantic ownership, bug prediction, quality scoring,

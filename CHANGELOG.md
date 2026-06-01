@@ -30,6 +30,8 @@ Implemented work covered by this draft includes:
 - Optional public symbol-relationship evidence for supported language lanes.
   Relationship output is syntax evidence from supported providers, not package,
   module, dependency graph, type-analysis, runtime, or complete call-graph truth.
+- Public documentation for combining historical-symbol attribution with
+  relationship evidence while keeping the two streams independent and caveated.
 - Human relationship-output readability improvements, including compact caveat
   summaries, relationship evidence summaries, clearer display-limit versus
   provider-cap omission wording, and guardrails that preserve duplicate-looking

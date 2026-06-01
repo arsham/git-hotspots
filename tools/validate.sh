@@ -1135,6 +1135,8 @@ docs_manual_checks() {
   grep -Fq 'Provider capability summary' docs/user-guide.md || return 1
   grep -Fq 'Python, JavaScript,' docs/user-guide.md || return 1
   grep -Fq 'TypeScript, and TSX Tree-sitter lanes' docs/user-guide.md || return 1
+  grep -Fq 'When pairing `--historical-symbols` with `--symbol-relationships`' docs/user-guide.md || return 1
+  grep -Fq 'Historical-symbol rows do not explain why churn happened' docs/user-guide.md || return 1
   grep -Fq 'Zig `.zig` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-zig-relations`' docs/user-guide.md || return 1
   grep -Fq 'Go `.go` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-go-relations`' docs/user-guide.md || return 1
   grep -Fq 'Lua `.lua` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-lua-relations`' docs/user-guide.md || return 1
@@ -1189,6 +1191,8 @@ docs_manual_checks() {
   grep -Fq 'tree-sitter-lua-relations' man/git-hotspots.1 || return 1
   grep -Fq 'tree-sitter-rust-relations' man/git-hotspots.1 || return 1
   grep -Fq 'Other current files preserve file evidence' man/git-hotspots.1 || return 1
+  grep -Fq 'For a focused historical-symbol and relationship workflow' man/git-hotspots.1 || return 1
+  grep -Fq 'historical attribution does not explain why churn happened' man/git-hotspots.1 || return 1
   grep -Fq -- '--progress' man/git-hotspots.1 || return 1
   grep -Fq 'local-first' man/git-hotspots.1 || return 1
   ! grep -Eq 'dogfood|tools/release-linux\.sh|packaging/aur|makepkg|pacman|pkg\.tar' man/git-hotspots.1 || return 1
@@ -1196,6 +1200,8 @@ docs_manual_checks() {
   grep -Fq 'docs/user-guide.md' README.md || return 1
   grep -Fq 'Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and' README.md || return 1
   grep -Fq 'retained ranked-file candidates in Zig' README.md || return 1
+  grep -Fq 'For a focused historical-symbol and relationship workflow' README.md || return 1
+  grep -Fq 'historical attribution does not' README.md || return 1
   grep -Fq 'Invalid CLI combinations exit 2' README.md || return 1
   grep -Fq 'Local Linux dogfood packaging' README.md || return 1
   grep -Fq 'tools/release-linux.sh' README.md || return 1

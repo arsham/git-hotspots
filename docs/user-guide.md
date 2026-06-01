@@ -332,6 +332,25 @@ do not change ranking, scoring, report schema, or file-level evidence. Treat
 relationship rows as bounded syntax context, not dependency proof or a complete
 call graph.
 
+When pairing `--historical-symbols` with `--symbol-relationships`, keep the two
+streams independent:
+
+1. Choose a narrow repo-relative scope or one `--inspect PATH` target before
+   adding provider evidence.
+2. Enable symbols and historical attribution:
+   `--symbols --historical-symbols`.
+3. Read the historical-symbol rows as revision-local hunk attribution or
+   file-level fallback evidence with visible caveats.
+4. Rerun or extend the same scoped question with
+   `--symbols --symbol-relationships`.
+5. Read relationship rows as bounded current syntax context that can suggest
+   nearby code to inspect.
+
+Historical-symbol rows do not explain why churn happened, and relationship rows
+do not prove what depended on or called the changed code. Unsupported provider
+lanes are unavailable enrichment, not failed hotspot analysis. Keep the caveats
+from both sections attached to any review note or agent prompt.
+
 ## Reading reports
 
 Reports include:

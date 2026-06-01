@@ -331,6 +331,20 @@ provenance and repo-relative output, report unsupported provider states as
 caveats, and do not change ranking, scoring, report schema, or file-level
 evidence. Relationship rows are bounded syntax context, not dependency proof or
 a complete call graph.
+.PP
+For a focused historical-symbol and relationship workflow, choose a narrow
+repo-relative scope or one
+.B --inspect PATH
+target first. Run
+.B --symbols --historical-symbols
+to inspect revision-local hunk attribution and fallback evidence, then run the
+same scoped question with
+.B --symbols --symbol-relationships
+to inspect bounded current syntax relationships. Keep the streams independent:
+historical attribution does not explain why churn happened, and relationship
+evidence does not prove dependency truth, call-graph truth, ownership, quality,
+or bug risk. Unsupported provider lanes are unavailable enrichment, not failed
+hotspot analysis.
 .SH DIAGNOSTICS
 Invalid CLI arguments exit 2 with concise stderr diagnostics that name the
 failed flag and, when deterministic, include a valid next command shape. For
