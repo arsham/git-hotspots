@@ -4,7 +4,7 @@ feature:
   slug: github-ci-pipeline-hardening
   title: GitHub CI pipeline hardening
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: GitHub Actions exists but needs a durable hardening slice to ensure
@@ -62,7 +62,7 @@ proposal:
     materialised_at: 2026-06-01T01:42:23.152Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -121,7 +121,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: CI baseline inventory
       goal: Map existing CI workflow, local hook gates, and build validation/proof
         commands before editing.
@@ -149,7 +149,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Harden CI workflow
       goal: Apply the minimal workflow changes needed to align CI with the project
         validation baseline and proof aggregate.
@@ -181,7 +181,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Validation and close-out proof
       goal: Prove the CI hardening change is safe, local-first, and complete enough
         for review.
@@ -260,7 +260,7 @@ links:
     - B001
 timestamps:
   created_at: 2026-06-01T01:36:31.518Z
-  updated_at: 2026-06-01T01:48:27.644Z
+  updated_at: 2026-06-01T02:12:32.452Z
 dispatch:
   status: prepared
   prepared_at: 2026-06-01T01:48:27.644Z

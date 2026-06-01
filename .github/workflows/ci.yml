@@ -22,35 +22,5 @@ jobs:
         with:
           version: 0.16.0
 
-      - name: Run validation gate
-        run: zig build validate
-
-      - name: Run Tree-sitter build proof
-        run: zig build tree-sitter-build-proof
-
-      - name: Run Tree-sitter symbol proof
-        run: zig build tree-sitter-symbol-proof
-
-      - name: Run Tree-sitter Go build proof
-        run: zig build tree-sitter-go-build-proof
-
-      - name: Run Tree-sitter Go symbol proof
-        run: zig build tree-sitter-go-symbol-proof
-
-      - name: Run Tree-sitter Python build proof
-        run: zig build tree-sitter-python-build-proof
-
-      - name: Run Tree-sitter Python symbol proof
-        run: zig build tree-sitter-python-symbol-proof
-
-      - name: Run Tree-sitter JavaScript build proof
-        run: zig build tree-sitter-javascript-build-proof
-
-      - name: Run Tree-sitter JavaScript symbol proof
-        run: zig build tree-sitter-javascript-symbol-proof
-
-      - name: Run Tree-sitter TypeScript symbol proof
-        run: zig build tree-sitter-typescript-symbol-proof
-
-      - name: Run Tree-sitter TSX symbol proof
-        run: zig build tree-sitter-tsx-symbol-proof
+      - name: Run full validation and provider proof aggregate
+        run: zig build validate-all
