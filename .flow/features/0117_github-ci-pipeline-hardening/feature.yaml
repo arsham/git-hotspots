@@ -1,0 +1,736 @@
+schema: flow-feature.v1
+feature:
+  id: "0117"
+  slug: github-ci-pipeline-hardening
+  title: GitHub CI pipeline hardening
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: GitHub Actions exists but needs a durable hardening slice to ensure
+    hosted CI matches the project validation baseline and proof gates without
+    duplicating stale logic or introducing release/package/network side effects.
+  outcome: A minimal, maintainable GitHub CI workflow that runs the authoritative
+    project validation/proof aggregate for pushes to master and pull requests,
+    with minimal permissions and no publishing or release side effects.
+  acceptance:
+    - CI runs on push to master and pull requests.
+    - CI uses full history when project validation requires Git-history evidence.
+    - CI installs the pinned supported Zig toolchain.
+    - CI runs the authoritative full validation/proof aggregate or an equivalent
+      project-owned aggregate with no missing admitted provider lane.
+    - CI keeps permissions minimal and introduces no publish, release, tag,
+      package, secret, or remote-mutation steps.
+    - "Local hook behaviour remains unchanged: pre-commit fast gate and pre-push
+      validate-all."
+    - No runtime, CLI, schema, provider, scoring, cache, network, telemetry,
+      release, or package behaviour changes.
+    - Implementation passes git diff --check, zig build test, zig build
+      validate, and zig build validate-all when proof orchestration changes.
+planning:
+  state: ready
+  summary: Harden the existing GitHub CI workflow by aligning it with local hook
+    and validation expectations. Preserve local-first runtime boundaries and
+    avoid package/release/tag side effects.
+  brief_sync:
+    status: updated
+    reason: "Feature 0117 links to B001 as project validation infrastructure for the
+      local-first CLI: it hardens hosted CI without changing runtime behaviour
+      or adding publish/release side effects."
+    checked_at: 2026-06-01T01:39:54.740Z
+  brief_alignment:
+    status: aligned
+    role: prerequisite
+    summary: CI hardening is validation infrastructure for the B001 local-first CLI
+      capability. It is not a new runtime feature and must preserve
+      local-first/no-telemetry/no-publish boundaries.
+    checked_at: 2026-06-01T01:40:05.944Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: routine
+    reasons:
+      - topology=serial_feature
+      - assurance=routine
+      - review_mode=control_plane_review
+      - runner_model=Balanced
+    risk_triggers:
+      - standard_lane_delivery
+    audit_required: true
+    judge_review_recommended: false
+    materialised_at: 2026-06-01T01:42:23.152Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-06-01T01:42:23.152Z
+  quality_plan:
+    assurance_band: routine
+    review_mode: control_plane_review
+    reviewer_member_usage: standby
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-06-01T01:42:23.152Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-06-01T01:42:23.152Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: Operator requested implementation of a GitHub CI pipeline while
+    no active roadmap work existed. Existing workflow means the honest slice is
+    CI hardening/alignment.
+  depends_on_feature_ids: []
+  blocked_by: []
+design:
+  rough_shape:
+    - Inspect the existing GitHub Actions workflow and project validation
+      commands before editing.
+    - Prefer calling project-owned aggregate validation over duplicated CI-only
+      proof lists when equivalent.
+    - Keep workflow permissions read-only and step names evidence-oriented.
+    - Update only CI/docs/validation references needed to keep the CI contract
+      truthful.
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: CI baseline inventory
+      goal: Map existing CI workflow, local hook gates, and build validation/proof
+        commands before editing.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: .github/workflows/ci.yml, .githooks/pre-commit,
+          .githooks/pre-push, build.zig, tools/validate.sh."
+        - "In scope: read and compare hosted CI, pre-commit, pre-push, validate,
+          validate-all, and provider proof steps."
+        - "Out of scope: changing runtime code, provider code, release/package
+          automation, or tag behaviour."
+        - "Protected: local-first/no-network runtime boundary; minimal GitHub
+          permissions; no secrets."
+        - "Dependencies: none."
+        - "Validation/evidence: record the command/step comparison and any gap
+          found in commit message or run handoff."
+        - "Review focus: CI changes must be based on actual project command
+          surfaces, not guesses."
+        - "Escalate if: an admitted provider has no project-owned proof step or
+          validation command ownership is ambiguous."
+        - "Done boundary: runner knows exactly whether CI should simplify,
+          expand, or remain mostly unchanged."
+      verification_commands:
+        - git diff --check
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: Harden CI workflow
+      goal: Apply the minimal workflow changes needed to align CI with the project
+        validation baseline and proof aggregate.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: .github/workflows/ci.yml primarily; docs only if existing CI
+          references become stale."
+        - "In scope: workflow trigger/permission/setup/validation-step edits;
+          step naming cleanup; aggregate proof alignment."
+        - "Out of scope: publishing, releases, tags, artefact upload, package
+          build/publish, runtime product changes."
+        - "Protected: no CLI/report/provider/schema/scoring changes; no
+          duplicated shell validation bodies in workflow."
+        - "Dependencies: P1 inventory must identify the exact desired workflow
+          shape."
+        - "Validation/evidence: workflow diff plus local validation commands; no
+          remote CI run is required unless available without extra side
+          effects."
+        - "Review focus: minimality, maintainability, and equivalence to
+          project-owned validation commands."
+        - "Escalate if: CI needs secrets, remote mutation, package publishing,
+          or release automation to satisfy the request."
+        - "Done boundary: workflow is clear, minimal, and aligned with local
+          validation baseline."
+      verification_commands:
+        - git diff --check
+        - zig build test
+        - zig build validate
+    - id: P3
+      depends_on:
+        - P2
+      status: planned
+      title: Validation and close-out proof
+      goal: Prove the CI hardening change is safe, local-first, and complete enough
+        for review.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: .github/workflows/ci.yml, build.zig, tools/validate.sh,
+          local hooks."
+        - "In scope: run full local validation, confirm no forbidden workflow
+          side effects, and leave durable review evidence."
+        - "Out of scope: waiting for hosted GitHub CI unless a run is naturally
+          available; publishing or tagging."
+        - "Protected: repo clean state; no release/package/tag/remote mutation."
+        - "Dependencies: P2 implemented."
+        - "Validation/evidence: git diff --check, zig build test, zig build
+          validate, and zig build validate-all if CI aggregate/proof
+          orchestration changed."
+        - "Review focus: reviewer should independently inspect workflow and run
+          credible local gates."
+        - "Escalate if: local validation fails or workflow cannot be verified
+          without remote side effects."
+        - "Done boundary: atomic runner commit exists and review handoff
+          includes commands run and forbidden side-effect check."
+      verification_commands:
+        - git diff --check
+        - zig build test
+        - zig build validate
+        - zig build validate-all
+  output_contract:
+    primary_files:
+      - .github/workflows/ci.yml
+    reference_files:
+      - .githooks/pre-commit
+      - .githooks/pre-push
+      - build.zig
+      - tools/validate.sh
+    prohibited_changes:
+      - runtime CLI behaviour
+      - report schema
+      - provider semantics
+      - scoring or ranking
+      - cache/network/telemetry
+      - release creation
+      - tag creation or push
+      - package publishing
+      - remote mutation beyond normal CI checkout/setup
+    validation_expectation:
+      - git diff --check
+      - zig build test
+      - zig build validate
+      - zig build validate-all when CI aggregate/proof coverage changes
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B001
+timestamps:
+  created_at: 2026-06-01T01:36:31.518Z
+  updated_at: 2026-06-01T01:48:27.644Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-06-01T01:48:27.644Z
+  assurance_level: routine
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Balanced
+    runner_model: Balanced
+    review_mode: control_plane_review
+    review_model: Balanced
+    reviewer_member_usage: standby
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Scope requires a stronger runner posture than Fast.
+  scope:
+    mode: packets
+    feature_id: "0117"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B001
+    feature:
+      title: GitHub CI pipeline hardening
+      problem: GitHub Actions exists but needs a durable hardening slice to ensure
+        hosted CI matches the project validation baseline and proof gates
+        without duplicating stale logic or introducing release/package/network
+        side effects.
+      outcome: A minimal, maintainable GitHub CI workflow that runs the authoritative
+        project validation/proof aggregate for pushes to master and pull
+        requests, with minimal permissions and no publishing or release side
+        effects.
+      acceptance:
+        - CI runs on push to master and pull requests.
+        - CI uses full history when project validation requires Git-history
+          evidence.
+        - CI installs the pinned supported Zig toolchain.
+        - CI runs the authoritative full validation/proof aggregate or an
+          equivalent project-owned aggregate with no missing admitted provider
+          lane.
+        - CI keeps permissions minimal and introduces no publish, release, tag,
+          package, secret, or remote-mutation steps.
+        - "Local hook behaviour remains unchanged: pre-commit fast gate and
+          pre-push validate-all."
+        - No runtime, CLI, schema, provider, scoring, cache, network, telemetry,
+          release, or package behaviour changes.
+        - Implementation passes git diff --check, zig build test, zig build
+          validate, and zig build validate-all when proof orchestration changes.
+    brief_alignment:
+      status: aligned
+      role: prerequisite
+      summary: CI hardening is validation infrastructure for the B001 local-first CLI
+        capability. It is not a new runtime feature and must preserve
+        local-first/no-telemetry/no-publish boundaries.
+      checked_at: 2026-06-01T01:40:05.944Z
+    briefs:
+      - id: B001
+        title: Local-first hotspot intelligence CLI
+        summary: "Define the OSS capability for git-hotspots as a deterministic,
+          local-first hotspot intelligence CLI for developers and coding agents:
+          before refactoring, ask Git where change pressure and maintenance pain
+          concentrate."
+        desired_capability:
+          - A command-line tool that analyses local Git history and produces
+            reproducible hotspot evidence for files first, with symbol-level
+            insight added later through provider adapters.
+          - Reports should help humans and coding agents focus review,
+            refactoring, testing, and onboarding effort without treating metrics
+            as runtime truth or quality judgement.
+          - Provider architecture should allow future evidence sources such as
+            tree-sitter, LSP, ctags, dependency graphs, blame/history, and test
+            or coverage data without making any single provider the core
+            product.
+        why:
+          - "High change frequency is a useful attention signal: code that
+            changes often may be fragile, strategically important, under-tested,
+            or worth improving."
+          - The reboot should avoid the old parser-heavy trap and prove
+            usefulness with deterministic Git-history evidence before deep
+            language support.
+          - Local-first reports preserve trust and make the project suitable for
+            private repositories, OSS maintainers, and agent-assisted workflows.
+        in_scope:
+          - OSS/publicity-oriented CLI capability and public project framing.
+          - "File-level hotspot analysis as the first useful layer: churn,
+            change frequency, recency, co-change, size, confidence, and
+            explainable evidence."
+          - Agent-ready export formats such as JSON and Markdown that users may
+            pipe into their own tools or agents.
+          - First-class provider concept for later symbol and dependency
+            evidence, with tree-sitter as one provider rather than the
+            foundation.
+          - "Campaign language such as: Your git history knows where your
+            technical debt lives; Stop refactoring by vibes; Before asking an AI
+            to refactor, ask Git where to look; The riskiest code is not always
+            the ugliest code, it is the code everyone keeps changing."
+        out_of_scope:
+          - Hosted dashboards, SaaS, and commercial or monetisation plans in
+            repository artefacts.
+          - Claims that the tool predicts bugs, measures code quality, ranks
+            developers, or replaces established code-health platforms.
+          - Mandatory LLM use at runtime; agents may consume exports, but the
+            product truth remains deterministic.
+          - Making tree-sitter, LSP, or any language provider part of the
+            initial critical path.
+          - Feature-level execution plans, PRDs, packet plans, todos, or runs
+            during this brief-capture step.
+        durable_decisions:
+          - "Adopt the public thesis: deterministic, local-first hotspot
+            intelligence CLI for developers and coding agents."
+          - "Adopt the tagline: Before you refactor, ask Git where the pain is."
+          - Start conceptually with file-level Git-history evidence; defer
+            symbol-level precision until provider seams are validated.
+          - Treat tree-sitter as a later provider, alongside possible LSP,
+            ctags, dependency, blame/history, and test/coverage providers.
+          - Keep the public repository free of monetisation plans and SaaS
+            strategy; use it as OSS/publicity framing only.
+          - Use agent-ready reports as an export surface, not as model-driven
+            product truth.
+    prd_path: .flow/features/0117_github-ci-pipeline-hardening/prd.md
+  requirements_contract:
+    source_path: .flow/features/0117_github-ci-pipeline-hardening/prd.md
+    source_digest: c8fd66444d8c184a12b7d1a8943a383f4c471010b922eb4c0ddd39363e784e37
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: "REQ-001: The GitHub CI workflow must run on pushes to master and pull
+          requests."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: "REQ-002: The workflow must check out full history where project
+          validation requires Git-history evidence."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: "REQ-003: The workflow must install the pinned supported Zig toolchain
+          used by the project."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: "REQ-004: The workflow must run the project’s authoritative full
+          validation gate, currently zig build validate-all, or an equivalent
+          project-owned aggregate that includes zig build validate plus proof
+          gates."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: "REQ-005: CI must include tree-sitter proof coverage for all currently
+          admitted symbol/relationship provider lanes where project-owned build
+          steps exist."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: "REQ-006: CI must avoid duplicated shell logic when a project-owned
+          aggregate command already expresses the same validation intent."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: "REQ-007: CI must not publish packages, create releases, create or push
+          tags, upload artefacts, mutate remotes, fetch private data, or require
+          secrets."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: "REQ-008: CI must not add runtime network, telemetry, cache, remote
+          enrichment, or package-publishing behaviour to the CLI."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#requirements[9]
+        text: "REQ-009: CI must remain deterministic and local-first except for standard
+          GitHub Actions dependency setup required to run validation on the
+          hosted runner."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#requirements[10]
+        text: "REQ-010: CI must keep permissions minimal, with read-only repository
+          contents unless a future explicit feature changes that."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#requirements[11]
+        text: "REQ-011: The workflow should use clear step names and avoid misleading
+          claims that CI predicts bugs, scores code quality, ranks developers,
+          or proves semantic dependency/call-graph truth."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#requirements[12]
+        text: "REQ-012: Documentation or validation references that mention CI must
+          remain accurate after the workflow change."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#requirements[13]
+        text: "REQ-013: The implementation must preserve existing local hook behaviour:
+          .githooks/pre-commit continues to run the fast gate and
+          .githooks/pre-push continues to run zig build validate-all."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#requirements[14]
+        text: "REQ-014: The implementation must leave the repository clean and pass git
+          diff --check, zig build test, and zig build validate; if CI config
+          changes validation orchestration, zig build validate-all must also be
+          run or explicitly justified."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#acceptance[1]
+        text: GitHub Actions workflow exists and is aligned with the project validation
+          baseline.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#acceptance[2]
+        text: Push and pull request CI run the full project validation/proof aggregate.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#acceptance[3]
+        text: Provider proof gates remain represented either through validate-all or
+          explicit workflow steps with no missing admitted provider lane.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#acceptance[4]
+        text: No publish/release/tag/remote mutation steps are introduced.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#acceptance[5]
+        text: No runtime CLI behaviour, report schema, provider semantics,
+          scoring/ranking, cache, network, telemetry, release, package, or Flow
+          lifecycle behaviour changes.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#acceptance[6]
+        text: Reviewer can independently verify the workflow against local hook commands
+          and current build steps.
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#edge-cases[1]
+        text: If zig build validate-all already includes all currently explicit CI proof
+          steps, prefer simplification to a single aggregate step plus any
+          genuinely missing CI-only checks.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-022
+        source_ref: prd.md#edge-cases[2]
+        text: If a proof step is intentionally not included in validate-all, document
+          why it remains explicit in CI.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-023
+        source_ref: prd.md#edge-cases[3]
+        text: If GitHub runner setup requires network access for actions/checkout or Zig
+          setup, keep that limited to CI environment setup and do not imply
+          runtime product network dependence.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-024
+        source_ref: prd.md#edge-cases[4]
+        text: If a new admitted provider lacks a project-owned CI proof step, stop and
+          shape a prerequisite validation feature rather than silently asserting
+          coverage.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-025
+        source_ref: prd.md#verification[1]
+        text: Inspect .github/workflows/ci.yml, .githooks/pre-commit,
+          .githooks/pre-push, and build.zig validation/proof step definitions.
+        category: verification
+        packet_refs: []
+        verification: Inspect .github/workflows/ci.yml, .githooks/pre-commit,
+          .githooks/pre-push, and build.zig validation/proof step definitions.
+        required_for_close_out: true
+      - id: REQ-026
+        source_ref: prd.md#verification[2]
+        text: Run git diff --check.
+        category: verification
+        packet_refs: []
+        verification: Run git diff --check.
+        required_for_close_out: true
+      - id: REQ-027
+        source_ref: prd.md#verification[3]
+        text: Run zig build test.
+        category: verification
+        packet_refs: []
+        verification: Run zig build test.
+        required_for_close_out: true
+      - id: REQ-028
+        source_ref: prd.md#verification[4]
+        text: Run zig build validate.
+        category: verification
+        packet_refs: []
+        verification: Run zig build validate.
+        required_for_close_out: true
+      - id: REQ-029
+        source_ref: prd.md#verification[5]
+        text: Run zig build validate-all when the workflow changes aggregate
+          validation/proof coverage.
+        category: verification
+        packet_refs:
+          - P2
+        verification: Run zig build validate-all when the workflow changes aggregate
+          validation/proof coverage.
+        required_for_close_out: true
+      - id: REQ-030
+        source_ref: prd.md#verification[6]
+        text: Confirm no release/tag/package/publish or remote-mutation action was
+          added.
+        category: verification
+        packet_refs: []
+        verification: Confirm no release/tag/package/publish or remote-mutation action
+          was added.
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: A minimal, maintainable GitHub CI workflow that runs the authoritative
+      project validation/proof aggregate for pushes to master and pull requests,
+      with minimal permissions and no publishing or release side effects.
+    acceptance:
+      - CI runs on push to master and pull requests.
+      - CI uses full history when project validation requires Git-history
+        evidence.
+      - CI installs the pinned supported Zig toolchain.
+      - CI runs the authoritative full validation/proof aggregate or an
+        equivalent project-owned aggregate with no missing admitted provider
+        lane.
+      - CI keeps permissions minimal and introduces no publish, release, tag,
+        package, secret, or remote-mutation steps.
+      - "Local hook behaviour remains unchanged: pre-commit fast gate and
+        pre-push validate-all."
+      - No runtime, CLI, schema, provider, scoring, cache, network, telemetry,
+        release, or package behaviour changes.
+      - Implementation passes git diff --check, zig build test, zig build
+        validate, and zig build validate-all when proof orchestration changes.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig build test
+      - zig build validate
+      - zig build validate-all
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+      - confirm CI uses validate-all or justified equivalent without missing
+        admitted provider lanes
+      - confirm no publish/release/tag/package/remote mutation steps were added
+  decision_budget:
+    allowed_local_decisions:
+      - safe workflow simplification inside dispatched scope
+      - local CI step naming/detail changes that do not alter project contracts
+    deferred_reconcile_triggers:
+      - minor non-contract deviation worth reviewer visibility
+      - implementation trade-off that stays inside acceptance
+      - CI aggregate equivalence judgement that stays inside validation baseline
+    hard_planner_escalation_triggers:
+      - scope or acceptance change
+      - dependency or prerequisite change
+      - protected-surface mutation outside dispatch envelope
+      - need for secrets, publishing, tag, release, package, or remote mutation
+    protected_surfaces:
+      - runtime CLI behaviour
+      - report schema
+      - provider semantics
+      - scoring or ranking
+      - cache/network/telemetry
+      - release creation
+      - tag creation or push
+      - package publishing
+      - remote mutation beyond normal CI checkout/setup
+  fallback_path: deferred_reconcile_decision
+  notes: null

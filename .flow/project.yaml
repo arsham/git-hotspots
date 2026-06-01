@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0117"
   active_run_id: null
   last_completed_feature_id: "0116"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 117
+  next_id: 118
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -493,6 +493,10 @@ features:
       slug: historical-symbol-and-relationship-workflow-guide
       path: .flow/features/0116_historical-symbol-and-relationship-workflow-guide
       created_at: 2026-06-01T00:16:59.013Z
+    - id: "0117"
+      slug: github-ci-pipeline-hardening
+      path: .flow/features/0117_github-ci-pipeline-hardening
+      created_at: 2026-06-01T01:36:31.518Z
 intake:
   mode: roadmap
   summary: null
