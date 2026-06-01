@@ -231,6 +231,11 @@ durable_decisions:
     and preserving runtime behaviour, provider algorithms, CLI flags, JSON
     schema, relation semantics, scoring, ranking, cache, network, telemetry,
     release, tag, remote, package, and publishing behaviour."
+  - "Shape a serial post-alpha.4 relationship evidence polish batch: 0113
+    drilldown examples, 0114 provider caveat audit, 0115 fixture gap closures,
+    and 0116 combined historical-symbol plus relationship workflow guide. These
+    slices remain evidence-only and protect runtime, provider, schema, scoring,
+    cache, network, release, tag, remote, package, and publish surfaces."
 links:
   roadmap_item_id: null
   feature_ids:
@@ -260,4 +265,4 @@ links:
     - "0107"
 timestamps:
   created_at: 2026-05-27T19:12:06.269Z
-  updated_at: 2026-05-31T23:31:46.283Z
+  updated_at: 2026-06-01T00:24:42.288Z
