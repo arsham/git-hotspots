@@ -345,8 +345,10 @@ developer metrics, bug prediction, scoring replacement, or a ranking input.
 
 To drill into a relationship record, read the human summary first, then match a
 shown row to the JSON fields. For example, the checked-in Go relationship
-fixture reports `emitted=8 kinds=contains:8 human_display_sample_omitted=2` in
-table and Markdown output. One shown row links `file:src/example.go` to
+fixture reports
+`emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1`
+and `human_display_sample_omitted=9` in table and Markdown output. One shown
+row links `file:src/example.go` to
 `symbol:src/example.go:Runner:type` with provider
 `tree-sitter-go-relations`, input `working-tree:src/example.go`, freshness
 `fresh`, failure `ok`, confidence `medium`, and evidence basis
@@ -367,6 +369,11 @@ from being reported. Unknown or unresolved targets, such as TSX rows for JSX or
 type-only syntax, are still useful prompts when paired with low confidence and
 caveats; they do not fabricate a local target. Duplicate-looking records can be
 meaningful when their relation kind or evidence basis differs.
+
+See `docs/user-guide.md` for the relationship caveat glossary covering bounded
+syntax proof, unknown relation-like syntax, unresolved endpoints,
+external-string endpoints, and the difference between human display omissions
+and provider-cap omissions.
 
 Use these layers together as progressively narrower local evidence, not as a
 replacement for review. Start with file hotspots to choose where to inspect,

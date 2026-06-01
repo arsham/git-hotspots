@@ -1137,6 +1137,19 @@ docs_manual_checks() {
   grep -Fq 'TypeScript, and TSX Tree-sitter lanes' docs/user-guide.md || return 1
   grep -Fq 'When pairing `--historical-symbols` with `--symbol-relationships`' docs/user-guide.md || return 1
   grep -Fq 'Historical-symbol rows do not explain why churn happened' docs/user-guide.md || return 1
+  grep -Fq 'Relationship caveat glossary' docs/user-guide.md || return 1
+  grep -Fq 'Bounded syntax proof' docs/user-guide.md || return 1
+  grep -Fq 'Unknown relation-like syntax' docs/user-guide.md || return 1
+  grep -Fq 'Unresolved endpoint' docs/user-guide.md || return 1
+  grep -Fq 'External-string endpoint' docs/user-guide.md || return 1
+  grep -Fq 'Human display omission' docs/user-guide.md || return 1
+  grep -Fq 'Provider-cap omission' docs/user-guide.md || return 1
+  grep -Fq 'Glossary example' docs/user-guide.md || return 1
+  grep -Fq 'Go provider observed a top-level declaration relationship' docs/user-guide.md || return 1
+  grep -Fq 'human_display_sample_omitted=9' docs/user-guide.md || return 1
+  grep -Fq 'target_unresolved: true' docs/user-guide.md || return 1
+  grep -Fq 'provider_partial_evidence_omitted' docs/user-guide.md || return 1
+  grep -Fq 'emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1' docs/user-guide.md || return 1
   grep -Fq 'Zig `.zig` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-zig-relations`' docs/user-guide.md || return 1
   grep -Fq 'Go `.go` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-go-relations`' docs/user-guide.md || return 1
   grep -Fq 'Lua `.lua` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-lua-relations`' docs/user-guide.md || return 1
@@ -1193,6 +1206,15 @@ docs_manual_checks() {
   grep -Fq 'Other current files preserve file evidence' man/git-hotspots.1 || return 1
   grep -Fq 'For a focused historical-symbol and relationship workflow' man/git-hotspots.1 || return 1
   grep -Fq 'historical attribution does not explain why churn happened' man/git-hotspots.1 || return 1
+  grep -Fq 'Relationship caveat glossary' man/git-hotspots.1 || return 1
+  grep -Fq 'Bounded syntax proof' man/git-hotspots.1 || return 1
+  grep -Fq 'Unknown relation-like syntax' man/git-hotspots.1 || return 1
+  grep -Fq 'Unresolved endpoint' man/git-hotspots.1 || return 1
+  grep -Fq 'External-string endpoint' man/git-hotspots.1 || return 1
+  grep -Fq 'human_display_sample_omitted' man/git-hotspots.1 || return 1
+  grep -Fq 'provider_partial_evidence_omitted' man/git-hotspots.1 || return 1
+  grep -Fq 'emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1' man/git-hotspots.1 || return 1
+  grep -Fq 'human_display_sample_omitted=9' man/git-hotspots.1 || return 1
   grep -Fq -- '--progress' man/git-hotspots.1 || return 1
   grep -Fq 'local-first' man/git-hotspots.1 || return 1
   ! grep -Eq 'dogfood|tools/release-linux\.sh|packaging/aur|makepkg|pacman|pkg\.tar' man/git-hotspots.1 || return 1
@@ -1202,6 +1224,11 @@ docs_manual_checks() {
   grep -Fq 'retained ranked-file candidates in Zig' README.md || return 1
   grep -Fq 'For a focused historical-symbol and relationship workflow' README.md || return 1
   grep -Fq 'historical attribution does not' README.md || return 1
+  grep -Fq 'relationship caveat glossary' README.md || return 1
+  grep -Fq 'syntax proof' README.md || return 1
+  grep -Fq 'external-string endpoints' README.md || return 1
+  grep -Fq 'emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1' README.md || return 1
+  grep -Fq 'human_display_sample_omitted=9' README.md || return 1
   grep -Fq 'Invalid CLI combinations exit 2' README.md || return 1
   grep -Fq 'Local Linux dogfood packaging' README.md || return 1
   grep -Fq 'tools/release-linux.sh' README.md || return 1

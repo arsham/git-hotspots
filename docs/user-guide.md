@@ -256,13 +256,57 @@ caveat arrays. It is caveated investigation context only, not call-graph truth,
 dependency proof, ownership, developer metrics, bug prediction, scoring
 replacement, or a ranking input.
 
+Relationship caveat glossary:
+
+- Bounded syntax proof: the provider observed local syntax patterns in one
+  file, within current caps and supported grammar coverage. This is useful
+  evidence, but it is not package resolution, type checking, runtime execution,
+  dependency truth, or a complete call graph.
+- Unknown relation-like syntax: the provider found syntax that may matter near
+  a relationship, but could not classify it honestly as a stronger relation
+  kind such as `call`, `reference`, or `import_include`. Treat it as a prompt to
+  inspect the local code, not as a failure or a hidden dependency.
+- Unresolved endpoint: a record points at syntax whose local target could not
+  be resolved inside the inspected file. The endpoint stays visible so the
+  uncertainty is explicit instead of silently disappearing.
+- External-string endpoint: an import, include, module, crate, package,
+  `require`, or `@import`-style string is recorded as syntax evidence only. The
+  tool does not prove where that string resolves on disk or in a build system.
+- Human display omission: `human_display_sample_omitted` means table and
+  Markdown output hid extra emitted rows to keep the human report compact. JSON
+  still keeps the bounded record array.
+- Provider-cap omission: `provider_partial_evidence_omitted` means the provider
+  stopped collecting after a configured evidence cap. This is different from a
+  human display limit because some provider candidates were not emitted.
+
+Keep these caveats attached when copying relationship output into review notes
+or agent prompts. They are the reason relationship evidence stays useful without
+claiming dependency truth, call-graph truth, ownership, code quality, or bug
+risk.
+
+Glossary example: the checked-in Go relationship fixture has a row from
+`file:src/example.go` to `symbol:src/example.go:Runner:type` with basis
+`go top-level declaration containment`. That row is a bounded syntax proof: the
+Go provider observed a top-level declaration relationship in one local file,
+not a package, interface, method-set, dependency, call graph, ownership, or bug
+risk fact. The same fixture summary includes
+`human_display_sample_omitted=9`, which means table and Markdown hid nine
+emitted rows for readability while JSON kept the bounded records.
+
+For uncertainty, compare TypeScript-family rows that use `kind: "unknown"` or
+`target_unresolved: true`. Those records keep uncertain local syntax visible
+without fabricating a target. Provider-cap omissions are separate from both
+examples: when `provider_partial_evidence_omitted` appears, it means the
+provider stopped collecting some candidates at its cap rather than only hiding
+already-emitted rows from the human table or Markdown sample.
+
 ### Drilling into relationship evidence
 
 Use checked-in fixture output as a stable way to learn the relationship fields.
 The Go fixture shows the same bounded evidence in table, Markdown, and JSON:
 
 ```text
-Relationship evidence summary: emitted=8 kinds=contains:8 human_display_sample_omitted=2
+Relationship evidence summary: emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1 unknown=2 unresolved=1 unresolved_targets=3 human_display_sample_omitted=9
 contains source_to_target source=file:src/example.go target=symbol:src/example.go:Runner:type provider=tree-sitter-go-relations basis=go top-level declaration containment
 ```
 
@@ -298,7 +342,7 @@ containment relationship in `src/example.go`; it does not prove package
 identity, dependencies, ownership, runtime calls, quality, or bugs.
 
 Omission fields describe why a human or provider view is incomplete. The Go
-fixture's `human_display_sample_omitted=2` means table and Markdown hid two
+fixture's `human_display_sample_omitted=9` means table and Markdown hid nine
 rows because of the human display limit; JSON still carries the bounded record
 array. Provider-cap omissions are different: `provider_partial_evidence_omitted`
 or bound-omitted counts mean the provider or record bound stopped some evidence

@@ -274,11 +274,49 @@ evidence; record bound omissions remain separate. They also compact repeated
 row caveats into stable C1-style references plus one caveat summary; JSON keeps
 per-record caveat arrays. It does not prove calls, dependencies, ownership,
 developer metrics, bugs, or ranking changes.
+.SS Relationship caveat glossary
+.B Bounded syntax proof
+means the provider observed local syntax patterns in one file, within current
+caps and supported grammar coverage. It is useful evidence, but it is not
+package resolution, type checking, runtime execution, dependency truth, or a
+complete call graph.
+.PP
+.B Unknown relation-like syntax
+means the provider found syntax that may matter near a relationship, but could
+not classify it honestly as a stronger relation kind such as
+.B call,
+.B reference,
+or
+.B import_include.
+Treat it as a prompt to inspect local code, not as a hidden dependency.
+.PP
+.B Unresolved endpoint
+means a record points at syntax whose local target could not be resolved inside
+the inspected file. The endpoint remains visible so the uncertainty is explicit
+instead of silently disappearing.
+.PP
+.B External-string endpoint
+means an import, include, module, crate, package,
+.B require,
+or
+.B @import
+string is recorded as syntax evidence only. The tool does not prove where that
+string resolves on disk or in a build system.
+.PP
+.B human_display_sample_omitted
+means table and Markdown output hid extra emitted rows to keep the human report
+compact; JSON still keeps the bounded record array.
+.B provider_partial_evidence_omitted
+means the provider stopped collecting after a configured evidence cap. Keep
+these caveats attached when copying relationship output into review notes or
+agent prompts.
 .SS Relationship drilldown examples
 Read relationship evidence by matching the human summary, a shown row, and the
 JSON record fields. In the checked-in Go fixture, table and Markdown output
 summarise
-.B emitted=8 kinds=contains:8 human_display_sample_omitted=2
+.B emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1
+and
+.B human_display_sample_omitted=9
 and show rows such as
 .B file:src/example.go
 to
