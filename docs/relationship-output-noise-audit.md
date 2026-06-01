@@ -63,7 +63,7 @@ evidence basis.
 | JavaScript | `tree-sitter-javascript-relations` | 17 | import_include 1, contains 12, reference 1, unresolved 1, call 2 | 1 | 0 | 3 | 70 instances, 6 unique | 4 shown, 13 omitted |
 | TSX | `tree-sitter-tsx-relations` | 17 | contains 7, unknown 7, unresolved 2, reference 1 | 9 | 0 | 0 | 77 instances, 6 unique | 4 shown, 13 omitted |
 | Rust | `tree-sitter-rust-relations` | 26 | contains 20, unresolved 2, import_include 1, reference 2, unknown 1 | 3 | 0 | 1 | 108 instances, 7 unique | 4 shown, 22 omitted |
-| Go | `tree-sitter-go-relations` | 8 | contains 8 | 0 | 0 | 0 | 32 instances, 4 unique | 4 shown, 4 omitted |
+| Go | `tree-sitter-go-relations` | 15 | import_include 1, contains 8, reference 2, call 1, unresolved 1, unknown 2 | 3 | 0 | 0 | 64 instances, 7 unique | 4 shown, 11 omitted |
 | Lua | `tree-sitter-lua-relations` | 16 | contains 9, reference 1, unresolved 2, call 2, unknown 2 | 5 | 0 | 1 | 69 instances, 6 unique | 4 shown, 12 omitted |
 | Zig dogfood | `tree-sitter-zig-relations` | 53 | contains 17, unknown 28, import_include 2, reference 5, unresolved 1 | 29 | 0 | 0 | 243 instances, 7 unique | 4 shown, 49 omitted |
 | Unsupported fallback | unsupported | 0 | none | 0 | 0 | 0 | none on records | 0 shown, 0 omitted |
@@ -113,11 +113,12 @@ records by provider lane and evidence basis before showing individual examples.
 
 ### Ambiguous call and member records
 
-Python reported one direct call to an unresolved local name. Lua reported two
-call records, one unresolved and one locally resolved. JavaScript reported two
-local direct-call records. TSX and Zig primarily expressed ambiguous syntax as
-`unknown` rather than `call`, which is safer than overclaiming semantic callee
-resolution.
+Python reported one direct call to an unresolved local name. Go reported one
+locally resolved direct call plus unresolved and selector-like syntax. Lua
+reported two call records, one unresolved and one locally resolved. JavaScript
+reported two local direct-call records. TSX and Zig primarily expressed
+ambiguous syntax as `unknown` rather than `call`, which is safer than
+overclaiming semantic callee resolution.
 
 Classification: acceptable caveat with a small display opportunity. The current
 provider behaviour is conservative. A successor should not relabel unknown or

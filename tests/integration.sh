@@ -434,7 +434,7 @@ python3 - "$tmp_dir/git-hotspots-symbol-relationships-zig.json" "$tmp_dir/git-ho
 import json, sys
 cases = [
     (sys.argv[1], 'tree-sitter-zig-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved', 'unknown'}, True, None),
-    (sys.argv[2], 'tree-sitter-go-relations', {'contains'}, False, None),
+    (sys.argv[2], 'tree-sitter-go-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved', 'unknown'}, True, None),
     (sys.argv[3], 'tree-sitter-javascript-relations', {'contains', 'reference', 'call', 'import_include', 'unresolved'}, True, ('symbol:src/example.mjs:topFunction:function', 'symbol:src/example.mjs:innerFunction:function', {'contains', 'call'}, {'javascript definition containment', 'javascript direct call expression'})),
     (sys.argv[4], 'tree-sitter-lua-relations', {'contains', 'reference', 'call', 'unresolved', 'unknown'}, True, ('file:src/example.lua', 'symbol:src/example.lua:exports:variable', {'contains', 'reference'}, {'lua module-level symbol containment', 'lua identifier reference syntax'})),
     (sys.argv[5], 'tree-sitter-typescript-relations', {'contains', 'call', 'unresolved', 'unknown'}, True, ('symbol:src/example.ts:compute:function', 'symbol:src/example.ts:localHelper:function', {'contains', 'call'}, {'typescript definition containment', 'typescript/tsx direct call expression'})),

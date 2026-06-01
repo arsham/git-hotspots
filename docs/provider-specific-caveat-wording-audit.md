@@ -33,7 +33,7 @@ diagnostics, commit messages, or source snippets.
 | --- | --- | --- | ---: | ---: |
 | Python | `fixtures/expected/symbol-relationships.json` | `tree-sitter-python-relations` | 20 | 5 |
 | JavaScript | `fixtures/expected/symbol-relationships-javascript.json` | `tree-sitter-javascript-relations` | 17 | 6 |
-| Go | `fixtures/expected/symbol-relationships-go.json` | `tree-sitter-go-relations` | 8 | 4 |
+| Go | `fixtures/expected/symbol-relationships-go.json` | `tree-sitter-go-relations` | 15 | 7 |
 | Lua | `fixtures/expected/symbol-relationships-lua.json` | `tree-sitter-lua-relations` | 16 | 6 |
 | Rust | `fixtures/expected/symbol-relationships-rust.json` | `tree-sitter-rust-relations` | 23 | 7 |
 | TSX | `fixtures/expected/symbol-relationships-tsx.json` | `tree-sitter-tsx-relations` | 17 | 6 |
@@ -66,7 +66,7 @@ modify the goldens or regenerate expected CLI output.
 | Unresolved target record caveat | Python, JavaScript, Lua, Rust, TSX, TypeScript, Zig | No action | Record-level unresolved caveats are honest and lane-specific where needed. |
 | Unknown relation-like syntax caveat | Lua, Rust, TSX, TypeScript, Zig | Docs candidate | The wording is conservative, but a docs glossary could explain why unknown syntax is evidence rather than failure. |
 | Import or include external-string caveat | JavaScript, Rust, Zig | No action | Each caveat correctly avoids package, crate, module, build graph, and file-system resolution claims. |
-| Go broad capability caveat | Go | Fixture candidate | Go caveat wording mentions imports, calls, selectors, unresolved, and unknown syntax, while the current lane golden only emits `contains` records. |
+| Go broad capability caveat | Go | No action | Go caveat wording mentions imports, calls, selectors, unresolved, and unknown syntax, and the current lane golden now emits stable examples for those categories. |
 | TSX and TypeScript shared caveat wording | TSX, TypeScript | No action | Shared wording is acceptable because both lanes use TypeScript-family syntax evidence and differ through record counts. |
 | Zig package/build/comptime caveat | Zig | No action | Zig-specific wording is appropriately bounded and avoids build graph, namespace, type, method, comptime, and generated-code truth. |
 
@@ -92,17 +92,12 @@ Classification: no action.
 
 ### Go
 
-Go has the only wording-to-fixture mismatch worth a bounded follow-up. Its lane
-caveat names imports, direct identifier calls, selector-like syntax, unresolved
-identifiers, and unknown relation-like syntax, but the current golden emits only
-8 `contains` records. The wording is still safe because it describes the
-provider's bounded evidence surface rather than claiming those categories appear
-in this fixture.
+Go caveats are coherent. The lane now includes stable import/include, direct
+identifier call, local identifier reference, unresolved identifier, and
+selector-like syntax examples alongside declaration containment, so the bounded
+syntax summary is represented directly by the checked-in golden.
 
-Classification: fixture candidate. A future Go fixture slice could add stable
-non-`contains` relationship examples if the provider already supports them, or a
-docs note could explain that the caveat describes provider capability while the
-current golden is intentionally narrow.
+Classification: no action.
 
 ### Lua
 
@@ -153,10 +148,10 @@ Classification: no action.
    `bounded syntax proof`, `unknown relation-like syntax`, unresolved endpoints,
    and external-string endpoints. This should be presentation documentation, not
    runtime wording or JSON schema work.
-2. **Review Go fixture representativeness.** Consider a future fixture-only Go
-   slice that exercises non-`contains` caveat categories if stable examples are
-   already available. If not, record that Go's narrow contains-only lane is
-   intentional.
+2. **Keep Go fixture representativeness stable.** Preserve the current Go
+   import/include, call, reference, unresolved, and selector-like examples when
+   regenerating fixture outputs unless a future provider contract intentionally
+   changes them.
 3. **Add drift validation for caveat classes.** Consider a validation-only check
    that confirms each admitted lane keeps product-truth, optional-evidence, and
    endpoint-resolution boundary caveats. This should not prescribe exact prose

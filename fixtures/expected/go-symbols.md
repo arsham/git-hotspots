@@ -5,7 +5,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 ## Run summary
 
 - Tool: git-hotspots 0.1.0-alpha.4
-- Head commit: 9efa83ac497f0c5f670110aadf8354388b3ccb9a
+- Head commit: a32bd2e6bd6c31e842c28acb6aeef73fdb18850a
 - Range: None
 - Commit count: 2
 - Shallow history: false
@@ -54,13 +54,13 @@ Symbols are opt-in current working-tree enrichment only. They do not change scor
 
 | Name | Kind | Lines | Confidence |
 | --- | --- | ---: | --- |
-| Alpha | other | 3-6 | high |
-| Beta | other | 3-6 | high |
-| Gamma | variable | 8-8 | high |
-| Method | method | 17-17 | high |
-| Runner | type | 15-15 | high |
-| Service | type | 14-14 | high |
-| Zebra | function | 10-12 | high |
+| Alpha | other | 5-8 | high |
+| Beta | other | 5-8 | high |
+| Gamma | variable | 10-10 | high |
+| Method | method | 19-25 | high |
+| Runner | type | 17-17 | high |
+| Service | type | 16-16 | high |
+| Zebra | function | 12-14 | high |
 | symbols | module | 1-1 | high |
 
 ## Caveats
@@ -71,19 +71,19 @@ Symbols are opt-in current working-tree enrichment only. They do not change scor
 
 | Rank | Path | Score | Changes | Churn | Confidence | Lineage | Last commit |
 | ---: | --- | ---: | ---: | ---: | --- | --- | --- |
-| 1 | src/example.go | 52.8 | 2 | 19 | medium | yes | 9efa83ac497f |
+| 1 | src/example.go | 53.1 | 2 | 27 | medium | yes | a32bd2e6bd6c |
 
 ## Evidence
 
 ### 1. src/example.go
 
-- Score breakdown: total=52.760, frequency=20.000, churn=0.760, recency=20.000, cochange=12.000
+- Score breakdown: total=53.080, frequency=20.000, churn=1.080, recency=20.000, cochange=12.000
 - Changes: 2
-- Additions: 18
+- Additions: 26
 - Deletions: 1
-- Current size: 182
+- Current size: 287
 - Confidence: medium
-- Last commit: 9efa83ac497f
+- Last commit: a32bd2e6bd6c
 - Lineage: Git rename edges only; no copy, split, merge, symbol, or semantic move tracking
   - Accepted aliases: src/old\-example.go
 - Top co-changes:
@@ -93,7 +93,7 @@ Symbols are opt-in current working-tree enrichment only. They do not change scor
   - src/empty.go (count=1)
   - src/large.go (count=1)
 - Evidence commits:
-  - commit=9efa83ac497f timestamp=1777680000 additions=3 deletions=1
-  - commit=06dd28088837 timestamp=1777593600 additions=15 deletions=0
+  - commit=a32bd2e6bd6c timestamp=1777680000 additions=3 deletions=1
+  - commit=8358403565ea timestamp=1777593600 additions=23 deletions=0
 - Row caveats:
   - None

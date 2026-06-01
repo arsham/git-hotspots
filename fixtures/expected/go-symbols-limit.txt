@@ -7,11 +7,11 @@ symbols: provider=tree-sitter-go state=current-only freshness=fresh failure=ok c
 symbols caveat: current working-tree enrichment only; file-level Git evidence, score, file order, lineage, and confidence are unchanged
 
 rank  score   changes churn   confidence lineage path
-1     52.8    2       19      medium     yes     src/example.go
+1     53.1    2       27      medium     yes     src/example.go
 
 current symbols (shown first by provider order):
   summary: total=8 shown=2 omitted=6 limit=2 limit_source=explicit sort_basis="provider order"
-  other Alpha lines 3-6 confidence=high
-  other Beta lines 3-6 confidence=high
+  other Alpha lines 5-8 confidence=high
+  other Beta lines 5-8 confidence=high
 
 Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.

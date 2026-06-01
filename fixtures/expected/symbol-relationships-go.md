@@ -5,7 +5,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 ## Run summary
 
 - Tool: git-hotspots 0.1.0-alpha.4
-- Head commit: 9efa83ac497f0c5f670110aadf8354388b3ccb9a
+- Head commit: a32bd2e6bd6c31e842c28acb6aeef73fdb18850a
 - Range: None
 - Commit count: 2
 - Shallow history: false
@@ -54,12 +54,12 @@ Symbols are opt-in current working-tree enrichment only. They do not change scor
 
 | Name | Kind | Lines | Confidence |
 | --- | --- | ---: | --- |
-| Alpha | other | 3-6 | high |
-| Beta | other | 3-6 | high |
-| Gamma | variable | 8-8 | high |
-| Method | method | 17-17 | high |
-| Runner | type | 15-15 | high |
-| Service | type | 14-14 | high |
+| Alpha | other | 5-8 | high |
+| Beta | other | 5-8 | high |
+| Gamma | variable | 10-10 | high |
+| Method | method | 19-25 | high |
+| Runner | type | 17-17 | high |
+| Service | type | 16-16 | high |
 
 ## Symbol relationships
 
@@ -69,9 +69,9 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
 - Retained candidate files: 1
 - Current symbol candidates: 8
 - Provider reports: 1
-- Relation records: 8
+- Relation records: 15
 - Shown records: 6
-- Records hidden by human display limit: 2
+- Records hidden by human display limit: 9
 - Human display limit: 6 (explicit)
 - Relation record bound: 1024
 - Relation record bound exceeded: false
@@ -82,22 +82,23 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
   - bounded Go syntax evidence: contains, import includes, direct identifier calls, selector\-like syntax, unresolved identifiers, and unknown relation\-like syntax
   - unresolved and external\-string endpoints are caveated; no package, module, type, interface, method\-set, build\-tag, generated\-source, cgo, vendored, or semantic dependency identity is fabricated
   - symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
-- Relationship evidence summary: emitted=8 kinds=contains:8 human_display_sample_omitted=2
+- Relationship evidence summary: emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1 unknown=2 unresolved=1 unresolved_targets=3 human_display_sample_omitted=9
 
 | Kind | Direction | Source endpoint | Target endpoint | Unresolved target | Provider | Provider input | Freshness | Failure | Confidence | Evidence basis | Caveat refs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| import_include | source_to_target | file:src/example.go | external:example.com/worker | false | tree\-sitter\-go\-relations | working\-tree:src/example.go | fresh | ok | medium | go import spec syntax | C1, C2, C3, C4, C5 |
 | contains | source_to_target | file:src/example.go | symbol:src/example.go:Alpha:other | false | tree\-sitter\-go\-relations | working\-tree:src/example.go | fresh | ok | medium | go top\-level declaration containment | C1, C2, C3, C4 |
 | contains | source_to_target | file:src/example.go | symbol:src/example.go:Beta:other | false | tree\-sitter\-go\-relations | working\-tree:src/example.go | fresh | ok | medium | go top\-level declaration containment | C1, C2, C3, C4 |
 | contains | source_to_target | file:src/example.go | symbol:src/example.go:Gamma:variable | false | tree\-sitter\-go\-relations | working\-tree:src/example.go | fresh | ok | medium | go top\-level declaration containment | C1, C2, C3, C4 |
 | contains | source_to_target | file:src/example.go | symbol:src/example.go:Method:method | false | tree\-sitter\-go\-relations | working\-tree:src/example.go | fresh | ok | medium | go top\-level declaration containment | C1, C2, C3, C4 |
 | contains | source_to_target | file:src/example.go | symbol:src/example.go:Runner:type | false | tree\-sitter\-go\-relations | working\-tree:src/example.go | fresh | ok | medium | go top\-level declaration containment | C1, C2, C3, C4 |
-| contains | source_to_target | file:src/example.go | symbol:src/example.go:Service:type | false | tree\-sitter\-go\-relations | working\-tree:src/example.go | fresh | ok | medium | go top\-level declaration containment | C1, C2, C3, C4 |
 
 - Row caveat references:
   - C1: candidate relation evidence only; file\-level Git evidence remains product truth
   - C2: bounded Go syntax evidence: contains, import includes, direct identifier calls, selector\-like syntax, unresolved identifiers, and unknown relation\-like syntax
   - C3: unresolved and external\-string endpoints are caveated; no package, module, type, interface, method\-set, build\-tag, generated\-source, cgo, vendored, or semantic dependency identity is fabricated
   - C4: symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
+  - C5: import target is an external string; package, module, vendor, generated\-source, build\-tag, and cgo resolution are out of scope
 
 ## Caveats
 
@@ -107,19 +108,19 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
 
 | Rank | Path | Score | Changes | Churn | Confidence | Lineage | Last commit |
 | ---: | --- | ---: | ---: | ---: | --- | --- | --- |
-| 1 | src/example.go | 52.8 | 2 | 19 | medium | yes | 9efa83ac497f |
+| 1 | src/example.go | 53.1 | 2 | 27 | medium | yes | a32bd2e6bd6c |
 
 ## Evidence
 
 ### 1. src/example.go
 
-- Score breakdown: total=52.760, frequency=20.000, churn=0.760, recency=20.000, cochange=12.000
+- Score breakdown: total=53.080, frequency=20.000, churn=1.080, recency=20.000, cochange=12.000
 - Changes: 2
-- Additions: 18
+- Additions: 26
 - Deletions: 1
-- Current size: 182
+- Current size: 287
 - Confidence: medium
-- Last commit: 9efa83ac497f
+- Last commit: a32bd2e6bd6c
 - Lineage: Git rename edges only; no copy, split, merge, symbol, or semantic move tracking
   - Accepted aliases: src/old\-example.go
 - Top co-changes:
@@ -129,7 +130,7 @@ Symbol relationships are opt-in bounded local provider evidence for retained ran
   - src/empty.go (count=1)
   - src/large.go (count=1)
 - Evidence commits:
-  - commit=9efa83ac497f timestamp=1777680000 additions=3 deletions=1
-  - commit=06dd28088837 timestamp=1777593600 additions=15 deletions=0
+  - commit=a32bd2e6bd6c timestamp=1777680000 additions=3 deletions=1
+  - commit=8358403565ea timestamp=1777593600 additions=23 deletions=0
 - Row caveats:
   - None

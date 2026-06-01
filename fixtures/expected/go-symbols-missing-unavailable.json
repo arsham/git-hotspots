@@ -2,7 +2,7 @@
   "schema_version": "1",
   "tool": { "name": "git-hotspots", "version": "0.1.0-alpha.4" },
   "analysis": {
-    "history": { "head": "9efa83ac497f0c5f670110aadf8354388b3ccb9a", "head_timestamp": 1777680000, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 2 },
+    "history": { "head": "a32bd2e6bd6c31e842c28acb6aeef73fdb18850a", "head_timestamp": 1777680000, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 2 },
     "scope": { "selected_scope": "project", "filters_active": true, "include_prefixes": [], "exclude_prefixes": [".flow/", ".zig-cache/", "zig-out/", "target/", "node_modules/", "dist/", "build/", "coverage/"], "outside_include_path_count": 0, "outside_include_change_count": 0, "excluded_path_count": 0, "excluded_change_count": 0 },
     "caveats": ["Git rename lineage is conservative: local --find-renames=40% file edges only; copies, splits, merges, and symbol moves are not tracked"]
   },
@@ -20,12 +20,12 @@
       "lineage": { "aliases": [], "partial": false, "caveat": "Git rename lineage is deterministic and limited to local --find-renames=40% file edges; copies, splits, merges, and symbol moves are not tracked" },
       "score": { "total": 52.240, "frequency": 20.000, "churn": 0.240, "recency": 20.000, "cochange": 12.000 },
       "change_count": 2, "additions": 3, "deletions": 3, "churn": 6,
-      "recency": { "last_changed_timestamp": 1777680000, "last_changed_commit": "9efa83ac497f" },
+      "recency": { "last_changed_timestamp": 1777680000, "last_changed_commit": "a32bd2e6bd6c" },
       "current_size": null,
       "cochanges": [{ "path": "src/example.go", "count": 2 }, { "path": "src/broken.go", "count": 1 }, { "path": "src/caveated.go", "count": 1 }, { "path": "src/empty.go", "count": 1 }, { "path": "src/large.go", "count": 1 }],
       "confidence": "medium",
       "caveats": ["path is deleted or not present at HEAD"],
-      "evidence": [{ "commit": "9efa83ac497f", "timestamp": 1777680000, "additions": 0, "deletions": 3 }, { "commit": "06dd28088837", "timestamp": 1777593600, "additions": 3, "deletions": 0 }]
+      "evidence": [{ "commit": "a32bd2e6bd6c", "timestamp": 1777680000, "additions": 0, "deletions": 3 }, { "commit": "8358403565ea", "timestamp": 1777593600, "additions": 3, "deletions": 0 }]
     }
   ]
 }

@@ -253,6 +253,8 @@ make_go_symbols() {
   cat > "$repo/src/old-example.go" <<'EOF'
 package symbols
 
+import "example.com/worker"
+
 const (
     Alpha = 1
     Beta = 2
@@ -265,7 +267,13 @@ func Zebra() {}
 type Service struct{}
 type Runner interface{ Run() }
 
-func (s Service) Method() {}
+func (s Service) Method() {
+    Zebra()
+    Gamma = Alpha
+    missingValue
+    s.Field
+    worker.Name
+}
 EOF
   printf '' > "$repo/src/empty.go"
   cat > "$repo/src/broken.go" <<'EOF'
@@ -308,6 +316,8 @@ EOF
   cat > "$repo/src/example.go" <<'EOF'
 package symbols
 
+import "example.com/worker"
+
 const (
     Alpha = 1
     Beta = 2
@@ -322,7 +332,13 @@ func Zebra() {
 type Service struct{}
 type Runner interface{ Run() }
 
-func (s Service) Method() {}
+func (s Service) Method() {
+    Zebra()
+    Gamma = Alpha
+    missingValue
+    s.Field
+    worker.Name
+}
 EOF
   rm "$repo/src/missing.go"
   commit_all "$repo" '2026-05-02T00:00:00+0000' 'expand go symbol functions'

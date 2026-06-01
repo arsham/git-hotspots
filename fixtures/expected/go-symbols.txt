@@ -7,17 +7,17 @@ symbols: provider=tree-sitter-go state=current-only freshness=fresh failure=ok c
 symbols caveat: current working-tree enrichment only; file-level Git evidence, score, file order, lineage, and confidence are unchanged
 
 rank  score   changes churn   confidence lineage path
-1     52.8    2       19      medium     yes     src/example.go
+1     53.1    2       27      medium     yes     src/example.go
 
 current symbols (shown first by provider order):
   summary: total=8 shown=8 omitted=0 limit=25 limit_source=default sort_basis="provider order"
-  other Alpha lines 3-6 confidence=high
-  other Beta lines 3-6 confidence=high
-  variable Gamma lines 8-8 confidence=high
-  method Method lines 17-17 confidence=high
-  type Runner lines 15-15 confidence=high
-  type Service lines 14-14 confidence=high
-  function Zebra lines 10-12 confidence=high
+  other Alpha lines 5-8 confidence=high
+  other Beta lines 5-8 confidence=high
+  variable Gamma lines 10-10 confidence=high
+  method Method lines 19-25 confidence=high
+  type Runner lines 17-17 confidence=high
+  type Service lines 16-16 confidence=high
+  function Zebra lines 12-14 confidence=high
   module symbols lines 1-1 confidence=high
 
 Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.

@@ -21,7 +21,7 @@ Reviewers should then update this matrix or intentionally update the goldens.
 | --- | --- | --- | ---: | --- | ---: | --- | --- | --- | --- |
 | Python | `fixtures/expected/symbol-relationships.json` | `tree-sitter-python-relations` | 20 | contains 10, unresolved 7, call 1, reference 2 | 8 | 4/20, omitted 16 | 0 omitted, 0 caps; repeat endpoint pairs exercise duplicate-looking guard; provider-cap coverage remains in synthetic integration fixture, not this lane golden | 88 instances, 5 unique | exact duplicates 0; repeated endpoint pairs 2 |
 | JavaScript | `fixtures/expected/symbol-relationships-javascript.json` | `tree-sitter-javascript-relations` | 17 | import_include 1, contains 12, reference 1, unresolved 1, call 2 | 1 | 6/17, omitted 11 | 0 omitted, 0 caps; repeat endpoint pairs exercise duplicate-looking guard; provider-cap coverage remains in synthetic integration fixture, not this lane golden | 70 instances, 6 unique | exact duplicates 0; repeated endpoint pairs 3 |
-| Go | `fixtures/expected/symbol-relationships-go.json` | `tree-sitter-go-relations` | 8 | contains 8 | 0 | 6/8, omitted 2 | 0 omitted, 0 caps; narrow contains-only lane is intentional for stable Go provider admission; provider-cap coverage remains in synthetic integration fixture | 32 instances, 4 unique | exact duplicates 0; repeated endpoint pairs 0 |
+| Go | `fixtures/expected/symbol-relationships-go.json` | `tree-sitter-go-relations` | 15 | import_include 1, contains 8, reference 2, call 1, unresolved 1, unknown 2 | 3 | 6/15, omitted 9 | 0 omitted, 0 caps; stable Go fixture covers provider wording categories; provider-cap coverage remains in synthetic integration fixture | 64 instances, 7 unique | exact duplicates 0; repeated endpoint pairs 0 |
 | Lua | `fixtures/expected/symbol-relationships-lua.json` | `tree-sitter-lua-relations` | 16 | contains 9, reference 1, unresolved 2, call 2, unknown 2 | 5 | 6/16, omitted 10 | 0 omitted, 0 caps; repeat endpoint pairs exercise duplicate-looking guard; provider-cap coverage remains in synthetic integration fixture, not this lane golden | 69 instances, 6 unique | exact duplicates 0; repeated endpoint pairs 1 |
 | Rust | `fixtures/expected/symbol-relationships-rust.json` | `tree-sitter-rust-relations` | 23 | import_include 2, contains 8, unresolved 3, unknown 6, call 2, reference 2 | 10 | 6/23, omitted 17 | 0 omitted, 0 caps; repeat endpoint pairs exercise duplicate-looking guard; provider-cap coverage remains in synthetic integration fixture, not this lane golden | 104 instances, 7 unique | exact duplicates 0; repeated endpoint pairs 2 |
 | TSX | `fixtures/expected/symbol-relationships-tsx.json` | `tree-sitter-tsx-relations` | 17 | contains 7, unknown 7, unresolved 2, reference 1 | 9 | 6/17, omitted 11 | 0 omitted, 0 caps; no repeated endpoint-pair guard in this lane; cross-lane duplicate-looking guards cover the category; provider-cap coverage remains in synthetic integration fixture | 77 instances, 6 unique | exact duplicates 0; repeated endpoint pairs 0 |
@@ -30,13 +30,11 @@ Reviewers should then update this matrix or intentionally update the goldens.
 
 ## Category observations
 
-- Relation-kind diversity: Python, JavaScript, Lua, Rust, TSX, TypeScript, and
-  Zig cover more than one relation kind. Go is intentionally narrow and covers
-  only deterministic `contains` records for its small stable fixture.
-- Unknown and unresolved coverage: Python, JavaScript, Lua, Rust, TSX,
-  TypeScript, and Zig include unresolved targets. Go intentionally has no
-  unresolved evidence in this lane because its fixture is a small declaration
-  containment sample.
+- Relation-kind diversity: every admitted lane now covers more than one
+  relation kind, including Go's stable import, reference, call, unresolved, and
+  selector-like syntax examples.
+- Unknown and unresolved coverage: every admitted lane now includes unresolved
+  or unknown bounded syntax evidence.
 - Human display omissions: every admitted lane records display-limit behaviour;
   this includes small omissions in Go and larger omissions in the other lanes.
 - Provider-cap coverage: admitted lane goldens do not force provider caps. Cap

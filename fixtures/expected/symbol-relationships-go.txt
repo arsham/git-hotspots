@@ -7,31 +7,32 @@ symbols: provider=tree-sitter-go state=current-only freshness=fresh failure=ok c
 symbols caveat: current working-tree enrichment only; file-level Git evidence, score, file order, lineage, and confidence are unchanged
 
 rank  score   changes churn   confidence lineage path
-1     52.8    2       19      medium     yes     src/example.go
+1     53.1    2       27      medium     yes     src/example.go
 
 current symbols (shown first by provider order):
   summary: total=8 shown=6 omitted=2 limit=6 limit_source=explicit sort_basis="provider order"
-  other Alpha lines 3-6 confidence=high
-  other Beta lines 3-6 confidence=high
-  variable Gamma lines 8-8 confidence=high
-  method Method lines 17-17 confidence=high
-  type Runner lines 15-15 confidence=high
-  type Service lines 14-14 confidence=high
+  other Alpha lines 5-8 confidence=high
+  other Beta lines 5-8 confidence=high
+  variable Gamma lines 10-10 confidence=high
+  method Method lines 19-25 confidence=high
+  type Runner lines 17-17 confidence=high
+  type Service lines 16-16 confidence=high
 
 symbol relationships for retained ranked files:
-  summary: candidates=1 retained_candidates=1 current_symbol_candidates=8 providers=1 records=8 human_display_shown=6 human_display_sample_omitted=2 record_bound=1024 record_bound_exceeded=false omitted_records=0
+  summary: candidates=1 retained_candidates=1 current_symbol_candidates=8 providers=1 records=15 human_display_shown=6 human_display_sample_omitted=9 record_bound=1024 record_bound_exceeded=false omitted_records=0
   caveats: candidate relation evidence only; file-level Git evidence remains product truth; bounded Go syntax evidence: contains, import includes, direct identifier calls, selector-like syntax, unresolved identifiers, and unknown relation-like syntax; unresolved and external-string endpoints are caveated; no package, module, type, interface, method-set, build-tag, generated-source, cgo, vendored, or semantic dependency identity is fabricated; symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
-  evidence summary: emitted=8 kinds=contains:8 human_display_sample_omitted=2
+  evidence summary: emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1 unknown=2 unresolved=1 unresolved_targets=3 human_display_sample_omitted=9
+  import_include source_to_target source=file:src/example.go target=external:example.com/worker unresolved=false provider=tree-sitter-go-relations input=working-tree:src/example.go freshness=fresh failure=ok confidence=medium basis=go import spec syntax caveats=C1,C2,C3,C4,C5
   contains source_to_target source=file:src/example.go target=symbol:src/example.go:Alpha:other unresolved=false provider=tree-sitter-go-relations input=working-tree:src/example.go freshness=fresh failure=ok confidence=medium basis=go top-level declaration containment caveats=C1,C2,C3,C4
   contains source_to_target source=file:src/example.go target=symbol:src/example.go:Beta:other unresolved=false provider=tree-sitter-go-relations input=working-tree:src/example.go freshness=fresh failure=ok confidence=medium basis=go top-level declaration containment caveats=C1,C2,C3,C4
   contains source_to_target source=file:src/example.go target=symbol:src/example.go:Gamma:variable unresolved=false provider=tree-sitter-go-relations input=working-tree:src/example.go freshness=fresh failure=ok confidence=medium basis=go top-level declaration containment caveats=C1,C2,C3,C4
   contains source_to_target source=file:src/example.go target=symbol:src/example.go:Method:method unresolved=false provider=tree-sitter-go-relations input=working-tree:src/example.go freshness=fresh failure=ok confidence=medium basis=go top-level declaration containment caveats=C1,C2,C3,C4
   contains source_to_target source=file:src/example.go target=symbol:src/example.go:Runner:type unresolved=false provider=tree-sitter-go-relations input=working-tree:src/example.go freshness=fresh failure=ok confidence=medium basis=go top-level declaration containment caveats=C1,C2,C3,C4
-  contains source_to_target source=file:src/example.go target=symbol:src/example.go:Service:type unresolved=false provider=tree-sitter-go-relations input=working-tree:src/example.go freshness=fresh failure=ok confidence=medium basis=go top-level declaration containment caveats=C1,C2,C3,C4
   row caveats:
     C1: candidate relation evidence only; file-level Git evidence remains product truth
     C2: bounded Go syntax evidence: contains, import includes, direct identifier calls, selector-like syntax, unresolved identifiers, and unknown relation-like syntax
     C3: unresolved and external-string endpoints are caveated; no package, module, type, interface, method-set, build-tag, generated-source, cgo, vendored, or semantic dependency identity is fabricated
     C4: symbol relationships are optional caveated provider evidence and are not used for scoring, ranking, cache truth, ownership, developer metrics, or bug prediction
+    C5: import target is an external string; package, module, vendor, generated-source, build-tag, and cgo resolution are out of scope
 
 Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.
