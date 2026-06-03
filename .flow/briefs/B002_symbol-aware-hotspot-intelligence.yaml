@@ -236,6 +236,11 @@ durable_decisions:
     and 0116 combined historical-symbol plus relationship workflow guide. These
     slices remain evidence-only and protect runtime, provider, schema, scoring,
     cache, network, release, tag, remote, package, and publish surfaces."
+  - "Shape feature 0124 as historical fallback pressure reduction: inspect one
+    concrete fallback-pressure case and either make one deterministic
+    evidence-safe attribution improvement with focused proof or deliver a
+    no-change proof; no guessing, lineage claims,
+    CLI/schema/provider-admission/scoring or release-surface changes."
 links:
   roadmap_item_id: null
   feature_ids:
@@ -265,4 +270,4 @@ links:
     - "0107"
 timestamps:
   created_at: 2026-05-27T19:12:06.269Z
-  updated_at: 2026-06-01T00:24:42.288Z
+  updated_at: 2026-06-01T23:52:47.508Z
