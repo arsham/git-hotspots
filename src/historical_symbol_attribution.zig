@@ -204,7 +204,8 @@ fn aggregateSide(
             try addCaveats(allocator, builder, symbol.caveats);
         }
         if (!matched) {
-            try addFallback(allocator, map, record, side == .old, provider.Failure.skipped, .low, "unattributed hunk fallback; no nearest-symbol guessing", options);
+            const pressure = @as(u64, interval.?.lineCount());
+            try addFallbackPressure(allocator, map, record, side == .old, if (side == .new) pressure else 0, if (side == .old) pressure else 0, provider.Failure.skipped, .low, "unattributed hunk fallback; no nearest-symbol guessing", options);
         }
     }
 }
@@ -219,10 +220,6 @@ fn addFallback(
     caveat: []const u8,
     options: Options,
 ) !void {
-    const path = if (old_side) record.old_path orelse record.new_path orelse return else record.new_path orelse record.old_path orelse return;
-    const status: provider.RevisionSymbolStatus = if (record.status == .deleted and old_side) .deleted else .unknown;
-    var builder = try ensureAggregate(allocator, map, path, null, null, null, status);
-    builder.fallback_count += 1;
     var added: u64 = 0;
     var deleted: u64 = 0;
     for (record.hunks) |hunk| {
@@ -232,6 +229,25 @@ fn addFallback(
             if (hunk.new) |interval| added += interval.lineCount();
         }
     }
+    try addFallbackPressure(allocator, map, record, old_side, added, deleted, failure, confidence, caveat, options);
+}
+
+fn addFallbackPressure(
+    allocator: std.mem.Allocator,
+    map: *std.StringHashMap(AggregateBuilder),
+    record: git_hunks.FileHunkRecord,
+    old_side: bool,
+    added: u64,
+    deleted: u64,
+    failure: provider.Failure,
+    confidence: provider.Confidence,
+    caveat: []const u8,
+    options: Options,
+) !void {
+    const path = if (old_side) record.old_path orelse record.new_path orelse return else record.new_path orelse record.old_path orelse return;
+    const status: provider.RevisionSymbolStatus = if (record.status == .deleted and old_side) .deleted else .unknown;
+    var builder = try ensureAggregate(allocator, map, path, null, null, null, status);
+    builder.fallback_count += 1;
     try addEvidence(allocator, builder, record, added, deleted, failure, confidence, options.max_sample_commits);
     try appendUniqueCaveat(allocator, &builder.caveats, caveat);
     try addCaveats(allocator, builder, record.caveats);
@@ -595,6 +611,55 @@ test "skipped historical fallbacks do not exhaust provider failure budget before
     try std.testing.expectEqual(provider.Failure.ok, alpha.provider_state);
     try std.testing.expectEqual(@as(u64, 1), alpha.added_line_pressure);
     try std.testing.expectEqual(@as(u32, 0), alpha.fallback_count);
+}
+
+test "unattributed hunk fallback pressure counts only the unmatched hunk" {
+    const allocator = std.testing.allocator;
+    const hunks = [_]git_hunks.Hunk{
+        .{ .old = null, .new = .{ .start = 1, .end = 1 } },
+        .{ .old = null, .new = .{ .start = 2, .end = 2 } },
+        .{ .old = null, .new = .{ .start = 3, .end = 3 } },
+    };
+    const records = [_]git_hunks.FileHunkRecord{.{
+        .commit_id = @constCast("case-mixed-hunks"),
+        .parent_id = null,
+        .timestamp = 1,
+        .old_path = null,
+        .new_path = @constCast("src/app.zig"),
+        .old_blob = null,
+        .new_blob = @constCast("blob-mixed-hunks"),
+        .status = .added,
+        .hunks = @constCast(hunks[0..]),
+        .old_blob_state = .absent,
+        .new_blob_state = .available,
+        .old_source = null,
+        .new_source = @constCast(
+            "pub fn alpha() void {}\n" ++
+                "// changed comment outside a symbol\n" ++
+                "pub fn beta() void {}\n",
+        ),
+        .caveats = @constCast(&[_][]const u8{}),
+    }};
+
+    // Selected case: when one revision parses and contains both symbol-backed
+    // and unattributed hunks, fallback hunk pressure should represent only the
+    // specific unmatched hunk. Counting all same-side hunks would overstate
+    // fallback pressure while already-attributed hunks remain covered by
+    // deterministic revision-local symbol ranges.
+    const aggregates = try aggregateRecords(allocator, records[0..], .{});
+    defer deinitAggregateRecords(allocator, aggregates);
+
+    const alpha = findRecord(aggregates, "src/app.zig", "alpha", .historical) orelse return error.MissingAlphaAttribution;
+    try std.testing.expectEqual(@as(u64, 1), alpha.added_line_pressure);
+    const beta = findRecord(aggregates, "src/app.zig", "beta", .historical) orelse return error.MissingBetaAttribution;
+    try std.testing.expectEqual(@as(u64, 1), beta.added_line_pressure);
+
+    const fallback = findRecord(aggregates, "src/app.zig", null, .unknown) orelse return error.MissingUnattributedFallback;
+    try std.testing.expectEqual(provider.Failure.skipped, fallback.provider_state);
+    try std.testing.expectEqual(@as(u64, 1), fallback.added_line_pressure);
+    try std.testing.expectEqual(@as(u64, 0), fallback.deleted_line_pressure);
+    try std.testing.expectEqual(@as(u32, 1), fallback.fallback_count);
+    try std.testing.expect(containsCaveat(fallback, "unattributed hunk fallback"));
 }
 
 test "failed historical provider parses still exhaust provider failure budget" {

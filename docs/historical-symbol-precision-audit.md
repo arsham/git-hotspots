@@ -81,8 +81,23 @@ does not exercise `failed`, `timed_out`, or `unavailable` historical rows. That
 is acceptable for the current fixture matrix as long as reviewers do not treat
 absence of those states as proof that they cannot occur.
 
-No implementation bug was found during this audit. No runtime follow-up is
-required inside this feature.
+## Feature 0124 selected case
+
+Feature 0124 inspected fallback hunk pressure in the checked-in historical
+fixture and the existing validation surfaces. The selected safe case is a
+single parsed revision containing multiple hunks where some hunks intersect
+revision-local symbol ranges and one hunk does not. The symbol-backed hunks are
+already deterministic `ok` evidence, so the file-level fallback row should
+carry only the unmatched hunk pressure, not every hunk on the same side of the
+file.
+
+This reduces overstated fallback hunk pressure without changing provider
+admission, CLI flags, JSON schema, scoring, ranking, cache, network, telemetry,
+release, tag, package, or remote behaviour. The fallback row still keeps the
+`unattributed hunk fallback; no nearest-symbol guessing` caveat, and the
+symbol-attributed rows still require direct intersection with revision-local
+symbol ranges. Unsupported, failed, skipped, timed-out, and unavailable
+provider-state semantics are unchanged.
 
 ## Successor recommendations
 

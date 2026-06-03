@@ -159,9 +159,12 @@ def validate_fallback_pressure(matrix_path: Path, guide_path: Path, golden_path:
 
     required_matrix = [
         "| Fallback hunk pressure | fallback rows carry `fallback_count`; the fixture uses tiny counts while real repos may have a few fallback rows with many fallback hunks |",
+        "| Mixed parsed revision fallback | mixed parsed revisions count only unmatched hunks as fallback pressure while symbol-intersecting hunks stay attributed |",
         "keeps fallback row count separate from fallback hunk pressure",
+        "prevents symbol-backed hunks from inflating file-level fallback pressure",
         "fallback rows, and fallback hunk pressure",
         "Keep unsupported, skipped, fallback rows, and fallback hunk pressure",
+        "only unmatched hunks contribute fallback pressure",
     ]
     for needle in required_matrix:
         require_anchor(matrix_path, matrix, needle, "fallback-pressure anchor")
@@ -169,6 +172,10 @@ def validate_fallback_pressure(matrix_path: Path, guide_path: Path, golden_path:
     required_guide = [
         "Fallback hunk pressure",
         "Read fallback row counts and fallback hunk counts separately",
+        "Mixed parsed revisions keep direct symbol",
+        "intersections as symbol evidence",
+        "count only unmatched hunks as fallback",
+        "Whole-file fallback still applies when the provider state is",
         "a fallback row may aggregate one or many changed",
         "number of fallback rows can still represent substantial unattributed hunk",
     ]

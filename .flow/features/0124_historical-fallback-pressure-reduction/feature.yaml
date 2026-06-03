@@ -4,7 +4,7 @@ feature:
   slug: historical-fallback-pressure-reduction
   title: Historical fallback pressure reduction
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Historical-symbol output can have low fallback row count but high
@@ -60,7 +60,7 @@ proposal:
     materialised_at: 2026-06-01T23:58:53.687Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -121,7 +121,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Inspect fallback pressure case
       goal: Find one deterministic fallback-pressure case suitable for safe
         improvement, or prove none is suitable.
@@ -144,7 +144,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Implement or prove no-change branch
       goal: Implement the selected safe improvement with focused proof, or deliver the
         no-change proof.
@@ -164,7 +164,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Validate and align metadata
       goal: Run full validation and align docs/fixture metadata only where truth
         changed.
@@ -210,7 +210,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-06-01 23:50:15.901000+00:00
-  updated_at: 2026-06-01T23:59:23.129Z
+  updated_at: 2026-06-02T02:01:40.414Z
 dispatch:
   status: prepared
   prepared_at: 2026-06-01T23:59:23.129Z

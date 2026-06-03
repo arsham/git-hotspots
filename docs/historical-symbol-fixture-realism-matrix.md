@@ -20,6 +20,7 @@ Source fixture:
 | Unsupported file fallback | `src/readme.txt` has `provider_state: unsupported` with file-level fallback | proves unsupported paths remain visible instead of being dropped |
 | Unattributed hunk fallback | `src/link.zig` has `provider_state: skipped`, `fallback_count: 1`, and `unattributed hunk fallback` | proves the engine avoids nearest-symbol guessing when attribution is unsafe |
 | Fallback hunk pressure | fallback rows carry `fallback_count`; the fixture uses tiny counts while real repos may have a few fallback rows with many fallback hunks | keeps fallback row count separate from fallback hunk pressure |
+| Mixed parsed revision fallback | mixed parsed revisions count only unmatched hunks as fallback pressure while symbol-intersecting hunks stay attributed | prevents symbol-backed hunks from inflating file-level fallback pressure |
 | Root-commit caveat | fallback rows include `root commit has no parent pre-image` | keeps root-commit evidence caveated instead of implying a normal hunk comparison |
 | Display omission | `human_display.total_count: 7`, `shown_count: 2`, and `omitted_count: 5` | proves table and Markdown can stay compact while JSON keeps bounded records |
 | Provider-state spread | summary includes `ok`, `unsupported`, `failed`, and `skipped` states | keeps user-facing provider states from collapsing into success/failure only |
@@ -44,12 +45,14 @@ matrix before approving the update:
 3. Keep unsupported, skipped, fallback rows, and fallback hunk pressure
    distinct. They describe different evidence states and different precision
    signals.
-4. Do not add `timed_out` or `unavailable` rows without a shaped fixture
+4. For mixed parsed revisions, verify symbol-intersecting hunks remain symbol
+   evidence and only unmatched hunks contribute fallback pressure.
+5. Do not add `timed_out` or `unavailable` rows without a shaped fixture
    feature and deterministic evidence; timeout or environment-dependent
    provider-unavailable cases are too brittle for goldens.
-5. Do not turn historical rows into semantic lineage, ownership, bug, quality,
+6. Do not turn historical rows into semantic lineage, ownership, bug, quality,
    dependency, or ranking claims.
-6. Re-run `zig build validate` so historical goldens, docs anchors, privacy
+7. Re-run `zig build validate` so historical goldens, docs anchors, privacy
    checks, and performance budgets execute together.
 
 ## Protected surfaces

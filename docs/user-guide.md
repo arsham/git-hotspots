@@ -238,7 +238,8 @@ Historical-symbol caveat glossary:
 - Fallback hunk pressure: a fallback row may aggregate one or many changed
   hunks. Read fallback row counts and fallback hunk counts separately: a small
   number of fallback rows can still represent substantial unattributed hunk
-  pressure.
+  pressure. In a mixed parsed revision, symbol-attributed hunks do not inflate
+  fallback pressure; only the unmatched hunks remain on the fallback row.
 - Unattributed hunk fallback: the hunk was retained without nearest-symbol
   guessing. This avoids inventing a symbol owner for blank lines, comments,
   unsupported syntax, or root-commit evidence.
@@ -272,8 +273,11 @@ proven impossible.
 When reviewing historical-symbol precision, do not collapse fallback evidence
 into one rate. Fallback row count tells you how many aggregate rows used a
 file-level fallback; fallback hunk pressure tells you how much changed-hunk
-evidence those rows carry. Both are investigation prompts, not proof of
-semantic lineage or code quality.
+evidence those rows carry. Mixed parsed revisions keep direct symbol
+intersections as symbol evidence and count only unmatched hunks as fallback
+pressure. Whole-file fallback still applies when the provider state is
+unsupported, skipped, or failed for the relevant evidence. Both are
+investigation prompts, not proof of semantic lineage or code quality.
 
 Use `--symbol-relationships` when you want bounded local relationship evidence
 for retained ranked-file candidates:
