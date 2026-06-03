@@ -113,6 +113,23 @@ suggest bounded syntax-adjacent code to inspect. Do not describe any provider
 layer as changing ranking, replacing file evidence, proving dependencies or
 calls, identifying ownership, or judging code quality.
 
+Capability documentation has one direction of travel:
+
+- `README.md` gives the visitor-facing summary.
+- `docs/user-guide.md` owns the user-facing provider capability summary,
+  historical-symbol caveat glossary, relationship caveat glossary, provider
+  caveat table, and combined evidence workflow.
+- `man/git-hotspots.1` mirrors command-facing behaviour and must stay concise.
+- `docs/provider-symbol-evidence-contract.md`,
+  `docs/historical-symbol-attribution-architecture.md`, and
+  `docs/symbol-relationship-architecture.md` own deeper provider contracts.
+- `docs/historical-symbol-fixture-realism-matrix.md` and
+  `docs/relationship-fixture-realism-matrix.md` own fixture coverage metadata.
+
+When those documents disagree, prefer the executable fixtures and validation
+checks, then update the user-facing summary. Do not add a second competing
+capability matrix.
+
 ## Validation ladder
 
 Enable the repository hooks in local checkouts before feature work:
@@ -135,6 +152,18 @@ zig build pre-commit
 zig build test
 zig build validate
 ```
+
+Use `zig build validate-all` before publishing, pushing a validation-sensitive
+change, or changing CI. It is intentionally heavier than `validate`: it runs the
+full proof aggregate, including fixture determinism, docs/man anchors, provider
+capability drift, relationship fixture realism, relationship caveat classes,
+performance budgets, packaging dogfood, privacy checks, and real-repo smoke.
+
+Docs-only changes usually start with `git diff --check` plus
+`zig build validate`. If they touch `tools/validate.sh`, docs anchors, fixture
+goldens, capability matrices, release notes, or provider caveats, keep the
+validation update in the same commit as the docs update so the guard and the
+surface stay reviewable together.
 
 Before Flow close-out, run the close-out validation helper with a second
 privacy-safe smoke target or an explicit privacy-safe skip reason:

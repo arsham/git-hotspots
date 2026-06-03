@@ -260,6 +260,31 @@ uses local historical blobs and hunks for retained ranked-file candidates only.
 It reports revision-local symbol or fallback aggregates with caveats and bounded
 sample commits; it does not checkout files, fetch history, upload source, or
 change ranking.
+.SS Historical-symbol caveat glossary
+.B Revision-local attribution
+means the provider parsed the historical blob that contributed the changed hunk.
+It is not proof that a current symbol is the same semantic entity across
+history.
+.PP
+.B File-level fallback
+means a changed hunk stayed attached to the retained file because the provider
+could not safely map it to a revision-local symbol. Fallback rows are visible
+evidence, not failed hotspot analysis.
+.PP
+.B Unattributed hunk fallback
+means the hunk was retained without nearest-symbol guessing. This avoids
+inventing symbol ownership for unsupported, blank, comment, or root-commit
+evidence.
+.PP
+.B Provider state
+values such as ok, unsupported, skipped, failed, or timed out explain parsing
+state only. They are not code-quality, ownership, or maintainer signals.
+.PP
+The checked-in matrix
+.B docs/historical-symbol-fixture-realism-matrix.md
+records historical golden coverage for parsed Zig rows, unsupported-file
+fallback, unattributed/root-commit fallback, display omission, provider states,
+aggregate bounds, and local-only provenance.
 .PP
 .B --symbol-relationships
 uses bounded local provider output for retained ranked-file candidates in the
@@ -411,7 +436,10 @@ See
 .B README.md
 for the project overview,
 .B docs/user-guide.md
-for the user guide, relationship caveat glossary, and provider caveat table,
+for the user guide, historical-symbol caveat glossary, relationship caveat
+glossary, and provider caveat table,
+.B docs/historical-symbol-fixture-realism-matrix.md
+for historical-symbol fixture coverage,
 .B docs/developer-guide.md
 for contributor boundaries, and
 .B CONTRIBUTING.md

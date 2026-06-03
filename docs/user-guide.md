@@ -227,6 +227,30 @@ parse the historical blob, and file-level fallbacks when it cannot. It is not
 semantic symbol lineage, reference/use analysis, ownership, bug prediction,
 scoring replacement, or a ranking input.
 
+Historical-symbol caveat glossary:
+
+- Revision-local attribution: the provider parsed the file content from the
+  historical Git blob that contributed the changed hunk. It is evidence about
+  that revision, not proof that a current symbol is the same entity.
+- File-level fallback: the changed hunk stayed attached to the retained file
+  because the provider could not safely map it to a revision-local symbol.
+  Fallback rows are intentional evidence, not missing hotspot analysis.
+- Unattributed hunk fallback: the hunk was retained without nearest-symbol
+  guessing. This avoids inventing a symbol owner for blank lines, comments,
+  unsupported syntax, or root-commit evidence.
+- Provider state: `ok`, `unsupported`, `skipped`, `failed`, and similar states
+  explain whether the historical blob was parsed. They are not code-quality or
+  maintainer signals.
+- Aggregate record bound: historical attribution keeps a deterministic record
+  cap. If a bound is reached, the report must say so instead of implying full
+  complete repository-wide symbol tracking.
+
+The historical-symbol fixture realism matrix in
+`docs/historical-symbol-fixture-realism-matrix.md` records what the checked-in
+historical golden covers: parsed Zig rows, unsupported-file fallback,
+unattributed/root-commit fallback, display omission, provider states, and
+aggregate-bound status.
+
 Use `--symbol-relationships` when you want bounded local relationship evidence
 for retained ranked-file candidates:
 
@@ -431,6 +455,32 @@ Historical-symbol rows do not explain why churn happened, and relationship rows
 do not prove what depended on or called the changed code. Unsupported provider
 lanes are unavailable enrichment, not failed hotspot analysis. Keep the caveats
 from both sections attached to any review note or agent prompt.
+
+### Combined evidence FAQ
+
+**Does this predict bugs?** No. Churn, historical-symbol attribution, and
+relationship evidence are investigation prompts. They do not predict defects or
+rank code quality.
+
+**Does relationship evidence prove dependencies or calls?** No. Relationship
+rows are bounded syntax evidence from local provider lanes. They do not prove a
+package graph, runtime call graph, type-checker result, or module resolution.
+
+**Does historical-symbol evidence prove semantic lineage?** No. Historical
+rows describe revision-local hunk attribution or file-level fallback evidence.
+They do not prove renames, moves, splits, merges, ownership, or that a current
+symbol is the same semantic entity across history.
+
+**Why are caveats part of the report?** Caveats are part of the evidence
+contract. They explain unsupported lanes, provider states, display limits,
+record caps, fallback rows, and unresolved endpoints so the tool does not imply
+more certainty than local deterministic evidence supports.
+
+**Which document owns provider capability claims?** The capability matrix in
+this guide is the user-facing summary. `docs/developer-guide.md` records the
+contributor rules for keeping capability claims validation-owned, while
+`docs/provider-symbol-evidence-contract.md` and
+`docs/symbol-relationship-architecture.md` describe lower-level contracts.
 
 ## Reading reports
 

@@ -1126,6 +1126,7 @@ docs_manual_checks() {
 
   [ -f docs/user-guide.md ] || return 1
   [ -f docs/developer-guide.md ] || return 1
+  [ -f docs/historical-symbol-fixture-realism-matrix.md ] || return 1
   [ -f man/git-hotspots.1 ] || return 1
 
   grep -Fq '# git-hotspots user guide' docs/user-guide.md || return 1
@@ -1141,6 +1142,21 @@ docs_manual_checks() {
   grep -Fq 'TypeScript, and TSX Tree-sitter lanes' docs/user-guide.md || return 1
   grep -Fq 'When pairing `--historical-symbols` with `--symbol-relationships`' docs/user-guide.md || return 1
   grep -Fq 'Historical-symbol rows do not explain why churn happened' docs/user-guide.md || return 1
+  for anchor in \
+    'Historical-symbol caveat glossary' \
+    'Revision-local attribution' \
+    'File-level fallback' \
+    'Unattributed hunk fallback' \
+    'Aggregate record bound' \
+    'docs/historical-symbol-fixture-realism-matrix.md' \
+    'Combined evidence FAQ' \
+    'Does this predict bugs?' \
+    'Does relationship evidence prove dependencies or calls?' \
+    'Does historical-symbol evidence prove semantic lineage?' \
+    'Which document owns provider capability claims?'
+  do
+    require_anchor docs/user-guide.md "$anchor" || return 1
+  done
   for anchor in \
     'Relationship caveats and provider boundaries' \
     'Relationship row quick reference' \
@@ -1203,6 +1219,10 @@ docs_manual_checks() {
   grep -Fq 'packaging/aur/git-hotspots-bin/' docs/developer-guide.md || return 1
   grep -Fq 'prohibited-claim' docs/developer-guide.md || return 1
   grep -Fq 'Provider capability claims are validation-owned' docs/developer-guide.md || return 1
+  grep -Fq 'Capability documentation has one direction of travel' docs/developer-guide.md || return 1
+  grep -Fq 'docs/historical-symbol-fixture-realism-matrix.md' docs/developer-guide.md || return 1
+  grep -Fq 'Use `zig build validate-all` before publishing' docs/developer-guide.md || return 1
+  grep -Fq 'full proof aggregate' docs/developer-guide.md || return 1
   grep -Fq 'TypeScript `.ts`, `.mts`, `.cts` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-typescript-relations`' docs/developer-guide.md || return 1
   grep -Fq 'Local-first' docs/developer-guide.md || return 1
 
@@ -1232,6 +1252,9 @@ docs_manual_checks() {
   grep -Fq 'Other current files preserve file evidence' man/git-hotspots.1 || return 1
   grep -Fq 'For a focused historical-symbol and relationship workflow' man/git-hotspots.1 || return 1
   grep -Fq 'historical attribution does not explain why churn happened' man/git-hotspots.1 || return 1
+  grep -Fq 'Historical-symbol caveat glossary' man/git-hotspots.1 || return 1
+  grep -Fq 'Revision-local attribution' man/git-hotspots.1 || return 1
+  grep -Fq 'docs/historical-symbol-fixture-realism-matrix.md' man/git-hotspots.1 || return 1
   grep -Fq 'Relationship caveat glossary' man/git-hotspots.1 || return 1
   grep -Fq 'provider caveat table' man/git-hotspots.1 || return 1
   grep -Fq 'Bounded syntax proof' man/git-hotspots.1 || return 1
@@ -1247,6 +1270,8 @@ docs_manual_checks() {
   ! grep -Eq 'dogfood|tools/release-linux\.sh|packaging/aur|makepkg|pacman|pkg\.tar' man/git-hotspots.1 || return 1
 
   grep -Fq 'docs/user-guide.md' README.md || return 1
+  grep -Fq 'docs/historical-symbol-fixture-realism-matrix.md' README.md || return 1
+  grep -Fq 'Provider capability claims are summarised' README.md || return 1
   grep -Fq 'Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and' README.md || return 1
   grep -Fq 'retained ranked-file candidates in Zig' README.md || return 1
   grep -Fq 'For a focused historical-symbol and relationship workflow' README.md || return 1

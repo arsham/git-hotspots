@@ -327,6 +327,10 @@ fallback rows when a historical blob cannot be parsed. It is local-only
 evidence, not semantic symbol lineage, reference/use analysis, ownership, bug
 prediction, scoring replacement, or a ranking input.
 
+See `docs/user-guide.md` for the historical-symbol caveat glossary and
+`docs/historical-symbol-fixture-realism-matrix.md` for the checked-in fixture
+coverage matrix.
+
 `--symbol-relationships` is an opt-in relationship layer that requires
 `--symbols`. It currently adds bounded local Tree-sitter relation evidence for
 retained ranked-file candidates in Zig, Go, Python, JavaScript, Lua, Rust,
@@ -374,6 +378,10 @@ See `docs/user-guide.md` for the relationship caveat glossary and provider
 caveat table covering bounded syntax proof, unknown relation-like syntax,
 unresolved endpoints, external-string endpoints, and the difference between
 human display omissions and provider-cap omissions.
+
+Provider capability claims are summarised in this README and the user guide;
+contributor rules for keeping those claims validation-owned live in
+`docs/developer-guide.md`.
 
 Use these layers together as progressively narrower local evidence, not as a
 replacement for review. Start with file hotspots to choose where to inspect,
