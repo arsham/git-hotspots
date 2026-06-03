@@ -4,7 +4,7 @@ feature:
   slug: historical-failed-state-seam-proof
   title: Historical failed-state seam proof
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The provider-state audit identified provider_state failed as the only
@@ -57,7 +57,7 @@ proposal:
     materialised_at: 2026-06-01T19:20:54.652Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -129,7 +129,7 @@ design:
       goal: Determine whether current historical attribution/provider paths can
         produce provider_state failed deterministically.
       depends_on: []
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: src/provider_selection.zig;
@@ -152,7 +152,7 @@ design:
       goal: Add the docs-only seam proof with a concrete next-slice decision.
       depends_on:
         - P1
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: docs/historical-failed-state-seam-proof.md;
@@ -174,7 +174,7 @@ design:
         implementation decision.
       depends_on:
         - P2
-      status: planned
+      status: done
       owner_phase: runner
       execution_context:
         - "Anchors: tools/validate.sh only if a docs anchor is materially
@@ -198,7 +198,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-06-01T19:13:31.818Z
-  updated_at: 2026-06-01T19:21:16.974Z
+  updated_at: 2026-06-01T19:35:43.451Z
 dispatch:
   status: prepared
   prepared_at: 2026-06-01T19:21:16.974Z
