@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0127"
   active_run_id: null
   last_completed_feature_id: "0126"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 127
+  next_id: 128
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -533,6 +533,10 @@ features:
       slug: historical-aggregate-bound-proof
       path: .flow/features/0126_historical-aggregate-bound-proof
       created_at: 2026-06-03T02:07:36.326Z
+    - id: "0127"
+      slug: historical-aggregate-bound-exceeded-proof
+      path: .flow/features/0127_historical-aggregate-bound-exceeded-proof
+      created_at: 2026-06-03T02:34:53.683Z
 intake:
   mode: roadmap
   summary: null

@@ -247,6 +247,9 @@ durable_decisions:
   - Shape successor feature 0126 to decide whether historical-symbol
     aggregate_record_bound_exceeded can be proven deterministically, or to
     record a tracked no-change proof if no safe seam exists.
+  - Shape successor feature 0127 to implement the deterministic synthetic proof
+    for historical aggregate_record_bound_exceeded=true using the seam proven by
+    0126, without changing fixture realism goldens or runtime semantics.
 links:
   roadmap_item_id: null
   feature_ids:
@@ -276,4 +279,4 @@ links:
     - "0107"
 timestamps:
   created_at: 2026-05-27T19:12:06.269Z
-  updated_at: 2026-06-03T02:08:41.790Z
+  updated_at: 2026-06-03T02:36:02.334Z
