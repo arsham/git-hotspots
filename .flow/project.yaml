@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0125"
   active_run_id: null
   last_completed_feature_id: "0124"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 125
+  next_id: 126
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -525,6 +525,10 @@ features:
       slug: historical-fallback-pressure-reduction
       path: .flow/features/0124_historical-fallback-pressure-reduction
       created_at: 2026-06-01T23:50:15.901Z
+    - id: "0125"
+      slug: historical-fallback-pressure-golden-realism
+      path: .flow/features/0125_historical-fallback-pressure-golden-realism
+      created_at: 2026-06-02T19:54:46.682Z
 intake:
   mode: roadmap
   summary: null
