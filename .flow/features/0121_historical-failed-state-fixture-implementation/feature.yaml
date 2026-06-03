@@ -1,0 +1,761 @@
+schema: flow-feature.v1
+feature:
+  id: "0121"
+  slug: historical-failed-state-fixture-implementation
+  title: Historical failed-state fixture implementation
+  lane: standard
+  status: ready
+  autonomy_default: ask
+intent:
+  problem: Historical-symbol fixture coverage lacks provider_state failed even
+    though feature 0120 proved a deterministic content-driven seam is feasible
+    through the historical Zig parser path.
+  outcome: Add deterministic failed-state historical-symbol fixture coverage and
+    align goldens, docs, and validation without changing runtime semantics or
+    public contracts.
+  acceptance:
+    - A deterministic fixture produces provider_state failed in
+      historical-symbol output.
+    - Historical-symbol table, JSON, and Markdown goldens are updated together
+      and remain deterministic.
+    - Historical provider-state docs mark failed covered while timed_out and
+      unavailable remain uncovered.
+    - No CLI/schema/scoring/provider
+      admission/release/tag/package/remote/network/telemetry/cache behaviour
+      changes.
+planning:
+  state: ready
+  summary: Implement the smallest deterministic provider_state failed
+    fixture/golden slice identified by the 0120 seam proof.
+  brief_alignment:
+    status: aligned
+    role: follow_up
+    summary: Implements deterministic provider_state failed fixture coverage proven
+      feasible by feature 0120 while preserving timed_out/unavailable as
+      uncovered gaps.
+    checked_at: 2026-06-01T20:13:39.997Z
+  brief_sync:
+    status: updated
+    reason: Linked to B002 as implementation follow-up to the historical
+      failed-state seam proof.
+    checked_at: 2026-06-01T20:13:40.042Z
+proposal:
+  lifecycle_state: shaping
+  outcome_contract_ref: null
+  risk_assessment:
+    assurance_level: high_assurance
+    reasons:
+      - topology=serial_feature
+      - assurance=high_assurance
+      - review_mode=delegated_reviewer
+      - runner_model=Strong
+    risk_triggers:
+      - standard_lane_delivery
+      - public_api_or_platform_risk_keywords
+    audit_required: true
+    judge_review_recommended: true
+    materialised_at: 2026-06-01T20:14:47.653Z
+  quality_plan: null
+project_feature:
+  lifecycle_state: ready
+  outcome_contract_ref:
+    contract_kind: feature_intent
+    contract_ref: feature.intent
+    materialised_at: 2026-06-01T20:14:47.653Z
+  quality_plan:
+    assurance_band: high_assurance
+    review_mode: delegated_reviewer
+    reviewer_member_usage: required
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+    verification_contract:
+      claim_classes: []
+      evidence_policy:
+        parity_claims: null
+        synthetic_only_is_insufficient: false
+      route_matrix:
+        required: false
+        routes: []
+      resolution_matrix:
+        required: false
+        cases: []
+      operator_examples:
+        required: false
+        cases: []
+    derived_from_risk_assessment_ref: proposal.risk_assessment
+    materialised_at: 2026-06-01T20:14:47.653Z
+  authority_refinement:
+    selected_sign_off_authority: orchestrator
+    explicit_pause_required: true
+    verification_independence_requirement: continuity_safe_delegated
+    materialised_at: 2026-06-01T20:14:47.653Z
+verification_independence_requirement: continuity_safe_delegated
+readiness:
+  requirements_ready: true
+  acceptance_ready: true
+  packet_plan_ready: true
+  dependencies_ready: true
+  implementation_ready: true
+context:
+  roadmap_item_id: null
+  detached_reason: null
+  depends_on_feature_ids: []
+  blocked_by: []
+design:
+  rough_shape: []
+  packets:
+    - id: P1
+      depends_on: []
+      status: planned
+      title: Implement failed fixture seam
+      goal: Add the minimal deterministic fixture/history change that produces
+        provider_state failed through existing historical parsing.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: docs/historical-failed-state-seam-proof.md;
+          fixtures/symbols; tools/setup-fixtures.sh; src/tree_sitter_zig.zig;
+          src/provider_selection.zig."
+        - "In scope: fixture repository/history content needed to exercise the
+          proven failed seam."
+        - "Out of scope: runtime injection, provider algorithm changes,
+          CLI/schema/scoring/provider admission changes."
+        - "Protected: existing ok/unsupported/skipped coverage and deterministic
+          fixture setup."
+        - Escalate if failed cannot be produced from content-driven
+          supported-language history without runtime changes.
+        - "Done boundary: fixture setup produces a failed provider state under
+          the historical-symbol path or planning_change is justified."
+      verification_commands:
+        - git diff --check
+        - zig build test
+    - id: P2
+      depends_on:
+        - P1
+      status: planned
+      title: Update historical goldens
+      goal: Update historical-symbol table, JSON, and Markdown goldens from the
+        deterministic failed-state fixture output.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: fixtures/expected/historical-symbols.json;
+          fixtures/expected/historical-symbols.md;
+          fixtures/expected/historical-symbols.txt; tests/integration.sh;
+          tools/validate.sh."
+        - "In scope: golden and assertion updates that reflect actual fixture
+          output."
+        - "Protected: JSON schema, existing sorted output contract, and
+          privacy-safe evidence."
+        - "Review focus: failed row is executable fixture output, not
+          hand-authored fiction."
+        - "Done boundary: historical-symbol integration/golden checks pass with
+          failed state present."
+      verification_commands:
+        - git diff --check
+        - zig build test
+        - zig build validate
+    - id: P3
+      depends_on:
+        - P2
+      status: planned
+      title: Align docs and validation
+      goal: Update historical fixture docs and validation anchors to mark failed
+        covered while timed_out and unavailable stay uncovered.
+      owner_phase: runner
+      execution_context:
+        - "Anchors: docs/historical-symbol-fixture-realism-matrix.md;
+          docs/historical-provider-state-fixture-gap-audit.md;
+          docs/historical-failed-state-seam-proof.md; docs/user-guide.md;
+          tools/validate.sh."
+        - "In scope: docs/validation alignment for failed-state coverage and
+          remaining uncovered states."
+        - "Protected:
+          runtime/provider/CLI/schema/scoring/release/tag/package/remote/networ\
+          k/telemetry/cache surfaces."
+        - "Done boundary: docs, validation anchors, and fixture goldens agree
+          with failed coverage."
+      verification_commands:
+        - git diff --check
+        - zig build test
+        - zig build validate
+  packet_contract:
+    version: v1
+    owner_model: phase_owned
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    verification_required: true
+    required_packet_fields:
+      - id
+      - title
+      - goal
+      - depends_on
+      - status
+      - owner_phase
+      - execution_context
+      - verification_commands
+execution:
+  active_run_id: null
+  current_packet_id: null
+  next_packet_ids: []
+  blockers: []
+  requires_confirmation: true
+links:
+  epic_todo_id: null
+  brief_ids:
+    - B002
+timestamps:
+  created_at: 2026-06-01T20:11:40.714Z
+  updated_at: 2026-06-01T20:15:08.190Z
+dispatch:
+  status: prepared
+  prepared_at: 2026-06-01T20:15:08.190Z
+  assurance_level: high_assurance
+  control_model: split
+  execution_topology: serial_feature
+  model_plan:
+    control_plane_model: Strong
+    runner_model: Strong
+    review_mode: delegated_reviewer
+    review_model: Strong
+    reviewer_member_usage: required
+    research_model: null
+    scaffold_owner_model: null
+    fill_worker_model: null
+    escalation_triggers:
+      - repeated validation failures
+      - dispatch envelope no longer fits implementation reality
+      - public interface, persistence, security, or concurrency change
+  execution_fit:
+    fast_execute_eligible: false
+    reason: Assurance level high_assurance requires stronger than Fast execution.
+  scope:
+    mode: packets
+    feature_id: "0121"
+    packet_ids:
+      - P1
+      - P2
+      - P3
+  comparison_basis:
+    roadmap_item_id: null
+    linked_brief_ids:
+      - B002
+    feature:
+      title: Historical failed-state fixture implementation
+      problem: Historical-symbol fixture coverage lacks provider_state failed even
+        though feature 0120 proved a deterministic content-driven seam is
+        feasible through the historical Zig parser path.
+      outcome: Add deterministic failed-state historical-symbol fixture coverage and
+        align goldens, docs, and validation without changing runtime semantics
+        or public contracts.
+      acceptance:
+        - A deterministic fixture produces provider_state failed in
+          historical-symbol output.
+        - Historical-symbol table, JSON, and Markdown goldens are updated
+          together and remain deterministic.
+        - Historical provider-state docs mark failed covered while timed_out and
+          unavailable remain uncovered.
+        - No CLI/schema/scoring/provider
+          admission/release/tag/package/remote/network/telemetry/cache behaviour
+          changes.
+    brief_alignment:
+      status: aligned
+      role: follow_up
+      summary: Implements deterministic provider_state failed fixture coverage proven
+        feasible by feature 0120 while preserving timed_out/unavailable as
+        uncovered gaps.
+      checked_at: 2026-06-01T20:13:39.997Z
+    briefs:
+      - id: B002
+        title: Symbol-aware hotspot intelligence
+        summary: "Capability brief for symbol-aware hotspot intelligence: extend
+          git-hotspots beyond file-level evidence to identify historically
+          active code symbols (functions, methods, types, modules, or other
+          language-provider symbols) from local Git history using a
+          language-agnostic pipeline. The capability must stay deterministic,
+          local-first, and performant, while making new language support
+          automatically benefit from the same history attribution, scoring,
+          explanation, and future relationship analysis surfaces."
+        desired_capability:
+          - Report hotspot evidence at symbol granularity, not just file
+            granularity, so users can investigate historically volatile
+            functions, methods, types, modules, or provider-defined symbols.
+          - "Use a normalized symbol-provider contract: language-specific
+            providers only expose symbol identity, kind, file path, source
+            range/span, and optional nesting/context; the Git-history
+            attribution, scoring, output, and explanation pipeline remains
+            language-agnostic."
+          - Attribute local Git history to symbols by intersecting changed
+            ranges, file revisions, and symbol spans in a deterministic way,
+            with enough evidence for users to understand why a symbol appears
+            hot.
+          - Design the symbol model so future enrichers can ask which symbols
+            are referenced by, used by, or related to hot places without
+            redesigning hotspot evidence from scratch.
+          - "Keep runtime defaults local-first: no network, telemetry, remote
+            enrichment, or non-deterministic service dependency for symbol
+            hotspot analysis."
+        why:
+          - File-level hotspots are useful but too coarse when a large file
+            contains one volatile function or type and many stable neighbours.
+          - A language-agnostic symbol pipeline prevents each future language
+            provider from needing bespoke hotspot scoring and history-search
+            logic.
+          - Symbol-level evidence gives agents and humans a more precise
+            investigation prompt while preserving the project rule that hotspots
+            are evidence, not blame, predictions, or code-quality scores.
+          - Future relationship analysis, such as symbols used by hot places,
+            needs stable symbol identities and relation-ready output contracts
+            from the beginning.
+        in_scope:
+          - Capability-level planning for extracting or receiving symbols
+            through providers, normalizing symbol records, and mapping
+            Git-history changes onto those records.
+          - "Performance-sensitive history traversal strategy: batch Git
+            queries, stream/limit revision data, parse only relevant file
+            revisions where possible, and avoid naive full-repository reparsing
+            for every commit."
+          - "Deterministic evidence fields for symbol hotspots: churn/change
+            frequency/recency/confidence/explanation inputs at symbol level,
+            with links back to file path, symbol kind, range/source context, and
+            relevant commits or changed hunks where feasible."
+          - "Language-extensibility rule: adding a new symbol provider should
+            make that language eligible for symbol hotspot reports without
+            changing the scoring, history attribution, CLI report, or export
+            logic except for provider registration and provider-specific tests."
+          - "Forward-compatible seams for reference/use analysis: symbol
+            identifiers, nesting/ownership, and relation-provider hooks should
+            be planned even if reference graph support is deferred."
+        out_of_scope:
+          - Predicting bugs, judging code quality, ranking developers, or
+            treating symbol hotspots as accusations rather than investigation
+            prompts.
+          - Network-backed code intelligence, hosted enrichment, telemetry, or
+            remote index upload by default.
+          - Implementing full semantic reference graphs, call graphs, or
+            cross-language dependency intelligence in the first symbol-hotspot
+            slice; those are future enrichers that should consume stable symbol
+            evidence.
+          - Requiring cache as product truth. Caches may improve performance
+            later, but symbol analysis must have a correct no-cache path.
+          - Browser-visible UI design is out of scope for this brief unless a
+            future feature adds visual symbol hotspot exploration; if that
+            happens, UX tone, visual constraints, and approval decisions must be
+            captured in feature/PRD artefacts.
+        durable_decisions:
+          - Treat symbol hotspots as an extension of deterministic Git-history
+            evidence, not as semantic judgement or prediction.
+          - "Make the core symbol-hotspot pipeline provider-neutral: providers
+            supply symbols; the shared engine maps history to symbols and
+            produces common reports/exports."
+          - Design for performance from the first feature by avoiding per-commit
+            whole-tree parsing and by batching Git/history work.
+          - Plan relation-aware output seams now, but defer reference/use
+            analysis until after symbol hotspot evidence is trustworthy.
+          - No feature-level PRD or implementation packet is created yet from
+            this intake; the next shaping step should decide whether to create a
+            feature for the first symbol-provider/history-attribution slice and
+            push detailed acceptance and packet plans into feature.yaml/prd.md.
+          - "First implementation slice selected during shaping for feature
+            0078: project-level current-symbol hotspot evidence over retained
+            ranked file hotspots using existing current symbol providers and
+            optional HEAD current-line Git evidence. This deliberately is not
+            true historical hunk-to-symbol attribution, symbol rename/move
+            lineage, reference/use analysis, scoring replacement, cache, or
+            provider plugin infrastructure; those remain later capability work
+            after current-symbol evidence is trustworthy."
+          - "Successor architecture spike selected for feature 0079: define true
+            historical hunk-to-symbol attribution before runtime implementation.
+            The spike is architecture-only and should produce
+            docs/historical-symbol-attribution-architecture.md, comparing
+            approaches and selecting a deterministic no-checkout local pipeline
+            over historical blobs, changed hunks, and revision-local provider
+            symbols. It deliberately does not add a user-facing historical
+            symbol engine, scoring changes, semantic lineage, reference
+            analysis, cache truth, or remote/provider dependencies."
+          - "Successor batch selected after feature 0080: feature 0081 is the
+            prerequisite internal pipeline integration that wires historical
+            hunk attribution into bounded ranked-file analysis without public
+            output drift; feature 0082 is the primary user-facing opt-in
+            historical symbol hotspot report that should execute serially after
+            0081 and update CLI/report/docs/tests/validation together.
+            Reference/use analysis remains deferred until the public historical
+            symbol report contract is stable."
+          - "Successor architecture spike selected for feature 0083: define
+            symbol relationship evidence before runtime implementation. The
+            spike is documentation-only and should produce
+            docs/symbol-relationship-architecture.md, comparing provider
+            approaches and defining relation endpoints, kinds, confidence,
+            caveats, deterministic aggregation, performance limits, and a narrow
+            local-first implementation successor. It deliberately does not add
+            relation runtime analysis, CLI/report output, scoring changes, cache
+            truth, dependencies, or public claim expansion."
+          - "Relation evidence successor batch selected: 0084 internal relation
+            provider proof, then 0085 internal relation aggregation integration,
+            then 0086 opt-in public symbol relationship report. The batch
+            remains serial: 0085 depends on 0084, and 0086 depends on 0084 and
+            0085. Public relation output must wait until internal provider and
+            aggregation proof are closed. Relation evidence stays local-first,
+            deterministic, caveated, evidence-only, and must not alter
+            file/symbol scoring or imply call-graph truth, dependency proof,
+            ownership, code-quality judgement, developer metrics, or bug
+            prediction."
+          - "Relation provider expansion batch selected after feature 0086: 0087
+            records the provider expansion strategy and admission rubric, 0088
+            adds TypeScript/TSX/JavaScript relationship provider proof, 0089
+            adds Rust relationship provider proof, and 0090 hardens the provider
+            relationship capability matrix and validation. The batch remains
+            serial: 0088 depends on 0087, 0089 depends on 0088, and 0090 depends
+            on 0089. Public relationship claims must remain opt-in,
+            deterministic, local-first, caveated, evidence-only, and must not
+            imply call-graph truth, type-aware dependency proof, ownership,
+            code-quality judgement, developer metrics, bug prediction, scoring
+            changes, cache truth, network access, or telemetry."
+          - "Feature 0090 closed the public provider capability decision:
+            current symbols, current-line history, and historical-symbol hunk
+            attribution use the Zig, Go, Python, JavaScript, Lua, Rust,
+            TypeScript, and TSX provider lanes, with file-level fallback for
+            unsupported historical blobs; symbol-relationship evidence is public
+            only for Python, JavaScript, Rust, TypeScript, and TSX. Zig, Go,
+            Lua, and unsupported current files have no public relationship
+            provider. Documentation, help/explain text, man page, integration
+            checks, and validation anchors must stay aligned with that matrix
+            until a later feature explicitly admits another relationship lane."
+          - "Provider hardening and remaining-language relationship batch
+            selected after feature 0090: 0091 creates a shared relation provider
+            conformance harness; 0092 adds internal Go relationship provider
+            proof; 0093 adds internal Lua relationship provider proof; 0094
+            evaluates and, if safe, adds internal Zig relationship provider
+            proof or records a no-admit outcome; 0095 is the only public-surface
+            refresh and may admit Go, Lua, or Zig relationship support only from
+            closed proof evidence. The batch is serial: 0092 depends on 0091,
+            0093 depends on 0092, 0094 depends on 0093, and 0095 depends on
+            0094. Public claims remain local-first, deterministic, caveated,
+            evidence-only, and must not imply call-graph truth, dependency
+            proof, type checking, ownership, code-quality judgement, developer
+            metrics, bug prediction, scoring changes, cache truth, network
+            access, or telemetry."
+          - "Shape a serial quality/performance hardening batch after public
+            symbol and relationship provider support: 0096 performance budget
+            and benchmark harness, 0097 provider failure and caveat audit, 0098
+            large-repository sampling and bounds, then 0099 symbol and
+            relationship workflow docs polish. The batch preserves local-first
+            deterministic evidence, public claim restraint, and no runtime
+            network/cache truth defaults."
+          - "Relationship precision follow-up selected for feature 0104: run a
+            docs-only relationship output noise audit before changing
+            provider-neutral aggregation, filtering, deduplication, caveat
+            wording, or public documentation. The audit must sample existing
+            public --symbol-relationships outputs, classify actionable noise
+            versus acceptable syntax-only caveats, recommend bounded successor
+            slices, and preserve CLI flags, report schema, scoring, ranking,
+            provider admission, release state, tags, remotes, package artefacts,
+            network behaviour, telemetry, and cache semantics."
+          - "Relationship presentation successor selected for feature 0106: add
+            provider-neutral human-only uncertainty summaries for
+            --symbol-relationships table and Markdown output. The slice should
+            summarise relation kind counts, unresolved/unknown totals, and
+            display-limit versus provider-cap omissions while preserving JSON
+            schema, record-level evidence/caveats, CLI flags,
+            scoring/ranking/confidence, provider admission, relationship
+            semantics, cache/network/telemetry behaviour, release state, tags,
+            remotes, and packages. Deduplication and provider admission remain
+            separate slices."
+          - "Shape 0108 as a tests-only deduplication guardrail successor from
+            the relationship output noise audit: preserve duplicate-looking
+            relationship records when relation kind or evidence basis differs;
+            no production deduplication, JSON schema, provider algorithm,
+            scoring, ranking, CLI, release, remote, package, network, telemetry,
+            or cache changes."
+          - "Shape 0109 as a docs/validation release-polish successor after
+            completing the 0104 relationship presentation successor set: review
+            and narrowly polish README, user guide, man/help, and validation
+            wording for coherent relationship evidence presentation; do not
+            change runtime behaviour, JSON schema, CLI flags, provider
+            admission, scoring, ranking, release state, package surfaces,
+            network, telemetry, or cache behaviour."
+          - "Shape 0110 as a docs-only relationship output sample realism audit
+            after the 0104-0109 presentation set: compare this-repo and
+            privacy-safe sibling/local relationship output against fixtures and
+            goldens, record bounded privacy-safe evidence and successor
+            recommendations, and do not change runtime behaviour, CLI flags,
+            JSON schema, report fields, provider algorithms, scoring, ranking,
+            cache, network, telemetry, release, tag, remote, package, or
+            publishing behaviour."
+          - "Shape 0111 as a fixture/validation successor to the 0110
+            relationship output sample realism audit: add deterministic
+            realistic Zig relationship golden coverage for mixed relation kinds,
+            unresolved or unknown evidence, human display omissions, and
+            provider-cap omission if stable, while preserving runtime behaviour,
+            CLI flags, JSON schema, provider algorithms, relationship semantics,
+            scoring, ranking, cache, network, telemetry, release, tag, remote,
+            package, and publishing behaviour."
+          - "Shape 0112 as a validation/docs metadata successor after 0111: add
+            a relationship fixture realism matrix covering admitted goldens and
+            expected coverage categories, preferring validation metadata over
+            changing goldens and preserving runtime behaviour, provider
+            algorithms, CLI flags, JSON schema, relation semantics, scoring,
+            ranking, cache, network, telemetry, release, tag, remote, package,
+            and publishing behaviour."
+          - "Shape a serial post-alpha.4 relationship evidence polish batch:
+            0113 drilldown examples, 0114 provider caveat audit, 0115 fixture
+            gap closures, and 0116 combined historical-symbol plus relationship
+            workflow guide. These slices remain evidence-only and protect
+            runtime, provider, schema, scoring, cache, network, release, tag,
+            remote, package, and publish surfaces."
+    prd_path: .flow/features/0121_historical-failed-state-fixture-implementation/prd.md
+  requirements_contract:
+    source_path: .flow/features/0121_historical-failed-state-fixture-implementation/prd.md
+    source_digest: 49b40c08671098914af1f93f1819b37de687e37e37e92c59f0c21a6f28a68219
+    extraction: structured_markdown
+    requirements:
+      - id: REQ-001
+        source_ref: prd.md#requirements[1]
+        text: "REQ-001: Add deterministic historical-symbol fixture coverage for
+          provider_state: failed using a supported-language historical blob that
+          fails parsing through the existing historical provider path."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-002
+        source_ref: prd.md#requirements[2]
+        text: "REQ-002: The fixture must not depend on runtime injection, wall-clock
+          timing, missing local dependencies, missing providers, remotes,
+          absolute paths, raw parser diagnostics, author identities, emails, or
+          commit messages."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-003
+        source_ref: prd.md#requirements[3]
+        text: "REQ-003: Update historical-symbol table, JSON, and Markdown goldens
+          together if the fixture output changes."
+        category: requirement
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-004
+        source_ref: prd.md#requirements[4]
+        text: "REQ-004: Preserve existing historical provider-state coverage for ok,
+          unsupported, and skipped."
+        category: requirement
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-005
+        source_ref: prd.md#requirements[5]
+        text: "REQ-005: Keep timed_out and unavailable explicitly uncovered unless a
+          later feature shapes stable coverage."
+        category: requirement
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-006
+        source_ref: prd.md#requirements[6]
+        text: "REQ-006: Update historical fixture realism and provider-state gap docs so
+          they agree that failed is covered and why the remaining states stay
+          uncovered."
+        category: requirement
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-007
+        source_ref: prd.md#requirements[7]
+        text: "REQ-007: Add or update validation anchors only where needed to keep the
+          provider-state coverage decision from drifting."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-008
+        source_ref: prd.md#requirements[8]
+        text: "REQ-008: Do not change CLI flags, JSON schema/report fields, scoring,
+          ranking, provider admission,
+          release/tag/package/remote/network/telemetry, or cache behaviour."
+        category: requirement
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-009
+        source_ref: prd.md#acceptance[1]
+        text: "A deterministic fixture or fixture-history change produces at least one
+          historical-symbol output row or fallback entry with provider_state:
+          failed."
+        category: acceptance
+        packet_refs:
+          - P1
+        verification: null
+        required_for_close_out: true
+      - id: REQ-010
+        source_ref: prd.md#acceptance[2]
+        text: Checked-in historical-symbol table, JSON, and Markdown goldens match the
+          new deterministic output.
+        category: acceptance
+        packet_refs:
+          - P2
+        verification: null
+        required_for_close_out: true
+      - id: REQ-011
+        source_ref: prd.md#acceptance[3]
+        text: Historical provider-state docs and validation agree that failed is
+          covered, while timed_out and unavailable remain uncovered.
+        category: acceptance
+        packet_refs:
+          - P3
+        verification: null
+        required_for_close_out: true
+      - id: REQ-012
+        source_ref: prd.md#acceptance[4]
+        text: The implementation remains local-first and privacy-safe and does not widen
+          product claims.
+        category: acceptance
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-013
+        source_ref: prd.md#edge-cases[1]
+        text: Do not hand-author a failed row without executable fixture evidence.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-014
+        source_ref: prd.md#edge-cases[2]
+        text: Do not use environment-dependent provider absence to force a failed state.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-015
+        source_ref: prd.md#edge-cases[3]
+        text: Do not introduce a runtime test injection seam in this slice.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-016
+        source_ref: prd.md#edge-cases[4]
+        text: If the existing parser path cannot produce failed from fixture content,
+          stop with a planning-change recommendation instead of broadening
+          scope.
+        category: edge_case
+        packet_refs: []
+        verification: null
+        required_for_close_out: true
+      - id: REQ-017
+        source_ref: prd.md#verification[1]
+        text: git diff --check
+        category: verification
+        packet_refs: []
+        verification: git diff --check
+        required_for_close_out: true
+      - id: REQ-018
+        source_ref: prd.md#verification[2]
+        text: zig build test
+        category: verification
+        packet_refs: []
+        verification: zig build test
+        required_for_close_out: true
+      - id: REQ-019
+        source_ref: prd.md#verification[3]
+        text: zig build validate
+        category: verification
+        packet_refs: []
+        verification: zig build validate
+        required_for_close_out: true
+      - id: REQ-020
+        source_ref: prd.md#verification[4]
+        text: flow validate --target feature:0121
+        category: verification
+        packet_refs: []
+        verification: flow validate --target feature:0121
+        required_for_close_out: true
+      - id: REQ-021
+        source_ref: prd.md#verification[5]
+        text: flow validate --target brief:B002
+        category: verification
+        packet_refs: []
+        verification: flow validate --target brief:B002
+        required_for_close_out: true
+    notes:
+      - Extracted requirements from PRD requirement, acceptance, behaviour,
+        constraint, edge-case, verification, or case sections.
+  acceptance_contract:
+    outcome: Add deterministic failed-state historical-symbol fixture coverage and
+      align goldens, docs, and validation without changing runtime semantics or
+      public contracts.
+    acceptance:
+      - A deterministic fixture produces provider_state failed in
+        historical-symbol output.
+      - Historical-symbol table, JSON, and Markdown goldens are updated together
+        and remain deterministic.
+      - Historical provider-state docs mark failed covered while timed_out and
+        unavailable remain uncovered.
+      - No CLI/schema/scoring/provider
+        admission/release/tag/package/remote/network/telemetry/cache behaviour
+        changes.
+  validation_contract:
+    ladders:
+      - V2_atomic_commit
+      - V3_final_packet
+      - V4_close_out
+    review_sequence:
+      - spec_compliance
+      - code_quality
+    packet_verification_commands:
+      - git diff --check
+      - zig build test
+      - zig build validate
+    reviewer_must_repeat: true
+    claim_classes: []
+    evidence_policy:
+      parity_claims: null
+      synthetic_only_is_insufficient: false
+    route_matrix:
+      required: false
+      routes: []
+    resolution_matrix:
+      required: false
+      cases: []
+    operator_examples:
+      required: false
+      cases: []
+  ownership:
+    reviewer_expectations:
+      - verify acceptance against dispatch comparison basis
+      - treat runner evidence as untrusted until independently checked
+      - verify failed row comes from executable fixture output;verify ok
+        unsupported skipped coverage remains;verify timed_out/unavailable remain
+        uncovered;run git diff --check
+      - zig build test
+      - zig build validate
+      - flow validate feature and brief
+  decision_budget:
+    allowed_local_decisions:
+      - fixture content details that produce provider_state failed through
+        existing historical path;golden wording/order updates matching actual
+        output;docs wording that preserves B002 boundaries
+    deferred_reconcile_triggers:
+      - minor fixture naming or docs wording tradeoff;validation anchor wording
+        choice
+    hard_planner_escalation_triggers:
+      - failed state cannot be produced without runtime/provider code
+        changes;schema or CLI change appears necessary;timed_out or unavailable
+        coverage becomes tempting;privacy unsafe fixture evidence appears
+    protected_surfaces:
+      - CLI flags
+      - JSON schema/report fields
+      - scoring/ranking
+      - provider admission
+      - runtime provider algorithms
+      - release tags packages remotes network telemetry cache
+      - timed_out/unavailable coverage
+  fallback_path: deferred_reconcile_decision
+  notes: null
