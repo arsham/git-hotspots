@@ -4,7 +4,7 @@ feature:
   slug: historical-symbol-release-readiness-sweep
   title: Historical symbol release readiness sweep
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: The historical-symbol surface has a large local improvement stack and
@@ -63,7 +63,7 @@ proposal:
     materialised_at: 2026-06-03T05:00:56.800Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -118,7 +118,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Audit historical-symbol release surfaces
       goal: Inspect historical-symbol release-facing docs, matrices, CHANGELOG,
         README/user guide/man, and validation anchors for stale or contradictory
@@ -143,7 +143,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Apply docs fixes or proof artifact
       goal: If stale wording exists, apply docs/validation-only fixes; otherwise add a
         concise tracked readiness/no-change proof artifact.
@@ -166,7 +166,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Close-out validation proof
       goal: Run close-out validation and record release-readiness evidence without
         release/tag/package side effects.
@@ -214,7 +214,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-06-03T04:57:38.909Z
-  updated_at: 2026-06-03T05:01:14.653Z
+  updated_at: 2026-06-03T05:36:59.286Z
 dispatch:
   status: prepared
   prepared_at: 2026-06-03T05:01:14.653Z
