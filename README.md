@@ -370,10 +370,10 @@ type-only syntax, are still useful prompts when paired with low confidence and
 caveats; they do not fabricate a local target. Duplicate-looking records can be
 meaningful when their relation kind or evidence basis differs.
 
-See `docs/user-guide.md` for the relationship caveat glossary covering bounded
-syntax proof, unknown relation-like syntax, unresolved endpoints,
-external-string endpoints, and the difference between human display omissions
-and provider-cap omissions.
+See `docs/user-guide.md` for the relationship caveat glossary and provider
+caveat table covering bounded syntax proof, unknown relation-like syntax,
+unresolved endpoints, external-string endpoints, and the difference between
+human display omissions and provider-cap omissions.
 
 Use these layers together as progressively narrower local evidence, not as a
 replacement for review. Start with file hotspots to choose where to inspect,

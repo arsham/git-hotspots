@@ -47,6 +47,24 @@ Reviewers should then update this matrix or intentionally update the goldens.
   records distinct. TSX, Go, and Zig do not currently need lane-local repeated
   endpoint pairs; cross-lane coverage keeps this category reviewed.
 
+## Reviewer checklist
+
+When a relationship golden changes, reviewers should check this matrix before
+approving the update:
+
+1. Regenerate the lane row from the checked-in JSON rather than editing counts
+   by hand.
+2. Prefer updating matrix metadata over changing runtime behaviour when the
+   fixture still represents the provider contract honestly.
+3. Regenerate or expand a golden only when the lane lacks a stable example for a
+   documented coverage category.
+4. Keep provider-cap coverage in the synthetic cap fixture unless a lane-local
+   cap example is stable, small, and not coupled to implementation limits.
+5. Preserve privacy: use only project-relative paths, provider names, bounded
+   counts, and categorical observations.
+6. Re-run `zig build validate` so matrix drift, caveat-class drift, docs/man,
+   privacy, and fixture determinism checks all execute together.
+
 ## Privacy and protected-surface review
 
 The matrix uses only project-relative fixture paths, provider names, bounded

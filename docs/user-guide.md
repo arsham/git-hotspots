@@ -256,6 +256,25 @@ caveat arrays. It is caveated investigation context only, not call-graph truth,
 dependency proof, ownership, developer metrics, bug prediction, scoring
 replacement, or a ranking input.
 
+### Relationship caveats and provider boundaries
+
+Use this section as the quick reference for reading relationship output safely:
+first the shared terms, then the provider-lane table, then one concrete fixture
+example.
+
+Relationship row quick reference:
+
+1. Start with `kind` and `evidence_basis` to understand the local syntax
+   pattern that was observed.
+2. Check `provider.name` and `provider.input` to confirm which local lane and
+   project-relative file produced the evidence.
+3. Read `target_unresolved`, `freshness`, `failure`, and `confidence` as
+   uncertainty fields, not as quality or bug signals.
+4. Keep row caveats with the record. They define the provider boundary and are
+   part of the evidence.
+5. Compare `source_endpoint`, `target_endpoint`, `kind`, and `evidence_basis`
+   before treating duplicate-looking rows as redundant.
+
 Relationship caveat glossary:
 
 - Bounded syntax proof: the provider observed local syntax patterns in one
@@ -284,7 +303,28 @@ or agent prompts. They are the reason relationship evidence stays useful without
 claiming dependency truth, call-graph truth, ownership, code quality, or bug
 risk.
 
-Glossary example: the checked-in Go relationship fixture has a row from
+Provider caveat table:
+
+| Lane | Main syntax evidence | Main caveats | Does not prove |
+| --- | --- | --- | --- |
+| Python | definitions, local references, calls, imports, unresolved names, ambiguous attributes | unresolved endpoints and ambiguous attribute syntax stay caveated | import resolution, runtime dispatch, type truth, dependency truth, or call-graph truth |
+| JavaScript | definitions, local references, calls, imports/includes, unresolved identifiers, member/computed syntax | external import strings, unresolved endpoints, and member/computed syntax stay caveated | Node, package, workspace, bundler, local module, runtime, or dependency truth |
+| Go | top-level declarations, imports, direct identifier calls, selector-like syntax, unresolved identifiers, unknown syntax | external import strings, unresolved endpoints, selector-like syntax, build tags, cgo, generated sources, and method-set limits stay caveated | package/module/vendor resolution, type/interface/method-set truth, build graph truth, or call-graph truth |
+| Lua | module-level symbols, `require`-like imports, direct calls, table/member reference-like syntax, unresolved identifiers, unknown syntax | dynamic tables, metatables, callable syntax, module loader behaviour, and unresolved endpoints stay caveated | package.path resolution, runtime mutation, metatable truth, generated-source truth, or dependency truth |
+| Rust | modules, structs/enums/functions, `mod`/`use`, direct calls, path/member syntax, unresolved identifiers, unknown syntax | Cargo/crate/module resolution, ambiguous paths, member syntax, and unresolved endpoints stay caveated | crate graph truth, trait/type resolution, macro expansion, file-system resolution, or call-graph truth |
+| TypeScript | functions/classes/interfaces/types, imports, direct calls, unresolved identifiers, type-only and member syntax | type-only syntax, unresolved endpoints, imports, and member/computed syntax stay caveated | type checker truth, module resolution, JSX/runtime behaviour, dependency truth, or call-graph truth |
+| TSX | components/functions/classes, imports, JSX/member syntax, unresolved identifiers, unknown syntax | JSX syntax, type-only syntax, unresolved endpoints, imports, and member/computed syntax stay caveated | React/runtime truth, type checker truth, module resolution, dependency truth, or call-graph truth |
+| Zig | declarations, `@import` strings, direct calls, local references, unresolved identifiers, member/comptime-like syntax | package lookup, build graph meaning, namespace/type/method/comptime ambiguity, and unresolved endpoints stay caveated | build graph truth, package resolution, comptime execution, type/method truth, or call-graph truth |
+
+The relationship fixture realism matrix in
+`docs/relationship-fixture-realism-matrix.md` records which checked-in goldens
+exercise these categories. The provider-specific caveat audit in
+`docs/provider-specific-caveat-wording-audit.md` records why the current lane
+wording is intentionally conservative.
+
+Glossary example:
+
+The checked-in Go relationship fixture has a row from
 `file:src/example.go` to `symbol:src/example.go:Runner:type` with basis
 `go top-level declaration containment`. That row is a bounded syntax proof: the
 Go provider observed a top-level declaration relationship in one local file,
@@ -334,12 +374,9 @@ In JSON, the same row is under `symbol_relationships.records[]`:
 ```
 
 Read these fields together rather than treating one format as more truthful.
-The provider name identifies the local syntax lane, the provider input remains
-project-relative, the evidence basis explains the syntax pattern, freshness and
-failure describe provider state, confidence is a caveated evidence summary, and
-caveats define the limits. This row says the Go syntax provider saw a top-level
-containment relationship in `src/example.go`; it does not prove package
-identity, dependencies, ownership, runtime calls, quality, or bugs.
+This row says the Go syntax provider saw a top-level containment relationship in
+`src/example.go`; it does not prove package identity, dependencies, ownership,
+runtime calls, quality, or bugs.
 
 Omission fields describe why a human or provider view is incomplete. The Go
 fixture's `human_display_sample_omitted=9` means table and Markdown hid nine

@@ -1120,6 +1120,10 @@ PY
 }
 
 docs_manual_checks() {
+  require_anchor() {
+    grep -Fq -- "$2" "$1"
+  }
+
   [ -f docs/user-guide.md ] || return 1
   [ -f docs/developer-guide.md ] || return 1
   [ -f man/git-hotspots.1 ] || return 1
@@ -1137,19 +1141,41 @@ docs_manual_checks() {
   grep -Fq 'TypeScript, and TSX Tree-sitter lanes' docs/user-guide.md || return 1
   grep -Fq 'When pairing `--historical-symbols` with `--symbol-relationships`' docs/user-guide.md || return 1
   grep -Fq 'Historical-symbol rows do not explain why churn happened' docs/user-guide.md || return 1
-  grep -Fq 'Relationship caveat glossary' docs/user-guide.md || return 1
-  grep -Fq 'Bounded syntax proof' docs/user-guide.md || return 1
-  grep -Fq 'Unknown relation-like syntax' docs/user-guide.md || return 1
-  grep -Fq 'Unresolved endpoint' docs/user-guide.md || return 1
-  grep -Fq 'External-string endpoint' docs/user-guide.md || return 1
-  grep -Fq 'Human display omission' docs/user-guide.md || return 1
-  grep -Fq 'Provider-cap omission' docs/user-guide.md || return 1
-  grep -Fq 'Glossary example' docs/user-guide.md || return 1
-  grep -Fq 'Go provider observed a top-level declaration relationship' docs/user-guide.md || return 1
-  grep -Fq 'human_display_sample_omitted=9' docs/user-guide.md || return 1
-  grep -Fq 'target_unresolved: true' docs/user-guide.md || return 1
-  grep -Fq 'provider_partial_evidence_omitted' docs/user-guide.md || return 1
-  grep -Fq 'emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1' docs/user-guide.md || return 1
+  for anchor in \
+    'Relationship caveats and provider boundaries' \
+    'Relationship row quick reference' \
+    'Relationship caveat glossary' \
+    'Use this section as the quick reference' \
+    'Bounded syntax proof' \
+    'Unknown relation-like syntax' \
+    'Unresolved endpoint' \
+    'External-string endpoint' \
+    'Human display omission' \
+    'Provider-cap omission' \
+    'Provider caveat table' \
+    'docs/relationship-fixture-realism-matrix.md' \
+    'docs/provider-specific-caveat-wording-audit.md' \
+    '| Lane | Main syntax evidence | Main caveats | Does not prove |' \
+    '| Python | definitions, local references, calls, imports, unresolved names, ambiguous attributes |' \
+    '| JavaScript | definitions, local references, calls, imports/includes, unresolved identifiers, member/computed syntax |' \
+    '| Go | top-level declarations, imports, direct identifier calls, selector-like syntax, unresolved identifiers, unknown syntax |' \
+    '| Lua | module-level symbols, `require`-like imports, direct calls, table/member reference-like syntax, unresolved identifiers, unknown syntax |' \
+    '| Rust | modules, structs/enums/functions, `mod`/`use`, direct calls, path/member syntax, unresolved identifiers, unknown syntax |' \
+    '| TypeScript | functions/classes/interfaces/types, imports, direct calls, unresolved identifiers, type-only and member syntax |' \
+    '| TSX | components/functions/classes, imports, JSX/member syntax, unresolved identifiers, unknown syntax |' \
+    '| Zig | declarations, `@import` strings, direct calls, local references, unresolved identifiers, member/comptime-like syntax |' \
+    'package/module/vendor resolution, type/interface/method-set truth' \
+    'React/runtime truth, type checker truth, module resolution' \
+    'build graph truth, package resolution, comptime execution' \
+    'Glossary example' \
+    'Go provider observed a top-level declaration relationship' \
+    'human_display_sample_omitted=9' \
+    'target_unresolved: true' \
+    'provider_partial_evidence_omitted' \
+    'emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1'
+  do
+    require_anchor docs/user-guide.md "$anchor" || return 1
+  done
   grep -Fq 'Zig `.zig` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-zig-relations`' docs/user-guide.md || return 1
   grep -Fq 'Go `.go` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-go-relations`' docs/user-guide.md || return 1
   grep -Fq 'Lua `.lua` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-lua-relations`' docs/user-guide.md || return 1
@@ -1207,6 +1233,7 @@ docs_manual_checks() {
   grep -Fq 'For a focused historical-symbol and relationship workflow' man/git-hotspots.1 || return 1
   grep -Fq 'historical attribution does not explain why churn happened' man/git-hotspots.1 || return 1
   grep -Fq 'Relationship caveat glossary' man/git-hotspots.1 || return 1
+  grep -Fq 'provider caveat table' man/git-hotspots.1 || return 1
   grep -Fq 'Bounded syntax proof' man/git-hotspots.1 || return 1
   grep -Fq 'Unknown relation-like syntax' man/git-hotspots.1 || return 1
   grep -Fq 'Unresolved endpoint' man/git-hotspots.1 || return 1
@@ -1225,6 +1252,7 @@ docs_manual_checks() {
   grep -Fq 'For a focused historical-symbol and relationship workflow' README.md || return 1
   grep -Fq 'historical attribution does not' README.md || return 1
   grep -Fq 'relationship caveat glossary' README.md || return 1
+  grep -Fq 'caveat table covering' README.md || return 1
   grep -Fq 'syntax proof' README.md || return 1
   grep -Fq 'external-string endpoints' README.md || return 1
   grep -Fq 'emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1' README.md || return 1
@@ -1353,6 +1381,93 @@ for needle in ('/home/', '/Users/', 'file://', 'https://', 'http://', 'ssh://', 
         raise SystemExit(f'{doc_path}: private path or remote marker leaked: {needle}')
 if re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b', text):
     raise SystemExit(f'{doc_path}: email-like identity leaked')
+PY
+}
+
+relationship_caveat_class_checks() {
+  have_python || return 1
+  python3 - \
+    fixtures/expected/symbol-relationships.json \
+    fixtures/expected/symbol-relationships-javascript.json \
+    fixtures/expected/symbol-relationships-go.json \
+    fixtures/expected/symbol-relationships-lua.json \
+    fixtures/expected/symbol-relationships-rust.json \
+    fixtures/expected/symbol-relationships-tsx.json \
+    fixtures/expected/symbol-relationships-typescript.json \
+    fixtures/expected/symbol-relationships-zig.json <<'PY'
+import json
+import sys
+from pathlib import Path
+
+required_files = {
+    'fixtures/expected/symbol-relationships.json': 'Python',
+    'fixtures/expected/symbol-relationships-javascript.json': 'JavaScript',
+    'fixtures/expected/symbol-relationships-go.json': 'Go',
+    'fixtures/expected/symbol-relationships-lua.json': 'Lua',
+    'fixtures/expected/symbol-relationships-rust.json': 'Rust',
+    'fixtures/expected/symbol-relationships-tsx.json': 'TSX',
+    'fixtures/expected/symbol-relationships-typescript.json': 'TypeScript',
+    'fixtures/expected/symbol-relationships-zig.json': 'Zig',
+}
+
+def fail(label, message):
+    raise SystemExit(f'{label}: {message}')
+
+for arg in sys.argv[1:]:
+    path = Path(arg)
+    label = required_files.get(str(path), path.name)
+    with path.open(encoding='utf-8') as fh:
+        data = json.load(fh)
+    relationships = data.get('symbol_relationships') or {}
+    records = relationships.get('records') or []
+    if not records:
+        fail(label, 'relationship golden has no records')
+    caveats = {caveat for record in records for caveat in (record.get('caveats') or [])}
+    joined = '\n'.join(sorted(caveats))
+    kinds = {record.get('kind') for record in records}
+    has_unresolved = any(record.get('target_unresolved') for record in records)
+
+    required_classes = [
+        ('product-truth boundary', 'file-level Git evidence remains product truth'),
+        ('optional-provider boundary', 'optional caveated provider evidence'),
+        ('scoring/ranking boundary', 'not used for scoring, ranking'),
+        ('bounded syntax proof', 'bounded'),
+        ('syntax proof noun', 'syntax proof'),
+    ]
+    for class_name, needle in required_classes:
+        if needle not in joined:
+            fail(label, f'missing {class_name}: {needle!r}')
+
+    if (
+        'no local target mapping is fabricated' not in joined
+        and 'unresolved and external-string endpoints are caveated' not in joined
+    ):
+        fail(label, 'missing endpoint-resolution boundary')
+
+    if has_unresolved and not any(caveat.startswith('target is unresolved by this bounded') for caveat in caveats):
+        fail(label, 'missing unresolved-target record caveat')
+
+    if 'unknown' in kinds and not any('cannot be classified safely by this proof' in caveat for caveat in caveats):
+        fail(label, 'missing unknown relation-like syntax caveat')
+
+    if 'import_include' in kinds:
+        external_strings = (
+            'external string',
+            'package, module',
+            'Cargo, crate',
+            'package lookup',
+            'Node, package',
+        )
+        if not any(any(needle in caveat for needle in external_strings) for caveat in caveats):
+            fail(label, 'missing external-string endpoint caveat')
+
+    if 'unknown' in kinds and 'unknown relation-like syntax' not in joined and 'relation-like' not in joined:
+        fail(label, 'missing relation-like wording for unknown records')
+
+    provider = (relationships.get('providers') or [{}])[0]
+    provider_name = ((provider.get('provider') or {}).get('name') or '')
+    if provider_name and provider_name not in json.dumps(data):
+        fail(label, 'provider identity missing from relationship evidence')
 PY
 }
 
@@ -2724,6 +2839,13 @@ if relationship_fixture_realism_matrix_checks; then
   pass_rung "relationship fixture realism matrix checks"
 else
   fail_rung "relationship fixture realism matrix checks" "relationship fixture realism matrix drifted or lost protected-surface review coverage"
+fi
+printf 'validate: RUN relationship caveat class drift checks\n'
+if relationship_caveat_class_checks; then
+  note_fallback "relationship caveat classes: python3 compared admitted relationship goldens with required safety caveat classes"
+  pass_rung "relationship caveat class drift checks"
+else
+  fail_rung "relationship caveat class drift checks" "relationship caveat safety classes drifted or weakened"
 fi
 printf 'validate: RUN packaged dogfood surface checks\n'
 if packaging_surface_checks; then

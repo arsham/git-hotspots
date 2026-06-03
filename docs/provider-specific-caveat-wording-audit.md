@@ -144,22 +144,33 @@ Classification: no action.
 
 ## Successor recommendations
 
-1. **Document a relationship caveat glossary.** Add a docs-only glossary for
-   `bounded syntax proof`, `unknown relation-like syntax`, unresolved endpoints,
-   and external-string endpoints. This should be presentation documentation, not
-   runtime wording or JSON schema work.
-2. **Keep Go fixture representativeness stable.** Preserve the current Go
+1. **Document a relationship caveat glossary.** Completed in
+   `docs/user-guide.md`, with README and man page pointers plus validation
+   anchors. It remains presentation documentation, not runtime wording or JSON
+   schema work.
+2. **Keep Go fixture representativeness stable.** Completed as a validation
+   contract: the fixture realism matrix and validation guards preserve Go
+   import/include, call, reference, unresolved, and selector-like coverage.
+3. **Add drift validation for caveat classes.** Completed in
+   `tools/validate.sh` as the relationship caveat class drift check. It guards
+   caveat classes without prescribing exact prose.
+4. **Do not start runtime/provider work from this audit.** Still current. No
+   provider algorithm, admission, relation semantic, scoring, ranking, CLI,
+   schema, cap, cache, network, telemetry, release, tag, remote, package, or
+   publish change is indicated by this audit.
+
+## Remaining watch points
+
+- **Keep Go fixture representativeness stable.** Preserve the current Go
    import/include, call, reference, unresolved, and selector-like examples when
    regenerating fixture outputs unless a future provider contract intentionally
    changes them.
-3. **Add drift validation for caveat classes.** Consider a validation-only check
-   that confirms each admitted lane keeps product-truth, optional-evidence, and
-   endpoint-resolution boundary caveats. This should not prescribe exact prose
-   unless a separate wording contract approves that constraint.
-4. **Do not start runtime/provider work from this audit.** No provider algorithm,
-   admission, relation semantic, scoring, ranking, CLI, schema, cap, cache,
-   network, telemetry, release, tag, remote, package, or publish change is
-   indicated.
+- **Keep caveat-class validation class-based.** Do not tighten it into exact
+  prose matching unless a separate wording contract explicitly approves that
+  constraint.
+- **Avoid runtime/provider follow-up by momentum.** Future provider work should
+  come from concrete fixture or real-repo evidence, not from this caveat audit
+  alone.
 
 ## Requirement coverage
 
