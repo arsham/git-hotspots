@@ -20,9 +20,10 @@ Source fixture:
 | Unsupported file fallback | `src/readme.txt` has `provider_state: unsupported` with file-level fallback | proves unsupported paths remain visible instead of being dropped |
 | Unattributed hunk fallback | `src/link.zig` has `provider_state: skipped`, `fallback_count: 1`, and `unattributed hunk fallback` | proves the engine avoids nearest-symbol guessing when attribution is unsafe |
 | Fallback hunk pressure | fallback rows carry `fallback_count`; the fixture uses tiny counts while real repos may have a few fallback rows with many fallback hunks | keeps fallback row count separate from fallback hunk pressure |
+| Multi-hunk fallback row | `src/example.zig` has `provider_state: skipped`, `fallback_count: 4`, and `unattributed hunk fallback; no nearest-symbol guessing` | proves one skipped row can aggregate multiple unmatched hunks without changing symbol attribution |
 | Mixed parsed revision fallback | mixed parsed revisions count only unmatched hunks as fallback pressure while symbol-intersecting hunks stay attributed | prevents symbol-backed hunks from inflating file-level fallback pressure |
 | Root-commit caveat | fallback rows include `root commit has no parent pre-image` | keeps root-commit evidence caveated instead of implying a normal hunk comparison |
-| Display omission | `human_display.total_count: 7`, `shown_count: 2`, and `omitted_count: 5` | proves table and Markdown can stay compact while JSON keeps bounded records |
+| Display omission | `human_display.total_count: 8`, `shown_count: 2`, and `omitted_count: 6` | proves table and Markdown can stay compact while JSON keeps bounded records |
 | Provider-state spread | summary includes `ok`, `unsupported`, `failed`, and `skipped` states | keeps user-facing provider states from collapsing into success/failure only |
 | Failed parser fallback | `src/broken.zig` has `provider_state: failed`, `fallback_count: 1`, and low confidence | proves a supported-language historical blob can fail closed through executable fixture history |
 | Aggregate-bound status | `aggregate_record_bound: 128` and `aggregate_record_bound_exceeded: false` | proves the bound is reported even when it is not exceeded |

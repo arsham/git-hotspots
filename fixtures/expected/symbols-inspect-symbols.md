@@ -5,7 +5,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 ## Run summary
 
 - Tool: git-hotspots 0.1.0-alpha.4
-- Head commit: b6954146523705bcaffaa7f281037cd6361a0117
+- Head commit: 1f4a60fcd8e7b98f2c8cb68d75d25c25b0c402d9
 - Range: None
 - Commit count: 3
 - Shallow history: false
@@ -52,8 +52,8 @@ Symbols are opt-in current working-tree enrichment only. They do not change scor
 
 | Name | Kind | Lines | Confidence |
 | --- | --- | ---: | --- |
-| alpha | function | 5-5 | high |
-| zebra | function | 1-3 | high |
+| alpha | function | 15-15 | high |
+| zebra | function | 5-7 | high |
 
 ## Caveats
 
@@ -63,26 +63,26 @@ Symbols are opt-in current working-tree enrichment only. They do not change scor
 
 | Rank | Path | Score | Changes | Churn | Confidence | Lineage | Last commit |
 | ---: | --- | ---: | ---: | ---: | --- | --- | --- |
-| 1 | src/example.zig | 46.3 | 2 | 7 | medium | no | 5e8784e66dbf |
+| 1 | src/example.zig | 46.8 | 2 | 21 | medium | no | f614c7a5973c |
 
 ## Evidence
 
 ### 1. src/example.zig
 
-- Score breakdown: total=46.280, frequency=20.000, churn=0.280, recency=20.000, cochange=6.000
+- Score breakdown: total=46.840, frequency=20.000, churn=0.840, recency=20.000, cochange=6.000
 - Changes: 2
-- Additions: 6
-- Deletions: 1
-- Current size: 56
+- Additions: 18
+- Deletions: 3
+- Current size: 102
 - Confidence: medium
-- Last commit: 5e8784e66dbf
+- Last commit: f614c7a5973c
 - Lineage: None
 - Top co-changes:
   - src/link.zig (count=1)
   - src/readme.txt (count=1)
   - src/target.zig (count=1)
 - Evidence commits:
-  - commit=5e8784e66dbf timestamp=1777680000 additions=3 deletions=1
-  - commit=68512f487cd1 timestamp=1777593600 additions=3 deletions=0
+  - commit=f614c7a5973c timestamp=1777680000 additions=5 deletions=3
+  - commit=f900be851f50 timestamp=1777593600 additions=13 deletions=0
 - Row caveats:
   - None

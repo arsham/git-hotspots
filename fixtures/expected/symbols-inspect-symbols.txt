@@ -6,11 +6,11 @@ symbols: provider=tree-sitter-zig state=current-only freshness=fresh failure=ok 
 symbols caveat: current working-tree enrichment only; file-level Git evidence, score, file order, lineage, and confidence are unchanged
 
 rank  score   changes churn   confidence lineage path
-1     46.3    2       7       medium     no      src/example.zig
+1     46.8    2       21      medium     no      src/example.zig
 
 current symbols (shown first by provider order):
   summary: total=2 shown=2 omitted=0 limit=25 limit_source=default sort_basis="provider order"
-  function alpha lines 5-5 confidence=high
-  function zebra lines 1-3 confidence=high
+  function alpha lines 15-15 confidence=high
+  function zebra lines 5-7 confidence=high
 
 Scores are deterministic prompts for investigation, not bug predictions or code-quality ratings.

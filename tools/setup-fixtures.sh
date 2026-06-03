@@ -195,7 +195,17 @@ make_symbols() {
   setup_repo "$repo"
 
   cat > "$repo/src/example.zig" <<'EOF'
+const banner = 1;
+
+
+
 pub fn zebra() void {}
+
+
+
+const spacer = 2;
+
+
 
 fn alpha() void {}
 EOF
@@ -207,9 +217,19 @@ EOF
   commit_all "$repo" '2026-05-01T00:00:00+0000' 'initial symbol files'
 
   cat > "$repo/src/example.zig" <<'EOF'
+const banner = 10;
+
+
+
 pub fn zebra() void {
     return;
 }
+
+
+
+const spacer = 20;
+
+
 
 fn alpha() void {}
 EOF

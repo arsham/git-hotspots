@@ -41,25 +41,24 @@ def historical_items(golden: dict) -> list[dict]:
     return list(golden.get("historical_symbols", {}).get("items", []))
 
 
-def items_by_path(golden: dict) -> dict[str, dict]:
-    return {record.get("evidence_path"): record for record in historical_items(golden)}
-
-
 def require_provider_record(
     golden_path: Path,
-    by_path: dict[str, dict],
+    golden: dict,
     path: str,
     state: str,
     fallback_count: int,
     context: str,
 ) -> None:
-    record = by_path.get(path)
-    if not record:
+    matches = [record for record in historical_items(golden) if record.get("evidence_path") == path]
+    if not matches:
         fail(f"{golden_path}: missing {context} row {path}")
-    if record.get("provider_state") != state:
-        fail(f"{golden_path}: {path} provider_state drifted: {record.get('provider_state')!r}")
-    if record.get("fallback_count") != fallback_count:
-        fail(f"{golden_path}: {path} fallback_count drifted: {record.get('fallback_count')!r}")
+    for record in matches:
+        if record.get("provider_state") == state and record.get("fallback_count") == fallback_count:
+            return
+    fail(
+        f"{golden_path}: {path} provider_state/fallback_count drifted: "
+        f"{[(record.get('provider_state'), record.get('fallback_count')) for record in matches]!r}"
+    )
 
 
 def validate_provider_states(matrix_path: Path, audit_path: Path, golden_path: Path) -> None:
@@ -72,25 +71,26 @@ def validate_provider_states(matrix_path: Path, audit_path: Path, golden_path: P
         "ok": 4,
         "unsupported": 1,
         "failed": 1,
-        "skipped": 1,
+        "skipped": 2,
         "timed_out": 0,
         "unavailable": 0,
     }
     if states != expected_states:
         fail(f"{golden_path}: provider-state summary drifted: {states!r}")
 
-    by_path = items_by_path(golden)
     required_records = {
         "src/broken.zig": ("failed", 1),
         "src/readme.txt": ("unsupported", 1),
         "src/link.zig": ("skipped", 1),
+        "src/example.zig": ("skipped", 4),
     }
     for path, (state, fallback_count) in required_records.items():
-        require_provider_record(golden_path, by_path, path, state, fallback_count, "historical fixture")
+        require_provider_record(golden_path, golden, path, state, fallback_count, "historical fixture")
 
     matrix_required = [
         "| Provider-state spread | summary includes `ok`, `unsupported`, `failed`, and `skipped` states |",
         "| Failed parser fallback | `src/broken.zig` has `provider_state: failed`, `fallback_count: 1`, and low confidence |",
+        "| Multi-hunk fallback row | `src/example.zig` has `provider_state: skipped`, `fallback_count: 4`, and `unattributed hunk fallback; no nearest-symbol guessing` |",
         "`timed_out` and `unavailable` remain explicit historical provider-state",
         "coverage gaps, not states proven impossible.",
     ]
@@ -134,31 +134,33 @@ def validate_fallback_pressure(matrix_path: Path, guide_path: Path, golden_path:
     summary = historical["summary"]
     records = historical_items(golden)
 
-    expected_fallback_record_count = 3
+    expected_fallback_record_count = 4
     if summary.get("fallback_record_count") != expected_fallback_record_count:
         fail(f"{golden_path}: fallback_record_count drifted: {summary.get('fallback_record_count')!r}")
-    if summary.get("fallback_count") != expected_fallback_record_count:
+    expected_total_fallback_hunks = 7
+    if summary.get("fallback_count") != expected_total_fallback_hunks:
         fail(f"{golden_path}: fallback_count drifted: {summary.get('fallback_count')!r}")
 
     fallback_rows = [record for record in records if record.get("fallback_count", 0) > 0]
     if len(fallback_rows) != expected_fallback_record_count:
         fail(f"{golden_path}: fallback row count drifted: {len(fallback_rows)!r}")
 
-    by_path = items_by_path(golden)
     expected_rows = {
         "src/broken.zig": ("failed", 1),
+        "src/example.zig": ("skipped", 4),
         "src/link.zig": ("skipped", 1),
         "src/readme.txt": ("unsupported", 1),
     }
     for path, (state, fallback_count) in expected_rows.items():
-        require_provider_record(golden_path, by_path, path, state, fallback_count, "fallback-pressure")
+        require_provider_record(golden_path, golden, path, state, fallback_count, "fallback-pressure")
 
     total_fallback_hunks = sum(record.get("fallback_count", 0) for record in records)
-    if total_fallback_hunks != expected_fallback_record_count:
+    if total_fallback_hunks != expected_total_fallback_hunks:
         fail(f"{golden_path}: total fallback hunk pressure drifted: {total_fallback_hunks!r}")
 
     required_matrix = [
         "| Fallback hunk pressure | fallback rows carry `fallback_count`; the fixture uses tiny counts while real repos may have a few fallback rows with many fallback hunks |",
+        "| Multi-hunk fallback row | `src/example.zig` has `provider_state: skipped`, `fallback_count: 4`, and `unattributed hunk fallback; no nearest-symbol guessing` |",
         "| Mixed parsed revision fallback | mixed parsed revisions count only unmatched hunks as fallback pressure while symbol-intersecting hunks stay attributed |",
         "keeps fallback row count separate from fallback hunk pressure",
         "prevents symbol-backed hunks from inflating file-level fallback pressure",

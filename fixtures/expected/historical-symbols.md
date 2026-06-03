@@ -5,7 +5,7 @@ File-level Git-history investigation prompts, not bug predictions or code-qualit
 ## Run summary
 
 - Tool: git-hotspots 0.1.0-alpha.4
-- Head commit: b6954146523705bcaffaa7f281037cd6361a0117
+- Head commit: 1f4a60fcd8e7b98f2c8cb68d75d25c25b0c402d9
 - Range: None
 - Commit count: 3
 - Shallow history: false
@@ -42,8 +42,8 @@ Symbols are opt-in current working-tree enrichment for retained ranked file hots
 
 | File rank | File | Score | Provider | Failure | Name | Kind | Lines | Confidence | Current-line Git evidence |
 | ---: | --- | ---: | --- | --- | --- | --- | ---: | --- | --- |
-| 1 | src/example.zig | 46.3 | tree\-sitter\-zig | ok | alpha | function | 5-5 | high | - |
-| 1 | src/example.zig | 46.3 | tree\-sitter\-zig | ok | zebra | function | 1-3 | high | - |
+| 1 | src/example.zig | 46.8 | tree\-sitter\-zig | ok | alpha | function | 15-15 | high | - |
+| 1 | src/example.zig | 46.8 | tree\-sitter\-zig | ok | zebra | function | 5-7 | high | - |
 
 ## Historical symbols
 
@@ -51,15 +51,15 @@ Historical symbols are opt-in true historical hunk attribution for retained rank
 
 - Candidate paths: 5
 - Retained candidate paths: 5
-- Aggregate records: 7
+- Aggregate records: 8
 - Shown records: 2
-- Omitted records: 5
+- Omitted records: 6
 - Human display limit: 2 (explicit)
 - Aggregate record bound: 128
 - Aggregate record bound exceeded: false
-- Fallback records: 3
-- Fallback count: 3
-- Provider states: ok=4, unavailable=0, unsupported=1, failed=1, timed_out=0, skipped=1
+- Fallback records: 4
+- Fallback count: 7
+- Provider states: ok=4, unavailable=0, unsupported=1, failed=1, timed_out=0, skipped=2
 - Sort basis: historical aggregate sort key: evidence path, symbol kind/name/status/range; attached parent rank is reported but does not change file ranking
 - Caveats:
   - historical symbols are opt\-in true historical hunk attribution over retained ranked\-file candidates only
@@ -69,8 +69,8 @@ Historical symbols are opt-in true historical hunk attribution for retained rank
 
 | File rank | File | Evidence path | Score | Name | Kind | Revision lines | Status | Changes | Added pressure | Deleted pressure | Latest timestamp | Provider state | Confidence | Fallbacks | Sample commits | Caveats |
 | ---: | --- | --- | ---: | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | --- | --- | ---: | --- | --- |
-| 5 | src/broken.zig | src/broken.zig | 30.0 | file fallback | - | - | unknown | 1 | 1 | 0 | 1777680000 | failed | low | 1 | b6954146523705bcaffaa7f281037cd6361a0117 | provider could not parse revision\-local source; fallback retained |
-| 1 | src/example.zig | src/example.zig | 46.3 | alpha | function | 3-3 | historical | 1 | 3 | 0 | 1777593600 | ok | high | 0 | 68512f487cd1a83c99b3fee9b07fb05e3ab24fe8 | current working\-tree enrichment only; file\-level Git evidence remains product truth; supported subset: named Zig function declarations only; range convention: one\-based inclusive lines |
+| 5 | src/broken.zig | src/broken.zig | 30.0 | file fallback | - | - | unknown | 1 | 1 | 0 | 1777680000 | failed | low | 1 | 1f4a60fcd8e7b98f2c8cb68d75d25c25b0c402d9 | provider could not parse revision\-local source; fallback retained |
+| 1 | src/example.zig | src/example.zig | 46.8 | file fallback | - | - | unknown | 4 | 2 | 2 | 1777680000 | skipped | low | 4 | f614c7a5973c9616d0474b0433ef6a0f1eaa6355 | unattributed hunk fallback; no nearest\-symbol guessing |
 
 ## Caveats
 
@@ -80,31 +80,31 @@ Historical symbols are opt-in true historical hunk attribution for retained rank
 
 | Rank | Path | Score | Changes | Churn | Confidence | Lineage | Last commit |
 | ---: | --- | ---: | ---: | ---: | --- | --- | --- |
-| 1 | src/example.zig | 46.3 | 2 | 7 | medium | no | 5e8784e66dbf |
-| 2 | src/link.zig | 35.0 | 1 | 1 | low | no | 68512f487cd1 |
-| 3 | src/readme.txt | 35.0 | 1 | 1 | low | no | 68512f487cd1 |
-| 4 | src/target.zig | 35.0 | 1 | 1 | low | no | 68512f487cd1 |
-| 5 | src/broken.zig | 30.0 | 1 | 1 | low | no | b69541465237 |
+| 1 | src/example.zig | 46.8 | 2 | 21 | medium | no | f614c7a5973c |
+| 2 | src/link.zig | 35.0 | 1 | 1 | low | no | f900be851f50 |
+| 3 | src/readme.txt | 35.0 | 1 | 1 | low | no | f900be851f50 |
+| 4 | src/target.zig | 35.0 | 1 | 1 | low | no | f900be851f50 |
+| 5 | src/broken.zig | 30.0 | 1 | 1 | low | no | 1f4a60fcd8e7 |
 
 ## Evidence
 
 ### 1. src/example.zig
 
-- Score breakdown: total=46.280, frequency=20.000, churn=0.280, recency=20.000, cochange=6.000
+- Score breakdown: total=46.840, frequency=20.000, churn=0.840, recency=20.000, cochange=6.000
 - Changes: 2
-- Additions: 6
-- Deletions: 1
-- Current size: 56
+- Additions: 18
+- Deletions: 3
+- Current size: 102
 - Confidence: medium
-- Last commit: 5e8784e66dbf
+- Last commit: f614c7a5973c
 - Lineage: None
 - Top co-changes:
   - src/link.zig (count=1)
   - src/readme.txt (count=1)
   - src/target.zig (count=1)
 - Evidence commits:
-  - commit=5e8784e66dbf timestamp=1777680000 additions=3 deletions=1
-  - commit=68512f487cd1 timestamp=1777593600 additions=3 deletions=0
+  - commit=f614c7a5973c timestamp=1777680000 additions=5 deletions=3
+  - commit=f900be851f50 timestamp=1777593600 additions=13 deletions=0
 - Row caveats:
   - None
 
@@ -116,14 +116,14 @@ Historical symbols are opt-in true historical hunk attribution for retained rank
 - Deletions: 0
 - Current size: 24
 - Confidence: low
-- Last commit: 68512f487cd1
+- Last commit: f900be851f50
 - Lineage: None
 - Top co-changes:
   - src/example.zig (count=1)
   - src/readme.txt (count=1)
   - src/target.zig (count=1)
 - Evidence commits:
-  - commit=68512f487cd1 timestamp=1777593600 additions=1 deletions=0
+  - commit=f900be851f50 timestamp=1777593600 additions=1 deletions=0
 - Row caveats:
   - None
 
@@ -135,14 +135,14 @@ Historical symbols are opt-in true historical hunk attribution for retained rank
 - Deletions: 0
 - Current size: 8
 - Confidence: low
-- Last commit: 68512f487cd1
+- Last commit: f900be851f50
 - Lineage: None
 - Top co-changes:
   - src/example.zig (count=1)
   - src/link.zig (count=1)
   - src/target.zig (count=1)
 - Evidence commits:
-  - commit=68512f487cd1 timestamp=1777593600 additions=1 deletions=0
+  - commit=f900be851f50 timestamp=1777593600 additions=1 deletions=0
 - Row caveats:
   - None
 
@@ -154,14 +154,14 @@ Historical symbols are opt-in true historical hunk attribution for retained rank
 - Deletions: 0
 - Current size: 24
 - Confidence: low
-- Last commit: 68512f487cd1
+- Last commit: f900be851f50
 - Lineage: None
 - Top co-changes:
   - src/example.zig (count=1)
   - src/link.zig (count=1)
   - src/readme.txt (count=1)
 - Evidence commits:
-  - commit=68512f487cd1 timestamp=1777593600 additions=1 deletions=0
+  - commit=f900be851f50 timestamp=1777593600 additions=1 deletions=0
 - Row caveats:
   - None
 
@@ -173,11 +173,11 @@ Historical symbols are opt-in true historical hunk attribution for retained rank
 - Deletions: 0
 - Current size: 23
 - Confidence: low
-- Last commit: b69541465237
+- Last commit: 1f4a60fcd8e7
 - Lineage: None
 - Top co-changes:
   - None
 - Evidence commits:
-  - commit=b69541465237 timestamp=1777680000 additions=1 deletions=0
+  - commit=1f4a60fcd8e7 timestamp=1777680000 additions=1 deletions=0
 - Row caveats:
   - None
