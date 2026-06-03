@@ -1280,13 +1280,14 @@ docs_manual_checks() {
   grep -Fq 'Fallback hunk pressure' docs/historical-symbol-fixture-realism-matrix.md || return 1
   grep -Fq 'fallback row count separate from fallback hunk pressure' docs/historical-symbol-fixture-realism-matrix.md || return 1
   grep -Fq 'fallback rows, and fallback hunk pressure' docs/historical-symbol-fixture-realism-matrix.md || return 1
-  grep -Fq 'failed`, `timed_out`, and `unavailable` are explicit historical provider-state' docs/historical-symbol-fixture-realism-matrix.md || return 1
+  grep -Fq 'Failed parser fallback' docs/historical-symbol-fixture-realism-matrix.md || return 1
+  grep -Fq '`timed_out` and `unavailable` remain explicit historical provider-state' docs/historical-symbol-fixture-realism-matrix.md || return 1
   grep -Fq 'historical-provider-state-fixture-gap-audit.md' docs/historical-symbol-fixture-realism-matrix.md || return 1
   grep -Fq 'Historical provider-state fixture gap audit' docs/historical-provider-state-fixture-gap-audit.md || return 1
-  grep -Fq '| `failed` | no | no historical golden row currently forces a parser failure |' docs/historical-provider-state-fixture-gap-audit.md || return 1
+  grep -Fq '| `failed` | yes | `src/broken.zig` malformed historical Zig blob produces a failed fallback row |' docs/historical-provider-state-fixture-gap-audit.md || return 1
   grep -Fq '| `timed_out` | no | no provider timeout injection exists for historical attribution |' docs/historical-provider-state-fixture-gap-audit.md || return 1
   grep -Fq '| `unavailable` | no | no historical blob fixture currently exercises unavailable provider input |' docs/historical-provider-state-fixture-gap-audit.md || return 1
-  grep -Fq 'Do not add a fixture in this slice' docs/historical-provider-state-fixture-gap-audit.md || return 1
+  grep -Fq 'Keep the deterministic `failed` fixture in this slice' docs/historical-provider-state-fixture-gap-audit.md || return 1
   grep -Fq 'wall-clock timeout fixtures or environment-dependent missing-provider' docs/historical-provider-state-fixture-gap-audit.md || return 1
   grep -Fq 'Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and' README.md || return 1
   grep -Fq 'retained ranked-file candidates in Zig' README.md || return 1

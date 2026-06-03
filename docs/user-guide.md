@@ -252,11 +252,11 @@ Historical-symbol caveat glossary:
 The historical-symbol fixture realism matrix in
 `docs/historical-symbol-fixture-realism-matrix.md` records what the checked-in
 historical golden covers: parsed Zig rows, unsupported-file fallback,
-unattributed/root-commit fallback, display omission, provider states, and
-aggregate-bound status. The provider-state gap audit in
-`docs/historical-provider-state-fixture-gap-audit.md` records why `failed`,
-`timed_out`, and `unavailable` are explicit uncovered fixture states rather
-than states proven impossible.
+unattributed/root-commit fallback, failed parser fallback, display omission,
+provider states, and aggregate-bound status. The provider-state gap audit in
+`docs/historical-provider-state-fixture-gap-audit.md` records why `timed_out`
+and `unavailable` are explicit uncovered fixture states rather than states
+proven impossible.
 
 When reviewing historical-symbol precision, do not collapse fallback evidence
 into one rate. Fallback row count tells you how many aggregate rows used a

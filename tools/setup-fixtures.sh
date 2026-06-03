@@ -214,6 +214,11 @@ pub fn zebra() void {
 fn alpha() void {}
 EOF
   commit_all "$repo" '2026-05-02T00:00:00+0000' 'expand zig function'
+
+  cat > "$repo/src/broken.zig" <<'EOF'
+pub fn broken() void {
+EOF
+  commit_all "$repo" '2026-05-02T00:00:00+0000' 'add invalid zig fixture'
 }
 
 make_zig_relationships() {

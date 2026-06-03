@@ -21,12 +21,13 @@ Source fixture:
 | Unattributed hunk fallback | `src/link.zig` has `provider_state: skipped`, `fallback_count: 1`, and `unattributed hunk fallback` | proves the engine avoids nearest-symbol guessing when attribution is unsafe |
 | Fallback hunk pressure | fallback rows carry `fallback_count`; the fixture uses tiny counts while real repos may have a few fallback rows with many fallback hunks | keeps fallback row count separate from fallback hunk pressure |
 | Root-commit caveat | fallback rows include `root commit has no parent pre-image` | keeps root-commit evidence caveated instead of implying a normal hunk comparison |
-| Display omission | `human_display.total_count: 6`, `shown_count: 2`, and `omitted_count: 4` | proves table and Markdown can stay compact while JSON keeps bounded records |
-| Provider-state spread | summary includes `ok`, `unsupported`, and `skipped` states | keeps user-facing provider states from collapsing into success/failure only |
+| Display omission | `human_display.total_count: 7`, `shown_count: 2`, and `omitted_count: 5` | proves table and Markdown can stay compact while JSON keeps bounded records |
+| Provider-state spread | summary includes `ok`, `unsupported`, `failed`, and `skipped` states | keeps user-facing provider states from collapsing into success/failure only |
+| Failed parser fallback | `src/broken.zig` has `provider_state: failed`, `fallback_count: 1`, and low confidence | proves a supported-language historical blob can fail closed through executable fixture history |
 | Aggregate-bound status | `aggregate_record_bound: 128` and `aggregate_record_bound_exceeded: false` | proves the bound is reported even when it is not exceeded |
 | Local-only provenance | provenance records `local_only: true`, `network: false`, `checkout: false`, and `auto_fetch: false` | protects local-first historical analysis semantics |
 
-`failed`, `timed_out`, and `unavailable` are explicit historical provider-state
+`timed_out` and `unavailable` remain explicit historical provider-state
 coverage gaps, not states proven impossible. See
 `docs/historical-provider-state-fixture-gap-audit.md` for the fixture
 feasibility decision.
@@ -43,8 +44,8 @@ matrix before approving the update:
 3. Keep unsupported, skipped, fallback rows, and fallback hunk pressure
    distinct. They describe different evidence states and different precision
    signals.
-4. Do not add `failed`, `timed_out`, or `unavailable` rows without a shaped
-   fixture feature and deterministic evidence; timeout or environment-dependent
+4. Do not add `timed_out` or `unavailable` rows without a shaped fixture
+   feature and deterministic evidence; timeout or environment-dependent
    provider-unavailable cases are too brittle for goldens.
 5. Do not turn historical rows into semantic lineage, ownership, bug, quality,
    dependency, or ranking claims.

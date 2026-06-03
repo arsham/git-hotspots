@@ -262,9 +262,10 @@ with open(sys.argv[1], encoding='utf-8') as fh:
     data = json.load(fh)
 project = data['project_symbols']
 assert project['current_only'] is True
-assert project['summary']['file_count'] == 3
+assert project['summary']['file_count'] == 4
 assert project['summary']['unsupported_count'] == 1
 assert project['summary']['unavailable_count'] == 1
+assert project['summary']['failed_count'] == 1
 assert project['human_display']['total_count'] == 3
 assert project['human_display']['shown_count'] == 3
 assert project['files'][0]['path'] == 'src/example.zig'
@@ -312,6 +313,8 @@ assert historical['human_display']['active_limit'] == 2
 assert historical['summary']['candidate_path_count'] >= historical['summary']['retained_candidate_path_count'] >= 1
 assert historical['summary']['item_count'] == len(historical['items'])
 assert historical['summary']['fallback_count'] >= 0
+assert historical['summary']['provider_states']['failed'] == 1
+assert any(item['provider_state'] == 'failed' for item in historical['items'])
 assert historical['caveats']
 assert all('parent_file_path' in item and 'evidence_path' in item and 'provider_state' in item for item in historical['items'])
 assert 'current_line_history' not in json.dumps(historical)

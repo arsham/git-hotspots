@@ -21,28 +21,27 @@ behaviour or depending on a missing provider.
 - `src/tree_sitter_zig.zig` returns `provider.Failure.failed` for parser
   creation failure, parser language setup failure, parse failure, or a parsed
   tree with syntax errors in supported Zig source.
-- `fixtures/expected/historical-symbols.json` currently shows `failed_count: 0`
-  and no historical `failed` row.
+- `fixtures/expected/historical-symbols.json` now includes a historical
+  `provider_state: failed` fallback row for `src/broken.zig`.
 - The checked-in audit in
-  `docs/historical-provider-state-fixture-gap-audit.md` already treats `failed`
-  as the only near-term candidate state.
+  `docs/historical-provider-state-fixture-gap-audit.md` treats `failed` as
+  covered and keeps `timed_out` and `unavailable` uncovered.
 
-## Smallest follow-up slice
+## Implemented slice
 
-Likely files:
+Changed files:
 
 - `fixtures/symbols/...` - add one malformed historical Zig blob in the fixture
-  repository history.
+  repository history through `tools/setup-fixtures.sh`.
 - `fixtures/expected/historical-symbols.json`
 - `fixtures/expected/historical-symbols.md`
 - `fixtures/expected/historical-symbols.txt`
 - Any fixture-generation test or helper that materialises the checked-in
   historical repository.
 
-Expected state:
+Resulting state:
 
-- one additional historical record or fallback row with `provider_state:
-  failed`
+- one additional historical fallback row with `provider_state: failed`
 - low confidence with the existing failed caveat wording
 - no runtime/provider code changes, no CLI/schema changes, and no scoring or
   ranking changes
