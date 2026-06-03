@@ -4,7 +4,7 @@ feature:
   slug: historical-fallback-attribution-improvement
   title: Historical fallback attribution improvement
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Historical-symbol audits show fallback hunk pressure can be high. Some
@@ -59,7 +59,7 @@ proposal:
     materialised_at: 2026-06-01T22:06:54.402Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -116,7 +116,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Select safe fallback case
       goal: Inspect current historical fallback rows and attribution code to select
         one deterministic improvement case or prove no safe case exists.
@@ -149,7 +149,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Implement or prove no-change branch
       goal: Implement the narrow deterministic fallback attribution improvement, or
         write the no-runtime-change proof if no safe improvement exists.
@@ -181,7 +181,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Validate and align docs
       goal: Run full validation and align historical fixture/docs metadata only where
         required by the implemented change or no-change proof.
@@ -248,7 +248,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-06-01T22:03:27.825Z
-  updated_at: 2026-06-01T22:07:18.037Z
+  updated_at: 2026-06-01T22:32:21.024Z
 dispatch:
   status: prepared
   prepared_at: 2026-06-01T22:07:18.037Z

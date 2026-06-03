@@ -176,7 +176,9 @@ fn aggregateSide(
     defer extraction.deinit(allocator);
 
     if (extraction.provider.failure != .ok) {
-        context.provider_failures += 1;
+        if (countsAgainstProviderFailureBudget(extraction.provider.failure)) {
+            context.provider_failures += 1;
+        }
         try addFallback(allocator, map, record, side == .old, extraction.provider.failure, extraction.provider.confidence, "provider could not parse revision-local source; fallback retained", options);
         return;
     }
@@ -233,6 +235,13 @@ fn addFallback(
     try addEvidence(allocator, builder, record, added, deleted, failure, confidence, options.max_sample_commits);
     try appendUniqueCaveat(allocator, &builder.caveats, caveat);
     try addCaveats(allocator, builder, record.caveats);
+}
+
+fn countsAgainstProviderFailureBudget(failure: provider.Failure) bool {
+    return switch (failure) {
+        .failed, .timed_out, .unavailable => true,
+        .ok, .unsupported, .skipped => false,
+    };
 }
 
 fn ensureAggregate(
@@ -460,7 +469,7 @@ test "generated local repository proves historical hunk attribution cases" {
     const provider_budget = try aggregateRecords(allocator, records, provider_budget_options);
     defer deinitAggregateRecords(allocator, provider_budget);
     const budget_fallback = findRecord(provider_budget, "notes.txt", null, .unknown) orelse return error.MissingProviderBudgetFallback;
-    try std.testing.expect(containsCaveat(budget_fallback, "provider failure bound exceeded"));
+    try std.testing.expect(!containsCaveat(budget_fallback, "provider failure bound exceeded"));
 
     const commit_bound_records = try git_hunks.readHistory(allocator, io, repo, &paths, .{ .max_commits = 1 });
     defer git_hunks.deinitRecords(allocator, commit_bound_records);
@@ -474,6 +483,114 @@ test "generated local repository proves historical hunk attribution cases" {
     defer deinitAggregateRecords(allocator, second);
     try std.testing.expectEqual(aggregates.len, second.len);
     for (aggregates, second) |lhs, rhs| try std.testing.expectEqualStrings(lhs.sort_key, rhs.sort_key);
+}
+
+test "unsupported historical paths do not exhaust provider failure budget before supported paths" {
+    const allocator = std.testing.allocator;
+    const unsupported_hunks = [_]git_hunks.Hunk{.{ .old = null, .new = .{ .start = 1, .end = 1 } }};
+    const supported_hunks = [_]git_hunks.Hunk{.{ .old = null, .new = .{ .start = 1, .end = 1 } }};
+    const records = [_]git_hunks.FileHunkRecord{
+        .{
+            .commit_id = @constCast("case-unsupported"),
+            .parent_id = null,
+            .timestamp = 1,
+            .old_path = null,
+            .new_path = @constCast("notes.txt"),
+            .old_blob = null,
+            .new_blob = @constCast("blob-unsupported"),
+            .status = .added,
+            .hunks = @constCast(unsupported_hunks[0..]),
+            .old_blob_state = .absent,
+            .new_blob_state = .available,
+            .old_source = null,
+            .new_source = @constCast("note\n"),
+            .caveats = @constCast(&[_][]const u8{}),
+        },
+        .{
+            .commit_id = @constCast("case-supported"),
+            .parent_id = null,
+            .timestamp = 2,
+            .old_path = null,
+            .new_path = @constCast("src/app.zig"),
+            .old_blob = null,
+            .new_blob = @constCast("blob-supported"),
+            .status = .added,
+            .hunks = @constCast(supported_hunks[0..]),
+            .old_blob_state = .absent,
+            .new_blob_state = .available,
+            .old_source = null,
+            .new_source = @constCast("pub fn alpha() void {}\n"),
+            .caveats = @constCast(&[_][]const u8{}),
+        },
+    };
+
+    // Selected case: an unsupported historical path before a supported Zig path
+    // should not make later deterministic revision-local symbol evidence fall
+    // back through the provider-failure budget. This preserves unsupported
+    // fallback honesty without nearest-symbol or adjacency attribution.
+    const aggregates = try aggregateRecords(allocator, records[0..], .{ .max_provider_failures = 1 });
+    defer deinitAggregateRecords(allocator, aggregates);
+
+    const unsupported = findRecord(aggregates, "notes.txt", null, .unknown) orelse return error.MissingUnsupportedFallback;
+    try std.testing.expectEqual(provider.Failure.unsupported, unsupported.provider_state);
+    try std.testing.expect(containsCaveat(unsupported, "provider could not parse"));
+
+    const alpha = findRecord(aggregates, "src/app.zig", "alpha", .historical) orelse return error.MissingAlphaAttribution;
+    try std.testing.expectEqual(provider.Failure.ok, alpha.provider_state);
+    try std.testing.expectEqual(@as(u64, 1), alpha.added_line_pressure);
+    try std.testing.expectEqual(@as(u32, 0), alpha.fallback_count);
+}
+
+test "failed historical provider parses still exhaust provider failure budget" {
+    const allocator = std.testing.allocator;
+    const failed_hunks = [_]git_hunks.Hunk{.{ .old = null, .new = .{ .start = 1, .end = 1 } }};
+    const supported_hunks = [_]git_hunks.Hunk{.{ .old = null, .new = .{ .start = 1, .end = 1 } }};
+    const records = [_]git_hunks.FileHunkRecord{
+        .{
+            .commit_id = @constCast("case-failed"),
+            .parent_id = null,
+            .timestamp = 1,
+            .old_path = null,
+            .new_path = @constCast("src/broken.zig"),
+            .old_blob = null,
+            .new_blob = @constCast("blob-failed"),
+            .status = .added,
+            .hunks = @constCast(failed_hunks[0..]),
+            .old_blob_state = .absent,
+            .new_blob_state = .available,
+            .old_source = null,
+            .new_source = @constCast("pub fn broken() void {\n"),
+            .caveats = @constCast(&[_][]const u8{}),
+        },
+        .{
+            .commit_id = @constCast("case-supported"),
+            .parent_id = null,
+            .timestamp = 2,
+            .old_path = null,
+            .new_path = @constCast("src/app.zig"),
+            .old_blob = null,
+            .new_blob = @constCast("blob-supported"),
+            .status = .added,
+            .hunks = @constCast(supported_hunks[0..]),
+            .old_blob_state = .absent,
+            .new_blob_state = .available,
+            .old_source = null,
+            .new_source = @constCast("pub fn alpha() void {}\n"),
+            .caveats = @constCast(&[_][]const u8{}),
+        },
+    };
+
+    const aggregates = try aggregateRecords(allocator, records[0..], .{ .max_provider_failures = 1 });
+    defer deinitAggregateRecords(allocator, aggregates);
+
+    const failed = findRecord(aggregates, "src/broken.zig", null, .unknown) orelse return error.MissingFailedFallback;
+    try std.testing.expectEqual(provider.Failure.failed, failed.provider_state);
+    try std.testing.expect(containsCaveat(failed, "provider could not parse"));
+
+    const skipped = findRecord(aggregates, "src/app.zig", null, .unknown) orelse return error.MissingProviderBudgetFallback;
+    try std.testing.expectEqual(provider.Failure.skipped, skipped.provider_state);
+    try std.testing.expect(containsCaveat(skipped, "provider failure bound exceeded"));
+    try std.testing.expect(findRecord(aggregates, "src/app.zig", "alpha", .historical) == null);
 }
 
 fn makeHistoricalFixtureRepo(allocator: std.mem.Allocator, io: std.Io) ![]u8 {
