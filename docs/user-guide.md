@@ -235,6 +235,10 @@ Historical-symbol caveat glossary:
 - File-level fallback: the changed hunk stayed attached to the retained file
   because the provider could not safely map it to a revision-local symbol.
   Fallback rows are intentional evidence, not missing hotspot analysis.
+- Fallback hunk pressure: a fallback row may aggregate one or many changed
+  hunks. Read fallback row counts and fallback hunk counts separately: a small
+  number of fallback rows can still represent substantial unattributed hunk
+  pressure.
 - Unattributed hunk fallback: the hunk was retained without nearest-symbol
   guessing. This avoids inventing a symbol owner for blank lines, comments,
   unsupported syntax, or root-commit evidence.
@@ -249,7 +253,16 @@ The historical-symbol fixture realism matrix in
 `docs/historical-symbol-fixture-realism-matrix.md` records what the checked-in
 historical golden covers: parsed Zig rows, unsupported-file fallback,
 unattributed/root-commit fallback, display omission, provider states, and
-aggregate-bound status.
+aggregate-bound status. The provider-state gap audit in
+`docs/historical-provider-state-fixture-gap-audit.md` records why `failed`,
+`timed_out`, and `unavailable` are explicit uncovered fixture states rather
+than states proven impossible.
+
+When reviewing historical-symbol precision, do not collapse fallback evidence
+into one rate. Fallback row count tells you how many aggregate rows used a
+file-level fallback; fallback hunk pressure tells you how much changed-hunk
+evidence those rows carry. Both are investigation prompts, not proof of
+semantic lineage or code quality.
 
 Use `--symbol-relationships` when you want bounded local relationship evidence
 for retained ranked-file candidates:

@@ -19,11 +19,17 @@ Source fixture:
 | Parsed revision-local Zig rows | `alpha`, `zebra`, and `target` rows have `provider_state: ok` and line ranges | proves historical hunk attribution can attach changed hunks to revision-local symbols |
 | Unsupported file fallback | `src/readme.txt` has `provider_state: unsupported` with file-level fallback | proves unsupported paths remain visible instead of being dropped |
 | Unattributed hunk fallback | `src/link.zig` has `provider_state: skipped`, `fallback_count: 1`, and `unattributed hunk fallback` | proves the engine avoids nearest-symbol guessing when attribution is unsafe |
+| Fallback hunk pressure | fallback rows carry `fallback_count`; the fixture uses tiny counts while real repos may have a few fallback rows with many fallback hunks | keeps fallback row count separate from fallback hunk pressure |
 | Root-commit caveat | fallback rows include `root commit has no parent pre-image` | keeps root-commit evidence caveated instead of implying a normal hunk comparison |
 | Display omission | `human_display.total_count: 6`, `shown_count: 2`, and `omitted_count: 4` | proves table and Markdown can stay compact while JSON keeps bounded records |
 | Provider-state spread | summary includes `ok`, `unsupported`, and `skipped` states | keeps user-facing provider states from collapsing into success/failure only |
 | Aggregate-bound status | `aggregate_record_bound: 128` and `aggregate_record_bound_exceeded: false` | proves the bound is reported even when it is not exceeded |
 | Local-only provenance | provenance records `local_only: true`, `network: false`, `checkout: false`, and `auto_fetch: false` | protects local-first historical analysis semantics |
+
+`failed`, `timed_out`, and `unavailable` are explicit historical provider-state
+coverage gaps, not states proven impossible. See
+`docs/historical-provider-state-fixture-gap-audit.md` for the fixture
+feasibility decision.
 
 ## Reviewer checklist
 
@@ -34,11 +40,15 @@ matrix before approving the update:
    than editing this document by guesswork.
 2. Preserve both symbol-attributed rows and fallback rows unless the active
    feature explicitly reshapes the fixture.
-3. Keep unsupported, skipped, and fallback wording distinct. They describe
-   different evidence states.
-4. Do not turn historical rows into semantic lineage, ownership, bug, quality,
+3. Keep unsupported, skipped, fallback rows, and fallback hunk pressure
+   distinct. They describe different evidence states and different precision
+   signals.
+4. Do not add `failed`, `timed_out`, or `unavailable` rows without a shaped
+   fixture feature and deterministic evidence; timeout or environment-dependent
+   provider-unavailable cases are too brittle for goldens.
+5. Do not turn historical rows into semantic lineage, ownership, bug, quality,
    dependency, or ranking claims.
-5. Re-run `zig build validate` so historical goldens, docs anchors, privacy
+6. Re-run `zig build validate` so historical goldens, docs anchors, privacy
    checks, and performance budgets execute together.
 
 ## Protected surfaces

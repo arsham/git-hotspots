@@ -1127,6 +1127,7 @@ docs_manual_checks() {
   [ -f docs/user-guide.md ] || return 1
   [ -f docs/developer-guide.md ] || return 1
   [ -f docs/historical-symbol-fixture-realism-matrix.md ] || return 1
+  [ -f docs/historical-provider-state-fixture-gap-audit.md ] || return 1
   [ -f man/git-hotspots.1 ] || return 1
 
   grep -Fq '# git-hotspots user guide' docs/user-guide.md || return 1
@@ -1146,9 +1147,12 @@ docs_manual_checks() {
     'Historical-symbol caveat glossary' \
     'Revision-local attribution' \
     'File-level fallback' \
+    'Fallback hunk pressure' \
+    'Read fallback row counts and fallback hunk counts separately' \
     'Unattributed hunk fallback' \
     'Aggregate record bound' \
     'docs/historical-symbol-fixture-realism-matrix.md' \
+    'docs/historical-provider-state-fixture-gap-audit.md' \
     'Combined evidence FAQ' \
     'Does this predict bugs?' \
     'Does relationship evidence prove dependencies or calls?' \
@@ -1272,6 +1276,18 @@ docs_manual_checks() {
   grep -Fq 'docs/user-guide.md' README.md || return 1
   grep -Fq 'docs/historical-symbol-fixture-realism-matrix.md' README.md || return 1
   grep -Fq 'Provider capability claims are summarised' README.md || return 1
+
+  grep -Fq 'Fallback hunk pressure' docs/historical-symbol-fixture-realism-matrix.md || return 1
+  grep -Fq 'fallback row count separate from fallback hunk pressure' docs/historical-symbol-fixture-realism-matrix.md || return 1
+  grep -Fq 'fallback rows, and fallback hunk pressure' docs/historical-symbol-fixture-realism-matrix.md || return 1
+  grep -Fq 'failed`, `timed_out`, and `unavailable` are explicit historical provider-state' docs/historical-symbol-fixture-realism-matrix.md || return 1
+  grep -Fq 'historical-provider-state-fixture-gap-audit.md' docs/historical-symbol-fixture-realism-matrix.md || return 1
+  grep -Fq 'Historical provider-state fixture gap audit' docs/historical-provider-state-fixture-gap-audit.md || return 1
+  grep -Fq '| `failed` | no | no historical golden row currently forces a parser failure |' docs/historical-provider-state-fixture-gap-audit.md || return 1
+  grep -Fq '| `timed_out` | no | no provider timeout injection exists for historical attribution |' docs/historical-provider-state-fixture-gap-audit.md || return 1
+  grep -Fq '| `unavailable` | no | no historical blob fixture currently exercises unavailable provider input |' docs/historical-provider-state-fixture-gap-audit.md || return 1
+  grep -Fq 'Do not add a fixture in this slice' docs/historical-provider-state-fixture-gap-audit.md || return 1
+  grep -Fq 'wall-clock timeout fixtures or environment-dependent missing-provider' docs/historical-provider-state-fixture-gap-audit.md || return 1
   grep -Fq 'Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and' README.md || return 1
   grep -Fq 'retained ranked-file candidates in Zig' README.md || return 1
   grep -Fq 'For a focused historical-symbol and relationship workflow' README.md || return 1
