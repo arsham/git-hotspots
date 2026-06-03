@@ -249,6 +249,17 @@ Historical-symbol caveat glossary:
   cap. If a bound is reached, the report must say so instead of implying full
   complete repository-wide symbol tracking.
 
+Historical provider-state guide:
+
+| State | Fixture coverage | What it means | How to interpret it |
+| --- | --- | --- | --- |
+| `ok` | covered | The provider parsed the historical blob and attributed retained hunks to revision-local symbols. | Treat as bounded evidence about that revision, not proof of semantic lineage. |
+| `unsupported` | covered | The retained file has no admitted historical symbol provider. | Treat as honest file-level fallback, not as missing analysis or code quality. |
+| `skipped` | covered | The hunk could not be safely attributed, such as root-commit or unattributed evidence. | Treat as a deliberate no-guess fallback that preserves changed-hunk evidence. |
+| `failed` | covered | A supported provider tried to parse the historical blob and failed deterministically. | Treat as parser failure evidence with file-level fallback, not as a runtime crash. |
+| `timed_out` | uncovered | No deterministic historical timeout fixture exists yet. | Treat as an explicit fixture gap, not a state proven impossible. |
+| `unavailable` | uncovered | No stable historical unavailable-provider fixture exists yet. | Treat as an explicit fixture gap; normal missing-provider cases currently resolve to other safe states. |
+
 The historical-symbol fixture realism matrix in
 `docs/historical-symbol-fixture-realism-matrix.md` records what the checked-in
 historical golden covers: parsed Zig rows, unsupported-file fallback,
