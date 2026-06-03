@@ -4,7 +4,7 @@ feature:
   slug: historical-fallback-budget-regression-matrix
   title: Historical fallback budget regression matrix
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Feature 0122 changed historical fallback attribution by excluding
@@ -62,7 +62,7 @@ proposal:
     materialised_at: 2026-06-01T22:54:01.560Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -122,7 +122,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Inventory current budget cases
       goal: Confirm existing unsupported and failed regressions, and select the
         deterministic skipped fallback case for this matrix.
@@ -147,7 +147,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Add regression matrix
       goal: Add tests or validation assertions proving unsupported/skipped do not
         consume failure budget while failed still does.
@@ -171,7 +171,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Validate and align docs metadata
       goal: Ensure historical provider-state and fallback-pressure docs/validation
         still describe the covered and uncovered states after the guard lands.
@@ -220,7 +220,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-06-01T22:46:08.066Z
-  updated_at: 2026-06-01T22:54:12.315Z
+  updated_at: 2026-06-01T23:15:01.244Z
 dispatch:
   status: prepared
   prepared_at: 2026-06-01T22:54:12.315Z

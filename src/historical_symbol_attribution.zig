@@ -541,6 +541,62 @@ test "unsupported historical paths do not exhaust provider failure budget before
     try std.testing.expectEqual(@as(u32, 0), alpha.fallback_count);
 }
 
+test "skipped historical fallbacks do not exhaust provider failure budget before supported paths" {
+    const allocator = std.testing.allocator;
+    const no_text_hunks = [_]git_hunks.Hunk{};
+    const supported_hunks = [_]git_hunks.Hunk{.{ .old = null, .new = .{ .start = 1, .end = 1 } }};
+    const records = [_]git_hunks.FileHunkRecord{
+        .{
+            .commit_id = @constCast("case-skipped"),
+            .parent_id = null,
+            .timestamp = 1,
+            .old_path = null,
+            .new_path = @constCast("src/link.zig"),
+            .old_blob = null,
+            .new_blob = @constCast("blob-skipped"),
+            .status = .added,
+            .hunks = @constCast(no_text_hunks[0..]),
+            .old_blob_state = .absent,
+            .new_blob_state = .available,
+            .old_source = null,
+            .new_source = null,
+            .caveats = @constCast(&[_][]const u8{}),
+        },
+        .{
+            .commit_id = @constCast("case-supported"),
+            .parent_id = null,
+            .timestamp = 2,
+            .old_path = null,
+            .new_path = @constCast("src/app.zig"),
+            .old_blob = null,
+            .new_blob = @constCast("blob-supported"),
+            .status = .added,
+            .hunks = @constCast(supported_hunks[0..]),
+            .old_blob_state = .absent,
+            .new_blob_state = .available,
+            .old_source = null,
+            .new_source = @constCast("pub fn alpha() void {}\n"),
+            .caveats = @constCast(&[_][]const u8{}),
+        },
+    };
+
+    // Selected case: a no-text-hunk historical row before a supported Zig path
+    // is a deterministic skipped fallback. It must retain file-level evidence
+    // without spending the provider-failure budget or starving later Zig
+    // attribution.
+    const aggregates = try aggregateRecords(allocator, records[0..], .{ .max_provider_failures = 1 });
+    defer deinitAggregateRecords(allocator, aggregates);
+
+    const skipped = findRecord(aggregates, "src/link.zig", null, .unknown) orelse return error.MissingSkippedFallback;
+    try std.testing.expectEqual(provider.Failure.skipped, skipped.provider_state);
+    try std.testing.expect(containsCaveat(skipped, "no text hunks available"));
+
+    const alpha = findRecord(aggregates, "src/app.zig", "alpha", .historical) orelse return error.MissingAlphaAttribution;
+    try std.testing.expectEqual(provider.Failure.ok, alpha.provider_state);
+    try std.testing.expectEqual(@as(u64, 1), alpha.added_line_pressure);
+    try std.testing.expectEqual(@as(u32, 0), alpha.fallback_count);
+}
+
 test "failed historical provider parses still exhaust provider failure budget" {
     const allocator = std.testing.allocator;
     const failed_hunks = [_]git_hunks.Hunk{.{ .old = null, .new = .{ .start = 1, .end = 1 } }};
