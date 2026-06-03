@@ -26,7 +26,8 @@ Source fixture:
 | Display omission | `human_display.total_count: 8`, `shown_count: 2`, and `omitted_count: 6` | proves table and Markdown can stay compact while JSON keeps bounded records |
 | Provider-state spread | summary includes `ok`, `unsupported`, `failed`, and `skipped` states | keeps user-facing provider states from collapsing into success/failure only |
 | Failed parser fallback | `src/broken.zig` has `provider_state: failed`, `fallback_count: 1`, and low confidence | proves a supported-language historical blob can fail closed through executable fixture history |
-| Aggregate-bound status | `aggregate_record_bound: 128` and `aggregate_record_bound_exceeded: false` | proves the bound is reported even when it is not exceeded |
+| Aggregate-bound fixture status | `aggregate_record_bound: 128` and `aggregate_record_bound_exceeded: false` | proves checked-in fixture realism reports the bound without pretending the fixture exceeds it |
+| Aggregate-bound synthetic proof | `src/historical_symbol_pipeline.zig` has synthetic tests for over-bound truncation and exactly-at-bound non-exceeded behaviour | proves the exceeded-bound branch without inflating checked-in fixture goldens |
 | Local-only provenance | provenance records `local_only: true`, `network: false`, `checkout: false`, and `auto_fetch: false` | protects local-first historical analysis semantics |
 
 `timed_out` and `unavailable` remain explicit historical provider-state
@@ -51,9 +52,13 @@ matrix before approving the update:
 5. Do not add `timed_out` or `unavailable` rows without a shaped fixture
    feature and deterministic evidence; timeout or environment-dependent
    provider-unavailable cases are too brittle for goldens.
-6. Do not turn historical rows into semantic lineage, ownership, bug, quality,
+6. Keep aggregate-bound fixture realism and synthetic proof separate: the
+   fixture matrix records `aggregate_record_bound_exceeded: false`, while the
+   synthetic pipeline tests prove over-bound truncation and exactly-at-bound
+   non-exceeded behaviour.
+7. Do not turn historical rows into semantic lineage, ownership, bug, quality,
    dependency, or ranking claims.
-7. Re-run `zig build validate` so historical goldens, docs anchors, privacy
+8. Re-run `zig build validate` so historical goldens, docs anchors, privacy
    checks, and performance budgets execute together.
 
 ## Protected surfaces

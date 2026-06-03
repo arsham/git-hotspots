@@ -48,6 +48,21 @@ branch directly while staying inside local-first, deterministic test control.
 It should not be treated as equivalent to checked-in fixture realism; it only
 proves the bound-handling seam.
 
+## Implemented proof
+
+The successor test slice added synthetic production-pipeline coverage for both
+aggregate-bound edges:
+
+- over-bound aggregate rows are truncated to the configured bound and set
+  `aggregate_record_bound_exceeded: true`, and
+- exactly-at-bound aggregate rows retain the configured count without setting
+  the exceeded flag.
+
+This proof intentionally stays separate from checked-in fixture realism. The
+fixture matrix still records `aggregate_record_bound_exceeded: false` for the
+historical-symbol golden because the fixture does not need to manufacture more
+than 128 aggregate rows to prove ordinary report realism.
+
 ## Trade-off note
 
 A checked-in fixture/golden expansion would provide realism coverage, but it is

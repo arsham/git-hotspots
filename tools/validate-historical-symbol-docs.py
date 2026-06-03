@@ -188,22 +188,76 @@ def validate_fallback_pressure(matrix_path: Path, guide_path: Path, golden_path:
     require_private_safe(guide_path, guide)
 
 
+def validate_aggregate_bound(matrix_path: Path, proof_path: Path, pipeline_path: Path, golden_path: Path) -> None:
+    matrix = read_text(matrix_path)
+    proof = read_text(proof_path)
+    pipeline = read_text(pipeline_path)
+    golden = read_json(golden_path)
+
+    summary = golden["historical_symbols"]["summary"]
+    if summary.get("aggregate_record_bound") != 128:
+        fail(f"{golden_path}: aggregate_record_bound drifted: {summary.get('aggregate_record_bound')!r}")
+    if summary.get("aggregate_record_bound_exceeded") is not False:
+        fail(
+            f"{golden_path}: fixture aggregate_record_bound_exceeded drifted: "
+            f"{summary.get('aggregate_record_bound_exceeded')!r}"
+        )
+
+    matrix_required = [
+        "| Aggregate-bound fixture status | `aggregate_record_bound: 128` and `aggregate_record_bound_exceeded: false` |",
+        "| Aggregate-bound synthetic proof | `src/historical_symbol_pipeline.zig` has synthetic tests for over-bound truncation and exactly-at-bound non-exceeded behaviour |",
+        "Keep aggregate-bound fixture realism and synthetic proof separate",
+        "fixture matrix records `aggregate_record_bound_exceeded: false`",
+        "synthetic pipeline tests prove over-bound truncation and exactly-at-bound",
+    ]
+    for needle in matrix_required:
+        require_anchor(matrix_path, matrix, needle, "aggregate-bound matrix anchor")
+
+    proof_required = [
+        "## Implemented proof",
+        "over-bound aggregate rows are truncated to the configured bound",
+        "`aggregate_record_bound_exceeded: true`",
+        "exactly-at-bound aggregate rows retain the configured count",
+        "stays separate from checked-in fixture realism",
+        "fixture matrix still records `aggregate_record_bound_exceeded: false`",
+    ]
+    for needle in proof_required:
+        require_anchor(proof_path, proof, needle, "aggregate-bound proof anchor")
+
+    pipeline_required = [
+        "test \"aggregate record bound truncates synthetic production aggregates\"",
+        "test \"aggregate record bound keeps exactly bound aggregate count unflagged\"",
+        "aggregate record bound exceeded; trailing historical symbol aggregates omitted",
+    ]
+    for needle in pipeline_required:
+        require_anchor(pipeline_path, pipeline, needle, "aggregate-bound synthetic test anchor")
+
+    require_private_safe(matrix_path, matrix)
+    require_private_safe(proof_path, proof)
+
+
 def main(argv: list[str]) -> int:
-    if len(argv) != 5 or argv[1] not in {"provider-states", "fallback-pressure"}:
+    if len(argv) not in {5, 6} or argv[1] not in {"provider-states", "fallback-pressure", "aggregate-bound"}:
         fail(
             "usage: validate-historical-symbol-docs.py "
             "provider-states <matrix.md> <audit.md> <golden.json> | "
-            "fallback-pressure <matrix.md> <user-guide.md> <golden.json>"
+            "fallback-pressure <matrix.md> <user-guide.md> <golden.json> | "
+            "aggregate-bound <matrix.md> <proof.md> <pipeline.zig> <golden.json>"
         )
 
     mode = argv[1]
-    first = Path(argv[2])
-    second = Path(argv[3])
-    golden = Path(argv[4])
     if mode == "provider-states":
-        validate_provider_states(first, second, golden)
+        if len(argv) != 5:
+            fail("provider-states expects three paths")
+        validate_provider_states(Path(argv[2]), Path(argv[3]), Path(argv[4]))
+    elif mode == "fallback-pressure":
+        if len(argv) != 5:
+            fail("fallback-pressure expects three paths")
+        validate_fallback_pressure(Path(argv[2]), Path(argv[3]), Path(argv[4]))
     else:
-        validate_fallback_pressure(first, second, golden)
+        if len(argv) != 6:
+            fail("aggregate-bound expects four paths")
+        validate_aggregate_bound(Path(argv[2]), Path(argv[3]), Path(argv[4]), Path(argv[5]))
     return 0
 
 

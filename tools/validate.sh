@@ -1040,6 +1040,20 @@ historical_fallback_pressure_checks() {
     fixtures/expected/historical-symbols.json
 }
 
+historical_aggregate_bound_checks() {
+  [ -f tools/validate-historical-symbol-docs.py ] || return 1
+  [ -f docs/historical-symbol-fixture-realism-matrix.md ] || return 1
+  [ -f docs/historical-aggregate-bound-seam-proof.md ] || return 1
+  [ -f src/historical_symbol_pipeline.zig ] || return 1
+  [ -f fixtures/expected/historical-symbols.json ] || return 1
+  have_python || return 1
+  python3 tools/validate-historical-symbol-docs.py aggregate-bound \
+    docs/historical-symbol-fixture-realism-matrix.md \
+    docs/historical-aggregate-bound-seam-proof.md \
+    src/historical_symbol_pipeline.zig \
+    fixtures/expected/historical-symbols.json
+}
+
 packaging_surface_checks() {
   [ -x tools/release-linux.sh ] || return 1
   [ -f packaging/aur/git-hotspots-bin/PKGBUILD ] || return 1
@@ -2429,6 +2443,13 @@ if historical_fallback_pressure_checks; then
   pass_rung "historical fallback pressure checks"
 else
   fail_rung "historical fallback pressure checks" "historical fallback pressure docs drifted from fixture goldens"
+fi
+printf 'validate: RUN historical aggregate-bound checks\n'
+if historical_aggregate_bound_checks; then
+  note_fallback "historical aggregate bound: python3 compared fixture non-exceeded truth with synthetic exceeded-bound proof"
+  pass_rung "historical aggregate-bound checks"
+else
+  fail_rung "historical aggregate-bound checks" "historical aggregate-bound proof docs drifted from fixture goldens or synthetic tests"
 fi
 printf 'validate: RUN packaged dogfood surface checks\n'
 if packaging_surface_checks; then

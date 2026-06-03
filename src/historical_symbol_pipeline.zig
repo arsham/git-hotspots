@@ -1,4 +1,5 @@
 const std = @import("std");
+const git_hunks = @import("git_hunks.zig");
 const model = @import("model.zig");
 const historical_symbol_attribution = @import("historical_symbol_attribution.zig");
 
@@ -43,12 +44,7 @@ pub fn build(
     var aggregates = try historical_symbol_attribution.analyze(allocator, io, analysis.repo_root, candidates, options.attribution);
     errdefer historical_symbol_attribution.deinitAggregateRecords(allocator, aggregates);
 
-    var aggregate_bound_exceeded = false;
-    if (aggregates.len > options.max_aggregate_records) {
-        aggregate_bound_exceeded = true;
-        try appendOwnedCaveat(allocator, &caveats, "aggregate record bound exceeded; trailing historical symbol aggregates omitted");
-        aggregates = try truncateAggregates(allocator, aggregates, options.max_aggregate_records);
-    }
+    const aggregate_bound_exceeded = try applyAggregateRecordBound(allocator, &caveats, &aggregates, options.max_aggregate_records);
 
     return .{
         .candidate_path_count = candidates.len,
@@ -115,6 +111,18 @@ fn appendOwnedCaveat(allocator: std.mem.Allocator, caveats: *std.ArrayList([]con
     try caveats.append(allocator, try allocator.dupe(u8, caveat));
 }
 
+fn applyAggregateRecordBound(
+    allocator: std.mem.Allocator,
+    caveats: *std.ArrayList([]const u8),
+    aggregates: *[]historical_symbol_attribution.AggregateRecord,
+    limit: usize,
+) !bool {
+    if (aggregates.*.len <= limit) return false;
+    try appendOwnedCaveat(allocator, caveats, "aggregate record bound exceeded; trailing historical symbol aggregates omitted");
+    aggregates.* = try truncateAggregates(allocator, aggregates.*, limit);
+    return true;
+}
+
 fn truncateAggregates(allocator: std.mem.Allocator, aggregates: []historical_symbol_attribution.AggregateRecord, limit: usize) ![]historical_symbol_attribution.AggregateRecord {
     const kept_len = @min(aggregates.len, limit);
     const kept = try allocator.alloc(historical_symbol_attribution.AggregateRecord, kept_len);
@@ -136,6 +144,11 @@ fn reportContainsCaveat(report: model.HistoricalSymbolReport, needle: []const u8
 
 fn recordContainsCaveat(record: historical_symbol_attribution.AggregateRecord, needle: []const u8) bool {
     for (record.caveats) |caveat| if (std.mem.indexOf(u8, caveat, needle) != null) return true;
+    return false;
+}
+
+fn caveatsContain(caveats: []const []const u8, needle: []const u8) bool {
+    for (caveats) |caveat| if (std.mem.indexOf(u8, caveat, needle) != null) return true;
     return false;
 }
 
@@ -230,6 +243,47 @@ test "integrated historical symbol pipeline applies internal bounds" {
     for (report.aggregates) |record| try std.testing.expect(record.sample_commit_ids.len <= 1);
 }
 
+test "aggregate record bound truncates synthetic production aggregates" {
+    const allocator = std.testing.allocator;
+    const bound: usize = 3;
+    const records = try makeSyntheticHunkRecordsForBoundTest(allocator, bound + 2);
+    defer deinitSyntheticHunkRecordsForBoundTest(allocator, records);
+
+    var aggregates = try historical_symbol_attribution.aggregateRecords(allocator, records, .{});
+    var caveats: std.ArrayList([]const u8) = .empty;
+    defer {
+        for (caveats.items) |caveat| allocator.free(caveat);
+        caveats.deinit(allocator);
+        historical_symbol_attribution.deinitAggregateRecords(allocator, aggregates);
+    }
+
+    try std.testing.expect(aggregates.len > bound);
+    const exceeded = try applyAggregateRecordBound(allocator, &caveats, &aggregates, bound);
+    try std.testing.expect(exceeded);
+    try std.testing.expectEqual(bound, aggregates.len);
+    try std.testing.expect(caveatsContain(caveats.items, "aggregate record bound exceeded"));
+}
+
+test "aggregate record bound keeps exactly bound aggregate count unflagged" {
+    const allocator = std.testing.allocator;
+    const bound: usize = 3;
+    const records = try makeSyntheticHunkRecordsForBoundTest(allocator, bound);
+    defer deinitSyntheticHunkRecordsForBoundTest(allocator, records);
+
+    var aggregates = try historical_symbol_attribution.aggregateRecords(allocator, records, .{});
+    var caveats: std.ArrayList([]const u8) = .empty;
+    defer {
+        for (caveats.items) |caveat| allocator.free(caveat);
+        caveats.deinit(allocator);
+        historical_symbol_attribution.deinitAggregateRecords(allocator, aggregates);
+    }
+
+    try std.testing.expectEqual(bound, aggregates.len);
+    const exceeded = try applyAggregateRecordBound(allocator, &caveats, &aggregates, bound);
+    try std.testing.expect(!exceeded);
+    try std.testing.expectEqual(bound, aggregates.len);
+}
+
 test "inspect analysis does not reintroduce other ranked file candidates" {
     const allocator = std.testing.allocator;
     var threaded: std.Io.Threaded = .init(allocator, .{});
@@ -276,4 +330,51 @@ test "this repository smoke exercises internal historical symbol integration" {
         try std.testing.expect(record.parent_path.len > 0);
         try std.testing.expect(record.sample_commit_ids.len <= 2);
     }
+}
+
+fn makeSyntheticHunkRecordsForBoundTest(allocator: std.mem.Allocator, count: usize) ![]git_hunks.FileHunkRecord {
+    const records = try allocator.alloc(git_hunks.FileHunkRecord, count);
+    var initialized: usize = 0;
+    errdefer {
+        for (records[0..initialized]) |record| record.deinit(allocator);
+        allocator.free(records);
+    }
+
+    for (records, 0..) |*record, index| {
+        const hunks = try allocator.alloc(git_hunks.Hunk, 1);
+        errdefer allocator.free(hunks);
+        const commit_id = try std.fmt.allocPrint(allocator, "synthetic-{d}", .{index});
+        errdefer allocator.free(commit_id);
+        const new_path = try std.fmt.allocPrint(allocator, "src/synthetic_{d}.zig", .{index});
+        errdefer allocator.free(new_path);
+        const new_blob = try std.fmt.allocPrint(allocator, "blob-{d}", .{index});
+        errdefer allocator.free(new_blob);
+        const new_source = try std.fmt.allocPrint(allocator, "pub fn symbol_{d}() void {{}}\n", .{index});
+        errdefer allocator.free(new_source);
+        const caveats = try allocator.alloc([]const u8, 0);
+        hunks[0] = .{ .old = null, .new = .{ .start = 1, .end = 1 } };
+        record.* = .{
+            .commit_id = commit_id,
+            .parent_id = null,
+            .timestamp = @as(i64, @intCast(index)),
+            .old_path = null,
+            .new_path = new_path,
+            .old_blob = null,
+            .new_blob = new_blob,
+            .status = .added,
+            .hunks = hunks,
+            .old_blob_state = .absent,
+            .new_blob_state = .available,
+            .old_source = null,
+            .new_source = new_source,
+            .caveats = caveats,
+        };
+        initialized += 1;
+    }
+    return records;
+}
+
+fn deinitSyntheticHunkRecordsForBoundTest(allocator: std.mem.Allocator, records: []git_hunks.FileHunkRecord) void {
+    for (records) |record| record.deinit(allocator);
+    allocator.free(records);
 }
