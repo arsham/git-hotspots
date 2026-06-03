@@ -873,153 +873,15 @@ capability_matrix_checks() {
   "$EXE" --repo fixtures/typescript-symbols --inspect src/component.tsx --symbols --symbol-relationships --format json > "$matrix_rel_tsx" || return 1
   "$EXE" --repo fixtures/symbols --inspect src/readme.txt --symbols --symbol-relationships --format json > "$matrix_rel_unsupported" || return 1
 
-  python3 - README.md docs/user-guide.md docs/developer-guide.md man/git-hotspots.1 "$matrix_explain" "$matrix_help" "$matrix_zig" "$matrix_go" "$matrix_python" "$matrix_javascript" "$matrix_lua" "$matrix_rust" "$matrix_typescript" "$matrix_tsx" "$matrix_unsupported" "$matrix_rel_zig" "$matrix_rel_go" "$matrix_rel_python" "$matrix_rel_javascript" "$matrix_rel_lua" "$matrix_rel_rust" "$matrix_rel_typescript" "$matrix_rel_tsx" "$matrix_rel_unsupported" <<'PY'
-import json
-import sys
-from pathlib import Path
-
-readme = Path(sys.argv[1]).read_text(encoding='utf-8')
-user_guide = Path(sys.argv[2]).read_text(encoding='utf-8')
-developer_guide = Path(sys.argv[3]).read_text(encoding='utf-8')
-man_page = Path(sys.argv[4]).read_text(encoding='utf-8')
-explain = Path(sys.argv[5]).read_text(encoding='utf-8')
-help_text = Path(sys.argv[6]).read_text(encoding='utf-8')
-payloads = [json.load(open(path, encoding='utf-8')) for path in sys.argv[7:]]
-zig, go, python, javascript, lua, rust, typescript, tsx, unsupported = payloads[:9]
-rel_zig, rel_go, rel_python, rel_javascript, rel_lua, rel_rust, rel_typescript, rel_tsx, rel_unsupported = payloads[9:]
-
-readme_rows = [
-    '| Zig | `.zig` | `tree-sitter-zig` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-zig` when parsing succeeds | public opt-in `tree-sitter-zig-relations` syntax evidence | no packages, build graph, comptime, generated-code truth, dependencies, semantic moves, true semantic lineage, scoring, or ownership claims |',
-    '| Go | `.go` | `tree-sitter-go` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-go` when parsing succeeds | public opt-in `tree-sitter-go-relations` syntax evidence | no packages, modules, build tags, cgo, dependency graphs, method-set or interface semantics, true semantic lineage, scoring, or ownership claims |',
-    '| Python | `.py` | `tree-sitter-python` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-python` when parsing succeeds | public opt-in `tree-sitter-python-relations` syntax evidence | no imports, packages, virtual environments, dependency graphs, generated-source policy, call-graph truth, scoring, or ownership claims |',
-    '| JavaScript | `.js`, `.mjs`, `.cjs`, admitted `.jsx` | `tree-sitter-javascript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-javascript` when parsing succeeds | public opt-in `tree-sitter-javascript-relations` syntax evidence | no Node, packages, workspaces, module resolution, TypeScript, TSX, dependency graphs, call-graph truth, scoring, or ownership claims |',
-    '| Lua | `.lua` | `tree-sitter-lua` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-lua` when parsing succeeds | public opt-in `tree-sitter-lua-relations` syntax evidence | no package, require, runtime module resolution, metatables, dynamic table keys, dependency graphs, runtime execution, scoring, or ownership claims |',
-    '| Rust | `.rs` | `tree-sitter-rust` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-rust` when parsing succeeds | public opt-in `tree-sitter-rust-relations` syntax evidence | no Cargo, crates, module resolution, macro expansion output, cfg feature selection, type checking, dependency graphs, call-graph truth, scoring, or ownership claims |',
-    '| TypeScript | `.ts`, `.mts`, `.cts` | `tree-sitter-typescript` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-typescript` when parsing succeeds | public opt-in `tree-sitter-typescript-relations` syntax evidence | no packages, workspaces, tsconfig, module resolution, type checking, dependency graphs, cache, call-graph truth, scoring, or ownership claims |',
-    '| TSX | `.tsx` | `tree-sitter-tsx` | current working-tree symbols for the matched file | current-line Git evidence for HEAD line ranges | revision-local hunk attribution through `tree-sitter-tsx` when parsing succeeds | public opt-in `tree-sitter-tsx-relations` syntax evidence | no React, DOM, packages, type analysis, dependency graphs, cache, call-graph truth, scoring, or ownership claims |',
-    '| Unsupported current files | all other paths | unsupported fallback | provider reports `unsupported` and keeps inspected file evidence | no current-line evidence | file-level fallback only when retained by historical attribution | unsupported | no parser diagnostics, source snippets, parsed symbols, relationship support, or scoring claims |',
-]
-for row in readme_rows:
-    assert row in readme, f'README capability row missing: {row}'
-
-explain_rows = [row.replace('`', '') for row in readme_rows]
-for row in explain_rows:
-    assert row in explain, f'explain capability row missing: {row}'
-
-for text, label in ((readme, 'README'), (explain, 'explain')):
-    normalized_text = text.replace('`', '')
-    assert 'Provider capability matrix' in text, f'{label} matrix heading missing'
-    assert 'current-line Git evidence for HEAD line ranges' in text, f'{label} current-line basis missing'
-    assert '--historical-symbols evidence' in normalized_text, f'{label} historical-symbol matrix column missing'
-    assert '--symbol-relationships evidence' in normalized_text, f'{label} relationship matrix column missing'
-    assert 'public opt-in tree-sitter-zig-relations syntax evidence' in normalized_text, f'{label} Zig relationship support missing'
-    assert 'public opt-in tree-sitter-go-relations syntax evidence' in normalized_text, f'{label} Go relationship support missing'
-    assert 'public opt-in tree-sitter-lua-relations syntax evidence' in normalized_text, f'{label} Lua relationship support missing'
-    assert 'public opt-in tree-sitter-rust-relations syntax evidence' in normalized_text, f'{label} Rust relationship support missing'
-    assert 'file-level fallback only when retained by historical attribution' in text, f'{label} unsupported fallback wording missing'
-
-summary_rows = [
-    '| Zig `.zig` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-zig-relations` |',
-    '| Go `.go` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-go-relations` |',
-    '| Python `.py` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-python-relations` |',
-    '| JavaScript `.js`, `.mjs`, `.cjs`, `.jsx` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-javascript-relations` |',
-    '| Lua `.lua` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-lua-relations` |',
-    '| Rust `.rs` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-rust-relations` |',
-    '| TypeScript `.ts`, `.mts`, `.cts` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-typescript-relations` |',
-    '| TSX `.tsx` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-tsx-relations` |',
-    '| Other current files | unsupported fallback | unsupported | file-level fallback only when retained | unsupported |',
-]
-for text, label in ((user_guide, 'user guide'), (developer_guide, 'developer guide')):
-    assert 'Provider capability summary' in text or 'current public matrix' in text, f'{label} capability summary missing'
-    for row in summary_rows:
-        assert row in text, f'{label} capability row missing: {row}'
-
-for needle in (
-    'Zig', 'Go', 'Python', 'JavaScript', 'Lua', 'Rust', 'TypeScript', 'TSX',
-    'tree-sitter-zig-relations', 'tree-sitter-go-relations',
-    'tree-sitter-python-relations', 'tree-sitter-javascript-relations',
-    'tree-sitter-lua-relations', 'tree-sitter-rust-relations',
-    'tree-sitter-typescript-relations', 'tree-sitter-tsx-relations',
-    'Other current files preserve file evidence',
-    'file-level fallback only when',
-):
-    assert needle in man_page, f'man capability text missing: {needle}'
-
-for needle in (
-    'Provider capability:',
-    'current working-tree symbol evidence',
-    'Other ranked current files are counted as unsupported while preserving file evidence.',
-    'not true symbol history, lineage, scoring, or ownership',
-    'Zig, Go, Python, JavaScript, Lua,',
-    'Rust, TypeScript, and TSX lanes only',
-):
-    assert needle in help_text, f'help capability text missing: {needle}'
-
-cases = [
-    ('Zig', zig, 'tree-sitter-zig', 'src/example.zig'),
-    ('Go', go, 'tree-sitter-go', 'src/example.go'),
-    ('Python', python, 'tree-sitter-python', 'src/example.py'),
-    ('JavaScript', javascript, 'tree-sitter-javascript', 'src/example.mjs'),
-    ('Lua', lua, 'tree-sitter-lua', 'src/example.lua'),
-    ('Rust', rust, 'tree-sitter-rust', 'src/example.rs'),
-    ('TypeScript', typescript, 'tree-sitter-typescript', 'src/example.ts'),
-    ('TSX', tsx, 'tree-sitter-tsx', 'src/component.tsx'),
-]
-for label, data, provider_name, matched_path in cases:
-    symbols = data['symbols']
-    provider = symbols['provider']
-    assert data['inspect']['matched_path'] == matched_path, f'{label} inspect path changed'
-    assert symbols['current_only'] is True, f'{label} symbols are not current-only'
-    assert provider['name'] == provider_name, f'{label} provider name changed'
-    assert provider['failure'] == 'ok', f'{label} provider failure changed'
-    assert provider['provenance']['local_only'] is True, f'{label} local provenance missing'
-    assert symbols['items'], f'{label} symbol list unexpectedly empty'
-    assert all(row['path'] == matched_path for row in symbols['items']), f'{label} leaked non-inspected file symbols'
-    assert all('current_line_history' in row for row in symbols['items']), f'{label} current-line evidence missing'
-    for row in symbols['items']:
-        history = row['current_line_history']
-        assert history['basis'] == 'current-line-range-at-head', f'{label} line-history basis changed'
-        assert history['current_only'] is True, f'{label} line-history current_only changed'
-
-relationship_supported = [
-    ('Zig', rel_zig, 'tree-sitter-zig-relations'),
-    ('Go', rel_go, 'tree-sitter-go-relations'),
-    ('Python', rel_python, 'tree-sitter-python-relations'),
-    ('JavaScript', rel_javascript, 'tree-sitter-javascript-relations'),
-    ('Lua', rel_lua, 'tree-sitter-lua-relations'),
-    ('Rust', rel_rust, 'tree-sitter-rust-relations'),
-    ('TypeScript', rel_typescript, 'tree-sitter-typescript-relations'),
-    ('TSX', rel_tsx, 'tree-sitter-tsx-relations'),
-]
-for label, data, provider_name in relationship_supported:
-    relationships = data['symbol_relationships']
-    assert relationships['basis']['requires_symbols_flag'] is True, f'{label} relation flag dependency changed'
-    assert relationships['basis']['scoring_effect'] == 'none', f'{label} relation scoring effect changed'
-    assert relationships['provenance']['local_only'] is True, f'{label} relation local provenance missing'
-    assert relationships['records'], f'{label} relation records unexpectedly empty'
-    provider_names = {entry['provider']['name'] for entry in relationships['providers']}
-    assert provider_name in provider_names, f'{label} relation provider changed: {provider_names}'
-    assert all(record['provider']['input'].startswith('working-tree:') for record in relationships['records']), f'{label} relation input provenance changed'
-
-relationship_unsupported = [
-    ('Unsupported', rel_unsupported),
-]
-for label, data in relationship_unsupported:
-    relationships = data['symbol_relationships']
-    assert relationships['basis']['requires_symbols_flag'] is True, f'{label} relation flag dependency changed'
-    assert relationships['basis']['scoring_effect'] == 'none', f'{label} relation scoring effect changed'
-    assert relationships['summary']['relation_record_count'] == 0, f'{label} relation records appeared despite unsupported public lane'
-    assert relationships['records'] == [], f'{label} relation records appeared despite unsupported public lane'
-    failures = {entry['provider']['failure'] for entry in relationships['providers']}
-    assert 'unsupported' in failures, f'{label} unsupported relation provider state missing: {failures}'
-
-unsupported_symbols = unsupported['symbols']
-assert unsupported['results'], 'unsupported inspect lost file evidence'
-assert unsupported_symbols['current_only'] is True, 'unsupported symbols current_only missing'
-assert unsupported_symbols['provider']['failure'] == 'unsupported', 'unsupported provider failure changed'
-assert unsupported_symbols['items'] == [], 'unsupported language emitted symbol items'
-assert 'current_line_history' not in json.dumps(unsupported, ensure_ascii=False), 'unsupported language emitted line history'
-PY
+  python3 tools/validate-provider-capabilities.py \
+    README.md docs/user-guide.md docs/developer-guide.md man/git-hotspots.1 \
+    "$matrix_explain" "$matrix_help" \
+    "$matrix_zig" "$matrix_go" "$matrix_python" "$matrix_javascript" \
+    "$matrix_lua" "$matrix_rust" "$matrix_typescript" "$matrix_tsx" \
+    "$matrix_unsupported" \
+    "$matrix_rel_zig" "$matrix_rel_go" "$matrix_rel_python" \
+    "$matrix_rel_javascript" "$matrix_rel_lua" "$matrix_rel_rust" \
+    "$matrix_rel_typescript" "$matrix_rel_tsx" "$matrix_rel_unsupported"
 }
 
 prohibited_claim_scan() {
@@ -1120,228 +982,16 @@ PY
 }
 
 docs_manual_checks() {
-  require_anchor() {
-    grep -Fq -- "$2" "$1"
-  }
-
-  [ -f docs/user-guide.md ] || return 1
-  [ -f docs/developer-guide.md ] || return 1
-  [ -f docs/historical-symbol-fixture-realism-matrix.md ] || return 1
-  [ -f docs/historical-provider-state-fixture-gap-audit.md ] || return 1
-  [ -f man/git-hotspots.1 ] || return 1
-
-  grep -Fq '# git-hotspots user guide' docs/user-guide.md || return 1
-  grep -Fq -- '--help' docs/user-guide.md || return 1
-  grep -Fq -- '--explain' docs/user-guide.md || return 1
-  grep -Fq -- '--inspect' docs/user-guide.md || return 1
-  grep -Fq -- '--symbols' docs/user-guide.md || return 1
-  grep -Fq -- '--symbol-line-history' docs/user-guide.md || return 1
-  grep -Fq -- '--historical-symbols' docs/user-guide.md || return 1
-  grep -Fq -- '--symbol-relationships' docs/user-guide.md || return 1
-  grep -Fq 'Provider capability summary' docs/user-guide.md || return 1
-  grep -Fq 'Python, JavaScript,' docs/user-guide.md || return 1
-  grep -Fq 'TypeScript, and TSX Tree-sitter lanes' docs/user-guide.md || return 1
-  grep -Fq 'When pairing `--historical-symbols` with `--symbol-relationships`' docs/user-guide.md || return 1
-  grep -Fq 'Historical-symbol rows do not explain why churn happened' docs/user-guide.md || return 1
-  for anchor in \
-    'Historical-symbol caveat glossary' \
-    'Revision-local attribution' \
-    'File-level fallback' \
-    'Fallback hunk pressure' \
-    'Read fallback row counts and fallback hunk counts separately' \
-    'Unattributed hunk fallback' \
-    'Historical provider-state guide' \
-    '| `ok` | covered |' \
-    '| `unsupported` | covered |' \
-    '| `skipped` | covered |' \
-    '| `failed` | covered |' \
-    '| `timed_out` | uncovered |' \
-    '| `unavailable` | uncovered |' \
-    'Aggregate record bound' \
-    'docs/historical-symbol-fixture-realism-matrix.md' \
-    'docs/historical-provider-state-fixture-gap-audit.md' \
-    'Combined evidence FAQ' \
-    'Does this predict bugs?' \
-    'Does relationship evidence prove dependencies or calls?' \
-    'Does historical-symbol evidence prove semantic lineage?' \
-    'Which document owns provider capability claims?'
-  do
-    require_anchor docs/user-guide.md "$anchor" || return 1
-  done
-  for anchor in \
-    'Relationship caveats and provider boundaries' \
-    'Relationship row quick reference' \
-    'Relationship caveat glossary' \
-    'Use this section as the quick reference' \
-    'Bounded syntax proof' \
-    'Unknown relation-like syntax' \
-    'Unresolved endpoint' \
-    'External-string endpoint' \
-    'Human display omission' \
-    'Provider-cap omission' \
-    'Provider caveat table' \
-    'docs/relationship-fixture-realism-matrix.md' \
-    'docs/provider-specific-caveat-wording-audit.md' \
-    '| Lane | Main syntax evidence | Main caveats | Does not prove |' \
-    '| Python | definitions, local references, calls, imports, unresolved names, ambiguous attributes |' \
-    '| JavaScript | definitions, local references, calls, imports/includes, unresolved identifiers, member/computed syntax |' \
-    '| Go | top-level declarations, imports, direct identifier calls, selector-like syntax, unresolved identifiers, unknown syntax |' \
-    '| Lua | module-level symbols, `require`-like imports, direct calls, table/member reference-like syntax, unresolved identifiers, unknown syntax |' \
-    '| Rust | modules, structs/enums/functions, `mod`/`use`, direct calls, path/member syntax, unresolved identifiers, unknown syntax |' \
-    '| TypeScript | functions/classes/interfaces/types, imports, direct calls, unresolved identifiers, type-only and member syntax |' \
-    '| TSX | components/functions/classes, imports, JSX/member syntax, unresolved identifiers, unknown syntax |' \
-    '| Zig | declarations, `@import` strings, direct calls, local references, unresolved identifiers, member/comptime-like syntax |' \
-    'package/module/vendor resolution, type/interface/method-set truth' \
-    'React/runtime truth, type checker truth, module resolution' \
-    'build graph truth, package resolution, comptime execution' \
-    'Glossary example' \
-    'Go provider observed a top-level declaration relationship' \
-    'human_display_sample_omitted=9' \
-    'target_unresolved: true' \
-    'provider_partial_evidence_omitted' \
-    'emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1'
-  do
-    require_anchor docs/user-guide.md "$anchor" || return 1
-  done
-  grep -Fq 'Zig `.zig` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-zig-relations`' docs/user-guide.md || return 1
-  grep -Fq 'Go `.go` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-go-relations`' docs/user-guide.md || return 1
-  grep -Fq 'Lua `.lua` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-lua-relations`' docs/user-guide.md || return 1
-  grep -Fq 'Rust `.rs` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-rust-relations`' docs/user-guide.md || return 1
-  grep -Fq 'Rust support is syntax-only' docs/user-guide.md || return 1
-  grep -Fq 'Cargo metadata, crates, module resolution' docs/user-guide.md || return 1
-  grep -Fq -- '--scope all' docs/user-guide.md || return 1
-  grep -Fq -- '--include-prefix' docs/user-guide.md || return 1
-  grep -Fq -- '--exclude-prefix' docs/user-guide.md || return 1
-  grep -Fq 'zig build validate' docs/user-guide.md || return 1
-  grep -Fq 'tools/release-linux.sh' docs/user-guide.md || return 1
-  grep -Fq 'unpublished use' docs/user-guide.md || return 1
-  grep -Fq 'error: --symbol-line-history requires --symbols' docs/user-guide.md || return 1
-  grep -Fq 'error: --historical-symbols requires --symbols' docs/user-guide.md || return 1
-  grep -Fq 'error: --symbol-relationships requires --symbols' docs/user-guide.md || return 1
-  grep -Fq 'local-first' docs/user-guide.md || return 1
-  grep -Fq 'telemetry' docs/user-guide.md || return 1
-
-  grep -Fq '# git-hotspots developer guide' docs/developer-guide.md || return 1
-  grep -Fq 'src/cli.zig' docs/developer-guide.md || return 1
-  grep -Fq 'tools/validate.sh' docs/developer-guide.md || return 1
-  grep -Fq 'CLI misuse matrix' docs/developer-guide.md || return 1
-  grep -Fq 'zig build validate-all' docs/developer-guide.md || return 1
-  grep -Fq 'tools/release-linux.sh' docs/developer-guide.md || return 1
-  grep -Fq 'packaging/aur/git-hotspots-bin/' docs/developer-guide.md || return 1
-  grep -Fq 'prohibited-claim' docs/developer-guide.md || return 1
-  grep -Fq 'Provider capability claims are validation-owned' docs/developer-guide.md || return 1
-  grep -Fq 'Capability documentation has one direction of travel' docs/developer-guide.md || return 1
-  grep -Fq 'docs/historical-symbol-fixture-realism-matrix.md' docs/developer-guide.md || return 1
-  grep -Fq 'Use `zig build validate-all` before publishing' docs/developer-guide.md || return 1
-  grep -Fq 'full proof aggregate' docs/developer-guide.md || return 1
-  grep -Fq 'TypeScript `.ts`, `.mts`, `.cts` | supported | supported | supported with revision-local provider fallback | supported by `tree-sitter-typescript-relations`' docs/developer-guide.md || return 1
-  grep -Fq 'Local-first' docs/developer-guide.md || return 1
-
-  grep -Fq '.SH NAME' man/git-hotspots.1 || return 1
-  grep -Fq '.SH SYNOPSIS' man/git-hotspots.1 || return 1
-  grep -Fq '.SH DESCRIPTION' man/git-hotspots.1 || return 1
-  grep -Fq '.SH OPTIONS' man/git-hotspots.1 || return 1
-  grep -Fq '.SH EXAMPLES' man/git-hotspots.1 || return 1
-  grep -Fq '.SH REPORT SEMANTICS' man/git-hotspots.1 || return 1
-  grep -Fq '.SH PRIVACY AND LOCAL-FIRST CAVEATS' man/git-hotspots.1 || return 1
-  grep -Fq '.SH PROVIDER BOUNDARIES' man/git-hotspots.1 || return 1
-  grep -Fq '.SH DIAGNOSTICS' man/git-hotspots.1 || return 1
-  grep -Fq '.SH EXIT STATUS' man/git-hotspots.1 || return 1
-  grep -Fq '.SH RELATED DOCUMENTS' man/git-hotspots.1 || return 1
-  grep -Fq -- '--help' man/git-hotspots.1 || return 1
-  grep -Fq -- '--explain' man/git-hotspots.1 || return 1
-  grep -Fq -- '--inspect' man/git-hotspots.1 || return 1
-  grep -Fq -- '--symbols' man/git-hotspots.1 || return 1
-  grep -Fq -- '--historical-symbols' man/git-hotspots.1 || return 1
-  grep -Fq -- '--symbol-relationships' man/git-hotspots.1 || return 1
-  grep -Fq 'Capability by language' man/git-hotspots.1 || return 1
-  grep -Fq 'Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and TSX lanes' man/git-hotspots.1 || return 1
-  grep -Fq 'tree-sitter-zig-relations' man/git-hotspots.1 || return 1
-  grep -Fq 'tree-sitter-go-relations' man/git-hotspots.1 || return 1
-  grep -Fq 'tree-sitter-lua-relations' man/git-hotspots.1 || return 1
-  grep -Fq 'tree-sitter-rust-relations' man/git-hotspots.1 || return 1
-  grep -Fq 'Other current files preserve file evidence' man/git-hotspots.1 || return 1
-  grep -Fq 'For a focused historical-symbol and relationship workflow' man/git-hotspots.1 || return 1
-  grep -Fq 'historical attribution does not explain why churn happened' man/git-hotspots.1 || return 1
-  grep -Fq 'Historical-symbol caveat glossary' man/git-hotspots.1 || return 1
-  grep -Fq 'Revision-local attribution' man/git-hotspots.1 || return 1
-  grep -Fq 'docs/historical-symbol-fixture-realism-matrix.md' man/git-hotspots.1 || return 1
-  grep -Fq 'Relationship caveat glossary' man/git-hotspots.1 || return 1
-  grep -Fq 'provider caveat table' man/git-hotspots.1 || return 1
-  grep -Fq 'Bounded syntax proof' man/git-hotspots.1 || return 1
-  grep -Fq 'Unknown relation-like syntax' man/git-hotspots.1 || return 1
-  grep -Fq 'Unresolved endpoint' man/git-hotspots.1 || return 1
-  grep -Fq 'External-string endpoint' man/git-hotspots.1 || return 1
-  grep -Fq 'human_display_sample_omitted' man/git-hotspots.1 || return 1
-  grep -Fq 'provider_partial_evidence_omitted' man/git-hotspots.1 || return 1
-  grep -Fq 'emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1' man/git-hotspots.1 || return 1
-  grep -Fq 'human_display_sample_omitted=9' man/git-hotspots.1 || return 1
-  grep -Fq -- '--progress' man/git-hotspots.1 || return 1
-  grep -Fq 'local-first' man/git-hotspots.1 || return 1
-  ! grep -Eq 'dogfood|tools/release-linux\.sh|packaging/aur|makepkg|pacman|pkg\.tar' man/git-hotspots.1 || return 1
-
-  grep -Fq 'docs/user-guide.md' README.md || return 1
-  grep -Fq 'docs/historical-symbol-fixture-realism-matrix.md' README.md || return 1
-  grep -Fq 'Provider capability claims are summarised' README.md || return 1
-
-  grep -Fq 'Fallback hunk pressure' docs/historical-symbol-fixture-realism-matrix.md || return 1
-  grep -Fq 'fallback row count separate from fallback hunk pressure' docs/historical-symbol-fixture-realism-matrix.md || return 1
-  grep -Fq 'fallback rows, and fallback hunk pressure' docs/historical-symbol-fixture-realism-matrix.md || return 1
-  grep -Fq 'Failed parser fallback' docs/historical-symbol-fixture-realism-matrix.md || return 1
-  grep -Fq '`timed_out` and `unavailable` remain explicit historical provider-state' docs/historical-symbol-fixture-realism-matrix.md || return 1
-  grep -Fq 'historical-provider-state-fixture-gap-audit.md' docs/historical-symbol-fixture-realism-matrix.md || return 1
-  grep -Fq 'Historical provider-state fixture gap audit' docs/historical-provider-state-fixture-gap-audit.md || return 1
-  grep -Fq '| `failed` | yes | `src/broken.zig` malformed historical Zig blob produces a failed fallback row |' docs/historical-provider-state-fixture-gap-audit.md || return 1
-  grep -Fq '| `timed_out` | no | no provider timeout injection exists for historical attribution |' docs/historical-provider-state-fixture-gap-audit.md || return 1
-  grep -Fq '| `unavailable` | no | no historical blob fixture currently exercises unavailable provider input |' docs/historical-provider-state-fixture-gap-audit.md || return 1
-  grep -Fq 'Keep the deterministic `failed` fixture in this slice' docs/historical-provider-state-fixture-gap-audit.md || return 1
-  grep -Fq 'wall-clock timeout fixtures or environment-dependent missing-provider' docs/historical-provider-state-fixture-gap-audit.md || return 1
-  grep -Fq 'Zig, Go, Python, JavaScript, Lua, Rust, TypeScript, and' README.md || return 1
-  grep -Fq 'retained ranked-file candidates in Zig' README.md || return 1
-  grep -Fq 'For a focused historical-symbol and relationship workflow' README.md || return 1
-  grep -Fq 'historical attribution does not' README.md || return 1
-  grep -Fq 'relationship caveat glossary' README.md || return 1
-  grep -Fq 'caveat table covering' README.md || return 1
-  grep -Fq 'syntax proof' README.md || return 1
-  grep -Fq 'external-string endpoints' README.md || return 1
-  grep -Fq 'emitted=15 kinds=contains:8,reference:2,call:1,import_include:1,unknown:2,unresolved:1' README.md || return 1
-  grep -Fq 'human_display_sample_omitted=9' README.md || return 1
-  grep -Fq 'Invalid CLI combinations exit 2' README.md || return 1
-  grep -Fq 'Local Linux dogfood packaging' README.md || return 1
-  grep -Fq 'tools/release-linux.sh' README.md || return 1
-  grep -Fq 'man/git-hotspots.1' README.md || return 1
-  grep -Fq 'docs/developer-guide.md' README.md || return 1
-  grep -Fq 'docs/developer-guide.md' CONTRIBUTING.md || return 1
-
-  have_python || return 1
-  python3 - docs/user-guide.md docs/developer-guide.md man/git-hotspots.1 <<'PY'
-import os
-import re
-import sys
-from pathlib import Path
-
-failures = []
-home = os.path.expanduser('~')
-for path_name in sys.argv[1:]:
-    path = Path(path_name)
-    text = path.read_text(encoding='utf-8')
-    if home and home in text:
-        failures.append(f'{path}: home path leaked')
-    for needle in ('/home/', '/Users/', 'file://', 'https://', 'http://', 'ssh://', 'git@'):
-        if needle in text:
-            failures.append(f'{path}: private path or remote marker leaked: {needle}')
-    if re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b', text):
-        failures.append(f'{path}: email-like identity leaked')
-
-if failures:
-    raise SystemExit('\n'.join(failures))
-PY
+  [ -f tools/validate-doc-surfaces.sh ] || return 1
+  sh tools/validate-doc-surfaces.sh
 }
 
 relationship_fixture_realism_matrix_checks() {
   [ -f docs/relationship-fixture-realism-matrix.md ] || return 1
+  [ -f tools/validate-relationship-fixtures.py ] || return 1
   have_python || return 1
-  python3 - docs/relationship-fixture-realism-matrix.md \
+  python3 tools/validate-relationship-fixtures.py \
+    docs/relationship-fixture-realism-matrix.md \
     fixtures/expected/symbol-relationships.json \
     fixtures/expected/symbol-relationships-javascript.json \
     fixtures/expected/symbol-relationships-go.json \
@@ -1349,93 +999,13 @@ relationship_fixture_realism_matrix_checks() {
     fixtures/expected/symbol-relationships-rust.json \
     fixtures/expected/symbol-relationships-tsx.json \
     fixtures/expected/symbol-relationships-typescript.json \
-    fixtures/expected/symbol-relationships-zig.json <<'PY'
-import collections
-import json
-import re
-import sys
-from pathlib import Path
-
-doc_path = Path(sys.argv[1])
-text = doc_path.read_text(encoding='utf-8')
-lanes = [
-    ('Python', sys.argv[2], 'tree-sitter-python-relations', 'repeat endpoint pairs exercise duplicate-looking guard; provider-cap coverage remains in synthetic integration fixture, not this lane golden'),
-    ('JavaScript', sys.argv[3], 'tree-sitter-javascript-relations', 'repeat endpoint pairs exercise duplicate-looking guard; provider-cap coverage remains in synthetic integration fixture, not this lane golden'),
-    ('Go', sys.argv[4], 'tree-sitter-go-relations', 'stable Go fixture covers provider wording categories; provider-cap coverage remains in synthetic integration fixture'),
-    ('Lua', sys.argv[5], 'tree-sitter-lua-relations', 'repeat endpoint pairs exercise duplicate-looking guard; provider-cap coverage remains in synthetic integration fixture, not this lane golden'),
-    ('Rust', sys.argv[6], 'tree-sitter-rust-relations', 'repeat endpoint pairs exercise duplicate-looking guard; provider-cap coverage remains in synthetic integration fixture, not this lane golden'),
-    ('TSX', sys.argv[7], 'tree-sitter-tsx-relations', 'no repeated endpoint-pair guard in this lane; cross-lane duplicate-looking guards cover the category; provider-cap coverage remains in synthetic integration fixture'),
-    ('TypeScript', sys.argv[8], 'tree-sitter-typescript-relations', 'repeat endpoint pairs exercise duplicate-looking guard; provider-cap coverage remains in synthetic integration fixture, not this lane golden'),
-    ('Zig', sys.argv[9], 'tree-sitter-zig-relations', 'no repeated endpoint-pair guard in this lane; stable Zig cap coverage would be oversized and cap-coupled, so cap coverage remains synthetic'),
-]
-
-required_phrases = [
-    'zig build validate',
-    'runtime behaviour',
-    'CLI flags',
-    'JSON schema',
-    'scoring',
-    'network behaviour',
-    'telemetry',
-    'release state',
-    'private paths',
-    'raw private reports',
-]
-for phrase in required_phrases:
-    if phrase not in text:
-        raise SystemExit(f'{doc_path}: missing matrix review phrase: {phrase}')
-
-def expected_row(label, path_name, provider_name, rationale):
-    with open(path_name, encoding='utf-8') as fh:
-        relationships = json.load(fh)['symbol_relationships']
-    records = relationships['records']
-    kind_counts = collections.OrderedDict()
-    for record in records:
-        kind_counts[record['kind']] = kind_counts.get(record['kind'], 0) + 1
-    kind_summary = ', '.join(f'{kind} {count}' for kind, count in kind_counts.items())
-    unresolved = sum(1 for record in records if record.get('target_unresolved'))
-    human_display = relationships['human_display']
-    provider_omitted = sum(int(provider.get('omitted_count', provider.get('omitted_record_count', 0)) or 0) for provider in relationships.get('providers', []))
-    provider_caps = sum(1 for provider in relationships.get('providers', []) if provider.get('cap_reached'))
-    caveat_instances = sum(len(record.get('caveats', [])) for record in records)
-    caveat_unique = len({caveat for record in records for caveat in record.get('caveats', [])})
-    exact_duplicates = len(records) - len({
-        (
-            record['source_endpoint'],
-            record['target_endpoint'],
-            record['kind'],
-            record['direction'],
-            record['provider']['name'],
-            record['evidence_basis'],
-        )
-        for record in records
-    })
-    endpoint_pairs = collections.Counter((record['source_endpoint'], record['target_endpoint']) for record in records)
-    repeated_pairs = sum(1 for count in endpoint_pairs.values() if count > 1)
-    return (
-        f'| {label} | `{path_name}` | `{provider_name}` | {len(records)} | '
-        f'{kind_summary} | {unresolved} | {human_display["shown_count"]}/{human_display["total_count"]}, '
-        f'omitted {human_display["omitted_count"]} | {provider_omitted} omitted, {provider_caps} caps; '
-        f'{rationale} | {caveat_instances} instances, {caveat_unique} unique | '
-        f'exact duplicates {exact_duplicates}; repeated endpoint pairs {repeated_pairs} |'
-    )
-
-for lane in lanes:
-    row = expected_row(*lane)
-    if row not in text:
-        raise SystemExit(f'{doc_path}: generated row drifted or is missing:\n{row}')
-
-for needle in ('/home/', '/Users/', 'file://', 'https://', 'http://', 'ssh://', 'git@'):
-    if needle in text:
-        raise SystemExit(f'{doc_path}: private path or remote marker leaked: {needle}')
-if re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b', text):
-    raise SystemExit(f'{doc_path}: email-like identity leaked')
-PY
+    fixtures/expected/symbol-relationships-zig.json
 }
 
 relationship_caveat_class_checks() {
+  [ -f tools/validate-relationship-caveats.py ] || return 1
   have_python || return 1
-  python3 - \
+  python3 tools/validate-relationship-caveats.py \
     fixtures/expected/symbol-relationships.json \
     fixtures/expected/symbol-relationships-javascript.json \
     fixtures/expected/symbol-relationships-go.json \
@@ -1443,261 +1013,31 @@ relationship_caveat_class_checks() {
     fixtures/expected/symbol-relationships-rust.json \
     fixtures/expected/symbol-relationships-tsx.json \
     fixtures/expected/symbol-relationships-typescript.json \
-    fixtures/expected/symbol-relationships-zig.json <<'PY'
-import json
-import sys
-from pathlib import Path
-
-required_files = {
-    'fixtures/expected/symbol-relationships.json': 'Python',
-    'fixtures/expected/symbol-relationships-javascript.json': 'JavaScript',
-    'fixtures/expected/symbol-relationships-go.json': 'Go',
-    'fixtures/expected/symbol-relationships-lua.json': 'Lua',
-    'fixtures/expected/symbol-relationships-rust.json': 'Rust',
-    'fixtures/expected/symbol-relationships-tsx.json': 'TSX',
-    'fixtures/expected/symbol-relationships-typescript.json': 'TypeScript',
-    'fixtures/expected/symbol-relationships-zig.json': 'Zig',
-}
-
-def fail(label, message):
-    raise SystemExit(f'{label}: {message}')
-
-for arg in sys.argv[1:]:
-    path = Path(arg)
-    label = required_files.get(str(path), path.name)
-    with path.open(encoding='utf-8') as fh:
-        data = json.load(fh)
-    relationships = data.get('symbol_relationships') or {}
-    records = relationships.get('records') or []
-    if not records:
-        fail(label, 'relationship golden has no records')
-    caveats = {caveat for record in records for caveat in (record.get('caveats') or [])}
-    joined = '\n'.join(sorted(caveats))
-    kinds = {record.get('kind') for record in records}
-    has_unresolved = any(record.get('target_unresolved') for record in records)
-
-    required_classes = [
-        ('product-truth boundary', 'file-level Git evidence remains product truth'),
-        ('optional-provider boundary', 'optional caveated provider evidence'),
-        ('scoring/ranking boundary', 'not used for scoring, ranking'),
-        ('bounded syntax proof', 'bounded'),
-        ('syntax proof noun', 'syntax proof'),
-    ]
-    for class_name, needle in required_classes:
-        if needle not in joined:
-            fail(label, f'missing {class_name}: {needle!r}')
-
-    if (
-        'no local target mapping is fabricated' not in joined
-        and 'unresolved and external-string endpoints are caveated' not in joined
-    ):
-        fail(label, 'missing endpoint-resolution boundary')
-
-    if has_unresolved and not any(caveat.startswith('target is unresolved by this bounded') for caveat in caveats):
-        fail(label, 'missing unresolved-target record caveat')
-
-    if 'unknown' in kinds and not any('cannot be classified safely by this proof' in caveat for caveat in caveats):
-        fail(label, 'missing unknown relation-like syntax caveat')
-
-    if 'import_include' in kinds:
-        external_strings = (
-            'external string',
-            'package, module',
-            'Cargo, crate',
-            'package lookup',
-            'Node, package',
-        )
-        if not any(any(needle in caveat for needle in external_strings) for caveat in caveats):
-            fail(label, 'missing external-string endpoint caveat')
-
-    if 'unknown' in kinds and 'unknown relation-like syntax' not in joined and 'relation-like' not in joined:
-        fail(label, 'missing relation-like wording for unknown records')
-
-    provider = (relationships.get('providers') or [{}])[0]
-    provider_name = ((provider.get('provider') or {}).get('name') or '')
-    if provider_name and provider_name not in json.dumps(data):
-        fail(label, 'provider identity missing from relationship evidence')
-PY
+    fixtures/expected/symbol-relationships-zig.json
 }
 
 historical_provider_state_matrix_checks() {
+  [ -f tools/validate-historical-symbol-docs.py ] || return 1
   [ -f docs/historical-symbol-fixture-realism-matrix.md ] || return 1
   [ -f docs/historical-provider-state-fixture-gap-audit.md ] || return 1
   [ -f fixtures/expected/historical-symbols.json ] || return 1
   have_python || return 1
-  python3 - \
+  python3 tools/validate-historical-symbol-docs.py provider-states \
     docs/historical-symbol-fixture-realism-matrix.md \
     docs/historical-provider-state-fixture-gap-audit.md \
-    fixtures/expected/historical-symbols.json <<'PY'
-import json
-import re
-import sys
-from pathlib import Path
-
-matrix_path = Path(sys.argv[1])
-audit_path = Path(sys.argv[2])
-golden_path = Path(sys.argv[3])
-matrix = matrix_path.read_text(encoding='utf-8')
-audit = audit_path.read_text(encoding='utf-8')
-golden = json.loads(golden_path.read_text(encoding='utf-8'))
-
-states = golden['historical_symbols']['summary']['provider_states']
-expected_states = {
-    'ok': 4,
-    'unsupported': 1,
-    'failed': 1,
-    'skipped': 1,
-    'timed_out': 0,
-    'unavailable': 0,
-}
-if states != expected_states:
-    raise SystemExit(f'{golden_path}: provider-state summary drifted: {states!r}')
-
-records = list(golden.get('historical_symbols', {}).get('items', []))
-
-by_path = {record.get('evidence_path'): record for record in records}
-required_records = {
-    'src/broken.zig': ('failed', 1),
-    'src/readme.txt': ('unsupported', 1),
-    'src/link.zig': ('skipped', 1),
-}
-for path, (state, fallback_count) in required_records.items():
-    record = by_path.get(path)
-    if not record:
-        raise SystemExit(f'{golden_path}: missing historical fixture row {path}')
-    if record.get('provider_state') != state:
-        raise SystemExit(f'{golden_path}: {path} provider_state drifted: {record.get("provider_state")!r}')
-    if record.get('fallback_count') != fallback_count:
-        raise SystemExit(f'{golden_path}: {path} fallback_count drifted: {record.get("fallback_count")!r}')
-
-matrix_required = [
-    '| Provider-state spread | summary includes `ok`, `unsupported`, `failed`, and `skipped` states |',
-    '| Failed parser fallback | `src/broken.zig` has `provider_state: failed`, `fallback_count: 1`, and low confidence |',
-    '`timed_out` and `unavailable` remain explicit historical provider-state',
-    'coverage gaps, not states proven impossible.',
-]
-for needle in matrix_required:
-    if needle not in matrix:
-        raise SystemExit(f'{matrix_path}: missing provider-state matrix anchor: {needle}')
-
-audit_rows = {
-    'ok': '| `ok` | yes | parsed revision-local Zig rows for `alpha`, `zebra`, and `target` |',
-    'unsupported': '| `unsupported` | yes | `src/readme.txt` fallback row |',
-    'skipped': '| `skipped` | yes | `src/link.zig` unattributed/root-commit fallback row |',
-    'failed': '| `failed` | yes | `src/broken.zig` malformed historical Zig blob produces a failed fallback row |',
-    'timed_out': '| `timed_out` | no | no provider timeout injection exists for historical attribution |',
-    'unavailable': '| `unavailable` | no | no historical blob fixture currently exercises unavailable provider input |',
-}
-for state, row in audit_rows.items():
-    if row not in audit:
-        raise SystemExit(f'{audit_path}: provider-state audit row missing for {state}: {row}')
-
-for state, count in expected_states.items():
-    covered = count > 0
-    expected_marker = f'| `{state}` | {"yes" if covered else "no"} |'
-    if expected_marker not in audit:
-        raise SystemExit(f'{audit_path}: coverage marker for {state} does not match golden count {count}')
-
-for needle in (
-    'The fixture now covers `failed` with deterministic content-driven parser',
-    'only `timed_out` and `unavailable` as uncovered historical',
-    'Reject wall-clock timeout fixtures or environment-dependent missing-provider',
-):
-    if needle not in audit:
-        raise SystemExit(f'{audit_path}: missing uncovered-state rationale: {needle}')
-
-for path, text in ((matrix_path, matrix), (audit_path, audit)):
-    for needle in ('/home/', '/Users/', 'file://', 'https://', 'http://', 'ssh://', 'git@'):
-        if needle in text:
-            raise SystemExit(f'{path}: private path or remote marker leaked: {needle}')
-    if re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b', text):
-        raise SystemExit(f'{path}: email-like identity leaked')
-PY
+    fixtures/expected/historical-symbols.json
 }
 
 historical_fallback_pressure_checks() {
+  [ -f tools/validate-historical-symbol-docs.py ] || return 1
   [ -f docs/historical-symbol-fixture-realism-matrix.md ] || return 1
   [ -f docs/user-guide.md ] || return 1
   [ -f fixtures/expected/historical-symbols.json ] || return 1
   have_python || return 1
-  python3 - \
+  python3 tools/validate-historical-symbol-docs.py fallback-pressure \
     docs/historical-symbol-fixture-realism-matrix.md \
     docs/user-guide.md \
-    fixtures/expected/historical-symbols.json <<'PY'
-import json
-import re
-import sys
-from pathlib import Path
-
-matrix_path = Path(sys.argv[1])
-guide_path = Path(sys.argv[2])
-golden_path = Path(sys.argv[3])
-matrix = matrix_path.read_text(encoding='utf-8')
-guide = guide_path.read_text(encoding='utf-8')
-golden = json.loads(golden_path.read_text(encoding='utf-8'))
-
-historical = golden['historical_symbols']
-summary = historical['summary']
-records = list(historical.get('items', []))
-
-expected_fallback_record_count = 3
-if summary.get('fallback_record_count') != expected_fallback_record_count:
-    raise SystemExit(
-        f'{golden_path}: fallback_record_count drifted: {summary.get("fallback_record_count")!r}'
-    )
-if summary.get('fallback_count') != expected_fallback_record_count:
-    raise SystemExit(f'{golden_path}: fallback_count drifted: {summary.get("fallback_count")!r}')
-
-fallback_rows = [record for record in records if record.get('fallback_count', 0) > 0]
-if len(fallback_rows) != expected_fallback_record_count:
-    raise SystemExit(f'{golden_path}: fallback row count drifted: {len(fallback_rows)!r}')
-
-by_path = {record.get('evidence_path'): record for record in records}
-expected_rows = {
-    'src/broken.zig': ('failed', 1),
-    'src/link.zig': ('skipped', 1),
-    'src/readme.txt': ('unsupported', 1),
-}
-for path, (state, fallback_count) in expected_rows.items():
-    record = by_path.get(path)
-    if not record:
-        raise SystemExit(f'{golden_path}: missing fallback-pressure row {path}')
-    if record.get('provider_state') != state:
-        raise SystemExit(f'{golden_path}: {path} provider_state drifted: {record.get("provider_state")!r}')
-    if record.get('fallback_count') != fallback_count:
-        raise SystemExit(f'{golden_path}: {path} fallback_count drifted: {record.get("fallback_count")!r}')
-
-total_fallback_hunks = sum(record.get('fallback_count', 0) for record in records)
-if total_fallback_hunks != expected_fallback_record_count:
-    raise SystemExit(f'{golden_path}: total fallback hunk pressure drifted: {total_fallback_hunks!r}')
-
-required_matrix = [
-    '| Fallback hunk pressure | fallback rows carry `fallback_count`; the fixture uses tiny counts while real repos may have a few fallback rows with many fallback hunks |',
-    'keeps fallback row count separate from fallback hunk pressure',
-    'fallback rows, and fallback hunk pressure',
-    'Keep unsupported, skipped, fallback rows, and fallback hunk pressure',
-]
-for needle in required_matrix:
-    if needle not in matrix:
-        raise SystemExit(f'{matrix_path}: missing fallback-pressure anchor: {needle}')
-
-required_guide = [
-    'Fallback hunk pressure',
-    'Read fallback row counts and fallback hunk counts separately',
-    'a fallback row may aggregate one or many changed',
-    'number of fallback rows can still represent substantial unattributed hunk',
-]
-for needle in required_guide:
-    if needle not in guide:
-        raise SystemExit(f'{guide_path}: missing fallback-pressure guide anchor: {needle}')
-
-for path, text in ((matrix_path, matrix), (guide_path, guide)):
-    for needle in ('/home/', '/Users/', 'file://', 'https://', 'http://', 'ssh://', 'git@'):
-        if needle in text:
-            raise SystemExit(f'{path}: private path or remote marker leaked: {needle}')
-    if re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b', text):
-        raise SystemExit(f'{path}: email-like identity leaked')
-PY
+    fixtures/expected/historical-symbols.json
 }
 
 packaging_surface_checks() {
