@@ -271,6 +271,12 @@ means a changed hunk stayed attached to the retained file because the provider
 could not safely map it to a revision-local symbol. Fallback rows are visible
 evidence, not failed hotspot analysis.
 .PP
+.B Fallback hunk pressure
+means a fallback row may aggregate one or many unmatched hunks. Read fallback
+row counts and fallback hunk counts separately; one visible fallback row with
+four fallbacks means four changed hunks remained file-level, not that the tool
+found a nearest symbol.
+.PP
 .B Unattributed hunk fallback
 means the hunk was retained without nearest-symbol guessing. This avoids
 inventing symbol ownership for unsupported, blank, comment, or root-commit
@@ -285,6 +291,18 @@ The checked-in matrix
 records historical golden coverage for parsed Zig rows, unsupported-file
 fallback, unattributed/root-commit fallback, display omission, provider states,
 aggregate bounds, and local-only provenance.
+.PP
+Read historical-symbol rows from the parent file hotspot into the bounded
+historical section. A checked-in fixture row such as
+.B src/example.zig
+with
+.B file fallback,
+.B skipped,
+and four fallbacks means file-level fallback hunk pressure, not semantic symbol
+lineage or nearest-symbol guessing. When the summary reports
+.B aggregate_record_bound_exceeded=false,
+the fixture proves non-exceeded realism; separate synthetic tests prove the
+exceeded-bound branch without enlarging public goldens.
 .PP
 .B --symbol-relationships
 uses bounded local provider output for retained ranked-file candidates in the

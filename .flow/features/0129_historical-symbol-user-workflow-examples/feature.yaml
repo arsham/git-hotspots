@@ -4,7 +4,7 @@ feature:
   slug: historical-symbol-user-workflow-examples
   title: Historical symbol user workflow examples
   lane: standard
-  status: ready
+  status: done
   autonomy_default: ask
 intent:
   problem: Historical-symbol evidence has stronger fallback-pressure and
@@ -61,7 +61,7 @@ proposal:
     materialised_at: 2026-06-04T01:10:05.061Z
   quality_plan: null
 project_feature:
-  lifecycle_state: ready
+  lifecycle_state: done
   outcome_contract_ref:
     contract_kind: feature_intent
     contract_ref: feature.intent
@@ -111,7 +111,7 @@ design:
   packets:
     - id: P1
       depends_on: []
-      status: planned
+      status: done
       title: Audit existing workflow surfaces
       goal: Inspect README, user guide, man page, and historical-symbol docs for
         current workflow guidance and stale wording.
@@ -132,7 +132,7 @@ design:
     - id: P2
       depends_on:
         - P1
-      status: planned
+      status: done
       title: Add examples or proof
       goal: Add concise user workflow examples, or a tracked no-change proof if
         existing docs are already sufficient.
@@ -152,7 +152,7 @@ design:
     - id: P3
       depends_on:
         - P2
-      status: planned
+      status: done
       title: Validate docs and readiness
       goal: Run validation, update anchors only if needed, and record no-tag public
         readiness.
@@ -194,7 +194,7 @@ links:
     - B002
 timestamps:
   created_at: 2026-06-04T01:02:49.862Z
-  updated_at: 2026-06-04T01:10:19.351Z
+  updated_at: 2026-06-04T01:33:55.572Z
 dispatch:
   status: prepared
   prepared_at: 2026-06-04T01:10:19.351Z

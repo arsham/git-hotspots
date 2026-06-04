@@ -5,9 +5,9 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: "0129"
+  active_feature_id: null
   active_run_id: null
-  last_completed_feature_id: "0128"
+  last_completed_feature_id: "0129"
 defaults:
   autonomy: ask
   lane: standard

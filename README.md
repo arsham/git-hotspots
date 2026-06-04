@@ -403,6 +403,15 @@ explain why churn happened, and relationship evidence does not prove dependency
 truth, call-graph truth, ownership, quality, or bug risk. Unsupported provider
 lanes are unavailable enrichment, not failed hotspot analysis.
 
+When reading historical-symbol rows, start with the parent file hotspot, then
+read each row as either revision-local symbol evidence or file-level fallback
+evidence. A fixture row such as `src/example.zig` with `Name: file fallback`,
+`Provider state: skipped`, and `Fallbacks: 4` means one fallback row carries
+four unmatched hunks; it is not permission to guess the nearest symbol. If the
+summary says `Aggregate record bound exceeded: false`, that checked-in fixture
+proved the non-exceeded case. Synthetic tests, not enlarged public goldens,
+prove the exceeded-bound branch.
+
 Git-detected file renames are folded conservatively when both the old and new
 paths are in scope. This is file-path lineage from local Git history only, not
 symbol or function lineage, semantic ownership, bug prediction, quality scoring,

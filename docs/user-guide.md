@@ -227,6 +227,27 @@ parse the historical blob, and file-level fallbacks when it cannot. It is not
 semantic symbol lineage, reference/use analysis, ownership, bug prediction,
 scoring replacement, or a ranking input.
 
+Historical-symbol row quick reference:
+
+1. Start from the parent file hotspot row, such as `src/example.zig`, to decide
+   why the file deserves inspection.
+2. Read `Historical symbols` rows as revision-local hunk attribution. A row
+   with `provider_state: ok`, a symbol name, and revision lines means the
+   historical blob parsed and the changed hunk intersected that revision-local
+   symbol.
+3. Read `Name: file fallback`, `Provider state: skipped`, `failed`, or
+   `unsupported`, and `Fallbacks` together. In the checked-in fixture,
+   `src/example.zig` has one file-level fallback row with `Fallbacks: 4`, so
+   one visible fallback row carries four unmatched changed hunks.
+4. Keep aggregate bounds attached to the summary. The fixture reports
+   `Aggregate record bound: 128` and `Aggregate record bound exceeded: false`,
+   while `docs/historical-aggregate-bound-seam-proof.md` records synthetic
+   exceeded-bound proof. The checked-in fixture proves non-exceeded realism; it
+   does not pretend to be a repository-wide complete symbol ledger.
+5. Do not use fallback rows to guess the nearest symbol. The fallback is the
+   evidence boundary: the hunk stayed file-level because the provider could not
+   attribute it safely.
+
 Historical-symbol caveat glossary:
 
 - Revision-local attribution: the provider parsed the file content from the
