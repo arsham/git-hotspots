@@ -38,20 +38,20 @@ Build and smoke-test the native Linux release archive:
 ```sh
 ./tools/release-linux.sh
 mkdir -p /tmp/git-hotspots-release-smoke
-tar -xzf dist/git-hotspots-0.1.0-alpha.4-linux-$(uname -m).tar.gz -C /tmp/git-hotspots-release-smoke
-/tmp/git-hotspots-release-smoke/git-hotspots-0.1.0-alpha.4-linux-$(uname -m)/git-hotspots --version
-/tmp/git-hotspots-release-smoke/git-hotspots-0.1.0-alpha.4-linux-$(uname -m)/git-hotspots --help
+tar -xzf dist/git-hotspots-0.1.0-alpha.5-linux-$(uname -m).tar.gz -C /tmp/git-hotspots-release-smoke
+/tmp/git-hotspots-release-smoke/git-hotspots-0.1.0-alpha.5-linux-$(uname -m)/git-hotspots --version
+/tmp/git-hotspots-release-smoke/git-hotspots-0.1.0-alpha.5-linux-$(uname -m)/git-hotspots --help
 ```
 
 Build the unpublished Arch dogfood package when standard Arch tooling is
 available:
 
 ```sh
-cp dist/git-hotspots-0.1.0-alpha.4-linux-$(uname -m).tar.gz packaging/aur/git-hotspots-bin/
+cp dist/git-hotspots-0.1.0-alpha.5-linux-$(uname -m).tar.gz packaging/aur/git-hotspots-bin/
 cd packaging/aur/git-hotspots-bin
 makepkg --printsrcinfo
 makepkg -f
-pacman -Qp git-hotspots-bin-0.1.0_alpha.4-1-$(uname -m).pkg.tar*
+pacman -Qp git-hotspots-bin-0.1.0_alpha.5-1-$(uname -m).pkg.tar*
 ```
 
 To avoid overwriting an existing user-managed `git-hotspots`, smoke-test the
@@ -60,7 +60,7 @@ system-wide:
 
 ```sh
 mkdir -p /tmp/git-hotspots-package-smoke
-bsdtar -xf git-hotspots-bin-0.1.0_alpha.4-1-$(uname -m).pkg.tar* -C /tmp/git-hotspots-package-smoke
+bsdtar -xf git-hotspots-bin-0.1.0_alpha.5-1-$(uname -m).pkg.tar* -C /tmp/git-hotspots-package-smoke
 /tmp/git-hotspots-package-smoke/usr/bin/git-hotspots --version
 /tmp/git-hotspots-package-smoke/usr/bin/git-hotspots --help
 ```

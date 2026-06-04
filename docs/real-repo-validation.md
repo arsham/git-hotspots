@@ -24,7 +24,7 @@ enrichment behaviour.
 
 Run context:
 
-- Tool version: `git-hotspots 0.1.0-alpha.4`.
+- Tool version: `git-hotspots 0.1.0-alpha.5`.
 - Zig version: `0.16.0`.
 - Git version: `git version 2.54.0`.
 - Analysed commit count: 28.

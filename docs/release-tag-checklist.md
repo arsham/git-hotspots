@@ -1,18 +1,18 @@
 # Release tag checklist
 
-This checklist prepares a future operator decision for `v0.1.0-alpha.4`. It is
+This checklist prepares a future operator decision for `v0.1.0-alpha.5`. It is
 inert documentation only: do not create tags, push tags, publish packages,
 create GitHub Releases, or announce the release until the explicit approval gate
 below is satisfied.
 
 ## Proposed tag and target
 
-- Proposed tag: `v0.1.0-alpha.4`.
+- Proposed tag: `v0.1.0-alpha.5`.
 - Target commit: resolve at approval time with `git rev-parse HEAD` after the
   cleaned release-readiness commits are pushed and before any tag is created.
 - Target summary: the approved `master` `HEAD` at release-approval time.
-- Version metadata: `src/version.zig` reports `0.1.0-alpha.4`.
-- Release notes: `CHANGELOG.md` has the `v0.1.0-alpha.4 draft` section.
+- Version metadata: `src/version.zig` reports `0.1.0-alpha.5`.
+- Release notes: `CHANGELOG.md` has the `v0.1.0-alpha.5 draft` section.
 - Validation evidence: `docs/packaging-smoke-evidence.md` records the
   2026-05-29 release-readiness validation for features 0100, 0101, and 0102.
 
@@ -22,14 +22,14 @@ Record fresh evidence immediately before any future approval decision:
 
 - `git status -sb` must show only the expected local branch status and no
   working-tree changes.
-- `git tag --list 'v0.1.0-alpha.4'` must print no local tag.
-- `git ls-remote --tags origin 'v0.1.0-alpha.4'` must print no remote tag.
+- `git tag --list 'v0.1.0-alpha.5'` must print no local tag.
+- `git ls-remote --tags origin 'v0.1.0-alpha.5'` must print no remote tag.
 - `git diff --check` must pass.
 - `TARGET_COMMIT=$(git rev-parse HEAD)` should be recorded before approval.
 - `git tag --points-at "$TARGET_COMMIT"` should be reviewed for any existing
   tag on the proposed target.
 
-If `v0.1.0-alpha.4` exists locally or remotely, stop and ask the operator. Do
+If `v0.1.0-alpha.5` exists locally or remotely, stop and ask the operator. Do
 not overwrite, delete, or recreate the tag inside this checklist flow. If
 `origin/master` changed unexpectedly since the evidence was recorded, stop with
 a status report before preparing a tag decision. If validation evidence is
@@ -43,11 +43,11 @@ checklist preparation.
 ```sh
 # Create the annotated tag at the approved target commit.
 TARGET_COMMIT=$(git rev-parse HEAD)
-git tag -a v0.1.0-alpha.4 "$TARGET_COMMIT" \
-  -m "git-hotspots v0.1.0-alpha.4"
+git tag -a v0.1.0-alpha.5 "$TARGET_COMMIT" \
+  -m "git-hotspots v0.1.0-alpha.5"
 
 # Push only after explicit operator approval.
-git push origin v0.1.0-alpha.4
+git push origin v0.1.0-alpha.5
 ```
 
 Rollback/delete-tag notes if an approved future tagging operation is made in
@@ -55,10 +55,10 @@ error:
 
 ```sh
 # Local delete, only after explicit operator approval.
-git tag -d v0.1.0-alpha.4
+git tag -d v0.1.0-alpha.5
 
 # Remote delete, only after explicit operator approval.
-git push origin :refs/tags/v0.1.0-alpha.4
+git push origin :refs/tags/v0.1.0-alpha.5
 ```
 
 The prior accidental deletion of `v0.1.0-alpha.3` is an operational caution:
@@ -71,9 +71,9 @@ Before any tag creation, tag push, package publish, GitHub Release, or
 announcement, the operator must explicitly approve all of these items in a new
 message:
 
-1. The tag name is `v0.1.0-alpha.4`.
+1. The tag name is `v0.1.0-alpha.5`.
 2. The target commit is the freshly recorded `git rev-parse HEAD` value.
-3. Fresh read-only evidence shows no local or remote `v0.1.0-alpha.4` tag.
+3. Fresh read-only evidence shows no local or remote `v0.1.0-alpha.5` tag.
 4. Fresh validation evidence is accepted as current enough for tagging; stale
    validation evidence must route back to release validation before tagging.
 5. The exact side effects being approved are named, such as local tag creation,

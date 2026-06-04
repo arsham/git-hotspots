@@ -139,7 +139,7 @@ test ! -s "$tmp_dir/git-hotspots-symbol-relationships-help.err"
 diff -u "$tmp_dir/git-hotspots-help.txt" "$tmp_dir/git-hotspots-repo-help.txt"
 test ! -s "$tmp_dir/git-hotspots-repo-help.err"
 "$EXE" --version > "$tmp_dir/git-hotspots-version.txt" 2> "$tmp_dir/git-hotspots-version.err"
-test "$(cat "$tmp_dir/git-hotspots-version.txt")" = "git-hotspots 0.1.0-alpha.4"
+test "$(cat "$tmp_dir/git-hotspots-version.txt")" = "git-hotspots 0.1.0-alpha.5"
 test ! -s "$tmp_dir/git-hotspots-version.err"
 explain_nongit=$(mktemp -d)
 (cd "$explain_nongit" && "$EXE_ABS" --explain > "$tmp_dir/git-hotspots-explain-nongit.txt" 2> "$tmp_dir/git-hotspots-explain-nongit.err")
@@ -147,7 +147,7 @@ diff -u fixtures/expected/explain.txt "$tmp_dir/git-hotspots-explain-nongit.txt"
 test ! -s "$tmp_dir/git-hotspots-explain-nongit.err"
 version_nongit=$(mktemp -d)
 (cd "$version_nongit" && "$EXE_ABS" --version > "$tmp_dir/git-hotspots-version-nongit.txt" 2> "$tmp_dir/git-hotspots-version-nongit.err")
-test "$(cat "$tmp_dir/git-hotspots-version-nongit.txt")" = "git-hotspots 0.1.0-alpha.4"
+test "$(cat "$tmp_dir/git-hotspots-version-nongit.txt")" = "git-hotspots 0.1.0-alpha.5"
 test ! -s "$tmp_dir/git-hotspots-version-nongit.err"
 help_nongit=$(mktemp -d)
 (cd "$help_nongit" && "$EXE_ABS" -h > "$tmp_dir/git-hotspots-help-nongit.txt" 2> "$tmp_dir/git-hotspots-help-nongit.err")

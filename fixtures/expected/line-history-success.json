@@ -1,6 +1,6 @@
 {
   "schema_version": "1",
-  "tool": { "name": "git-hotspots", "version": "0.1.0-alpha.4" },
+  "tool": { "name": "git-hotspots", "version": "0.1.0-alpha.5" },
   "analysis": {
     "history": { "head": "f60b6c476b88d8c0092d41831e433a942015557d", "head_timestamp": 1780444800, "range": null, "is_shallow": false, "is_partial": false, "auto_fetch": false, "dirty_worktree": false, "commit_count": 3 },
     "scope": { "selected_scope": "project", "filters_active": true, "include_prefixes": [], "exclude_prefixes": [".flow/", ".zig-cache/", "zig-out/", "target/", "node_modules/", "dist/", "build/", "coverage/"], "outside_include_path_count": 0, "outside_include_change_count": 0, "excluded_path_count": 0, "excluded_change_count": 0 },

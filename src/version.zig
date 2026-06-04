@@ -1,1 +1,1 @@
-pub const value = "0.1.0-alpha.4";
+pub const value = "0.1.0-alpha.5";

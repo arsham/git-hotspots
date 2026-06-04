@@ -7,7 +7,7 @@ packages, absolute local paths, upload logs, or machine-specific raw output.
 Expected validation sequence:
 
 1. Run `./tools/release-linux.sh` on a native Linux host.
-2. Unpack `dist/git-hotspots-0.1.0-alpha.4-linux-$(uname -m).tar.gz` into a
+2. Unpack `dist/git-hotspots-0.1.0-alpha.5-linux-$(uname -m).tar.gz` into a
    temporary directory.
 3. Run the unpacked `git-hotspots --version` and `git-hotspots --help`.
 4. Copy the archive into `packaging/aur/git-hotspots-bin/`.
@@ -44,7 +44,7 @@ Bounded smoke evidence from the validation summary:
 - Deterministic fixture budgets passed for file hotspots, current symbols,
   historical symbols, and relationship enrichment within the named validation
   limits.
-- Source-install copy smoke passed with version `0.1.0-alpha.4`.
+- Source-install copy smoke passed with version `0.1.0-alpha.5`.
 
 The recorded evidence uses labels and bounded counts only; raw reports,
 absolute local paths, generated archives, and private output were not committed.

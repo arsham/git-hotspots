@@ -212,7 +212,7 @@ smoke and Arch package metadata or build checks when local tools are available:
 ./tools/release-linux.sh
 makepkg --printsrcinfo
 makepkg -f
-pacman -Qp git-hotspots-bin-0.1.0_alpha.4-1-$(uname -m).pkg.tar*
+pacman -Qp git-hotspots-bin-0.1.0_alpha.5-1-$(uname -m).pkg.tar*
 ```
 
 Run the `makepkg` and `pacman` commands from
