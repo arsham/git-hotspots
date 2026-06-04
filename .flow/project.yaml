@@ -5,7 +5,7 @@ project:
   name: git-hotspots
 state:
   status: active
-  active_feature_id: null
+  active_feature_id: "0129"
   active_run_id: null
   last_completed_feature_id: "0128"
 defaults:
@@ -27,7 +27,7 @@ execution_queue:
   feature_ids: []
   stop_on_blocked: true
 features:
-  next_id: 129
+  next_id: 130
   registry:
     - id: "0001"
       slug: project-goals-and-planning-briefs
@@ -541,6 +541,10 @@ features:
       slug: historical-symbol-release-readiness-sweep
       path: .flow/features/0128_historical-symbol-release-readiness-sweep
       created_at: 2026-06-03T04:57:38.909Z
+    - id: "0129"
+      slug: historical-symbol-user-workflow-examples
+      path: .flow/features/0129_historical-symbol-user-workflow-examples
+      created_at: 2026-06-04T01:02:49.862Z
 intake:
   mode: roadmap
   summary: null
